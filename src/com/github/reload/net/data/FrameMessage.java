@@ -24,6 +24,8 @@ public abstract class FrameMessage {
 		}
 	};
 
+	public abstract long getSequence();
+
 	public abstract FrameType getType();
 
 	public static class FramedData extends FrameMessage {
@@ -41,13 +43,30 @@ public abstract class FrameMessage {
 			return FrameType.DATA;
 		}
 
+		@Override
+		public long getSequence() {
+			return sequence;
+		}
+
 	}
 
 	public static class FramedAck extends FrameMessage {
 
+		protected long ack_sequence;
+		protected int receivedBitMask;
+
 		@Override
 		public FrameType getType() {
 			return FrameType.ACK;
+		}
+
+		@Override
+		public long getSequence() {
+			return ack_sequence;
+		}
+
+		public int getReceivedMask() {
+			return receivedBitMask;
 		}
 
 	}

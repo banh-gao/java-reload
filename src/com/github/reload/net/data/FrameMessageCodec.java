@@ -10,7 +10,6 @@ public class FrameMessageCodec extends ByteToMessageCodec<FrameMessage> {
 	@Override
 	protected void encode(ChannelHandlerContext ctx, FrameMessage msg, ByteBuf out) throws Exception {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
