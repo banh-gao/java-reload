@@ -1,82 +1,110 @@
 package com.github.reload.net.data;
 
-import java.math.BigInteger;
+import io.netty.buffer.ByteBuf;
 
 /**
- * Utility class for on low level data encoding and decoding
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
+ * Utility class to write and read variable-length fields on byte buffers.
+ * The data-length subfield uses only the needed bytes to represent the
+ * maximum value for the data subfield length as an unsigned integer.
  */
 public class CodecUtils {
-
-	/**
-	 * The number of bytes needed to represent a 8 bits unsigned integer
-	 */
-	public static final byte U_INT8 = 1;
-	/**
-	 * The number of bytes needed to represent a 16 bits unsigned integer
-	 */
-	public static final byte U_INT16 = 2;
-	/**
-	 * The number of bytes needed to represent a 24 bits unsigned integer
-	 */
-	public static final byte U_INT24 = 3;
-	/**
-	 * The number of bytes needed to represent a 32 bits unsigned integer
-	 */
-	public static final byte U_INT32 = 4;
-	/**
-	 * The number of bytes needed to represent a 64 bits unsigned integer
-	 */
-	public static final byte U_INT64 = 8;
-	/**
-	 * The number of bytes needed to represent a 128 bits unsigned integer
-	 */
-	public static final byte U_INT128 = 16;
-
-	/**
-	 * The maximum value that can be represented with an unsigned integer
-	 * (values corresponds to 2<sup>index*8</sup>-1)
-	 */
-	private static final long[] MAX_VALUE = new long[U_INT128];
-
-	static {
-		for (int i = 0; i < MAX_VALUE.length; i++) {
-			MAX_VALUE[i] = (long) Math.pow(2, i * 8) - 1;
-		}
-	}
 
 	private CodecUtils() {
 	}
 
 	/**
-	 * @param len
-	 *            The number of bytes available
-	 * @return The maximum unsigned int that can be represented with the given
-	 *         amount of bytes
+	 * Allocate a field at the current write index that can hold at most the
+	 * data of the given amount of bytes.
+	 * This method is meant to be used with
+	 * {@link #setVariableLengthField(ByteBuf, int, int)} to set the length
+	 * subfield after the data have been written to the buffer
+	 * 
+	 * @param buf
+	 *            the buffer
+	 * @param maxDataLength
+	 *            the data maximum size in bytes
 	 */
-	public static long maxUnsignedInt(int len) {
-		if (len > MAX_VALUE.length)
-			return (long) Math.pow(2, len) - 1;
-		else
-			return MAX_VALUE[len];
+	public static int allocateField(ByteBuf buf, int maxDataLength) {
+		int fieldPos = buf.writerIndex();
+		buf.writerIndex(fieldPos + maxDataLength);
+		return fieldPos;
 	}
 
 	/**
-	 * @return the hexadecimal string representation of the passed bytes
+	 * Set data length to the length subfield at the given field position.
+	 * The data length is calculated starting from the end of the length
+	 * subfield up to the current buffer write index
+	 * 
+	 * @param buf
+	 *            the buffer
+	 * @param fieldPos
+	 *            the start position of the field
+	 * @param maxDataLength
+	 *            the data maximum size in bytes
+	 * 
+	 * @return
+	 *         the length of data subfield in bytes
+	 * 
+	 * @throws IndexOutOfBoundsException
+	 *             if the written bytes after the length subfield exceeds the
+	 *             data maximum length
 	 */
-	public static String toHexString(byte[] bytes) {
-		BigInteger bi = new BigInteger(1, bytes);
-		return String.format("%#x", bi);
+	public static int setDataLength(ByteBuf buf, int fieldPos, int maxDataLength) {
+		// current position - (start of data subfield)
+		int writtenDataLength = buf.writerIndex() - (fieldPos + maxDataLength);
+
+		if (writtenDataLength > maxDataLength)
+			throw new IndexOutOfBoundsException("Trying to write " + writtenDataLength + " bytes where the maximum field length is " + maxDataLength + " bytes");
+
+		// Set actual written data subfield length into the length subfield
+		buf.writerIndex(fieldPos);
+		encodeLength(maxDataLength, writtenDataLength, buf);
+
+		// Reset 1 byte after original position (after the field)
+		buf.writerIndex(buf.writerIndex() + writtenDataLength + 1);
+
+		return writtenDataLength;
 	}
 
 	/**
-	 * @return the hexadecimal string representation of the passed value without
-	 *         sign
+	 * Encode length subfield
 	 */
-	public static String toHexString(long val) {
-		BigInteger bi = BigInteger.valueOf(val).abs();
-		return String.format("%#x", bi);
+	private static void encodeLength(int maxDataLength, int dataLength, ByteBuf buf) {
+		int neededBytes = getNeededBytes(maxDataLength);
+		for (int i = 0; i < neededBytes; i++) {
+			int offset = (neededBytes - 1 - i);
+			buf.writeByte(dataLength >>> offset);
+		}
+	}
+
+	/**
+	 * The mininum amount of bytes needed to represent the given value as an
+	 * unsigned integer
+	 */
+	private static int getNeededBytes(int value) {
+		int s = 1;
+		while (s < 8 && value >= (1L << (s * 8)))
+			s++;
+		return s;
+	}
+
+	/**
+	 * Read the length of a variable-length data field at the current read index
+	 * for a field that can hold at most the data of the given amount of bytes.
+	 * 
+	 * @param buf
+	 *            the buffer
+	 * @param maxDataLength
+	 *            the data maximum size in bytes
+	 */
+	public static int readDataLength(ByteBuf buf, int maxDataLength) {
+		int neededBytes = getNeededBytes(maxDataLength);
+		int decoded = 0;
+		int baseOffset = (neededBytes - 1) * 8;
+		for (int i = 0; i < neededBytes; i++) {
+			int offset = baseOffset - (i * 8);
+			decoded += (buf.readByte() & 0xff) << offset;
+		}
+		return decoded;
 	}
 }
