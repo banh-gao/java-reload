@@ -1,11 +1,12 @@
 package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
+import com.github.reload.net.data.CodecUtils.Field;
 
 /**
  * RELOAD link layer message
  */
-public abstract class FrameMessage {
+public abstract class FrameMessage implements Encodable {
 
 	public enum FrameType {
 		DATA(128), ACK(129);
@@ -30,13 +31,10 @@ public abstract class FrameMessage {
 
 	public static class FramedData extends FrameMessage {
 
-		private final long sequence;
-		private final ByteBuf data;
+		private static final int DATA_MAX_LENGTH = CodecUtils.U_INT24;
 
-		public FramedData(long sequence, ByteBuf data) {
-			this.sequence = sequence;
-			this.data = data;
-		}
+		protected long sequence;
+		protected ByteBuf data;
 
 		@Override
 		public FrameType getType() {
@@ -48,6 +46,17 @@ public abstract class FrameMessage {
 			return sequence;
 		}
 
+		public ByteBuf getData() {
+			return data;
+		}
+
+		@Override
+		public void encode(ByteBuf buf) {
+			buf.writeInt((int) sequence);
+			Field dataFld = CodecUtils.allocateField(buf, DATA_MAX_LENGTH);
+			buf.writeBytes(data);
+			dataFld.updateDataLength();
+		}
 	}
 
 	public static class FramedAck extends FrameMessage {
@@ -67,6 +76,12 @@ public abstract class FrameMessage {
 
 		public int getReceivedMask() {
 			return receivedBitMask;
+		}
+
+		@Override
+		public void encode(ByteBuf buf) {
+			buf.writeInt((int) ack_sequence);
+			buf.writeInt(receivedBitMask);
 		}
 
 	}
