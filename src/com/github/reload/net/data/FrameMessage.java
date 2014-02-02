@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf;
 /**
  * RELOAD link layer message
  */
-abstract class FramedMessage {
+public abstract class FrameMessage {
 
 	public enum FrameType {
 		DATA(128), ACK(129);
@@ -26,7 +26,7 @@ abstract class FramedMessage {
 
 	public abstract FrameType getType();
 
-	public static class FramedData extends FramedMessage {
+	public static class FramedData extends FrameMessage {
 
 		private final long sequence;
 		private final ByteBuf data;
@@ -43,7 +43,7 @@ abstract class FramedMessage {
 
 	}
 
-	public static class FramedAck extends FramedMessage {
+	public static class FramedAck extends FrameMessage {
 
 		@Override
 		public FrameType getType() {

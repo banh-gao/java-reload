@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 
 
-public class OpaqueMessageCodec extends ByteToMessageCodec<Header> {
+public class ForwardMessageCodec extends ByteToMessageCodec<Header> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, Header msg, ByteBuf out) throws Exception {

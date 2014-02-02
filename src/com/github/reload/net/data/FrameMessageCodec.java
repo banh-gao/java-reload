@@ -5,10 +5,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 
-public class FrameCodec extends ByteToMessageCodec<FramedMessage> {
+public class FrameMessageCodec extends ByteToMessageCodec<FrameMessage> {
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, FramedMessage msg, ByteBuf out) throws Exception {
+	protected void encode(ChannelHandlerContext ctx, FrameMessage msg, ByteBuf out) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
