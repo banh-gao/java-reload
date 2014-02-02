@@ -3,9 +3,9 @@ package com.github.reload.net;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import com.github.reload.net.data.ForwardMessageCodec;
 import com.github.reload.net.data.FrameMessageCodec;
 import com.github.reload.net.data.MessageCodec;
-import com.github.reload.net.data.ForwardMessageCodec;
 import com.github.reload.net.handlers.ForwardingHandler;
 import com.github.reload.net.handlers.LinkHandler;
 import com.github.reload.net.handlers.MessageHandler;
@@ -23,9 +23,14 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 	public static final String MSG_HANDLER = "MSG_HANDLER";
 
 	private final LinkHandler linkHandler;
+	private final ForwardingHandler fwdHandler;
+	private final MessageHandler msgHandler;
 
-	public ChannelInitializerImpl(LinkHandler linkHandler) {
+	public ChannelInitializerImpl(LinkHandler linkHandler, ForwardingHandler fwdHandler, MessageHandler msgHandler) {
+		// TODO: share codecs instances between channels
 		this.linkHandler = linkHandler;
+		this.fwdHandler = fwdHandler;
+		this.msgHandler = msgHandler;
 	}
 
 	@Override
@@ -43,14 +48,15 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		// IN/OUT: Codec for RELOAD forwarding header
 		pipeline.addLast(FWD_CODEC, new ForwardMessageCodec());
 
-		// IN: check header and forward messages without passing to upper levels
-		pipeline.addLast(FWD_HANDLER, new ForwardingHandler());
+		// IN: check header and pass messages directly to the forwarding handler
+		// of the channel where the message has to be routed
+		pipeline.addLast(FWD_HANDLER, fwdHandler);
 
 		// IN/OUT: Codec for RELOAD message content and security block
 		pipeline.addLast(MSG_CODEC, new MessageCodec());
 
 		// IN: Process incoming messages directed to this node
-		pipeline.addLast(MSG_HANDLER, new MessageHandler());
+		pipeline.addLast(MSG_HANDLER, msgHandler);
 	}
 
 }
