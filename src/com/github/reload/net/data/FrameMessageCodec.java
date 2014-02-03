@@ -9,13 +9,13 @@ public class FrameMessageCodec extends ByteToMessageCodec<FrameMessage> {
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, FrameMessage msg, ByteBuf out) throws Exception {
-		// TODO Auto-generated method stub
+		msg.encode(out);
+
 	}
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-		// TODO Auto-generated method stub
-
+		out.add(FrameMessage.decode(in));
 	}
 
 }

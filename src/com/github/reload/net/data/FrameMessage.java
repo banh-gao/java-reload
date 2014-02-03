@@ -1,6 +1,7 @@
 package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 import com.github.reload.net.data.CodecUtils.Field;
 
 /**
@@ -8,7 +9,7 @@ import com.github.reload.net.data.CodecUtils.Field;
  */
 public abstract class FrameMessage implements Encodable {
 
-	public enum FrameType {
+	public static enum FrameType {
 		DATA(128), ACK(129);
 
 		public final int code;
@@ -17,7 +18,7 @@ public abstract class FrameMessage implements Encodable {
 			this.code = code;
 		}
 
-		public FrameType valueOf(int code) {
+		public static FrameType valueOf(int code) {
 			for (FrameType t : FrameType.values())
 				if (t.code == code)
 					return t;
@@ -29,12 +30,42 @@ public abstract class FrameMessage implements Encodable {
 
 	public abstract FrameType getType();
 
+	protected abstract void implEncode(ByteBuf buf);
+
+	public static FrameMessage decode(ByteBuf in) throws DecoderException {
+		FrameType type = FrameType.valueOf(in.readUnsignedByte());
+		if (type == null)
+			throw new DecoderException("Unknown frame type");
+
+		switch (type) {
+			case DATA :
+				return FramedData.decode(in);
+			case ACK :
+				return FramedAck.decode(in);
+		}
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public final void encode(ByteBuf buf) {
+		// TODO Auto-generated method stub
+		implEncode(buf);
+	}
+
 	public static class FramedData extends FrameMessage {
 
 		private static final int DATA_MAX_LENGTH = CodecUtils.U_INT24;
 
 		protected long sequence;
 		protected ByteBuf data;
+
+		public static FramedData decode(ByteBuf in) {
+			FramedData d = new FramedData();
+			d.sequence = in.readUnsignedInt();
+			d.data = in.slice();
+			return d;
+		}
 
 		@Override
 		public FrameType getType() {
@@ -51,7 +82,7 @@ public abstract class FrameMessage implements Encodable {
 		}
 
 		@Override
-		public void encode(ByteBuf buf) {
+		public void implEncode(ByteBuf buf) {
 			buf.writeInt((int) sequence);
 			Field dataFld = CodecUtils.allocateField(buf, DATA_MAX_LENGTH);
 			buf.writeBytes(data);
@@ -63,6 +94,13 @@ public abstract class FrameMessage implements Encodable {
 
 		protected long ack_sequence;
 		protected int receivedBitMask;
+
+		public static FramedAck decode(ByteBuf in) {
+			FramedAck a = new FramedAck();
+			a.ack_sequence = in.readUnsignedInt();
+			a.receivedBitMask = in.readInt();
+			return a;
+		}
 
 		@Override
 		public FrameType getType() {
@@ -79,7 +117,7 @@ public abstract class FrameMessage implements Encodable {
 		}
 
 		@Override
-		public void encode(ByteBuf buf) {
+		public void implEncode(ByteBuf buf) {
 			buf.writeInt((int) ack_sequence);
 			buf.writeInt(receivedBitMask);
 		}
