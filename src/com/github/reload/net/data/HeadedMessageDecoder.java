@@ -6,14 +6,13 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
 
 /**
- * Decoder that process only the Forwarding Header
+ * Decoder used to process only the Forwarding Header part of the message
  */
 public class HeadedMessageDecoder extends ByteToMessageDecoder {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-		// TODO Auto-generated method stub
-
+		out.add(HeadedMessage.decode(in));
 	}
 
 }

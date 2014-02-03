@@ -5,7 +5,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import com.github.reload.net.data.FramedMessageCodec;
 import com.github.reload.net.data.HeadedMessageDecoder;
-import com.github.reload.net.data.MessageCodec;
+import com.github.reload.net.data.MessageDecoder;
+import com.github.reload.net.data.MessageEncoder;
 import com.github.reload.net.handlers.ForwardingHandler;
 import com.github.reload.net.handlers.LinkHandler;
 import com.github.reload.net.handlers.MessageHandler;
@@ -15,11 +16,13 @@ import com.github.reload.net.handlers.MessageHandler;
  */
 public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
-	public static final String FRAME_CODEC = "FRAME_CODEC";
-	public static final String LINK_HANDLER = "LINK_HANDLER";
+	public static final String FRAME_CODEC = "FRM_CODEC";
 	public static final String FWD_DECODER = "FWD_DECODER";
+	public static final String MSG_DECODER = "MSG_DECODER";
+	public static final String MSG_ENCODER = "MSG_ENCODER";
+
+	public static final String LINK_HANDLER = "LINK_HANDLER";
 	public static final String FWD_HANDLER = "FWD_HANDLER";
-	public static final String MSG_CODEC = "MSG_CODEC";
 	public static final String MSG_HANDLER = "MSG_HANDLER";
 
 	private final LinkHandler linkHandler;
@@ -53,8 +56,11 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		// OUT: Send a forwarded message on the link (not originated locally)
 		pipeline.addLast(FWD_HANDLER, fwdHandler);
 
-		// IN/OUT: Codec for RELOAD message content and security block
-		pipeline.addLast(MSG_CODEC, new MessageCodec());
+		// IN: Codec for RELOAD message content and security block
+		pipeline.addLast(MSG_DECODER, new MessageDecoder());
+
+		// OUT: Codec for RELOAD message content and security block
+		pipeline.addLast(MSG_ENCODER, new MessageEncoder());
 
 		// IN: Process incoming messages directed to this node
 		pipeline.addLast(MSG_HANDLER, msgHandler);

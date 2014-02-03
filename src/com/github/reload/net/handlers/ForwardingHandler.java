@@ -42,5 +42,6 @@ public class ForwardingHandler extends ChannelDuplexHandler {
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		HeadedMessage message = (HeadedMessage) msg;
 		// TODO : determine if this message is local or has to be forwarded
+		ctx.fireChannelRead(message);
 	}
 }
