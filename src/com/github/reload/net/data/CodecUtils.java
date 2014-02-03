@@ -55,22 +55,27 @@ public class CodecUtils {
 	}
 
 	/**
-	 * Read the length of a variable-length data field at the current read index
-	 * for a field that can hold at most the data of the given amount of bytes.
+	 * Returns the data stored in a variable-length field at the current read
+	 * index.
+	 * The returned buffer is a {@link ByteBuf#slice()} of the original buffer,
+	 * it remains backed to the original buffer.
 	 * 
 	 * @param buf
 	 *            the buffer
 	 * @param maxDataLength
 	 *            the data maximum bytes size in power of two
+	 * 
+	 * @see {@link ByteBuf#slice()}
 	 */
-	public static int readDataLength(ByteBuf buf, int maxDataLength) {
-		int decoded = 0;
+	public static ByteBuf readDataLength(ByteBuf buf, int maxDataLength) {
+		int dataLength = 0;
 		int baseOffset = (maxDataLength - 1) * 8;
 		for (int i = 0; i < maxDataLength; i++) {
 			int offset = baseOffset - (i * 8);
-			decoded += (buf.readByte() & 0xff) << offset;
+			dataLength += (buf.readByte() & 0xff) << offset;
 		}
-		return decoded;
+
+		return buf.slice(buf.readerIndex(), dataLength);
 	}
 
 	public static class Field {
