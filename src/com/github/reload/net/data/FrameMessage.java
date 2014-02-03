@@ -43,16 +43,20 @@ public abstract class FrameMessage implements Encodable {
 			case ACK :
 				return FramedAck.decode(in);
 		}
-		// TODO Auto-generated method stub
+
+		// Should't happen: Unhandled message type
+		assert false;
 		return null;
 	}
 
 	@Override
 	public final void encode(ByteBuf buf) {
-		// TODO Auto-generated method stub
 		implEncode(buf);
 	}
 
+	/**
+	 * Link level data message
+	 */
 	public static class FramedData extends FrameMessage {
 
 		private static final int DATA_MAX_LENGTH = CodecUtils.U_INT24;
@@ -90,6 +94,9 @@ public abstract class FrameMessage implements Encodable {
 		}
 	}
 
+	/**
+	 * Link level acknowledge message
+	 */
 	public static class FramedAck extends FrameMessage {
 
 		protected long ack_sequence;
