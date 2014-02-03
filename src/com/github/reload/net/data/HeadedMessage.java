@@ -5,7 +5,7 @@ import com.github.reload.message.Header;
 /**
  * RELOAD message with decoded header and opaque payload
  */
-public class OpaqueMessage {
+public class HeadedMessage {
 
 	private Header header;
 

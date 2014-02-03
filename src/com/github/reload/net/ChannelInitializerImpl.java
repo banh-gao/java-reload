@@ -3,8 +3,8 @@ package com.github.reload.net;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import com.github.reload.net.data.ForwardMessageCodec;
-import com.github.reload.net.data.FrameMessageCodec;
+import com.github.reload.net.data.FramedMessageCodec;
+import com.github.reload.net.data.HeadedMessageDecoder;
 import com.github.reload.net.data.MessageCodec;
 import com.github.reload.net.handlers.ForwardingHandler;
 import com.github.reload.net.handlers.LinkHandler;
@@ -17,7 +17,7 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
 	public static final String FRAME_CODEC = "FRAME_CODEC";
 	public static final String LINK_HANDLER = "LINK_HANDLER";
-	public static final String FWD_CODEC = "FWD_CODEC";
+	public static final String FWD_DECODER = "FWD_DECODER";
 	public static final String FWD_HANDLER = "FWD_HANDLER";
 	public static final String MSG_CODEC = "MSG_CODEC";
 	public static final String MSG_HANDLER = "MSG_HANDLER";
@@ -40,16 +40,17 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
 	private void initPipeline(ChannelPipeline pipeline) {
 		// IN/OUT: Codec for RELOAD framing message
-		pipeline.addLast(FRAME_CODEC, new FrameMessageCodec());
+		pipeline.addLast(FRAME_CODEC, new FramedMessageCodec());
 
 		// IN/OUT: Specific link handler to control link reliability
 		pipeline.addLast(LINK_HANDLER, linkHandler);
 
-		// IN/OUT: Codec for RELOAD forwarding header
-		pipeline.addLast(FWD_CODEC, new ForwardMessageCodec());
+		// IN: Decoder for RELOAD forwarding header
+		pipeline.addLast(FWD_DECODER, new HeadedMessageDecoder());
 
-		// IN: check header and pass messages directly to the forwarding handler
-		// of the channel where the message has to be routed
+		// IN: If message is directed to this node pass to upper layer,
+		// otherwise forward
+		// OUT: Send a forwarded message on the link (not originated locally)
 		pipeline.addLast(FWD_HANDLER, fwdHandler);
 
 		// IN/OUT: Codec for RELOAD message content and security block

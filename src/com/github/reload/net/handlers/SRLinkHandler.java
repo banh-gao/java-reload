@@ -1,7 +1,8 @@
 package com.github.reload.net.handlers;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.net.data.FrameMessage;
+import com.github.reload.net.data.FramedMessage;
+import com.github.reload.net.data.FramedMessage.FramedData;
 
 /**
  * Simple Reliability Link level protocol handler
@@ -9,13 +10,12 @@ import com.github.reload.net.data.FrameMessage;
 public class SRLinkHandler extends LinkHandler {
 
 	@Override
-	protected void read(FrameMessage message) {
-		// TODO Auto-generated method stub
-
+	protected void handleReceived(FramedMessage message) {
+		// TODO: implement link layer Simple Reliability
 	}
 
 	@Override
-	protected FrameMessage write(ByteBuf data) {
+	protected FramedData getDataFrame(ByteBuf payload) {
 		// TODO Auto-generated method stub
 		return null;
 	}

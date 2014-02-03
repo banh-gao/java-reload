@@ -5,6 +5,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import java.util.List;
 
+/**
+ * Codec for RELOAD messages exchanged on the overlay
+ */
 public class MessageCodec extends ByteToMessageCodec<Message> {
 
 	@Override

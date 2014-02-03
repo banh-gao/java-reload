@@ -7,7 +7,7 @@ import com.github.reload.net.data.CodecUtils.Field;
 /**
  * RELOAD link layer message
  */
-public abstract class FrameMessage implements Encodable {
+public abstract class FramedMessage implements Encodable {
 
 	public static enum FrameType {
 		DATA(128), ACK(129);
@@ -32,7 +32,7 @@ public abstract class FrameMessage implements Encodable {
 
 	protected abstract void implEncode(ByteBuf buf);
 
-	public static FrameMessage decode(ByteBuf in) throws DecoderException {
+	public static FramedMessage decode(ByteBuf in) throws DecoderException {
 		FrameType type = FrameType.valueOf(in.readUnsignedByte());
 		if (type == null)
 			throw new DecoderException("Unknown frame type");
@@ -46,6 +46,7 @@ public abstract class FrameMessage implements Encodable {
 
 		// Should't happen: Unhandled message type
 		assert false;
+
 		return null;
 	}
 
@@ -57,7 +58,7 @@ public abstract class FrameMessage implements Encodable {
 	/**
 	 * Link level data message
 	 */
-	public static class FramedData extends FrameMessage {
+	public static class FramedData extends FramedMessage {
 
 		private static final int DATA_MAX_LENGTH = CodecUtils.U_INT24;
 
@@ -97,7 +98,7 @@ public abstract class FrameMessage implements Encodable {
 	/**
 	 * Link level acknowledge message
 	 */
-	public static class FramedAck extends FrameMessage {
+	public static class FramedAck extends FramedMessage {
 
 		protected long ack_sequence;
 		protected int receivedBitMask;
