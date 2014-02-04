@@ -1,6 +1,6 @@
 package com.github.reload.net;
 
-import com.github.reload.net.data.Message;
+import com.github.reload.message.Message;
 
 /**
  * Main class representing the processing task to be performed for an incoming

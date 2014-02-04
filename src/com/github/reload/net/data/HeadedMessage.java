@@ -7,17 +7,10 @@ import com.github.reload.message.Header;
 /**
  * RELOAD message with decoded header and opaque payload
  */
-public class HeadedMessage implements Encodable {
+public class HeadedMessage {
 
-	private Header header;
-	private ByteBuf payload;
-
-	public static HeadedMessage decode(ByteBuf in) {
-		HeadedMessage message = new HeadedMessage();
-		message.header = Header.decode(in);
-		message.payload = in.slice();
-		return message;
-	}
+	Header header;
+	ByteBuf payload;
 
 	public Header getHeader() {
 		return header;
@@ -27,7 +20,6 @@ public class HeadedMessage implements Encodable {
 		return payload;
 	}
 
-	@Override
 	public void encode(ByteBuf buf) throws EncoderException {
 		header.encode(buf);
 		buf.writeBytes(payload, header.getPayloadLength());

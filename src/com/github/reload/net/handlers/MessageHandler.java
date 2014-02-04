@@ -4,8 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.github.reload.message.Message;
 import com.github.reload.net.MessageProcessTask;
-import com.github.reload.net.data.Message;
 
 /**
  * Message handler that dispatch incoming messages to receiver workers

@@ -19,5 +19,4 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 		out.add(FramedMessage.decode(in));
 	}
-
 }

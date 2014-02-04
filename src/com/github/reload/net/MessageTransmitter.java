@@ -1,6 +1,6 @@
 package com.github.reload.net;
 
-import com.github.reload.net.data.HeadedMessage;
+import com.github.reload.message.Message;
 
 public class MessageTransmitter {
 
@@ -13,7 +13,7 @@ public class MessageTransmitter {
 	 * @param message
 	 * @return
 	 */
-	public TransmissionFuture sendMessage(HeadedMessage message) {
+	public TransmissionFuture sendMessage(Message message) {
 		// TODO: forward message to neighbors and update transmissionFuture with
 		// transmission status updates
 		return null;

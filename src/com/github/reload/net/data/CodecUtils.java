@@ -1,6 +1,7 @@
 package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
+import java.math.BigInteger;
 
 /**
  * Utility class to write and read variable-length fields on byte buffers.
@@ -67,7 +68,7 @@ public class CodecUtils {
 	 * 
 	 * @see {@link ByteBuf#slice()}
 	 */
-	public static ByteBuf readDataLength(ByteBuf buf, int maxDataLength) {
+	public static ByteBuf readData(ByteBuf buf, int maxDataLength) {
 		int dataLength = 0;
 		int baseOffset = (maxDataLength - 1) * 8;
 		for (int i = 0; i < maxDataLength; i++) {
@@ -120,6 +121,22 @@ public class CodecUtils {
 				buf.writeByte(dataLength >>> offset);
 			}
 		}
+	}
 
+	/**
+	 * @return the hexadecimal string representation of the passed bytes
+	 */
+	public static String hexDump(byte[] bytes) {
+		BigInteger bi = new BigInteger(1, bytes);
+		return String.format("%#x", bi);
+	}
+
+	/**
+	 * @return the hexadecimal string representation of the passed value without
+	 *         sign
+	 */
+	public static String hexDump(long val) {
+		BigInteger bi = BigInteger.valueOf(val).abs();
+		return String.format("%#x", bi);
 	}
 }

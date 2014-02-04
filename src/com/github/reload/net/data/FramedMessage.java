@@ -7,7 +7,7 @@ import com.github.reload.net.data.CodecUtils.Field;
 /**
  * RELOAD link layer message
  */
-public abstract class FramedMessage implements Encodable {
+public abstract class FramedMessage {
 
 	public static enum FrameType {
 		DATA(128), ACK(129);
@@ -50,7 +50,6 @@ public abstract class FramedMessage implements Encodable {
 		return null;
 	}
 
-	@Override
 	public final void encode(ByteBuf buf) {
 		implEncode(buf);
 	}
@@ -129,6 +128,5 @@ public abstract class FramedMessage implements Encodable {
 			buf.writeInt((int) ack_sequence);
 			buf.writeInt(receivedBitMask);
 		}
-
 	}
 }
