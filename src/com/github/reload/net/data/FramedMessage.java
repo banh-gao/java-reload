@@ -2,7 +2,7 @@ package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
-import com.github.reload.net.data.CodecUtils.Field;
+import com.github.reload.net.data.Codec.Field;
 
 /**
  * RELOAD link layer message
@@ -59,7 +59,7 @@ public abstract class FramedMessage {
 	 */
 	public static class FramedData extends FramedMessage {
 
-		private static final int DATA_MAX_LENGTH = CodecUtils.U_INT24;
+		private static final int DATA_MAX_LENGTH = Codec.U_INT24;
 
 		protected long sequence;
 		protected ByteBuf data;
@@ -88,7 +88,7 @@ public abstract class FramedMessage {
 		@Override
 		public void implEncode(ByteBuf buf) {
 			buf.writeInt((int) sequence);
-			Field dataFld = CodecUtils.allocateField(buf, DATA_MAX_LENGTH);
+			Field dataFld = Codec.allocateField(buf, DATA_MAX_LENGTH);
 			buf.writeBytes(data);
 			dataFld.updateDataLength();
 		}

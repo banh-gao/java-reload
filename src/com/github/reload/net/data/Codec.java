@@ -1,43 +1,93 @@
 package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
+import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import com.github.reload.Context;
+import com.github.reload.message.errors.Error;
+import com.github.reload.message.errors.Error.ErrorType;
 
 /**
- * Utility class to write and read variable-length fields on byte buffers.
- * The data-length subfield uses only the needed bytes to represent the
- * maximum value for the data subfield length as an unsigned integer.
+ * Encode and decode the object on the given buffer
+ * 
+ * @param <T>
+ *            The object type handled by this codec
  */
-public class CodecUtils {
+public abstract class Codec<T> {
 
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>8</sup>-1
 	 */
-	public static final int U_INT8 = 1;
+	protected static final int U_INT8 = 1;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>16</sup>-1
 	 */
-	public static final int U_INT16 = 2;
+	protected static final int U_INT16 = 2;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>24</sup>-1
 	 */
-	public static final int U_INT24 = 3;
+	protected static final int U_INT24 = 3;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>32</sup>-1
 	 */
-	public static final int U_INT32 = 4;
+	protected static final int U_INT32 = 4;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>64</sup>-1
 	 */
-	public static final int U_INT64 = 8;
+	protected static final int U_INT64 = 8;
 
-	private CodecUtils() {
+	protected final Context context;
+
+	public Codec(Context context) {
+		this.context = context;
 	}
+
+	/**
+	 * Get an instance of the codec associated with the given class. The given
+	 * class must be annotated with the {@link ReloadCodec} annotation to
+	 * declare the codec class.
+	 * The new codec will be initialized with the given {@link Context}.
+	 * 
+	 * @param clazz
+	 *            the class that the codec is associated with
+	 * @param ctx
+	 *            the context used to initialize the codec
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Codec<T> getCodec(Class<T> clazz, Context ctx) {
+		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
+		if (codecAnn == null)
+			throw new IllegalStateException("No RELOAD codec associated with class " + clazz.toString());
+
+		try {
+			Constructor<? extends Codec<?>> codecConstr = codecAnn.value().getConstructor(Context.class);
+			return (Codec<T>) codecConstr.newInstance(ctx);
+		} catch (Exception e) {
+			throw new IllegalStateException("Codec instantiation failed for class " + clazz.toString(), e);
+		}
+	}
+
+	/**
+	 * Encode object to the given byte buffer
+	 * 
+	 * @param data
+	 * @param buf
+	 */
+	public abstract void encode(T obj, ByteBuf buf) throws CodecException;
+
+	/**
+	 * Decode object from the given byte buffer
+	 * 
+	 * @param buf
+	 * @return
+	 */
+	public abstract T decode(ByteBuf buf) throws CodecException;
 
 	/**
 	 * Allocate a field at the current write index that can hold at most the
@@ -51,13 +101,13 @@ public class CodecUtils {
 	 * @param maxDataLength
 	 *            the data maximum bytes size in power of two
 	 */
-	public static Field allocateField(ByteBuf buf, int maxDataLength) {
+	protected static Field allocateField(ByteBuf buf, int maxDataLength) {
 		return new Field(buf, maxDataLength);
 	}
 
 	/**
 	 * Returns the data stored in a variable-length field at the current read
-	 * index.
+	 * index and move the readIndex after the field.
 	 * The returned buffer is a {@link ByteBuf#slice()} of the original buffer,
 	 * it remains backed to the original buffer.
 	 * 
@@ -68,7 +118,7 @@ public class CodecUtils {
 	 * 
 	 * @see {@link ByteBuf#slice()}
 	 */
-	public static ByteBuf readData(ByteBuf buf, int maxDataLength) {
+	protected static ByteBuf readData(ByteBuf buf, int maxDataLength) {
 		int dataLength = 0;
 		int baseOffset = (maxDataLength - 1) * 8;
 		for (int i = 0; i < maxDataLength; i++) {
@@ -76,10 +126,12 @@ public class CodecUtils {
 			dataLength += (buf.readByte() & 0xff) << offset;
 		}
 
-		return buf.slice(buf.readerIndex(), dataLength);
+		ByteBuf data = buf.slice(buf.readerIndex(), dataLength);
+		buf.readerIndex(data.readableBytes());
+		return data;
 	}
 
-	public static class Field {
+	protected static class Field {
 
 		private final ByteBuf buf;
 		private final int fieldPos;
@@ -138,5 +190,41 @@ public class CodecUtils {
 	public static String hexDump(long val) {
 		BigInteger bi = BigInteger.valueOf(val).abs();
 		return String.format("%#x", bi);
+	}
+
+	/**
+	 * This exception can be thrown to indicate an error in the en/decoding
+	 * process
+	 */
+	public static class CodecException extends Exception {
+
+		public CodecException() {
+			super();
+		}
+
+		public CodecException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+			super(message, cause, enableSuppression, writableStackTrace);
+		}
+
+		public CodecException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public CodecException(String message) {
+			super(message);
+		}
+
+		public CodecException(Throwable cause) {
+			super(cause);
+		}
+
+		/**
+		 * @return An error response to send to the sender node with the cause
+		 *         of the error
+		 */
+		public Error getErrorResponse() {
+			return new Error(ErrorType.INVALID_MESSAGE, getMessage());
+		}
+
 	}
 }

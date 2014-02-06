@@ -2,8 +2,6 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.EncoderException;
-import com.github.reload.net.data.CodecUtils;
-import com.github.reload.net.data.CodecUtils.Field;
 
 /**
  * An opaque id used to substitute other ids by the local peer (also known as

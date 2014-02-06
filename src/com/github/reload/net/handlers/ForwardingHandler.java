@@ -26,6 +26,7 @@ public class ForwardingHandler extends ChannelDuplexHandler {
 	 * @return
 	 */
 	public ChannelPromise write(HeadedMessage msg) {
+		System.out.println("ENCODE");
 		if (ctx == null)
 			throw new IllegalStateException("Handler not associated with a channel");
 

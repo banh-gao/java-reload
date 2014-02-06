@@ -5,7 +5,8 @@ import io.netty.handler.codec.DecoderException;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import com.github.reload.message.Content;
-import com.github.reload.message.ForwardingOption.UnsupportedFwdOptionException;
+import com.github.reload.message.ForwardingOptionCodec.UnsupportedFwdOptionException;
+import com.github.reload.message.content.ContentType;
 import com.github.reload.net.data.CodecUtils;
 
 /**

@@ -4,16 +4,14 @@ import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * A destination list used to specify the path between peers a message
  * must traverse in the RELOAD overlay
  */
+@ReloadCodec(DestinationListCodec.class)
 public class DestinationList extends AbstractList<RoutableID> {
-
-	static {
-		CodecFactory.registerCodec(DestinationList.class, new DestinationListCodec());
-	}
 
 	private final LinkedList<RoutableID> list;
 

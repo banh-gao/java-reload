@@ -11,11 +11,19 @@ import com.github.reload.message.MessageCodec;
  */
 public class MessageEncoder extends MessageToByteEncoder<Message> {
 
-	private MessageCodec codec = new MessageCodec();
+	private MessageCodec codec;
+
+	public MessageEncoder(MessageCodec codec) {
+		this.codec = codec;
+	}
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
-		codec.encode(msg, out);
+		try {
+			codec.encode(msg, out);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

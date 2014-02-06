@@ -1,6 +1,7 @@
 package com.github.reload.message;
 
 import java.util.EnumSet;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * Forwarding option contained in the message header
@@ -8,11 +9,8 @@ import java.util.EnumSet;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
+@ReloadCodec(ForwardingOptionCodec.class)
 public abstract class ForwardingOption {
-
-	static {
-		CodecFactory.registerCodec(ForwardingOption.class, new ForwardingOptionCodec());
-	}
 
 	public enum ForwardingOptionType {
 		UNKNOWN_OPTION((byte) 0);

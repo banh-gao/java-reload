@@ -10,7 +10,11 @@ import com.github.reload.message.MessageCodec;
  */
 public class MessageDecoder extends MessageToMessageDecoder<HeadedMessage> {
 
-	private MessageCodec codec = new MessageCodec();
+	private MessageCodec codec;
+
+	public MessageDecoder(MessageCodec messageCodec) {
+		codec = messageCodec;
+	}
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, HeadedMessage msg, List<Object> out) throws Exception {

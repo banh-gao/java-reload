@@ -1,18 +1,15 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import net.sf.jReload.ApplicationID;
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
-import net.sf.jReload.net.ice.ICEHelper;
-import net.sf.jReload.net.ice.IceCandidate;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.ice.ICEHelper;
+import com.github.reload.net.ice.IceCandidate;
 
 /**
  * common representation of AppAttach requests and answers
@@ -20,54 +17,23 @@ import net.sf.jReload.net.ice.IceCandidate;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class AppAttachReqAns extends MessageContent {
+public class AppAttachReqAns extends Content {
 
-	private final static int UFRAG_LENGTH_FIELD = EncUtils.U_INT8;
-	private final static int PASS_LENGTH_FIELD = EncUtils.U_INT8;
-	private final static int ROLE_LENGTH_FIELD = EncUtils.U_INT8;
-	private final static int CANDIDATES_LENGTH_FIELD = EncUtils.U_INT16;
+	private byte[] userFragment;
+	private byte[] password;
+	private ApplicationID applicationID;
+	private byte[] role;
+	private List<IceCandidate> candidates;
 
-	private final ContentType contentType;
-	private final byte[] userFragment;
-	private final byte[] password;
-	private final ApplicationID applicationID;
-	private final byte[] role;
-	private final List<IceCandidate> candidates;
+	private AppAttachReqAns() {
+	}
 
-	private AppAttachReqAns(Builder builder, ContentType contentType) {
+	private AppAttachReqAns(Builder builder) {
 		userFragment = builder.userFragment;
 		password = builder.password;
 		applicationID = builder.applicationID;
 		role = builder.role;
 		candidates = builder.candidates;
-		this.contentType = contentType;
-	}
-
-	public AppAttachReqAns(UnsignedByteBuffer buf, ContentType contentType) {
-		this.contentType = contentType;
-		userFragment = new byte[buf.getLengthValue(UFRAG_LENGTH_FIELD)];
-		buf.getRaw(userFragment);
-
-		password = new byte[buf.getLengthValue(PASS_LENGTH_FIELD)];
-		buf.getRaw(password);
-
-		int appId = buf.getSigned16();
-		applicationID = ApplicationID.valueOf(appId);
-		if (applicationID == null)
-			throw new DecodingException("Unknown application ID " + appId);
-
-		role = new byte[buf.getLengthValue(ROLE_LENGTH_FIELD)];
-		buf.getRaw(role);
-
-		candidates = new ArrayList<IceCandidate>();
-		int candLength = buf.getLengthValue(CANDIDATES_LENGTH_FIELD);
-
-		int startPos = buf.position();
-
-		while (buf.getConsumedFrom(startPos) < candLength) {
-			IceCandidate candidate = IceCandidate.parse(buf);
-			candidates.add(candidate);
-		}
 	}
 
 	/**
@@ -104,36 +70,6 @@ public class AppAttachReqAns extends MessageContent {
 	 */
 	public ApplicationID getApplicationID() {
 		return applicationID;
-	}
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		Field ufragLenFld = buf.allocateLengthField(UFRAG_LENGTH_FIELD);
-		buf.putRaw(userFragment);
-		ufragLenFld.setEncodedLength(buf.getConsumedFrom(ufragLenFld.getNextPosition()));
-		Field passLenFld = buf.allocateLengthField(PASS_LENGTH_FIELD);
-		buf.putRaw(password);
-		passLenFld.setEncodedLength(buf.getConsumedFrom(passLenFld.getNextPosition()));
-		buf.putUnsigned16(applicationID.getId());
-		Field roleLenFld = buf.allocateLengthField(ROLE_LENGTH_FIELD);
-		buf.putRaw(role);
-		roleLenFld.setEncodedLength(buf.getConsumedFrom(roleLenFld.getNextPosition()));
-		writeCandidates(buf);
-	}
-
-	private void writeCandidates(UnsignedByteBuffer buf) {
-		Field lenFld = buf.allocateLengthField(CANDIDATES_LENGTH_FIELD);
-
-		for (IceCandidate c : candidates) {
-			c.writeTo(buf);
-		}
-
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-	}
-
-	@Override
-	public ContentType getType() {
-		return contentType;
 	}
 
 	/**
@@ -173,5 +109,79 @@ public class AppAttachReqAns extends MessageContent {
 			role = ROLE_ACTIVE;
 			return new AppAttachReqAns(this, ContentType.APPATTACH_ANS);
 		}
+	}
+
+	public static class AppAttachReqAnsCodec extends Codec<AppAttachReqAns> {
+
+		private final static int UFRAG_LENGTH_FIELD = U_INT8;
+		private final static int PASS_LENGTH_FIELD = U_INT8;
+		private final static int ROLE_LENGTH_FIELD = U_INT8;
+		private final static int CANDIDATES_LENGTH_FIELD = U_INT16;
+
+		private final Codec<IceCandidate> iceCodec;
+
+		public AppAttachReqAnsCodec(Context context) {
+			super(context);
+			iceCodec = getCodec(IceCandidate.class, context);
+		}
+
+		@Override
+		public void encode(AppAttachReqAns obj, ByteBuf buf) throws CodecException {
+			Field ufragLenFld = allocateField(buf, UFRAG_LENGTH_FIELD);
+			buf.writeBytes(obj.userFragment);
+			ufragLenFld.updateDataLength();
+
+			Field passLenFld = allocateField(buf, PASS_LENGTH_FIELD);
+			buf.writeBytes(obj.password);
+			passLenFld.updateDataLength();
+
+			buf.writeShort(obj.applicationID.getId());
+			Field roleLenFld = allocateField(buf, ROLE_LENGTH_FIELD);
+			buf.writeBytes(obj.role);
+			roleLenFld.updateDataLength();
+			encodeCandidates(obj, buf);
+		}
+
+		private void encodeCandidates(AppAttachReqAns obj, ByteBuf buf) throws CodecException {
+			Field lenFld = allocateField(buf, CANDIDATES_LENGTH_FIELD);
+
+			for (IceCandidate c : obj.candidates) {
+				iceCodec.encode(c, buf);
+			}
+
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public AppAttachReqAns decode(ByteBuf buf) throws CodecException {
+			AppAttachReqAns obj = new AppAttachReqAns();
+			ByteBuf fragFld = readData(buf, UFRAG_LENGTH_FIELD);
+			obj.userFragment = new byte[fragFld.readableBytes()];
+			fragFld.readBytes(obj.userFragment);
+
+			ByteBuf pswData = readData(buf, PASS_LENGTH_FIELD);
+			obj.password = new byte[pswData.readableBytes()];
+			pswData.readBytes(obj.password);
+
+			int appId = buf.readShort();
+			obj.applicationID = ApplicationID.valueOf(appId);
+			if (obj.applicationID == null)
+				throw new CodecException("Unknown application ID " + appId);
+
+			ByteBuf roleData = readData(buf, ROLE_LENGTH_FIELD);
+
+			obj.role = new byte[roleData.readableBytes()];
+			buf.readBytes(obj.role);
+
+			obj.candidates = new ArrayList<IceCandidate>();
+			ByteBuf candData = readData(buf, CANDIDATES_LENGTH_FIELD);
+
+			while (candData.readableBytes() > 0) {
+				IceCandidate candidate = iceCodec.decode(buf);
+				obj.candidates.add(candidate);
+			}
+			return obj;
+		}
+
 	}
 }

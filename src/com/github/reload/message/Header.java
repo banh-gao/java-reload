@@ -2,16 +2,14 @@ package com.github.reload.message;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.github.reload.net.data.CodecUtils;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * RELOAD message header
  */
+@ReloadCodec(HeaderCodec.class)
 public class Header {
-
-	static {
-		CodecFactory.registerCodec(Header.class, new HeaderCodec());
-	}
 
 	boolean isReloTokenValid;
 	long transactionId;
@@ -171,6 +169,6 @@ public class Header {
 
 	@Override
 	public String toString() {
-		return "ForwardingHeader [overlayHash=" + CodecUtils.hexDump(overlayHash) + ", messageLength=" + getMessageLength() + ", headerLength=" + headerLength + ", payloadLength=" + payloadLength + ", ttl=" + ttl + ", transactionId=" + CodecUtils.hexDump(transactionId) + ", viaList=" + viaList + ", destinationList=" + destinationList + ", isLastFragment=" + isLastFragment + ", fragmentOffset=" + fragmentOffset + "]";
+		return "ForwardingHeader [overlayHash=" + Codec.hexDump(overlayHash) + ", messageLength=" + getMessageLength() + ", headerLength=" + headerLength + ", payloadLength=" + payloadLength + ", ttl=" + ttl + ", transactionId=" + Codec.hexDump(transactionId) + ", viaList=" + viaList + ", destinationList=" + destinationList + ", isLastFragment=" + isLastFragment + ", fragmentOffset=" + fragmentOffset + "]";
 	}
 }

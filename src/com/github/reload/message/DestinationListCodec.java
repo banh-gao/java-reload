@@ -1,8 +1,14 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.net.data.Codec;
 
-public class DestinationListCodec extends AbstractCodec<DestinationList> {
+public class DestinationListCodec extends Codec<DestinationList> {
+
+	public DestinationListCodec(Context context) {
+		super(context);
+	}
 
 	@Override
 	public void encode(DestinationList obj, ByteBuf buf) {

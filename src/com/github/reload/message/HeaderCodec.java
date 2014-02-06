@@ -4,23 +4,24 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Context;
-import com.github.reload.net.data.CodecUtils;
+import com.github.reload.net.data.Codec;
 
 /**
  * RELOAD Header codec
  */
-public class HeaderCodec extends AbstractCodec<Header> {
+
+public class HeaderCodec extends Codec<Header> {
 
 	private static final int RELOAD_TOKEN = (int) 0xd2454c4fL;
 
-	public static final int TOTAL_MESSAGE_LENGTH_FIELD = CodecUtils.U_INT32;
+	public static final int TOTAL_MESSAGE_LENGTH_FIELD = U_INT32;
 
 	// First two bytes initial value
 	private static final short FRAGMENT_INITIAL_VALUE = (short) 0x8000;
 	// Second bit set means this is the last fragment
 	private static final short LAST_FRAGMENT_MASK = (short) 0x4000;
 
-	private static final int LISTS_LENGTH_FIELD = CodecUtils.U_INT16;
+	private static final int LISTS_LENGTH_FIELD = U_INT16;
 
 	/**
 	 * Size in bytes of the first part of the header from the beginning to the
@@ -30,15 +31,17 @@ public class HeaderCodec extends AbstractCodec<Header> {
 
 	private static final short HEADER_MIN_LENGTH = 38;
 
-	private CodecFactory factory;
+	private final Codec<DestinationList> destListCodec;
+	private final Codec<ForwardingOption> fwdOptionCodec;
 
-	@Override
-	public void init(Context ctx, CodecFactory factory) {
-		this.factory = factory;
+	public HeaderCodec(Context ctx) {
+		super(ctx);
+		this.destListCodec = getCodec(DestinationList.class, ctx);
+		this.fwdOptionCodec = getCodec(ForwardingOption.class, ctx);
 	}
 
 	@Override
-	public void encode(Header h, ByteBuf buf) {
+	public void encode(Header h, ByteBuf buf) throws CodecException {
 		buf.writeInt(RELOAD_TOKEN);
 		buf.writeInt(h.overlayHash);
 		buf.writeShort(h.configurationSequence);
@@ -62,11 +65,11 @@ public class HeaderCodec extends AbstractCodec<Header> {
 		buf.writerIndex(buf.writerIndex() + LISTS_LENGTH_FIELD);
 
 		int viaStartPos = buf.writerIndex();
-		factory.getCodec(DestinationList.class).encode(h.viaList, buf);
+		destListCodec.encode(h.viaList, buf);
 		setListLength(buf, viaStartPos, viaLengthFld);
 
 		int destStartPos = buf.writerIndex();
-		factory.getCodec(DestinationList.class).encode(h.destinationList, buf);
+		destListCodec.encode(h.destinationList, buf);
 		setListLength(buf, destStartPos, destLengthFld);
 
 		int fwdStartPos = buf.writerIndex();
@@ -91,14 +94,14 @@ public class HeaderCodec extends AbstractCodec<Header> {
 		buf.setShort(lengthFieldPos, listLength);
 	}
 
-	private void writeFwdOptions(ByteBuf buf, Header h) {
+	private void writeFwdOptions(ByteBuf buf, Header h) throws CodecException {
 		for (ForwardingOption o : h.forwardingOptions) {
-			factory.getCodec(ForwardingOption.class).encode(o, buf);
+			fwdOptionCodec.encode(o, buf);
 		}
 	}
 
 	@Override
-	public Header decode(ByteBuf buf) {
+	public Header decode(ByteBuf buf) throws CodecException {
 		Header h = new Header();
 		h.isReloTokenValid = (buf.readInt() == RELOAD_TOKEN);
 		h.overlayHash = buf.readInt();
@@ -119,8 +122,8 @@ public class HeaderCodec extends AbstractCodec<Header> {
 		int destinationListLength = buf.readShort();
 		int fwdOptionsLength = buf.readShort();
 
-		h.viaList = factory.getCodec(DestinationList.class).decode(buf.slice(buf.readerIndex(), viaListLength));
-		h.destinationList = factory.getCodec(DestinationList.class).decode(buf.slice(buf.readerIndex(), destinationListLength));
+		h.viaList = destListCodec.decode(buf.slice(buf.readerIndex(), viaListLength));
+		h.destinationList = destListCodec.decode(buf.slice(buf.readerIndex(), destinationListLength));
 		h.forwardingOptions = decodeOptions(buf.slice(buf.readerIndex(), fwdOptionsLength));
 
 		h.headerLength = HEADER_MIN_LENGTH + viaListLength + destinationListLength + fwdOptionsLength;
@@ -128,11 +131,11 @@ public class HeaderCodec extends AbstractCodec<Header> {
 		return h;
 	}
 
-	private List<ForwardingOption> decodeOptions(ByteBuf buf) {
+	private List<ForwardingOption> decodeOptions(ByteBuf buf) throws CodecException {
 		List<ForwardingOption> out = new ArrayList<ForwardingOption>();
 
 		while (buf.readableBytes() > 0)
-			out.add(factory.getCodec(ForwardingOption.class).decode(buf));
+			out.add(fwdOptionCodec.decode(buf));
 
 		return out;
 	}
