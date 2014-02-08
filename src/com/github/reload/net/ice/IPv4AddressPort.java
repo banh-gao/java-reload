@@ -1,37 +1,19 @@
 package com.github.reload.net.ice;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.UnsignedByteBuffer;
+import com.github.reload.Context;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.net.ice.IPv4AddressPort.IPv4AddresPortCodec;
 
+@ReloadCodec(IPv4AddresPortCodec.class)
 public class IPv4AddressPort extends IPAddressPort {
-
-	private static final int ADDR_LENGTH = EncUtils.U_INT32;
 
 	public IPv4AddressPort(InetAddress addr, int port) {
 		super(addr, port);
-	}
-
-	public IPv4AddressPort(UnsignedByteBuffer buf) {
-		super(parseAddr(buf), parsePort(buf));
-	}
-
-	private static InetAddress parseAddr(UnsignedByteBuffer buf) {
-		byte[] tmpAddr = new byte[IPv4AddressPort.ADDR_LENGTH];
-		buf.getRaw(tmpAddr);
-		try {
-			return InetAddress.getByAddress(tmpAddr);
-		} catch (UnknownHostException e) {
-			throw new DecodingException("Invalid IPv4 address");
-		} catch (ClassCastException e) {
-			throw new DecodingException("Invalid IPv4 address");
-		}
-	}
-
-	public static int parsePort(UnsignedByteBuffer buf) {
-		return buf.getSigned16();
 	}
 
 	@Override
@@ -39,9 +21,40 @@ public class IPv4AddressPort extends IPAddressPort {
 		return AddressType.IPv4;
 	}
 
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		buf.putRaw(getAddress().getAddress());
-		buf.putUnsigned16(getPort());
+	public static class IPv4AddresPortCodec extends Codec<IPv4AddressPort> {
+
+		private static final int ADDR_LENGTH = U_INT32;
+
+		public IPv4AddresPortCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(IPv4AddressPort obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			buf.writeBytes(obj.getAddress().getAddress());
+			buf.writeShort(obj.getPort());
+		}
+
+		@Override
+		public IPv4AddressPort decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			return new IPv4AddressPort(decodeAddr(buf), decodePort(buf));
+		}
+
+		private InetAddress decodeAddr(ByteBuf buf) {
+			byte[] tmpAddr = new byte[ADDR_LENGTH];
+			buf.readBytes(tmpAddr);
+			try {
+				return InetAddress.getByAddress(tmpAddr);
+			} catch (UnknownHostException e) {
+				throw new DecoderException("Invalid IPv4 address");
+			} catch (ClassCastException e) {
+				throw new DecoderException("Invalid IPv4 address");
+			}
+		}
+
+		public int decodePort(ByteBuf buf) {
+			return buf.readUnsignedShort();
+		}
+
 	}
 }

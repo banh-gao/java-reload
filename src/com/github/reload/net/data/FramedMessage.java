@@ -64,11 +64,13 @@ public abstract class FramedMessage {
 		protected long sequence;
 		protected ByteBuf data;
 
+		public FramedData(long sequence, ByteBuf data) {
+			this.sequence = sequence;
+			this.data = data;
+		}
+
 		public static FramedData decode(ByteBuf in) {
-			FramedData d = new FramedData();
-			d.sequence = in.readUnsignedInt();
-			d.data = in.slice();
-			return d;
+			return new FramedData(in.readUnsignedInt(), in.slice());
 		}
 
 		@Override

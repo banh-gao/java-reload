@@ -10,18 +10,21 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import org.omg.IOP.CodecFactory;
-import com.github.reload.message.Message;
+import com.github.reload.Context;
 import com.github.reload.net.data.FramedMessage;
 import com.github.reload.net.data.FramedMessage.FramedData;
 import com.github.reload.net.data.FramedMessageCodec;
-import com.github.reload.net.data.HeadedMessageCodec;
+import com.github.reload.net.data.HeadedMessageDecoder;
+import com.github.reload.net.data.Message;
+import com.github.reload.net.data.MessageCodec;
 import com.github.reload.net.data.MessageDecoder;
 import com.github.reload.net.data.MessageEncoder;
 import com.github.reload.net.handlers.ForwardingHandler;
 import com.github.reload.net.handlers.LinkHandler;
 import com.github.reload.net.handlers.MessageHandler;
+import com.github.reload.net.handlers.SRLinkHandler;
 
 /**
  * Initialize an newly created channel
@@ -40,6 +43,8 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 	private final LinkHandler linkHandler;
 	private final ForwardingHandler fwdHandler;
 	private final MessageHandler msgHandler;
+
+	private MessageCodec codec = new MessageCodec(new Context());
 
 	public ChannelInitializerImpl(LinkHandler linkHandler, ForwardingHandler fwdHandler, MessageHandler msgHandler) {
 		// TODO: share codecs instances between channels
@@ -61,18 +66,19 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		pipeline.addLast(LINK_HANDLER, linkHandler);
 
 		// IN: Decoder for RELOAD forwarding header
-		pipeline.addLast(FWD_DECODER, new HeadedMessageCodec(null));
+		pipeline.addLast(FWD_DECODER, new HeadedMessageDecoder(new Context()));
 
 		// IN: If message is directed to this node pass to upper layer,
 		// otherwise forward
-		// OUT: Send a forwarded message on the link (not originated locally)
+		// OUT: Send a forwarded message on the link (message with opaque
+		// payload not originated locally)
 		pipeline.addLast(FWD_HANDLER, fwdHandler);
 
 		// IN: Codec for RELOAD message content and security block
-		pipeline.addLast(MSG_DECODER, new MessageDecoder();
+		pipeline.addLast(MSG_DECODER, new MessageDecoder(codec));
 
 		// OUT: Codec for RELOAD message content and security block
-		pipeline.addLast(MSG_ENCODER, new MessageEncoder(CodecFactory.getInstance(null)));
+		pipeline.addLast(MSG_ENCODER, new MessageEncoder(codec));
 
 		// IN: Process incoming messages directed to this node
 		pipeline.addLast(MSG_HANDLER, msgHandler);
@@ -80,7 +86,7 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
 	public static void main(String[] args) throws Exception {
 		ServerBootstrap sb = new ServerBootstrap();
-		sb.group(new NioEventLoopGroup()).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializerImpl(new LinkHandler() {
+		sb.group(new NioEventLoopGroup(5)).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializerImpl(new LinkHandler() {
 
 			@Override
 			protected void handleReceived(FramedMessage message) {
@@ -100,27 +106,21 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		f.await();
 
 		Bootstrap b = new Bootstrap();
-		b.group(new NioEventLoopGroup()).channel(NioServerSocketChannel.class).handler(new ChannelInitializerImpl(new LinkHandler() {
+		b.group(new NioEventLoopGroup(5)).channel(NioServerSocketChannel.class).handler(new ChannelInitializerImpl(new SRLinkHandler(), new ForwardingHandler(), new MessageHandler()));
 
-			@Override
-			protected void handleReceived(FramedMessage message) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			protected FramedData getDataFrame(ByteBuf payload) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		}, new ForwardingHandler(), new MessageHandler()));
-
-		ChannelFuture f2 = b.connect(new InetSocketAddress(8080));
+		ChannelFuture f2 = b.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), 8080));
 
 		f2.await();
 
-		ChannelFuture f3 = f2.channel().write(new Message());
+		Message m = new Message();
+
+		ChannelFuture f3 = f2.channel().writeAndFlush(m);
+
 		f3.await();
-		System.out.println(f.isSuccess());
+
+		if (!f3.isSuccess())
+			f3.cause().printStackTrace();
+
+		System.out.println(f3.isSuccess());
 	}
 }

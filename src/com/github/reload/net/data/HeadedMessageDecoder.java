@@ -2,7 +2,7 @@ package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageCodec;
+import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
 import com.github.reload.Context;
 import com.github.reload.message.Header;
@@ -10,11 +10,11 @@ import com.github.reload.message.Header;
 /**
  * Decoder used to process only the Forwarding Header part of the message
  */
-public class HeadedMessageCodec extends ByteToMessageCodec<HeadedMessage> {
+public class HeadedMessageDecoder extends ByteToMessageDecoder {
 
 	private final Codec<Header> hdrCodec;
 
-	public HeadedMessageCodec(Context ctx) {
+	public HeadedMessageDecoder(Context ctx) {
 		this.hdrCodec = Codec.getCodec(Header.class, ctx);
 	}
 
@@ -24,11 +24,5 @@ public class HeadedMessageCodec extends ByteToMessageCodec<HeadedMessage> {
 		message.header = hdrCodec.decode(in);
 		message.payload = in.slice();
 		out.add(message);
-	}
-
-	@Override
-	protected void encode(ChannelHandlerContext ctx, HeadedMessage msg, ByteBuf out) throws Exception {
-		hdrCodec.encode(msg.header, out);
-		out.writeBytes(msg.getPayload(), msg.header.getPayloadLength());
 	}
 }

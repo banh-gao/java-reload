@@ -3,6 +3,7 @@ package com.github.reload.message;
 import java.util.LinkedList;
 import java.util.List;
 import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.Message;
 import com.github.reload.net.data.ReloadCodec;
 
 /**
@@ -31,7 +32,7 @@ public class Header {
 	int headerLength;
 	int payloadLength;
 
-	Header() {
+	public Header() {
 	}
 
 	public boolean hasValidToken() {

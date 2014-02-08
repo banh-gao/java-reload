@@ -155,11 +155,11 @@ public class AppAttachReqAns extends Content {
 		@Override
 		public AppAttachReqAns decode(ByteBuf buf) throws CodecException {
 			AppAttachReqAns obj = new AppAttachReqAns();
-			ByteBuf fragFld = readData(buf, UFRAG_LENGTH_FIELD);
+			ByteBuf fragFld = readField(buf, UFRAG_LENGTH_FIELD);
 			obj.userFragment = new byte[fragFld.readableBytes()];
 			fragFld.readBytes(obj.userFragment);
 
-			ByteBuf pswData = readData(buf, PASS_LENGTH_FIELD);
+			ByteBuf pswData = readField(buf, PASS_LENGTH_FIELD);
 			obj.password = new byte[pswData.readableBytes()];
 			pswData.readBytes(obj.password);
 
@@ -168,13 +168,13 @@ public class AppAttachReqAns extends Content {
 			if (obj.applicationID == null)
 				throw new CodecException("Unknown application ID " + appId);
 
-			ByteBuf roleData = readData(buf, ROLE_LENGTH_FIELD);
+			ByteBuf roleData = readField(buf, ROLE_LENGTH_FIELD);
 
 			obj.role = new byte[roleData.readableBytes()];
 			buf.readBytes(obj.role);
 
 			obj.candidates = new ArrayList<IceCandidate>();
-			ByteBuf candData = readData(buf, CANDIDATES_LENGTH_FIELD);
+			ByteBuf candData = readField(buf, CANDIDATES_LENGTH_FIELD);
 
 			while (candData.readableBytes() > 0) {
 				IceCandidate candidate = iceCodec.decode(buf);

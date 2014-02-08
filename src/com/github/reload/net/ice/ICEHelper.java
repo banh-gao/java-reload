@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import net.sf.jReload.Context;
-import net.sf.jReload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.Context;
+import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
 public class ICEHelper {

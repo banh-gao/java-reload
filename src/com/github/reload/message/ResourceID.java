@@ -1,9 +1,10 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.EncoderException;
-import com.github.reload.net.data.CodecUtils;
-import com.github.reload.net.data.CodecUtils.Field;
+import com.github.reload.Context;
+import com.github.reload.message.ResourceID.ResourceIDCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * The identifier of a resource
@@ -11,9 +12,8 @@ import com.github.reload.net.data.CodecUtils.Field;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
+@ReloadCodec(ResourceIDCodec.class)
 public final class ResourceID extends RoutableID {
-
-	private static final int VALUE_LENGTH_FIELD = CodecUtils.U_INT8;
 
 	private final byte[] id;
 
@@ -23,13 +23,6 @@ public final class ResourceID extends RoutableID {
 
 	public static ResourceID valueOf(byte[] id) {
 		return new ResourceID(id);
-	}
-
-	public static ResourceID valueOf(ByteBuf buf) {
-		ByteBuf data = CodecUtils.readData(buf, ResourceID.VALUE_LENGTH_FIELD);
-		byte[] id = new byte[data.readableBytes()];
-		buf.readBytes(id);
-		return valueOf(id);
 	}
 
 	public static ResourceID valueOf(String hexString) {
@@ -46,10 +39,27 @@ public final class ResourceID extends RoutableID {
 		return DestinationType.RESOURCEID;
 	}
 
-	@Override
-	public void implEncode(ByteBuf buf) throws EncoderException {
-		Field lenFld = CodecUtils.allocateField(buf, VALUE_LENGTH_FIELD);
-		buf.writeBytes(id);
-		lenFld.updateDataLength();
+	public static class ResourceIDCodec extends Codec<ResourceID> {
+
+		public ResourceIDCodec(Context context) {
+			super(context);
+		}
+
+		private static final int VALUE_LENGTH_FIELD = U_INT8;
+
+		@Override
+		public void encode(ResourceID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			Field lenFld = allocateField(buf, VALUE_LENGTH_FIELD);
+			buf.writeBytes(obj.id);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public ResourceID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			ByteBuf data = readField(buf, VALUE_LENGTH_FIELD);
+			byte[] id = new byte[data.readableBytes()];
+			buf.readBytes(id);
+			return valueOf(id);
+		}
 	}
 }

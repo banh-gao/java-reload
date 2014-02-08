@@ -1,7 +1,10 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.EncoderException;
+import com.github.reload.Context;
+import com.github.reload.message.OpaqueID.OpaqueIdCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * An opaque id used to substitute other ids by the local peer (also known as
@@ -10,9 +13,8 @@ import io.netty.handler.codec.EncoderException;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
+@ReloadCodec(OpaqueIdCodec.class)
 public class OpaqueID extends RoutableID {
-
-	private static final int OPAQUE_LENGTH_FIELD = CodecUtils.U_INT8;
 
 	private final byte[] id;
 
@@ -24,31 +26,9 @@ public class OpaqueID extends RoutableID {
 		return new OpaqueID(id);
 	}
 
-	public static OpaqueID valueOf(ByteBuf buf) {
-		ByteBuf data = CodecUtils.readData(buf, OPAQUE_LENGTH_FIELD);
-		byte[] id = new byte[data.readableBytes()];
-		data.readBytes(id);
-		return valueOf(id);
-	}
-
 	@Override
 	public byte[] getData() {
 		return id;
-	}
-
-	/**
-	 * Write this opaque as an opaque destination
-	 * 
-	 * @param buf
-	 * @throws IllegalStateException
-	 *             if the opaque id is not a valid opaque destination value
-	 *             (uint16 with top bit setted)
-	 */
-	public void writeAsOpaqueDestinationTo(ByteBuf buf) {
-		if (id.length != CodecUtils.U_INT16 || (id[0] & OPAQUE_DEST_MASK) != OPAQUE_DEST_MASK)
-			throw new IllegalStateException("Invalid opaque-id for opaque destination, top bit must be setted");
-
-		buf.writeBytes(id);
 	}
 
 	@Override
@@ -56,10 +36,28 @@ public class OpaqueID extends RoutableID {
 		return DestinationType.OPAQUEID;
 	}
 
-	@Override
-	public void implEncode(ByteBuf buf) throws EncoderException {
-		Field lenFld = CodecUtils.allocateField(buf, OPAQUE_LENGTH_FIELD);
-		buf.writeBytes(id);
-		lenFld.updateDataLength();
+	public static class OpaqueIdCodec extends Codec<OpaqueID> {
+
+		private static final int OPAQUE_LENGTH_FIELD = U_INT8;
+
+		public OpaqueIdCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(OpaqueID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			Field lenFld = allocateField(buf, OPAQUE_LENGTH_FIELD);
+			buf.writeBytes(obj.id);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public OpaqueID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			ByteBuf data = readField(buf, OPAQUE_LENGTH_FIELD);
+			byte[] id = new byte[data.readableBytes()];
+			data.readBytes(id);
+			return valueOf(id);
+		}
+
 	}
 }

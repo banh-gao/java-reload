@@ -1,19 +1,19 @@
 package com.github.reload.net.ice;
 
+import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
-import net.sf.jReload.message.UnsignedByteBuffer;
+import com.github.reload.Context;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.net.ice.RelayCandidate.RelayCandidateCodec;
 
+@ReloadCodec(RelayCandidateCodec.class)
 public class RelayCandidate extends IceCandidate {
 
 	private IPAddressPort relayAddrPort;
 
-	public RelayCandidate(UnsignedByteBuffer buf) {
-		relayAddrPort = IPAddressPort.parse(buf);
-	}
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		relayAddrPort.writeTo(buf);
+	public RelayCandidate(IPAddressPort addrPort) {
+		this.relayAddrPort = addrPort;
 	}
 
 	public void setRelayAddrPort(InetSocketAddress relayAddrPort) {
@@ -27,5 +27,25 @@ public class RelayCandidate extends IceCandidate {
 	@Override
 	protected CandidateType getCandType() {
 		return CandidateType.RELAY;
+	}
+
+	public static class RelayCandidateCodec extends Codec<RelayCandidate> {
+
+		private final Codec<IPAddressPort> sockAddrCodec;
+
+		public RelayCandidateCodec(Context context) {
+			super(context);
+			sockAddrCodec = getCodec(IPAddressPort.class, context);
+		}
+
+		@Override
+		public void encode(RelayCandidate obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			sockAddrCodec.encode(obj.relayAddrPort, buf);
+		}
+
+		@Override
+		public RelayCandidate decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			return new RelayCandidate(sockAddrCodec.decode(buf));
+		}
 	}
 }

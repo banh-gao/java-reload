@@ -41,6 +41,12 @@ public abstract class Codec<T> {
 	 */
 	protected static final int U_INT64 = 8;
 
+	/**
+	 * The amount of bytes needed to represent an unsigned integer up to
+	 * 2<sup>128</sup>-1
+	 */
+	protected static final int U_INT128 = 16;
+
 	protected final Context context;
 
 	public Codec(Context context) {
@@ -61,6 +67,8 @@ public abstract class Codec<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Codec<T> getCodec(Class<T> clazz, Context ctx) {
+		if (ctx == null)
+			throw new NullPointerException();
 		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
 		if (codecAnn == null)
 			throw new IllegalStateException("No RELOAD codec associated with class " + clazz.toString());
@@ -118,7 +126,7 @@ public abstract class Codec<T> {
 	 * 
 	 * @see {@link ByteBuf#slice()}
 	 */
-	protected static ByteBuf readData(ByteBuf buf, int maxDataLength) {
+	protected static ByteBuf readField(ByteBuf buf, int maxDataLength) {
 		int dataLength = 0;
 		int baseOffset = (maxDataLength - 1) * 8;
 		for (int i = 0; i < maxDataLength; i++) {

@@ -1,27 +1,21 @@
 package com.github.reload.net.ice;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import com.github.reload.net.data.ReloadCodec;
 
+@ReloadCodec(IceCandidateCodec.class)
 public abstract class IceCandidate {
-
-	private static final int FOUNDATION_LENGTH_FIELD = EncUtils.U_INT8;
-	private static final int EXTENSIONS_LENGTH_FIELD = EncUtils.U_INT16;
 
 	public enum OverlayLinkType {
 		DTLS_UDP_SR((byte) 1, "DTLS", true),
 		DTLS_UDP_SR_NO_ICE((byte) 3, "DTLS", false),
 		TLS_TCP_FH_NO_ICE((byte) 4, "TLS", false);
 
-		private final byte code;
-		private final String linkProtocol;
-		private boolean useICE;
+		final byte code;
+		final String linkProtocol;
+		boolean useICE;
 
 		OverlayLinkType(byte code, String linkProtocol, boolean useICE) {
 			this.code = code;
@@ -55,7 +49,7 @@ public abstract class IceCandidate {
 		PEER_REFLEXIVE((byte) 3),
 		RELAY((byte) 4);
 
-		private final byte code;
+		final byte code;
 
 		CandidateType(byte code) {
 			this.code = code;
@@ -80,71 +74,6 @@ public abstract class IceCandidate {
 	protected List<IceExtension> extensions;
 
 	protected IceCandidate() {
-	}
-
-	public static IceCandidate parse(UnsignedByteBuffer buf) {
-		IPAddressPort addrPort = IPAddressPort.parse(buf);
-
-		OverlayLinkType overlayLink = OverlayLinkType.valueOf(buf.getRaw8());
-		if (overlayLink == null)
-			throw new DecodingException("Unknown overlay link type");
-
-		int fondLength = buf.getLengthValue(FOUNDATION_LENGTH_FIELD);
-		byte[] foundation = new byte[fondLength];
-		buf.getRaw(foundation);
-
-		long priority = buf.getSigned32();
-
-		CandidateType candType = CandidateType.valueOf(buf.getRaw8());
-
-		if (candType == null)
-			throw new DecodingException("Unknown ICE candidate type");
-
-		IceCandidate candidate = null;
-
-		switch (candType) {
-			case HOST :
-				candidate = new HostCandidate();
-				break;
-			case PEER_REFLEXIVE :
-				candidate = new PeerReflexiveCandidate(buf);
-				break;
-			case RELAY :
-				candidate = new RelayCandidate(buf);
-				break;
-			case SERVER_REFLEXIVE :
-				candidate = new ServerReflexiveCandidate(buf);
-				break;
-		}
-
-		assert (candidate != null);
-
-		candidate.addrPort = addrPort;
-		candidate.overlayLink = overlayLink;
-		candidate.foundation = foundation;
-		candidate.priority = priority;
-
-		int extLength = buf.getLengthValue(IceCandidate.EXTENSIONS_LENGTH_FIELD);
-		candidate.extensions = new ArrayList<IceExtension>();
-		while (extLength > 0) {
-			IceExtension extension = new IceExtension(buf);
-			candidate.extensions.add(extension);
-			extLength -= extension.getLength();
-		}
-
-		return candidate;
-	}
-
-	public void writeTo(UnsignedByteBuffer buf) {
-		addrPort.writeTo(buf);
-		buf.putRaw8(overlayLink.code);
-		Field lenFld = buf.allocateLengthField(FOUNDATION_LENGTH_FIELD);
-		buf.putRaw(foundation);
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-		buf.putUnsigned32(priority);
-		buf.putRaw8(getCandType().code);
-		implWriteTo(buf);
-		writeExtensions(buf);
 	}
 
 	public InetSocketAddress getSocketAddress() {
@@ -183,19 +112,7 @@ public abstract class IceCandidate {
 		return extensions;
 	}
 
-	private void writeExtensions(UnsignedByteBuffer buf) {
-		Field lenFld = buf.allocateLengthField(EXTENSIONS_LENGTH_FIELD);
-
-		for (IceExtension ex : extensions) {
-			ex.writeTo(buf);
-		}
-
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-	}
-
 	protected abstract CandidateType getCandType();
-
-	protected abstract void implWriteTo(UnsignedByteBuffer buf);
 
 	@Override
 	public int hashCode() {
@@ -226,5 +143,4 @@ public abstract class IceCandidate {
 	public String toString() {
 		return "IceCandidate [addrPort=" + addrPort + ", overlayLink=" + overlayLink + ", foundation=" + foundation + ", priority=" + priority + ", extensions=" + extensions + "]";
 	}
-
 }

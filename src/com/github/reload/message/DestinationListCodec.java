@@ -6,23 +6,26 @@ import com.github.reload.net.data.Codec;
 
 public class DestinationListCodec extends Codec<DestinationList> {
 
+	private final Codec<RoutableID> rouIdCodec;
+
 	public DestinationListCodec(Context context) {
 		super(context);
+		rouIdCodec = getCodec(RoutableID.class, context);
 	}
 
 	@Override
-	public void encode(DestinationList obj, ByteBuf buf) {
+	public void encode(DestinationList obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
 		for (RoutableID d : obj) {
-			d.writeAsDestinationTo(buf);
+			rouIdCodec.encode(d, buf);
 		}
 	}
 
 	@Override
-	public DestinationList decode(ByteBuf buf) {
+	public DestinationList decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
 		DestinationList out = new DestinationList();
 
 		while (buf.readableBytes() > 0) {
-			RoutableID id = RoutableID.parseFromDestination(buf);
+			RoutableID id = rouIdCodec.decode(buf);
 			out.add(id);
 		}
 

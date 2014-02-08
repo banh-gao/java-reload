@@ -1,12 +1,10 @@
 package com.github.reload.message;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.DecoderException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.EnumSet;
-import com.github.reload.net.data.CodecUtils;
-import com.github.reload.net.data.CodecUtils.Field;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * A routable identitier that can be used as destination for the resource based
@@ -15,6 +13,7 @@ import com.github.reload.net.data.CodecUtils.Field;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
+@ReloadCodec(RoutableIDCodec.class)
 public abstract class RoutableID implements Comparable<RoutableID> {
 
 	protected enum DestinationType {
@@ -34,53 +33,9 @@ public abstract class RoutableID implements Comparable<RoutableID> {
 		}
 	}
 
-	private static final int DEST_LENGTH_FIELD = CodecUtils.U_INT8;
-
-	protected static final int OPAQUE_DEST_MASK = 0x80;
-
 	protected abstract byte[] getData();
 
 	public abstract DestinationType getType();
-
-	public abstract void implEncode(ByteBuf buf);
-
-	/**
-	 * Parse the data in the buffer as a Destination structure
-	 * 
-	 * @param buf
-	 * @return
-	 */
-	public static RoutableID parseFromDestination(ByteBuf buf) {
-		byte firstByte = buf.readByte();
-
-		if ((firstByte & OPAQUE_DEST_MASK) == OPAQUE_DEST_MASK) {
-			byte[] opaqueDest = new byte[2];
-			buf.readBytes(opaqueDest);
-			return parseOpaqueDestination(opaqueDest);
-		}
-		DestinationType type = DestinationType.valueOf(firstByte);
-
-		if (type == null)
-			throw new DecoderException("Unsupported destination type");
-
-		ByteBuf dataBuf = CodecUtils.readData(buf, DEST_LENGTH_FIELD);
-		switch (type) {
-			case NODEID :
-				return NodeID.valueOf(dataBuf);
-			case RESOURCEID :
-				return ResourceID.valueOf(dataBuf);
-			case OPAQUEID :
-				return OpaqueID.valueOf(dataBuf);
-			default :
-				throw new DecoderException("Unsupported destination type");
-		}
-	}
-
-	private static OpaqueID parseOpaqueDestination(byte[] id) {
-		if ((id[0] & OPAQUE_DEST_MASK) != OPAQUE_DEST_MASK)
-			throw new DecoderException("Invalid opaque-id");
-		return OpaqueID.valueOf(id);
-	}
 
 	protected static byte[] hexToByte(String str) {
 		byte[] bytes = new byte[str.length() / 2];
@@ -88,19 +43,6 @@ public abstract class RoutableID implements Comparable<RoutableID> {
 			bytes[i] = (byte) Integer.parseInt(str.substring(2 * i, 2 * i + 2), 16);
 		}
 		return bytes;
-	}
-
-	/**
-	 * Write this id as a Destination structure to the specified buffer
-	 */
-	public void writeAsDestinationTo(ByteBuf buf) {
-		buf.writeByte(getType().code);
-
-		Field lenFld = CodecUtils.allocateField(buf, DEST_LENGTH_FIELD);
-
-		implEncode(buf);
-
-		lenFld.updateDataLength();
 	}
 
 	@Override
@@ -136,7 +78,7 @@ public abstract class RoutableID implements Comparable<RoutableID> {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + '[' + CodecUtils.hexDump(getData()) + ']';
+		return this.getClass().getSimpleName() + '[' + Codec.hexDump(getData()) + ']';
 	}
 
 	/**

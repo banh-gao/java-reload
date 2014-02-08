@@ -3,6 +3,8 @@ package com.github.reload.message;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
+import com.github.reload.Context;
+import com.github.reload.net.data.Codec;
 
 /**
  * The identifier of a node
@@ -47,12 +49,6 @@ public class NodeID extends RoutableID {
 		return valueOf(paddedId);
 	}
 
-	public static NodeID valueOf(ByteBuf buf) {
-		byte[] id = new byte[buf.readableBytes()];
-		buf.readBytes(id);
-		return valueOf(id);
-	}
-
 	/**
 	 * Create a node-id from a hexadecimal string
 	 * 
@@ -81,8 +77,22 @@ public class NodeID extends RoutableID {
 		return DestinationType.NODEID;
 	}
 
-	@Override
-	public void implEncode(ByteBuf buf) {
-		buf.writeBytes(id);
+	public static class NodeIdCodec extends Codec<NodeID> {
+
+		public NodeIdCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(NodeID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			buf.writeBytes(obj.id);
+		}
+
+		@Override
+		public NodeID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			byte[] id = new byte[buf.readableBytes()];
+			buf.readBytes(id);
+			return valueOf(id);
+		}
 	}
 }

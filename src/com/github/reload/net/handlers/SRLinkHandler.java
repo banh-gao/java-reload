@@ -16,8 +16,8 @@ public class SRLinkHandler extends LinkHandler {
 
 	@Override
 	protected FramedData getDataFrame(ByteBuf payload) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO
+		return new FramedData(1, payload);
 	}
 
 }

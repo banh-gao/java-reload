@@ -1,35 +1,54 @@
 package com.github.reload.net.ice;
 
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
+@ReloadCodec(IceCandidateCodec.class)
 public class IceExtension {
-
-	private static final int NAME_LENGTH_FIELD = EncUtils.U_INT16;
-	private static final int VALUE_LENGTH_FIELD = EncUtils.U_INT16;
 
 	private final byte[] name;
 	private final byte[] value;
 
-	public IceExtension(UnsignedByteBuffer buf) {
-		name = new byte[buf.getLengthValue(NAME_LENGTH_FIELD)];
-		buf.getRaw(name);
-		value = new byte[buf.getLengthValue(VALUE_LENGTH_FIELD)];
-		buf.getRaw(value);
+	public IceExtension(byte[] name, byte[] value) {
+		super();
+		this.name = name;
+		this.value = value;
 	}
 
-	public int getLength() {
-		return NAME_LENGTH_FIELD + name.length + VALUE_LENGTH_FIELD + value.length;
-	}
+	public static class IceExtensionCodec extends Codec<IceExtension> {
 
-	public void writeTo(UnsignedByteBuffer buf) {
-		Field nameLenFld = buf.allocateLengthField(NAME_LENGTH_FIELD);
-		buf.putRaw(name);
-		nameLenFld.setEncodedLength(buf.getConsumedFrom(nameLenFld.getNextPosition()));
+		private static final int NAME_LENGTH_FIELD = U_INT16;
+		private static final int VALUE_LENGTH_FIELD = U_INT16;
 
-		Field valLenFld = buf.allocateLengthField(VALUE_LENGTH_FIELD);
-		buf.putRaw(value);
-		valLenFld.setEncodedLength(buf.getConsumedFrom(valLenFld.getNextPosition()));
+		public IceExtensionCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(IceExtension obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			Field nameLenFld = allocateField(buf, NAME_LENGTH_FIELD);
+			buf.writeBytes(obj.name);
+			nameLenFld.updateDataLength();
+
+			Field valLenFld = allocateField(buf, VALUE_LENGTH_FIELD);
+			buf.writeBytes(obj.value);
+			valLenFld.updateDataLength();
+		}
+
+		@Override
+		public IceExtension decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			ByteBuf nameBuf = readField(buf, NAME_LENGTH_FIELD);
+			byte[] name = new byte[nameBuf.readableBytes()];
+			nameBuf.readBytes(name);
+
+			ByteBuf valueBuf = readField(buf, VALUE_LENGTH_FIELD);
+			byte[] value = new byte[valueBuf.readableBytes()];
+			valueBuf.readBytes(value);
+
+			return new IceExtension(name, value);
+		}
+
 	}
 }

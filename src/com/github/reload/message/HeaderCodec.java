@@ -27,7 +27,7 @@ public class HeaderCodec extends Codec<Header> {
 	 * Size in bytes of the first part of the header from the beginning to the
 	 * message length field
 	 */
-	public static int HDR_LEADING_LEN = 128;
+	public static int HDR_LEADING_LEN = 16;
 
 	private static final short HEADER_MIN_LENGTH = 38;
 

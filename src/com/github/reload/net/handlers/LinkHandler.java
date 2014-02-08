@@ -35,6 +35,7 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 	@Override
 	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 		ctx.write(getDataFrame((ByteBuf) msg));
+		ctx.flush();
 	}
 
 	/**

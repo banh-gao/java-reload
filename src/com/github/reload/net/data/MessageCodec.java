@@ -1,9 +1,11 @@
-package com.github.reload.message;
+package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
 import com.github.reload.Context;
-import com.github.reload.net.data.Codec;
-import com.github.reload.net.data.HeadedMessage;
+import com.github.reload.message.Content;
+import com.github.reload.message.Header;
+import com.github.reload.message.HeaderCodec;
+import com.github.reload.message.SecurityBlock;
 import com.github.reload.net.data.Codec.CodecException;
 
 /**

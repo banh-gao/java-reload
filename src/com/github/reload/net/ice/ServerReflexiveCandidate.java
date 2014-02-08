@@ -1,11 +1,13 @@
 package com.github.reload.net.ice;
 
-import net.sf.jReload.message.UnsignedByteBuffer;
+import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.net.ice.RelayCandidate.RelayCandidateCodec;
 
+@ReloadCodec(RelayCandidateCodec.class)
 public class ServerReflexiveCandidate extends RelayCandidate {
 
-	public ServerReflexiveCandidate(UnsignedByteBuffer buf) {
-		super(buf);
+	public ServerReflexiveCandidate(IPAddressPort addrPort) {
+		super(addrPort);
 	}
 
 	@Override

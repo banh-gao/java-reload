@@ -1,10 +1,12 @@
 package com.github.reload.net.handlers;
 
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import com.github.reload.net.data.HeadedMessage;
 
+@Sharable
 public class ForwardingHandler extends ChannelDuplexHandler {
 
 	private ChannelHandlerContext ctx;

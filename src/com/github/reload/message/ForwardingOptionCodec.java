@@ -70,7 +70,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 		if (type == ForwardingOptionType.UNKNOWN_OPTION && (isFwdCritical || isDstCritical))
 			throw new UnsupportedFwdOptionException("Unknown forwarding option");
 
-		ByteBuf data = readData(buf, OPTION_LENGTH_FIELD);
+		ByteBuf data = readField(buf, OPTION_LENGTH_FIELD);
 
 		switch (type) {
 			case UNKNOWN_OPTION :
