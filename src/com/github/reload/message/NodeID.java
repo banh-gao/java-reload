@@ -4,7 +4,9 @@ import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
 import com.github.reload.Context;
+import com.github.reload.message.NodeID.NodeIdCodec;
 import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * The identifier of a node
@@ -12,6 +14,7 @@ import com.github.reload.net.data.Codec;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
+@ReloadCodec(NodeIdCodec.class)
 public class NodeID extends RoutableID {
 
 	private static final Map<byte[], NodeID> INSTANCES = new HashMap<byte[], NodeID>();
@@ -92,6 +95,7 @@ public class NodeID extends RoutableID {
 		public NodeID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
 			byte[] id = new byte[buf.readableBytes()];
 			buf.readBytes(id);
+			buf.release();
 			return valueOf(id);
 		}
 	}

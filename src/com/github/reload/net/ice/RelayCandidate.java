@@ -13,7 +13,7 @@ public class RelayCandidate extends IceCandidate {
 	private IPAddressPort relayAddrPort;
 
 	public RelayCandidate(IPAddressPort addrPort) {
-		this.relayAddrPort = addrPort;
+		relayAddrPort = addrPort;
 	}
 
 	public void setRelayAddrPort(InetSocketAddress relayAddrPort) {
@@ -35,7 +35,7 @@ public class RelayCandidate extends IceCandidate {
 
 		public RelayCandidateCodec(Context context) {
 			super(context);
-			sockAddrCodec = getCodec(IPAddressPort.class, context);
+			sockAddrCodec = getCodec(IPAddressPort.class);
 		}
 
 		@Override

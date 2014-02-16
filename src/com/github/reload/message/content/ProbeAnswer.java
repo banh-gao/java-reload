@@ -2,15 +2,10 @@ package com.github.reload.message.content;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
-import net.sf.jReload.message.content.ProbeRequest.ProbeInformationType;
+import com.github.reload.message.Content;
+import com.github.reload.message.content.ProbeRequest.ProbeInformationType;
 
-public class ProbeAnswer extends MessageContent {
+public class ProbeAnswer extends Content {
 
 	private static final int LIST_LENGTH_FIELD = EncUtils.U_INT16;
 

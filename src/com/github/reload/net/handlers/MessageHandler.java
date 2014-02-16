@@ -17,6 +17,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		Message message = (Message) msg;
+		System.out.println(message);
 		receivingWorkers.submit(new MessageProcessTask(message));
 	}
 }

@@ -32,6 +32,7 @@ public class UnknownForwardingOption extends ForwardingOption {
 			UnknownForwardingOption obj = new UnknownForwardingOption();
 			obj.data = new byte[buf.readableBytes()];
 			buf.readBytes(obj.data);
+			buf.release();
 			return obj;
 		}
 

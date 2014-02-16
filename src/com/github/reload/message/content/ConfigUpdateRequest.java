@@ -1,12 +1,6 @@
 package com.github.reload.message.content;
 
 import java.util.EnumSet;
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
 
 public class ConfigUpdateRequest extends MessageContent {
 

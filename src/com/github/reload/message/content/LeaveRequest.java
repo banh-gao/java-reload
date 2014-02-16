@@ -1,12 +1,6 @@
 package com.github.reload.message.content;
 
-import net.sf.jReload.Context;
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.NodeID;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import com.github.reload.message.NodeID;
 
 public abstract class LeaveRequest extends MessageContent {
 

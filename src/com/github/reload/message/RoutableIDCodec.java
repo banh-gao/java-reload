@@ -18,9 +18,9 @@ public class RoutableIDCodec extends Codec<RoutableID> {
 
 	public RoutableIDCodec(Context context) {
 		super(context);
-		nodeIdCodec = getCodec(NodeID.class, context);
-		resIdCodec = getCodec(ResourceID.class, context);
-		opaqueIdCodec = getCodec(OpaqueID.class, context);
+		nodeIdCodec = getCodec(NodeID.class);
+		resIdCodec = getCodec(ResourceID.class);
+		opaqueIdCodec = getCodec(OpaqueID.class);
 	}
 
 	@Override

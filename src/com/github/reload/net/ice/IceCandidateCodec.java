@@ -23,12 +23,12 @@ public class IceCandidateCodec extends Codec<IceCandidate> {
 
 	public IceCandidateCodec(Context context) {
 		super(context);
-		socketAddrCodec = getCodec(IPAddressPort.class, context);
-		iceExtCodec = getCodec(IceExtension.class, context);
-		hostCandCodec = getCodec(HostCandidate.class, context);
-		peerRefCodec = getCodec(PeerReflexiveCandidate.class, context);
-		relayCodec = getCodec(RelayCandidate.class, context);
-		serverRefCodec = getCodec(ServerReflexiveCandidate.class, context);
+		socketAddrCodec = getCodec(IPAddressPort.class);
+		iceExtCodec = getCodec(IceExtension.class);
+		hostCandCodec = getCodec(HostCandidate.class);
+		peerRefCodec = getCodec(PeerReflexiveCandidate.class);
+		relayCodec = getCodec(RelayCandidate.class);
+		serverRefCodec = getCodec(ServerReflexiveCandidate.class);
 	}
 
 	@Override

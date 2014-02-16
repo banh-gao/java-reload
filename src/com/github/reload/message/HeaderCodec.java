@@ -36,8 +36,8 @@ public class HeaderCodec extends Codec<Header> {
 
 	public HeaderCodec(Context ctx) {
 		super(ctx);
-		this.destListCodec = getCodec(DestinationList.class, ctx);
-		this.fwdOptionCodec = getCodec(ForwardingOption.class, ctx);
+		destListCodec = getCodec(DestinationList.class);
+		fwdOptionCodec = getCodec(ForwardingOption.class);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class HeaderCodec extends Codec<Header> {
 		buf.writeShort(h.fragmentOffset);
 
 		// Allocate space for message length field
-		buf.writerIndex(buf.writerIndex() + TOTAL_MESSAGE_LENGTH_FIELD);
+		buf.writeInt(0);
 
 		buf.writeLong(h.transactionId);
 		buf.writeInt(h.maxResponseLength);
@@ -103,10 +103,11 @@ public class HeaderCodec extends Codec<Header> {
 	@Override
 	public Header decode(ByteBuf buf) throws CodecException {
 		Header h = new Header();
+
 		h.isReloTokenValid = (buf.readInt() == RELOAD_TOKEN);
 		h.overlayHash = buf.readInt();
 		h.configurationSequence = buf.readShort();
-		h.version = buf.readShort();
+		h.version = buf.readUnsignedByte();
 		h.ttl = buf.readUnsignedByte();
 
 		h.isLastFragment = (buf.readShort() & LAST_FRAGMENT_MASK) == LAST_FRAGMENT_MASK;
@@ -122,20 +123,33 @@ public class HeaderCodec extends Codec<Header> {
 		int destinationListLength = buf.readShort();
 		int fwdOptionsLength = buf.readShort();
 
-		h.viaList = destListCodec.decode(buf.slice(buf.readerIndex(), viaListLength));
-		h.destinationList = destListCodec.decode(buf.slice(buf.readerIndex(), destinationListLength));
-		h.forwardingOptions = decodeOptions(buf.slice(buf.readerIndex(), fwdOptionsLength));
+		h.viaList = decodeList(buf, viaListLength);
+		h.destinationList = decodeList(buf, destinationListLength);
+		h.forwardingOptions = decodeOptions(buf, fwdOptionsLength);
 
 		h.headerLength = HEADER_MIN_LENGTH + viaListLength + destinationListLength + fwdOptionsLength;
 		h.payloadLength = totalMessageLength - h.headerLength;
 		return h;
 	}
 
-	private List<ForwardingOption> decodeOptions(ByteBuf buf) throws CodecException {
+	private DestinationList decodeList(ByteBuf buf, int listLength) throws com.github.reload.net.data.Codec.CodecException {
+		ByteBuf listData = buf.readBytes(listLength);
+		listData.retain();
+
+		return destListCodec.decode(listData);
+	}
+
+	private List<ForwardingOption> decodeOptions(ByteBuf buf, int optionsLength) throws CodecException {
 		List<ForwardingOption> out = new ArrayList<ForwardingOption>();
 
-		while (buf.readableBytes() > 0)
-			out.add(fwdOptionCodec.decode(buf));
+		ByteBuf optionsData = buf.readBytes(optionsLength);
+		optionsData.retain();
+
+		while (optionsData.readableBytes() > 0) {
+			out.add(fwdOptionCodec.decode(optionsData));
+		}
+
+		optionsData.release();
 
 		return out;
 	}

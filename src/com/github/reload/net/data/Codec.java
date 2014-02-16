@@ -50,7 +50,23 @@ public abstract class Codec<T> {
 	protected final Context context;
 
 	public Codec(Context context) {
+		if (context == null)
+			throw new NullPointerException();
 		this.context = context;
+	}
+
+	/**
+	 * Get an instance of the codec associated with the given class. The given
+	 * class must be annotated with the {@link ReloadCodec} annotation to
+	 * declare the codec class.
+	 * The new codec will be initialized with the given {@link Context}.
+	 * 
+	 * @param clazz
+	 *            the class that the codec is associated with
+	 * @return
+	 */
+	public <C> Codec<C> getCodec(Class<C> clazz) {
+		return getCodec(clazz, context);
 	}
 
 	/**
@@ -66,18 +82,18 @@ public abstract class Codec<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Codec<T> getCodec(Class<T> clazz, Context ctx) {
-		if (ctx == null)
+	public static <T> Codec<T> getCodec(Class<T> clazz, Context context) {
+		if (context == null)
 			throw new NullPointerException();
 		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
 		if (codecAnn == null)
-			throw new IllegalStateException("No RELOAD codec associated with class " + clazz.toString());
+			throw new IllegalStateException("No codec associated with " + clazz.toString());
 
 		try {
 			Constructor<? extends Codec<?>> codecConstr = codecAnn.value().getConstructor(Context.class);
-			return (Codec<T>) codecConstr.newInstance(ctx);
+			return (Codec<T>) codecConstr.newInstance(context);
 		} catch (Exception e) {
-			throw new IllegalStateException("Codec instantiation failed for class " + clazz.toString(), e);
+			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);
 		}
 	}
 
@@ -117,7 +133,9 @@ public abstract class Codec<T> {
 	 * Returns the data stored in a variable-length field at the current read
 	 * index and move the readIndex after the field.
 	 * The returned buffer is a {@link ByteBuf#slice()} of the original buffer,
-	 * it remains backed to the original buffer.
+	 * it remains backed to the original buffer and increases the original
+	 * buffer references count by 1.
+	 * Remember to release the returned buffer after it is consumed.
 	 * 
 	 * @param buf
 	 *            the buffer
@@ -127,16 +145,22 @@ public abstract class Codec<T> {
 	 * @see {@link ByteBuf#slice()}
 	 */
 	protected static ByteBuf readField(ByteBuf buf, int maxDataLength) {
+		int dataLength = readLength(buf, maxDataLength);
+
+		ByteBuf data = buf.readBytes(dataLength);
+		data.retain();
+
+		return data;
+	}
+
+	protected static int readLength(ByteBuf buf, int maxDataLength) {
 		int dataLength = 0;
 		int baseOffset = (maxDataLength - 1) * 8;
 		for (int i = 0; i < maxDataLength; i++) {
 			int offset = baseOffset - (i * 8);
-			dataLength += (buf.readByte() & 0xff) << offset;
+			dataLength += buf.readUnsignedByte() << offset;
 		}
-
-		ByteBuf data = buf.slice(buf.readerIndex(), dataLength);
-		buf.readerIndex(data.readableBytes());
-		return data;
+		return dataLength;
 	}
 
 	protected static class Field {
@@ -167,7 +191,7 @@ public abstract class Codec<T> {
 			encodeLength(maxDataLength, writtenDataLength, buf);
 
 			// Reset 1 byte after original position (after the field)
-			buf.writerIndex(buf.writerIndex() + writtenDataLength + 1);
+			buf.writerIndex(buf.writerIndex() + writtenDataLength);
 
 			return writtenDataLength;
 		}
@@ -177,7 +201,7 @@ public abstract class Codec<T> {
 		 */
 		private static void encodeLength(int maxDataLength, int dataLength, ByteBuf buf) {
 			for (int i = 0; i < maxDataLength; i++) {
-				int offset = (maxDataLength - 1 - i);
+				int offset = (maxDataLength - 1 - i) * 8;
 				buf.writeByte(dataLength >>> offset);
 			}
 		}
@@ -204,7 +228,7 @@ public abstract class Codec<T> {
 	 * This exception can be thrown to indicate an error in the en/decoding
 	 * process
 	 */
-	public static class CodecException extends Exception {
+	public static class CodecException extends Exception implements ErrorRespose {
 
 		public CodecException() {
 			super();
@@ -226,11 +250,8 @@ public abstract class Codec<T> {
 			super(cause);
 		}
 
-		/**
-		 * @return An error response to send to the sender node with the cause
-		 *         of the error
-		 */
-		public Error getErrorResponse() {
+		@Override
+		public Error getError() {
 			return new Error(ErrorType.INVALID_MESSAGE, getMessage());
 		}
 

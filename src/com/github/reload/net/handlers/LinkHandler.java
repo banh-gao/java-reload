@@ -28,8 +28,10 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		handleReceived((FramedMessage) msg);
-		ctx.fireChannelRead(msg);
+		FramedMessage frame = (FramedMessage) msg;
+		handleReceived(frame);
+		if (frame instanceof FramedData)
+			ctx.fireChannelRead(((FramedData) frame).getData());
 	}
 
 	@Override

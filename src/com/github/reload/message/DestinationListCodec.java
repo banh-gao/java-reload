@@ -10,7 +10,7 @@ public class DestinationListCodec extends Codec<DestinationList> {
 
 	public DestinationListCodec(Context context) {
 		super(context);
-		rouIdCodec = getCodec(RoutableID.class, context);
+		rouIdCodec = getCodec(RoutableID.class);
 	}
 
 	@Override
@@ -28,6 +28,8 @@ public class DestinationListCodec extends Codec<DestinationList> {
 			RoutableID id = rouIdCodec.decode(buf);
 			out.add(id);
 		}
+
+		buf.release();
 
 		return out;
 	}

@@ -1,8 +1,6 @@
 package com.github.reload.net.data;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.DecoderException;
-import com.github.reload.net.data.Codec.Field;
 
 /**
  * RELOAD link layer message
@@ -30,36 +28,10 @@ public abstract class FramedMessage {
 
 	public abstract FrameType getType();
 
-	protected abstract void implEncode(ByteBuf buf);
-
-	public static FramedMessage decode(ByteBuf in) throws DecoderException {
-		FrameType type = FrameType.valueOf(in.readUnsignedByte());
-		if (type == null)
-			throw new DecoderException("Unknown frame type");
-
-		switch (type) {
-			case DATA :
-				return FramedData.decode(in);
-			case ACK :
-				return FramedAck.decode(in);
-		}
-
-		// Should't happen: Unhandled message type
-		assert false;
-
-		return null;
-	}
-
-	public final void encode(ByteBuf buf) {
-		implEncode(buf);
-	}
-
 	/**
 	 * Link level data message
 	 */
 	public static class FramedData extends FramedMessage {
-
-		private static final int DATA_MAX_LENGTH = Codec.U_INT24;
 
 		protected long sequence;
 		protected ByteBuf data;
@@ -67,10 +39,6 @@ public abstract class FramedMessage {
 		public FramedData(long sequence, ByteBuf data) {
 			this.sequence = sequence;
 			this.data = data;
-		}
-
-		public static FramedData decode(ByteBuf in) {
-			return new FramedData(in.readUnsignedInt(), in.slice());
 		}
 
 		@Override
@@ -86,14 +54,6 @@ public abstract class FramedMessage {
 		public ByteBuf getData() {
 			return data;
 		}
-
-		@Override
-		public void implEncode(ByteBuf buf) {
-			buf.writeInt((int) sequence);
-			Field dataFld = Codec.allocateField(buf, DATA_MAX_LENGTH);
-			buf.writeBytes(data);
-			dataFld.updateDataLength();
-		}
 	}
 
 	/**
@@ -101,14 +61,13 @@ public abstract class FramedMessage {
 	 */
 	public static class FramedAck extends FramedMessage {
 
-		protected long ack_sequence;
-		protected int receivedBitMask;
+		protected final long ack_sequence;
+		protected final int receivedBitMask;
 
-		public static FramedAck decode(ByteBuf in) {
-			FramedAck a = new FramedAck();
-			a.ack_sequence = in.readUnsignedInt();
-			a.receivedBitMask = in.readInt();
-			return a;
+		public FramedAck(long ack_sequence, int receivedBitMask) {
+			super();
+			this.ack_sequence = ack_sequence;
+			this.receivedBitMask = receivedBitMask;
 		}
 
 		@Override
@@ -123,12 +82,6 @@ public abstract class FramedMessage {
 
 		public int getReceivedMask() {
 			return receivedBitMask;
-		}
-
-		@Override
-		public void implEncode(ByteBuf buf) {
-			buf.writeInt((int) ack_sequence);
-			buf.writeInt(receivedBitMask);
 		}
 	}
 }

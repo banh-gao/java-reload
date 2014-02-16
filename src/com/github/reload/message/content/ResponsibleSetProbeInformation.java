@@ -1,8 +1,7 @@
 package com.github.reload.message.content;
 
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.content.ProbeAnswer.ProbeInformation;
-import net.sf.jReload.message.content.ProbeRequest.ProbeInformationType;
+import com.github.reload.message.content.ProbeAnswer.ProbeInformation;
+import com.github.reload.message.content.ProbeRequest.ProbeInformationType;
 
 /**
  * Probe information that reports the magnitude of the resource space this peer

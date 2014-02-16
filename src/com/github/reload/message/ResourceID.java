@@ -58,7 +58,8 @@ public final class ResourceID extends RoutableID {
 		public ResourceID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
 			ByteBuf data = readField(buf, VALUE_LENGTH_FIELD);
 			byte[] id = new byte[data.readableBytes()];
-			buf.readBytes(id);
+			data.readBytes(id);
+			data.release();
 			return valueOf(id);
 		}
 	}

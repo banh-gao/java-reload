@@ -19,7 +19,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 
 	public ForwardingOptionCodec(Context ctx) {
 		super(ctx);
-		unknownFwdCodec = getCodec(UnknownForwardingOption.class, ctx);
+		unknownFwdCodec = getCodec(UnknownForwardingOption.class);
 	}
 
 	@Override

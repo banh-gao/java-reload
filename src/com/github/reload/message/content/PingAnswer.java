@@ -2,9 +2,6 @@ package com.github.reload.message.content;
 
 import java.math.BigInteger;
 import java.util.Random;
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.UnsignedByteBuffer;
 
 public class PingAnswer extends MessageContent {
 

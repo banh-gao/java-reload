@@ -4,47 +4,46 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
+import com.github.reload.Context;
 import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
 import com.github.reload.message.ForwardingOptionCodec.UnsupportedFwdOptionException;
-import com.github.reload.message.content.ContentType;
-import com.github.reload.net.data.CodecUtils;
+import com.github.reload.message.MessageExtension.UnknownExtensionException;
+import com.github.reload.net.data.Codec;
+import com.github.reload.storage.ForbittenException;
 
 /**
  * An RELOAD error message
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class Error extends Content {
-
-	private static final int INFO_LENGTH_FIELD = CodecUtils.U_INT16;
 
 	public enum ErrorType {
 		FORBITTEN((short) 2) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new ForbittenException(error.getStringInfo());
 			}
 		},
 		NOT_FOUND((short) 3) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new NotFoundException(error.getStringInfo());
 			}
 		},
 		REQUEST_TIMEOUT((short) 4) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new RequestTimeoutException(error.getStringInfo());
 			}
 		},
 		GEN_COUNTER_TOO_LOW((short) 5) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				try {
 					return new GenerationTooLowException(error.getInfo());
 				} catch (DecoderException e) {
@@ -62,21 +61,21 @@ public class Error extends Content {
 		UNSUPPORTED_FWD_OPTION((short) 7) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new UnsupportedFwdOptionException(error.getStringInfo());
 			}
 		},
 		DATA_TOO_LARGE((short) 8) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new DataTooLargeException(error.getStringInfo());
 			}
 		},
 		DATA_TOO_OLD((short) 9) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new DataTooOldException(error.getStringInfo());
 			}
 		},
@@ -97,7 +96,7 @@ public class Error extends Content {
 		UNKNOWN_KIND((short) 12) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				try {
 					return new UnknownKindException(error.getInfo());
 				} catch (DecoderException e) {
@@ -108,14 +107,14 @@ public class Error extends Content {
 		UNKNOWN_EXTENSION((short) 13) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new UnknownExtensionException(error.getStringInfo());
 			}
 		},
 		RESPONSE_TOO_LARGE((short) 14) {
 
 			@Override
-			public ErrorMessageException toException(Error error) {
+			public Exception toException(Error error) {
 				return new ResponseTooLargeException(error.getStringInfo());
 			}
 		},
@@ -146,48 +145,6 @@ public class Error extends Content {
 			public ErrorMessageException toException(Error error) {
 				return new InvalidMessageException(error.getStringInfo());
 			}
-		},
-		UNDERLAY_DEST_UNREACHABLE((short) 101) {
-
-			@Override
-			public ErrorMessageException toException(Error error) {
-				return new DiagnosticErrorException(error);
-			}
-		},
-		UNDERLAY_TIME_EXCEEDED((short) 102) {
-
-			@Override
-			public ErrorMessageException toException(Error error) {
-				return new DiagnosticErrorException(error);
-			}
-		},
-		MESSAGE_EXPIRED((short) 103) {
-
-			@Override
-			public ErrorMessageException toException(Error error) {
-				return new DiagnosticErrorException(error);
-			}
-		},
-		UPSTREAM_MISROUTING((short) 104) {
-
-			@Override
-			public ErrorMessageException toException(Error error) {
-				return new DiagnosticErrorException(error);
-			}
-		},
-		LOOP_DETECTED((short) 105) {
-
-			@Override
-			public ErrorMessageException toException(Error error) {
-				return new DiagnosticErrorException(error);
-			}
-		},
-		TTL_HOPS_EXCEEDED((short) 106) {
-
-			@Override
-			public ErrorMessageException toException(Error error) {
-				return new DiagnosticErrorException(error);
-			}
 		};
 
 		private final short code;
@@ -207,7 +164,7 @@ public class Error extends Content {
 			return code;
 		}
 
-		public abstract ErrorMessageException toException(Error error);
+		public abstract Exception toException(Error error);
 	}
 
 	private final ErrorType error;
@@ -225,14 +182,6 @@ public class Error extends Content {
 	public Error(ErrorType type, byte[] info) {
 		error = type;
 		this.info = info;
-	}
-
-	public Error(ByteBuf buf) {
-		error = ErrorType.valueOf(buf.getRaw16());
-
-		int len = buf.getLengthValue(Error.INFO_LENGTH_FIELD);
-		info = new byte[len];
-		buf.getRaw(info);
 	}
 
 	public ErrorType getErrorType() {
@@ -253,24 +202,47 @@ public class Error extends Content {
 	}
 
 	@Override
-	protected void implEncode(ByteBuf buf) {
-		buf.putRaw16(error.getCode());
-		Field lenFld = buf.allocateLengthField(Error.INFO_LENGTH_FIELD);
-		buf.putRaw(info);
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-	}
-
-	@Override
 	public ContentType getType() {
 		return ContentType.ERROR;
 	}
 
-	public ErrorMessageException toException() {
+	public Exception toException() {
 		return error.toException(this);
 	}
 
 	@Override
 	public boolean isAnswer() {
 		return true;
+	}
+
+	public static class ErrorCodec extends Codec<Error> {
+
+		private static final int INFO_LENGTH_FIELD = U_INT16;
+
+		public ErrorCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(Error obj, ByteBuf buf) throws CodecException {
+			buf.writeShort(obj.error.getCode());
+
+			Field lenFld = allocateField(buf, INFO_LENGTH_FIELD);
+			buf.writeBytes(obj.info);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public Error decode(ByteBuf buf) throws CodecException {
+			ErrorType error = ErrorType.valueOf(buf.readShort());
+
+			ByteBuf info = readField(buf, INFO_LENGTH_FIELD);
+			byte[] infoData = new byte[info.readableBytes()];
+			info.readBytes(infoData);
+
+			return new Error(error, infoData);
+
+		}
+
 	}
 }

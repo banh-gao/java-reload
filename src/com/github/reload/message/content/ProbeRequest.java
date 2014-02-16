@@ -4,14 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import com.github.reload.message.Content;
 
-public class ProbeRequest extends MessageContent {
+public class ProbeRequest extends Content {
 
 	private static final int LIST_LENGTH_FIELD = EncUtils.U_INT8;
 

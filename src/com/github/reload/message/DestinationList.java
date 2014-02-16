@@ -16,7 +16,7 @@ public class DestinationList extends AbstractList<RoutableID> {
 	private final LinkedList<RoutableID> list;
 
 	public DestinationList() {
-		this.list = new LinkedList<RoutableID>();
+		list = new LinkedList<RoutableID>();
 	}
 
 	/**
@@ -65,6 +65,11 @@ public class DestinationList extends AbstractList<RoutableID> {
 		if (last instanceof ResourceID)
 			return (ResourceID) last;
 		throw new IllegalArgumentException("Invalid resource-id destination");
+	}
+
+	@Override
+	public boolean add(RoutableID e) {
+		return list.add(e);
 	}
 
 	@Override

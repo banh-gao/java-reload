@@ -50,12 +50,13 @@ public class ICEHelper {
 
 	public List<InetAddress> getInterfaceAddresses() {
 		// FIXME: TEST return loopback only for test
-		if (true)
+		if (true) {
 			try {
 				return Collections.singletonList(InetAddress.getByName("127.0.0.1"));
 			} catch (UnknownHostException e1) {
 				e1.printStackTrace();
 			}
+		}
 
 		// END TEST BLOCK
 
@@ -70,8 +71,9 @@ public class ICEHelper {
 			NetworkInterface netIf = netIfs.nextElement();
 			for (InterfaceAddress ifAddr : netIf.getInterfaceAddresses()) {
 				// NOTE: TEST only IPv4 for wireshark ssl decrypt
-				if (ifAddr.getAddress() instanceof Inet4Address)
+				if (ifAddr.getAddress() instanceof Inet4Address) {
 					out.add(ifAddr.getAddress());
+				}
 			}
 		}
 		return out;

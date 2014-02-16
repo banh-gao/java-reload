@@ -56,6 +56,7 @@ public class OpaqueID extends RoutableID {
 			ByteBuf data = readField(buf, OPAQUE_LENGTH_FIELD);
 			byte[] id = new byte[data.readableBytes()];
 			data.readBytes(id);
+			data.release();
 			return valueOf(id);
 		}
 

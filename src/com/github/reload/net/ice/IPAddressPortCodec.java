@@ -14,8 +14,8 @@ public class IPAddressPortCodec extends Codec<IPAddressPort> {
 
 	public IPAddressPortCodec(Context context) {
 		super(context);
-		ip4codec = getCodec(IPv4AddressPort.class, context);
-		ip6codec = getCodec(IPv6AddressPort.class, context);
+		ip4codec = getCodec(IPv4AddressPort.class);
+		ip6codec = getCodec(IPv6AddressPort.class);
 	}
 
 	@Override

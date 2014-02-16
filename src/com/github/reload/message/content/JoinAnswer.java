@@ -1,11 +1,5 @@
 package com.github.reload.message.content;
 
-import net.sf.jReload.message.ContentType;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.MessageContent;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
-import net.sf.jReload.overlay.TopologyPlugin;
 
 public abstract class JoinAnswer extends MessageContent {
 
