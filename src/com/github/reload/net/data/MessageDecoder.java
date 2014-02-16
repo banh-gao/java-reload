@@ -29,8 +29,7 @@ public class MessageDecoder extends MessageToMessageDecoder<HeadedMessage> {
 		try {
 			message.content = contentCodec.decode(payload);
 			message.secBlock = secBlockCodec.decode(payload);
-		} catch (Exception e) {
-			e.printStackTrace();
+			out.add(message);
 		} finally {
 			payload.release();
 		}
