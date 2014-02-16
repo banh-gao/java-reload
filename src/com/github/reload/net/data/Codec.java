@@ -3,6 +3,8 @@ package com.github.reload.net.data;
 import io.netty.buffer.ByteBuf;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import com.github.reload.Context;
 import com.github.reload.message.errors.Error;
 import com.github.reload.message.errors.Error.ErrorType;
@@ -49,6 +51,8 @@ public abstract class Codec<T> {
 
 	protected final Context context;
 
+	protected final Map<Class<?>, Codec<?>> codecs = new HashMap<Class<?>, Codec<?>>();
+
 	public Codec(Context context) {
 		if (context == null)
 			throw new NullPointerException();
@@ -57,16 +61,23 @@ public abstract class Codec<T> {
 
 	/**
 	 * Get an instance of the codec associated with the given class. The given
-	 * class must be annotated with the {@link ReloadCodec} annotation to
-	 * declare the codec class.
-	 * The new codec will be initialized with the given {@link Context}.
+	 * class specify its codec class by the the {@link ReloadCodec} annotation.
 	 * 
 	 * @param clazz
 	 *            the class that the codec is associated with
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public <C> Codec<C> getCodec(Class<C> clazz) {
-		return getCodec(clazz, context);
+		Codec<?> codec = codecs.get(clazz);
+		if (codec == null) {
+			codec = getCodec(clazz, context);
+			codecs.put(clazz, codec);
+		}
+
+		// Safe cast because the object is instantiated using reflection on the
+		// class type given in input specific
+		return (Codec<C>) codec;
 	}
 
 	/**
