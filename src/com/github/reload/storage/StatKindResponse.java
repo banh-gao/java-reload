@@ -10,13 +10,13 @@ import java.util.List;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class StatResponse extends DataResponse<StoredMetadata> {
+public class StatKindResponse extends DataResponse<StoredMetadata> {
 
-	public StatResponse(DataKind kind, BigInteger generation, List<StoredMetadata> values) {
+	public StatKindResponse(DataKind kind, BigInteger generation, List<StoredMetadata> values) {
 		super(kind, generation, values);
 	}
 
-	public StatResponse(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
+	public StatKindResponse(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
 		super(context, buf);
 	}
 

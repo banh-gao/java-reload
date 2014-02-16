@@ -1,44 +1,21 @@
 package com.github.reload.storage;
 
+import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
 import com.github.reload.message.ResourceID;
+import com.github.reload.net.data.Codec;
 
-/**
- * A storage query request for resources (includes fetch and stat request)
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
-public abstract class QueryRequest extends MessageContent {
+public abstract class QueryRequest extends Content {
 
-	private static final int SPECIFIERS_LENGTH_FIELD = EncUtils.U_INT16;
-
-	private final ResourceID resourceId;
-	private final List<DataSpecifier> specifiers;
+	final ResourceID resourceId;
+	final List<DataSpecifier> specifiers;
 
 	public QueryRequest(ResourceID id, List<DataSpecifier> specifiers) {
 		resourceId = id;
 		this.specifiers = specifiers;
-	}
-
-	public QueryRequest(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
-		resourceId = ResourceID.valueOf(buf);
-		specifiers = readSpecifiers(context, buf);
-	}
-
-	private static List<DataSpecifier> readSpecifiers(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
-		int length = buf.getLengthValue(QueryRequest.SPECIFIERS_LENGTH_FIELD);
-
-		List<DataSpecifier> out = new ArrayList<DataSpecifier>();
-
-		int startPos = buf.position();
-
-		while (buf.getConsumedFrom(startPos) < length) {
-			DataSpecifier spec = new DataSpecifier(context.getConfiguration(), buf);
-			out.add(spec);
-		}
-		return out;
 	}
 
 	public ResourceID getResourceId() {
@@ -49,19 +26,55 @@ public abstract class QueryRequest extends MessageContent {
 		return specifiers;
 	}
 
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		resourceId.writeTo(buf);
-		writeSpecifiersTo(buf);
-	}
+	public static abstract class QueryRequestCodec extends Codec<QueryRequest> {
 
-	private void writeSpecifiersTo(UnsignedByteBuffer buf) {
-		Field lenFld = buf.allocateLengthField(SPECIFIERS_LENGTH_FIELD);
+		private static final int SPECIFIERS_LENGTH_FIELD = U_INT16;
 
-		for (DataSpecifier s : specifiers) {
-			s.writeTo(buf);
+		private final Codec<ResourceID> resIdCodec;
+		private final Codec<DataSpecifier> dataSpecifierCodec;
+
+		public QueryRequestCodec(Context context) {
+			super(context);
+			resIdCodec = getCodec(ResourceID.class);
+			dataSpecifierCodec = getCodec(DataSpecifier.class);
 		}
 
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
+		@Override
+		public void encode(QueryRequest obj, ByteBuf buf) throws CodecException {
+			resIdCodec.encode(obj.resourceId, buf);
+			writeSpecifiersTo(obj, buf);
+		}
+
+		private void writeSpecifiersTo(QueryRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			Field lenFld = allocateField(buf, SPECIFIERS_LENGTH_FIELD);
+
+			for (DataSpecifier s : obj.specifiers) {
+				dataSpecifierCodec.encode(s, buf);
+			}
+
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public QueryRequest decode(ByteBuf buf) throws CodecException {
+			ResourceID resourceId = resIdCodec.decode(buf);
+			List<DataSpecifier> specifiers = readSpecifiers(buf);
+			return implDecode(resourceId, specifiers, buf);
+		}
+
+		protected abstract QueryRequest implDecode(ResourceID resourceId, List<DataSpecifier> specifiers, ByteBuf buf);
+
+		private List<DataSpecifier> readSpecifiers(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			List<DataSpecifier> out = new ArrayList<DataSpecifier>();
+
+			ByteBuf specifiersData = readField(buf, SPECIFIERS_LENGTH_FIELD);
+			while (specifiersData.readableBytes() > 0) {
+				out.add(dataSpecifierCodec.decode(specifiersData));
+			}
+			specifiersData.release();
+
+			return out;
+		}
+
 	}
 }

@@ -1,7 +1,7 @@
 package com.github.reload.message;
 
 import java.util.EnumSet;
-import com.github.reload.message.content.AppAttachReqAns;
+import com.github.reload.message.content.AppAttachMessage;
 import com.github.reload.message.content.AttachMessage;
 import com.github.reload.message.content.ConfigUpdateAnswer;
 import com.github.reload.message.content.ConfigUpdateRequest;
@@ -55,8 +55,8 @@ public enum ContentType {
 	PING_ANS((short) 24, PingAnswer.class),
 	STAT_REQ((short) 25, StatRequest.class),
 	STAT_ANS((short) 26, StatAnswer.class),
-	APPATTACH_REQ((short) 29, AppAttachReqAns.class),
-	APPATTACH_ANS((short) 30, AppAttachReqAns.class),
+	APPATTACH_REQ((short) 29, AppAttachMessage.class),
+	APPATTACH_ANS((short) 30, AppAttachMessage.class),
 	CONFIG_UPDATE_REQ((short) 33, ConfigUpdateRequest.class),
 	CONFIG_UPDATE_ANS((short) 34, ConfigUpdateAnswer.class),
 	ERROR((short) 255, Error.class);

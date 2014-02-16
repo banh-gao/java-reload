@@ -65,13 +65,13 @@ public class StorageController {
 
 	private Message handleFetchRequest(Message requestMessage) throws ErrorMessageException {
 		FetchRequest req = (FetchRequest) requestMessage.getContent();
-		FetchAnswer answer = new FetchAnswer(context, localStore.<FetchResponse>query(req.getResourceId(), req.getDataSpecifiers(), QueryType.FETCH));
+		FetchAnswer answer = new FetchAnswer(context, localStore.<FetchKindResponse>query(req.getResourceId(), req.getDataSpecifiers(), QueryType.FETCH));
 		return getAnswer(requestMessage, answer);
 	}
 
 	private Message handleStatRequest(Message requestMessage) throws ErrorMessageException {
 		StatRequest req = (StatRequest) requestMessage.getContent();
-		MessageContent answer = new StatAnswer(context, localStore.<StatResponse>query(req.getResourceId(), req.getDataSpecifiers(), QueryType.STAT));
+		MessageContent answer = new StatAnswer(context, localStore.<StatKindResponse>query(req.getResourceId(), req.getDataSpecifiers(), QueryType.STAT));
 		return getAnswer(requestMessage, answer);
 	}
 

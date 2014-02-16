@@ -8,7 +8,7 @@ import com.github.reload.Context;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.ice.IceCandidate;
 
-public class AppAttachReqAnsCodec extends Codec<AppAttachReqAns> {
+public class AppAttachMessageCodec extends Codec<AppAttachMessage> {
 
 	private final static int UFRAG_LENGTH_FIELD = U_INT8;
 	private final static int PASS_LENGTH_FIELD = U_INT8;
@@ -20,13 +20,13 @@ public class AppAttachReqAnsCodec extends Codec<AppAttachReqAns> {
 
 	private final Codec<IceCandidate> iceCodec;
 
-	public AppAttachReqAnsCodec(Context context) {
+	public AppAttachMessageCodec(Context context) {
 		super(context);
 		iceCodec = getCodec(IceCandidate.class);
 	}
 
 	@Override
-	public void encode(AppAttachReqAns obj, ByteBuf buf) throws CodecException {
+	public void encode(AppAttachMessage obj, ByteBuf buf) throws CodecException {
 		Field ufragLenFld = allocateField(buf, UFRAG_LENGTH_FIELD);
 		buf.writeBytes(obj.userFragment);
 		ufragLenFld.updateDataLength();
@@ -48,7 +48,7 @@ public class AppAttachReqAnsCodec extends Codec<AppAttachReqAns> {
 		encodeCandidates(obj, buf);
 	}
 
-	private void encodeCandidates(AppAttachReqAns obj, ByteBuf buf) throws CodecException {
+	private void encodeCandidates(AppAttachMessage obj, ByteBuf buf) throws CodecException {
 		Field lenFld = allocateField(buf, CANDIDATES_LENGTH_FIELD);
 
 		for (IceCandidate c : obj.candidates) {
@@ -59,8 +59,8 @@ public class AppAttachReqAnsCodec extends Codec<AppAttachReqAns> {
 	}
 
 	@Override
-	public AppAttachReqAns decode(ByteBuf buf) throws CodecException {
-		AppAttachReqAns obj = new AppAttachReqAns();
+	public AppAttachMessage decode(ByteBuf buf) throws CodecException {
+		AppAttachMessage obj = new AppAttachMessage();
 		ByteBuf fragFld = readField(buf, UFRAG_LENGTH_FIELD);
 		obj.userFragment = new byte[fragFld.readableBytes()];
 		fragFld.readBytes(obj.userFragment);

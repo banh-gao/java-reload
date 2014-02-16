@@ -35,7 +35,7 @@ public class LocalKinds implements ConfigurationUpdateListener {
 		return localStore.getDataRemoverExecutor();
 	}
 
-	public BigInteger add(StoredKindData receivedData) throws StorageException {
+	public BigInteger add(StoreKindData receivedData) throws StorageException {
 		LocalKindData storedKindData = get(receivedData.getKind().getKindId());
 
 		if (storedKindData == null) {
@@ -63,7 +63,7 @@ public class LocalKinds implements ConfigurationUpdateListener {
 		return newGenCounter;
 	}
 
-	private static void validateRequest(LocalKindData localData, StoredKindData receivedData) throws StorageException {
+	private static void validateRequest(LocalKindData localData, StoreKindData receivedData) throws StorageException {
 		BigInteger rcvGen = receivedData.getGeneration();
 
 		if (rcvGen.compareTo(BigInteger.ZERO) > 0 && rcvGen.compareTo(localData.getGeneration()) < 0)
@@ -103,7 +103,7 @@ public class LocalKinds implements ConfigurationUpdateListener {
 		}
 	}
 
-	public void remove(StoredKindData data) {
+	public void remove(StoreKindData data) {
 		LocalKindData localKindData = storedKinds.get(data.getKind());
 		if (localKindData == null)
 			return;

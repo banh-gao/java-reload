@@ -47,13 +47,13 @@ public class StorageClientHelper {
 		if (resourceId.getData().length > context.getTopologyPlugin().getResourceIdLength())
 			throw new IllegalArgumentException("The resource-id exceeds the overlay allowed length of " + context.getTopologyPlugin().getResourceIdLength() + " bytes");
 
-		Map<KindId, StoredKindData> kindData = new HashMap<KindId, StoredKindData>();
+		Map<KindId, StoreKindData> kindData = new HashMap<KindId, StoreKindData>();
 
 		for (PreparedData prepared : preparedData) {
 			StoredData data = prepared.build(context, resourceId);
-			StoredKindData kd = kindData.get(prepared.getKind().getKindId());
+			StoreKindData kd = kindData.get(prepared.getKind().getKindId());
 			if (kd == null) {
-				kd = new StoredKindData(data.getKind(), prepared.getGeneration());
+				kd = new StoreKindData(data.getKind(), prepared.getGeneration());
 				kindData.put(data.getKind().getKindId(), kd);
 			}
 			kd.add(data);
@@ -62,7 +62,7 @@ public class StorageClientHelper {
 		Message response;
 
 		try {
-			Message request = context.getMessageBuilder().newMessage(new StoreRequest(resourceId, REPLICA_NUMBER, new ArrayList<StoredKindData>(kindData.values())), destination);
+			Message request = context.getMessageBuilder().newMessage(new StoreRequest(resourceId, REPLICA_NUMBER, new ArrayList<StoreKindData>(kindData.values())), destination);
 
 			response = context.getMessageRouter().sendRequestMessage(request);
 		} catch (ErrorMessageException e) {
@@ -79,7 +79,7 @@ public class StorageClientHelper {
 		return answer.getResponses();
 	}
 
-	public List<FetchResponse> sendFetchRequest(DestinationList destination, DataSpecifier... specifiers) throws StorageException, NetworkException, InterruptedException {
+	public List<FetchKindResponse> sendFetchRequest(DestinationList destination, DataSpecifier... specifiers) throws StorageException, NetworkException, InterruptedException {
 		ResourceID resourceId;
 		try {
 			resourceId = (ResourceID) destination.get(destination.size() - 1);
@@ -102,7 +102,7 @@ public class StorageClientHelper {
 
 		FetchAnswer answer = (FetchAnswer) response.getContent();
 
-		for (FetchResponse r : answer.getResponses()) {
+		for (FetchKindResponse r : answer.getResponses()) {
 			for (StoredData data : r.getValues()) {
 				try {
 					// Synthetic values are not authenticated

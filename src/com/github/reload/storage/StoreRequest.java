@@ -1,41 +1,27 @@
 package com.github.reload.storage;
 
+import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
 import com.github.reload.message.ResourceID;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.storage.StoreRequest.StoreRequestCodec;
 
-public class StoreRequest extends MessageContent {
-
-	private static final int STOREDKINDDATA_LENGTH_FIELD = EncUtils.U_INT32;
+@ReloadCodec(StoreRequestCodec.class)
+public class StoreRequest extends Content {
 
 	private final ResourceID resourceId;
 	private final short replicaNumber;
-	private final List<StoredKindData> kindData;
+	private final List<StoreKindData> kindData;
 
-	public StoreRequest(ResourceID id, short replicaNumber, List<StoredKindData> data) {
+	public StoreRequest(ResourceID id, short replicaNumber, List<StoreKindData> data) {
 		resourceId = id;
 		this.replicaNumber = replicaNumber;
 		kindData = data;
-	}
-
-	public StoreRequest(Context context, UnsignedByteBuffer buf) throws StorageException {
-		resourceId = ResourceID.valueOf(buf);
-		replicaNumber = buf.getSigned8();
-		kindData = decodeKindDataList(context, buf);
-	}
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		resourceId.writeTo(buf);
-		buf.putUnsigned8(replicaNumber);
-
-		Field lenFld = buf.allocateLengthField(STOREDKINDDATA_LENGTH_FIELD);
-
-		for (StoredKindData d : kindData) {
-			d.writeTo(buf);
-		}
-
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
 	}
 
 	@Override
@@ -43,28 +29,64 @@ public class StoreRequest extends MessageContent {
 		return ContentType.STORE_REQ;
 	}
 
-	private static List<StoredKindData> decodeKindDataList(Context context, UnsignedByteBuffer buf) throws StorageException {
-		int length = buf.getLengthValue(StoreRequest.STOREDKINDDATA_LENGTH_FIELD);
-		List<StoredKindData> out = new ArrayList<StoredKindData>();
-
-		int startPos = buf.position();
-
-		while (buf.getConsumedFrom(startPos) < length) {
-			StoredKindData data = new StoredKindData(context, buf);
-			out.add(data);
-		}
-		return out;
-	}
-
 	public ResourceID getResourceId() {
 		return resourceId;
 	}
 
-	public List<StoredKindData> getKindData() {
+	public List<StoreKindData> getKindData() {
 		return kindData;
 	}
 
 	public short getReplicaNumber() {
 		return replicaNumber;
+	}
+
+	public static class StoreRequestCodec extends Codec<StoreRequest> {
+
+		private static final int STOREDKINDDATA_LENGTH_FIELD = U_INT32;
+
+		private final Codec<ResourceID> resIdCodec;
+		private final Codec<StoreKindData> storeKindDataCodec;
+
+		public StoreRequestCodec(Context context) {
+			super(context);
+			resIdCodec = getCodec(ResourceID.class);
+			storeKindDataCodec = getCodec(StoreKindData.class);
+		}
+
+		@Override
+		public void encode(StoreRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			resIdCodec.encode(obj.resourceId, buf);
+			buf.writeByte(obj.replicaNumber);
+
+			Field lenFld = allocateField(buf, STOREDKINDDATA_LENGTH_FIELD);
+
+			for (StoreKindData d : obj.kindData) {
+				storeKindDataCodec.encode(d, buf);
+			}
+
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public StoreRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			ResourceID resId = resIdCodec.decode(buf);
+			short replicaNumber = buf.readUnsignedByte();
+			List<StoreKindData> kindData = decodeKindDataList(buf);
+			return new StoreRequest(resId, replicaNumber, kindData);
+		}
+
+		private List<StoreKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			List<StoreKindData> out = new ArrayList<StoreKindData>();
+
+			ByteBuf kindData = readField(buf, STOREDKINDDATA_LENGTH_FIELD);
+
+			while (kindData.readableBytes() > 0) {
+				out.add(storeKindDataCodec.decode(kindData));
+			}
+
+			kindData.release();
+			return out;
+		}
 	}
 }

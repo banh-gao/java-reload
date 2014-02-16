@@ -124,8 +124,8 @@ public abstract class LocalKindData {
 		return (List<T>) out;
 	}
 
-	public StoredKindData asStoredKindData() {
-		StoredKindData s = new StoredKindData(kind, generationCounter);
+	public StoreKindData asStoredKindData() {
+		StoreKindData s = new StoreKindData(kind, generationCounter);
 
 		for (StoredData d : getDataValues()) {
 			s.add(d);

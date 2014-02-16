@@ -10,13 +10,13 @@ import java.util.List;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class FetchResponse extends DataResponse<StoredData> {
+public class FetchKindResponse extends DataResponse<StoredData> {
 
-	public FetchResponse(DataKind kind, BigInteger generation, List<StoredData> values) {
+	public FetchKindResponse(DataKind kind, BigInteger generation, List<StoredData> values) {
 		super(kind, generation, values);
 	}
 
-	public FetchResponse(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
+	public FetchKindResponse(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
 		super(context, buf);
 	}
 

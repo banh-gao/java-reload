@@ -10,7 +10,7 @@ import java.util.List;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class StoredKindData {
+public class StoreKindData {
 
 	protected static final int VALUES_LENGTH_FIELD = EncUtils.U_INT32;
 
@@ -20,12 +20,12 @@ public class StoredKindData {
 
 	private final List<StoredData> data = new ArrayList<StoredData>();
 
-	public StoredKindData(DataKind kind, BigInteger generationCounter) {
+	public StoreKindData(DataKind kind, BigInteger generationCounter) {
 		this.kind = kind;
 		this.generationCounter = generationCounter;
 	}
 
-	public StoredKindData(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
+	public StoreKindData(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
 		KindId id = KindId.valueOf(buf);
 		kind = context.getConfiguration().getDataKind(id);
 		if (kind == null)
@@ -37,7 +37,7 @@ public class StoredKindData {
 	}
 
 	private void decodeStoredDataList(DataKind kind, UnsignedByteBuffer buf) {
-		int length = buf.getLengthValue(StoredKindData.VALUES_LENGTH_FIELD);
+		int length = buf.getLengthValue(StoreKindData.VALUES_LENGTH_FIELD);
 
 		int startPos = buf.position();
 
@@ -99,7 +99,7 @@ public class StoredKindData {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		StoredKindData other = (StoredKindData) obj;
+		StoreKindData other = (StoreKindData) obj;
 		if (kind == null) {
 			if (other.kind != null)
 				return false;

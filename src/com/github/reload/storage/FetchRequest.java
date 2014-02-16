@@ -1,24 +1,15 @@
 package com.github.reload.storage;
 
-import java.util.Arrays;
+import io.netty.buffer.ByteBuf;
 import java.util.List;
+import com.github.reload.Context;
+import com.github.reload.message.ContentType;
 import com.github.reload.message.ResourceID;
+import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.storage.FetchRequest.FetchRequestCodec;
 
-/**
- * A fetch request for overlay storage
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
+@ReloadCodec(FetchRequestCodec.class)
 public class FetchRequest extends QueryRequest {
-
-	public FetchRequest(Context context, UnsignedByteBuffer buf) throws UnknownKindException {
-		super(context, buf);
-	}
-
-	public FetchRequest(ResourceID id, DataSpecifier... specifiers) {
-		this(id, Arrays.asList(specifiers));
-	}
 
 	public FetchRequest(ResourceID id, List<DataSpecifier> specifiers) {
 		super(id, specifiers);
@@ -29,4 +20,15 @@ public class FetchRequest extends QueryRequest {
 		return ContentType.FETCH_REQ;
 	}
 
+	public static class FetchRequestCodec extends QueryRequestCodec {
+
+		public FetchRequestCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		protected QueryRequest implDecode(ResourceID resourceId, List<DataSpecifier> specifiers, ByteBuf buf) {
+			return new FetchRequest(resourceId, specifiers);
+		}
+	}
 }

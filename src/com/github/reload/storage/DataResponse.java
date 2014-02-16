@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import com.github.reload.storage.errors.UnknownKindException;
 
 public abstract class DataResponse<T extends DataResponse.ResponseData> implements Iterable<T> {
 

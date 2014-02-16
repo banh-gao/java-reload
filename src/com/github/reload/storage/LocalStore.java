@@ -52,7 +52,7 @@ public class LocalStore {
 	 * @throws StorageException
 	 * 
 	 */
-	public List<StoreResponse> store(ResourceID resourceId, List<StoredKindData> data) throws StorageException {
+	public List<StoreResponse> store(ResourceID resourceId, List<StoreKindData> data) throws StorageException {
 		LocalKinds storedKinds = storedResources.get(resourceId);
 
 		if (storedKinds == null) {
@@ -63,7 +63,7 @@ public class LocalStore {
 		List<StoreResponse> response = new ArrayList<StoreResponse>();
 		List<StoreResponse> generTooLowResponses = new ArrayList<StoreResponse>();
 
-		for (StoredKindData receivedData : data) {
+		for (StoreKindData receivedData : data) {
 			try {
 				BigInteger newGeneration = storedKinds.add(receivedData);
 				List<NodeID> replicaIds = context.getTopologyPlugin().onReplicateData(resourceId, receivedData);
@@ -110,16 +110,16 @@ public class LocalStore {
 
 				if (queryType == QueryType.FETCH) {
 					List<StoredData> values = data.getMatchingValues(spec, queryType);
-					out.add(new FetchResponse(kind, genCounter, values));
+					out.add(new FetchKindResponse(kind, genCounter, values));
 				} else {
 					List<StoredMetadata> values = data.getMatchingValues(spec, queryType);
-					out.add(new StatResponse(kind, genCounter, values));
+					out.add(new StatKindResponse(kind, genCounter, values));
 				}
 			} else {
 				if (queryType == QueryType.FETCH) {
 					List<StoredData> values = new ArrayList<StoredData>();
 					values.add(StoredData.getNonExistentData(spec.getDataKind()));
-					out.add(new FetchResponse(spec.getDataKind(), BigInteger.ZERO, values));
+					out.add(new FetchKindResponse(spec.getDataKind(), BigInteger.ZERO, values));
 				}
 			}
 		}

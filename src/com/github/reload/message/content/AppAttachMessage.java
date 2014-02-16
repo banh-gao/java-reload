@@ -4,16 +4,12 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
+import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.IceCandidate;
 
-/**
- * common representation of AppAttach requests and answers
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
-public class AppAttachReqAns extends Content {
+@ReloadCodec(AppAttachMessageCodec.class)
+public class AppAttachMessage extends Content {
 
 	byte[] userFragment;
 	byte[] password;
@@ -21,10 +17,10 @@ public class AppAttachReqAns extends Content {
 	boolean isActive;
 	List<IceCandidate> candidates;
 
-	AppAttachReqAns() {
+	AppAttachMessage() {
 	}
 
-	private AppAttachReqAns(Builder builder) {
+	private AppAttachMessage(Builder builder) {
 		userFragment = builder.userFragment;
 		password = builder.password;
 		applicationID = builder.applicationID;
@@ -93,14 +89,14 @@ public class AppAttachReqAns extends Content {
 			return this;
 		}
 
-		public AppAttachReqAns buildRequest() {
+		public AppAttachMessage buildRequest() {
 			isActive = false;
-			return new AppAttachReqAns(this);
+			return new AppAttachMessage(this);
 		}
 
-		public AppAttachReqAns buildAnswer() {
+		public AppAttachMessage buildAnswer() {
 			isActive = true;
-			return new AppAttachReqAns(this);
+			return new AppAttachMessage(this);
 		}
 	}
 
