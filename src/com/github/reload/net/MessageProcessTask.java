@@ -16,6 +16,7 @@ public class MessageProcessTask implements Runnable {
 
 	@Override
 	public void run() {
+		System.out.println("Processing incoming message: " + message);
 		// TODO: process the incoming message
 	}
 }

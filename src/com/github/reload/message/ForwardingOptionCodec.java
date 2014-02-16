@@ -101,7 +101,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 		}
 
 		@Override
-		public Error getErrorResponse() {
+		public Error getError() {
 			return new Error(ErrorType.UNSUPPORTED_FWD_OPTION, getMessage());
 		}
 	}
