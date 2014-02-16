@@ -1,23 +1,24 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import java.util.Random;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
+import com.github.reload.message.content.PingAnswer.PingAnswerCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-public class PingAnswer extends MessageContent {
-
-	private static final Random idGen = new Random(System.currentTimeMillis());
+@ReloadCodec(PingAnswerCodec.class)
+public class PingAnswer extends Content {
 
 	private final long responseId;
 	private final BigInteger responseTime;
 
-	public PingAnswer(UnsignedByteBuffer buf) {
-		responseId = buf.getRaw64();
-		responseTime = buf.getSigned64();
-	}
-
-	public PingAnswer() {
-		responseId = idGen.nextLong();
-		responseTime = BigInteger.valueOf(System.currentTimeMillis());
+	public PingAnswer(long responseId, BigInteger responseTime) {
+		super();
+		this.responseId = responseId;
+		this.responseTime = responseTime;
 	}
 
 	/**
@@ -35,12 +36,6 @@ public class PingAnswer extends MessageContent {
 	}
 
 	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		buf.putRaw64(responseId);
-		buf.putUnsigned64(responseTime);
-	}
-
-	@Override
 	public ContentType getType() {
 		return ContentType.PING_ANS;
 	}
@@ -48,5 +43,29 @@ public class PingAnswer extends MessageContent {
 	@Override
 	public String toString() {
 		return "PingAnswer [responseId=" + responseId + ", responseTime=" + responseTime + "]";
+	}
+
+	public static class PingAnswerCodec extends Codec<PingAnswer> {
+
+		public PingAnswerCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(PingAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			buf.writeLong(obj.responseId);
+			buf.writeBytes(obj.responseTime.toByteArray());
+		}
+
+		@Override
+		public PingAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			long responseId = buf.readLong();
+			byte[] resposeTimeData = new byte[U_INT64];
+			buf.readBytes(resposeTimeData);
+			BigInteger responseTime = new BigInteger(1, resposeTimeData);
+
+			return new PingAnswer(responseId, responseTime);
+		}
+
 	}
 }
