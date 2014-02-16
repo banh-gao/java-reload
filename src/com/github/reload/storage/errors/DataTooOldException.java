@@ -1,22 +1,20 @@
 package com.github.reload.storage.errors;
 
-import net.sf.jReload.overlay.errors.Error;
-import net.sf.jReload.overlay.errors.Error.ErrorType;
+import com.github.reload.message.errors.ErrorRespose;
+import com.github.reload.message.errors.ErrorType;
 
 /**
  * Indicates that the data value is older than the current stored value
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
-public class DataTooOldException extends StorageException {
+public class DataTooOldException extends Exception implements ErrorRespose {
 
 	public DataTooOldException(String message) {
 		super(message);
 	}
 
 	@Override
-	public Error getError() {
-		return new Error(ErrorType.DATA_TOO_OLD, getMessage());
+	public ErrorType getErrorType() {
+		return ErrorType.DATA_TOO_OLD;
 	}
 }

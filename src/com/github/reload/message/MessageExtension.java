@@ -4,8 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
 import com.github.reload.Context;
 import com.github.reload.message.MessageExtension.MessageExtensionCodec;
-import com.github.reload.message.errors.Error;
-import com.github.reload.message.errors.Error.ErrorType;
+import com.github.reload.message.errors.ErrorType;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.Codec.CodecException;
 import com.github.reload.net.data.ReloadCodec;
@@ -53,8 +52,8 @@ public abstract class MessageExtension {
 		}
 
 		@Override
-		public Error getError() {
-			return new Error(ErrorType.UNKNOWN_EXTENSION, getMessage());
+		public ErrorType getErrorType() {
+			return ErrorType.UNKNOWN_EXTENSION;
 		}
 	}
 
@@ -73,6 +72,7 @@ public abstract class MessageExtension {
 
 			Field lenFld = allocateField(buf, EXTENSION_CONTENT_LENGTH_FIELD);
 
+			@SuppressWarnings("unchecked")
 			Codec<MessageExtension> codec = (Codec<MessageExtension>) getCodec(obj.getClass());
 
 			codec.encode(obj, buf);

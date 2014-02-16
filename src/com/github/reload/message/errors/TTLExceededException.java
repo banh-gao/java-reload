@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-import com.github.reload.message.errors.Error.ErrorType;
 
 /**
  * Indicates that the time to live of the message reaches zero and the message
@@ -9,9 +8,14 @@ import com.github.reload.message.errors.Error.ErrorType;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class TTLExceededException extends ErrorMessageException {
+public class TTLExceededException extends Exception implements ErrorRespose {
 
 	public TTLExceededException(String message) {
-		super(new Error(ErrorType.TLL_EXCEEDED, message));
+		super(message);
+	}
+
+	@Override
+	public ErrorType getErrorType() {
+		return ErrorType.TLL_EXCEEDED;
 	}
 }

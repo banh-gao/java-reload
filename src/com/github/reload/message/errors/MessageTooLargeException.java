@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-import com.github.reload.message.errors.Error.ErrorType;
 
 /**
  * Indicates that the message size exceed the maximum allowed size
@@ -8,10 +7,15 @@ import com.github.reload.message.errors.Error.ErrorType;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class MessageTooLargeException extends ErrorMessageException {
+public class MessageTooLargeException extends Exception implements ErrorRespose {
 
 	public MessageTooLargeException(String message) {
-		super(new Error(ErrorType.MESSAGE_TOO_LARGE, message));
+		super(message);
+	}
+
+	@Override
+	public ErrorType getErrorType() {
+		return ErrorType.MESSAGE_TOO_LARGE;
 	}
 
 }

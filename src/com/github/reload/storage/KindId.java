@@ -6,14 +6,10 @@ import java.util.Map;
 /**
  * Data kind identifier
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class KindId {
 
 	private final long id;
-
-	public final static int MAX_LENGTH = EncUtils.U_INT32;
 
 	private final static Map<Long, KindId> INSTANCES = new HashMap<Long, KindId>();
 
@@ -32,21 +28,8 @@ public class KindId {
 		return kindId;
 	}
 
-	public static KindId valueOf(UnsignedByteBuffer buf) {
-		try {
-			KindId kindId = valueOf(buf.getSigned32());
-			return kindId;
-		} catch (IllegalArgumentException e) {
-			throw new DecodingException(e.getMessage());
-		}
-	}
-
 	public long getId() {
 		return id;
-	}
-
-	public void writeTo(UnsignedByteBuffer buf) {
-		buf.putUnsigned32(id);
 	}
 
 	@Override

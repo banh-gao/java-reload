@@ -3,8 +3,7 @@ package com.github.reload.message;
 import io.netty.buffer.ByteBuf;
 import com.github.reload.Context;
 import com.github.reload.message.ForwardingOption.ForwardingOptionType;
-import com.github.reload.message.errors.Error;
-import com.github.reload.message.errors.Error.ErrorType;
+import com.github.reload.message.errors.ErrorType;
 import com.github.reload.net.data.Codec;
 
 public class ForwardingOptionCodec extends Codec<ForwardingOption> {
@@ -101,8 +100,8 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 		}
 
 		@Override
-		public Error getError() {
-			return new Error(ErrorType.UNSUPPORTED_FWD_OPTION, getMessage());
+		public ErrorType getErrorType() {
+			return ErrorType.UNSUPPORTED_FWD_OPTION;
 		}
 	}
 }

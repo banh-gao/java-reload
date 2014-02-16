@@ -150,6 +150,7 @@ public class AttachMessage extends Content {
 			Field lenFld = allocateField(buf, CANDIDATES_LENGTH_FIELD);
 
 			for (IceCandidate c : obj.candidates) {
+				@SuppressWarnings("unchecked")
 				Codec<IceCandidate> iceCodec = (Codec<IceCandidate>) getCodec(c.getClass());
 				iceCodec.encode(c, buf);
 			}

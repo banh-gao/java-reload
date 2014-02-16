@@ -1,34 +1,28 @@
 package com.github.reload.message.content;
 
-import com.github.reload.message.content.ProbeAnswer.ProbeInformation;
+import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.message.content.NumResourcesProbeInformation.NumResCodec;
 import com.github.reload.message.content.ProbeRequest.ProbeInformationType;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
 /**
  * Probe information that reports the amount of resources stored locally
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
+@ReloadCodec(NumResCodec.class)
 public class NumResourcesProbeInformation extends ProbeInformation {
 
 	private final long numResources;
 
-	public NumResourcesProbeInformation(int resourceNumber) {
+	public NumResourcesProbeInformation(long resourceNumber) {
 		numResources = resourceNumber;
-	}
-
-	public NumResourcesProbeInformation(UnsignedByteBuffer buf) {
-		numResources = buf.getSigned32();
 	}
 
 	@Override
 	public ProbeInformationType getType() {
 		return ProbeInformationType.NUM_RESOUCES;
-	}
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		buf.putUnsigned32(numResources);
 	}
 
 	public long getResourceNumber() {
@@ -38,5 +32,22 @@ public class NumResourcesProbeInformation extends ProbeInformation {
 	@Override
 	public String toString() {
 		return "NumResourcesProbeInformation [numResources=" + numResources + "]";
+	}
+
+	public static class NumResCodec extends Codec<NumResourcesProbeInformation> {
+
+		public NumResCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(NumResourcesProbeInformation obj, ByteBuf buf) throws CodecException {
+			buf.writeInt((int) obj.numResources);
+		}
+
+		@Override
+		public NumResourcesProbeInformation decode(ByteBuf buf) throws CodecException {
+			return new NumResourcesProbeInformation(buf.readUnsignedInt());
+		}
 	}
 }

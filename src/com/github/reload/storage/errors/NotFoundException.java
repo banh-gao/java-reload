@@ -1,23 +1,21 @@
 package com.github.reload.storage.errors;
 
-import net.sf.jReload.overlay.errors.Error;
-import net.sf.jReload.overlay.errors.Error.ErrorType;
+import com.github.reload.message.errors.ErrorRespose;
+import com.github.reload.message.errors.ErrorType;
 
 /**
  * Indicates that a requested value was not found
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
-public class NotFoundException extends StorageException {
+public class NotFoundException extends Exception implements ErrorRespose {
 
 	public NotFoundException(String message) {
 		super(message);
 	}
 
 	@Override
-	public Error getError() {
-		return new Error(ErrorType.NOT_FOUND, getMessage());
+	public ErrorType getErrorType() {
+		return ErrorType.NOT_FOUND;
 	}
 
 }

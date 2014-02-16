@@ -1,27 +1,25 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.DecoderException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import com.github.reload.Context;
 import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
+import com.github.reload.message.content.ProbeRequest.ProbeRequestCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
+@ReloadCodec(ProbeRequestCodec.class)
 public class ProbeRequest extends Content {
 
-	private static final int LIST_LENGTH_FIELD = EncUtils.U_INT8;
-
 	public enum ProbeInformationType {
-		RESPONSIBLE_SET((byte) 1), NUM_RESOUCES((byte) 2), UPTIME((byte) 3);
-
-		private final byte code;
-
-		private ProbeInformationType(byte code) {
-			this.code = code;
-		}
-
-		public byte getCode() {
-			return code;
-		}
+		RESPONSIBLE_SET((byte) 0x1, ResponsibleSetProbeInformation.class),
+		NUM_RESOUCES((byte) 0x2, NumResourcesProbeInformation.class),
+		UPTIME((byte) 0x3, UptimeProbeInformation.class);
 
 		public static ProbeInformationType valueOf(byte v) {
 			for (ProbeInformationType t : EnumSet.allOf(ProbeInformationType.class)) {
@@ -30,42 +28,79 @@ public class ProbeRequest extends Content {
 			}
 			return null;
 		}
+
+		private final byte code;
+
+		private final Class<? extends ProbeInformation> infoClass;
+
+		private ProbeInformationType(byte code, Class<? extends ProbeInformation> infoClass) {
+			this.code = code;
+			this.infoClass = infoClass;
+		}
+
+		public byte getCode() {
+			return code;
+		}
+
+		public Class<? extends ProbeInformation> getInfoClass() {
+			return infoClass;
+		}
+	}
+
+	public static class ProbeRequestCodec extends Codec<ProbeRequest> {
+
+		private static final int LIST_LENGTH_FIELD = U_INT8;
+
+		public ProbeRequestCodec(Context context) {
+			super(context);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public ProbeRequest decode(ByteBuf buf) throws CodecException {
+
+			List<ProbeInformationType> requestedInfo = new ArrayList<ProbeRequest.ProbeInformationType>();
+
+			ByteBuf reqInfoData = readField(buf, LIST_LENGTH_FIELD);
+
+			while (reqInfoData.readableBytes() > 0) {
+				byte typeV = reqInfoData.readByte();
+				ProbeInformationType type = ProbeInformationType.valueOf(typeV);
+
+				if (type == null)
+					throw new DecoderException("Unknown probe information type " + typeV);
+
+				requestedInfo.add(type);
+			}
+
+			reqInfoData.release();
+
+			return new ProbeRequest(requestedInfo);
+		}
+
+		@Override
+		public void encode(ProbeRequest obj, ByteBuf buf) throws CodecException {
+			Field lenFld = allocateField(buf, LIST_LENGTH_FIELD);
+			for (ProbeInformationType t : obj.requestedInfo) {
+				buf.writeByte(t.getCode());
+			}
+			lenFld.updateDataLength();
+		}
+
 	}
 
 	private final List<ProbeInformationType> requestedInfo;
-
-	public ProbeRequest(ProbeInformationType... probeTypes) {
-		this(Arrays.asList(probeTypes));
-	}
 
 	public ProbeRequest(List<ProbeInformationType> probeTypes) {
 		requestedInfo = probeTypes;
 	}
 
-	public ProbeRequest(UnsignedByteBuffer buf) {
-		int length = buf.getLengthValue(LIST_LENGTH_FIELD);
-		requestedInfo = new ArrayList<ProbeRequest.ProbeInformationType>(length);
-		for (int i = 0; i < length; i++) {
-			byte typeV = buf.getRaw8();
-			ProbeInformationType type = ProbeInformationType.valueOf(typeV);
-			if (type != null) {
-				requestedInfo.add(type);
-			} else
-				throw new DecodingException("Unknown probe information type " + typeV);
-		}
+	public ProbeRequest(ProbeInformationType... probeTypes) {
+		this(Arrays.asList(probeTypes));
 	}
 
 	public List<ProbeInformationType> getRequestedInfo() {
 		return requestedInfo;
-	}
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		Field lenFld = buf.allocateLengthField(LIST_LENGTH_FIELD);
-		for (ProbeInformationType t : requestedInfo) {
-			buf.putRaw8(t.getCode());
-		}
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
 	}
 
 	@Override

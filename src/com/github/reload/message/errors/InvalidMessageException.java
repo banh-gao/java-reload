@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-import com.github.reload.message.errors.Error.ErrorType;
 import com.github.reload.net.data.Codec.CodecException;
 
 /**
@@ -9,12 +8,12 @@ import com.github.reload.net.data.Codec.CodecException;
 public class InvalidMessageException extends CodecException {
 
 	public InvalidMessageException(String message) {
-		super();
+		super(message);
 	}
 
 	@Override
-	public Error getError() {
-		return new Error(ErrorType.INVALID_MESSAGE, getMessage());
+	public ErrorType getErrorType() {
+		return ErrorType.INVALID_MESSAGE;
 	}
 
 }

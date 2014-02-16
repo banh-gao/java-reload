@@ -1,22 +1,21 @@
 package com.github.reload.storage.errors;
 
-import com.github.reload.message.errors.Error.ErrorType;
+import com.github.reload.message.errors.ErrorRespose;
+import com.github.reload.message.errors.ErrorType;
 
 /**
  * Indicates that the data exceeds the maximum allowed size
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
-public class DataTooLargeException extends StorageException {
+public class DataTooLargeException extends Exception implements ErrorRespose {
 
 	public DataTooLargeException(String message) {
 		super(message);
 	}
 
 	@Override
-	public Error getError() {
-		return new Error(ErrorType.DATA_TOO_LARGE, getMessage());
+	public ErrorType getErrorType() {
+		return ErrorType.DATA_TOO_LARGE;
 	}
 
 }

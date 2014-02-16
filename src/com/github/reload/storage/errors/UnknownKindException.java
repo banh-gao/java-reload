@@ -1,52 +1,66 @@
 package com.github.reload.storage.errors;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
-import net.sf.jReload.overlay.errors.Error;
-import net.sf.jReload.overlay.errors.Error.ErrorType;
-import net.sf.jReload.storage.KindId;
+import com.github.reload.message.errors.Error;
+import com.github.reload.message.errors.ErrorRespose;
+import com.github.reload.message.errors.ErrorType;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.Codec.Field;
+import com.github.reload.storage.KindId;
 
 /**
  * Indicates that some kinds are unknown and report them in the error
  * information
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
-public class UnknownKindException extends StorageException {
+public class UnknownKindException extends Exception implements ErrorRespose {
 
-	private static final int KINDS_LENGTH_FIELD = EncUtils.U_INT8;
+	private static final int KINDS_LENGTH_FIELD = Codec.U_INT8;
 
 	private final List<KindId> unknownKinds;
 
-	public UnknownKindException(String message) {
-		super(message);
-		unknownKinds = new ArrayList<KindId>();
+	public UnknownKindException(List<KindId> kindIds) {
+		super(getEncodedKinds(kindIds));
+		unknownKinds = kindIds;
 	}
 
-	public UnknownKindException(KindId... kindIds) {
-		super("Unknown kinds " + Arrays.toString(kindIds));
-		unknownKinds = Arrays.asList(kindIds);
-	}
+	public UnknownKindException(String info) {
+		super("Unknown data kinds");
 
-	public UnknownKindException(byte[] info) {
-		super("Unknown kinds");
+		byte[] infoData = info.getBytes(Error.MSG_CHARSET);
 
-		UnsignedByteBuffer buf = UnsignedByteBuffer.wrap(info);
-		int length = buf.getLengthValue(UnknownKindException.KINDS_LENGTH_FIELD);
+		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(infoData.length);
+		buf.writeBytes(infoData);
+		ByteBuf unknownKindsData = Codec.readField(buf, KINDS_LENGTH_FIELD);
 
 		unknownKinds = new ArrayList<KindId>();
 
-		int startPos = buf.position();
-
-		while (buf.getConsumedFrom(startPos) < length) {
-			KindId kindId = KindId.valueOf(buf);
+		while (unknownKindsData.readableBytes() > 0) {
+			KindId kindId = KindId.valueOf(buf.readInt());
 			unknownKinds.add(kindId);
 		}
+
+		unknownKindsData.release();
+	}
+
+	private static String getEncodedKinds(List<KindId> kindIds) {
+		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer();
+
+		Field lenFld = Codec.allocateField(buf, KINDS_LENGTH_FIELD);
+
+		for (KindId id : kindIds) {
+			buf.writeInt((int) id.getId());
+		}
+
+		lenFld.updateDataLength();
+
+		byte[] out = new byte[buf.readableBytes()];
+		buf.readBytes(out);
+
+		return new String(out, Error.MSG_CHARSET);
 	}
 
 	public List<KindId> getUnknownKinds() {
@@ -54,21 +68,12 @@ public class UnknownKindException extends StorageException {
 	}
 
 	@Override
-	public Error getError() {
-		return new Error(ErrorType.UNKNOWN_KIND, getEncodedKinds());
+	public ErrorType getErrorType() {
+		return ErrorType.UNKNOWN_KIND;
 	}
 
-	private byte[] getEncodedKinds() {
-		UnsignedByteBuffer buf = UnsignedByteBuffer.allocate(UnknownKindException.KINDS_LENGTH_FIELD + KindId.MAX_LENGTH);
-
-		Field lenFld = buf.allocateLengthField(KINDS_LENGTH_FIELD);
-
-		for (KindId id : unknownKinds) {
-			id.writeTo(buf);
-		}
-
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-
-		return buf.flip().slice().array();
+	@Override
+	public String getMessage() {
+		return "Unknown data kinds: " + unknownKinds;
 	}
 }

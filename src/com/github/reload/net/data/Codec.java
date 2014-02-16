@@ -6,8 +6,8 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import com.github.reload.Context;
-import com.github.reload.message.errors.Error;
-import com.github.reload.message.errors.Error.ErrorType;
+import com.github.reload.message.errors.ErrorRespose;
+import com.github.reload.message.errors.ErrorType;
 
 /**
  * Encode and decode the object on the given buffer
@@ -21,33 +21,33 @@ public abstract class Codec<T> {
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>8</sup>-1
 	 */
-	protected static final int U_INT8 = 1;
+	public static final int U_INT8 = 1;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>16</sup>-1
 	 */
-	protected static final int U_INT16 = 2;
+	public static final int U_INT16 = 2;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>24</sup>-1
 	 */
-	protected static final int U_INT24 = 3;
+	public static final int U_INT24 = 3;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>32</sup>-1
 	 */
-	protected static final int U_INT32 = 4;
+	public static final int U_INT32 = 4;
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>64</sup>-1
 	 */
-	protected static final int U_INT64 = 8;
+	public static final int U_INT64 = 8;
 
 	/**
 	 * The amount of bytes needed to represent an unsigned integer up to
 	 * 2<sup>128</sup>-1
 	 */
-	protected static final int U_INT128 = 16;
+	public static final int U_INT128 = 16;
 
 	protected final Context context;
 
@@ -136,7 +136,7 @@ public abstract class Codec<T> {
 	 * @param maxDataLength
 	 *            the data maximum bytes size in power of two
 	 */
-	protected static Field allocateField(ByteBuf buf, int maxDataLength) {
+	public static Field allocateField(ByteBuf buf, int maxDataLength) {
 		return new Field(buf, maxDataLength);
 	}
 
@@ -155,7 +155,7 @@ public abstract class Codec<T> {
 	 * 
 	 * @see {@link ByteBuf#slice()}
 	 */
-	protected static ByteBuf readField(ByteBuf buf, int maxDataLength) {
+	public static ByteBuf readField(ByteBuf buf, int maxDataLength) {
 		int dataLength = readLength(buf, maxDataLength);
 
 		ByteBuf data = buf.readBytes(dataLength);
@@ -164,7 +164,7 @@ public abstract class Codec<T> {
 		return data;
 	}
 
-	protected static int readLength(ByteBuf buf, int maxDataLength) {
+	public static int readLength(ByteBuf buf, int maxDataLength) {
 		int dataLength = 0;
 		int baseOffset = (maxDataLength - 1) * 8;
 		for (int i = 0; i < maxDataLength; i++) {
@@ -174,7 +174,7 @@ public abstract class Codec<T> {
 		return dataLength;
 	}
 
-	protected static class Field {
+	public static class Field {
 
 		private final ByteBuf buf;
 		private final int fieldPos;
@@ -241,14 +241,6 @@ public abstract class Codec<T> {
 	 */
 	public static class CodecException extends Exception implements ErrorRespose {
 
-		public CodecException() {
-			super();
-		}
-
-		public CodecException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-			super(message, cause, enableSuppression, writableStackTrace);
-		}
-
 		public CodecException(String message, Throwable cause) {
 			super(message, cause);
 		}
@@ -257,13 +249,9 @@ public abstract class Codec<T> {
 			super(message);
 		}
 
-		public CodecException(Throwable cause) {
-			super(cause);
-		}
-
 		@Override
-		public Error getError() {
-			return new Error(ErrorType.INVALID_MESSAGE, getMessage());
+		public ErrorType getErrorType() {
+			return ErrorType.INVALID_MESSAGE;
 		}
 
 	}

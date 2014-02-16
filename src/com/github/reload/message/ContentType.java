@@ -7,6 +7,7 @@ import com.github.reload.message.content.ConfigUpdateAnswer;
 import com.github.reload.message.content.ConfigUpdateRequest;
 import com.github.reload.message.content.JoinAnswer;
 import com.github.reload.message.content.JoinRequest;
+import com.github.reload.message.content.LeaveAnswer;
 import com.github.reload.message.content.LeaveRequest;
 import com.github.reload.message.content.PingAnswer;
 import com.github.reload.message.content.PingRequest;
@@ -34,32 +35,33 @@ import com.github.reload.storage.StoreRequest;
  * 
  */
 public enum ContentType {
-	PROBE_REQ((short) 1, ProbeRequest.class),
-	PROBE_ANS((short) 2, ProbeAnswer.class),
-	ATTACH_REQ((short) 3, AttachMessage.class),
-	ATTACH_ANS((short) 4, AttachMessage.class),
-	STORE_REQ((short) 7, StoreRequest.class),
-	STORE_ANS((short) 8, StoreAnswer.class),
-	FETCH_REQ((short) 9, FetchRequest.class),
-	FETCH_ANS((short) 10, FetchAnswer.class),
-	FIND_REQ((short) 13, FindRequest.class),
-	FIND_ANS((short) 14, FindAnswer.class),
-	JOIN_REQ((short) 15, JoinRequest.class),
-	JOIN_ANS((short) 16, JoinAnswer.class),
-	LEAVE_REQ((short) 17, LeaveRequest.class),
-	UPDATE_REQ((short) 19, UpdateRequest.class),
-	UPDATE_ANS((short) 20, UpdateAnswer.class),
-	ROUTE_QUERY_REQ((short) 21, RouteQueryRequest.class),
-	ROUTE_QUERY_ANS((short) 22, RouteQueryAnswer.class),
-	PING_REQ((short) 23, PingRequest.class),
-	PING_ANS((short) 24, PingAnswer.class),
-	STAT_REQ((short) 25, StatRequest.class),
-	STAT_ANS((short) 26, StatAnswer.class),
-	APPATTACH_REQ((short) 29, AppAttachMessage.class),
-	APPATTACH_ANS((short) 30, AppAttachMessage.class),
-	CONFIG_UPDATE_REQ((short) 33, ConfigUpdateRequest.class),
-	CONFIG_UPDATE_ANS((short) 34, ConfigUpdateAnswer.class),
-	ERROR((short) 255, Error.class);
+	PROBE_REQ((short) 0x1, ProbeRequest.class),
+	PROBE_ANS((short) 0x2, ProbeAnswer.class),
+	ATTACH_REQ((short) 0x3, AttachMessage.class),
+	ATTACH_ANS((short) 0x4, AttachMessage.class),
+	STORE_REQ((short) 0x7, StoreRequest.class),
+	STORE_ANS((short) 0x8, StoreAnswer.class),
+	FETCH_REQ((short) 0x9, FetchRequest.class),
+	FETCH_ANS((short) 0xa, FetchAnswer.class),
+	FIND_REQ((short) 0xd, FindRequest.class),
+	FIND_ANS((short) 0xe, FindAnswer.class),
+	JOIN_REQ((short) 0xf, JoinRequest.class),
+	JOIN_ANS((short) 0x10, JoinAnswer.class),
+	LEAVE_REQ((short) 0x11, LeaveRequest.class),
+	LEAVE_ANS((short) 0x12, LeaveAnswer.class),
+	UPDATE_REQ((short) 0x13, UpdateRequest.class),
+	UPDATE_ANS((short) 0x14, UpdateAnswer.class),
+	ROUTE_QUERY_REQ((short) 0x15, RouteQueryRequest.class),
+	ROUTE_QUERY_ANS((short) 0x16, RouteQueryAnswer.class),
+	PING_REQ((short) 0x17, PingRequest.class),
+	PING_ANS((short) 0x18, PingAnswer.class),
+	STAT_REQ((short) 0x19, StatRequest.class),
+	STAT_ANS((short) 0x1a, StatAnswer.class),
+	APPATTACH_REQ((short) 0x1d, AppAttachMessage.class),
+	APPATTACH_ANS((short) 0x1e, AppAttachMessage.class),
+	CONFIG_UPDATE_REQ((short) 0x21, ConfigUpdateRequest.class),
+	CONFIG_UPDATE_ANS((short) 0x22, ConfigUpdateAnswer.class),
+	ERROR((short) 0xffff, Error.class);
 
 	private final short code;
 	private final Class<? extends Content> contentClass;
