@@ -1,30 +1,55 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
+import com.github.reload.message.content.JoinAnswer.JoinAnswerCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-public abstract class JoinAnswer extends MessageContent {
+@ReloadCodec(JoinAnswerCodec.class)
+public class JoinAnswer extends Content {
 
-	private static final int DATA_LENGTH_FIELD = EncUtils.U_INT16;
+	private final byte[] overlayData;
 
-	public static JoinAnswer parseAnswer(TopologyPlugin plugin, UnsignedByteBuffer buf) {
-		int len = buf.getLengthValue(DATA_LENGTH_FIELD);
-		byte[] data = new byte[len];
-		buf.getRaw(data);
-		return plugin.parseJoinAnswer(UnsignedByteBuffer.wrap(data));
+	public JoinAnswer(byte[] overlayData) {
+		this.overlayData = overlayData;
 	}
 
-	@Override
-	protected final void implWriteTo(UnsignedByteBuffer buf) {
-		byte[] data = getData();
-		Field lenFld = buf.allocateLengthField(DATA_LENGTH_FIELD);
-		buf.putRaw(data);
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
+	public byte[] getOverlayData() {
+		return overlayData;
 	}
-
-	protected abstract byte[] getData();
 
 	@Override
 	public final ContentType getType() {
 		return ContentType.JOIN_ANS;
+	}
+
+	public static class JoinAnswerCodec extends Codec<JoinAnswer> {
+
+		private static final int DATA_LENGTH_FIELD = U_INT16;
+
+		public JoinAnswerCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(JoinAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
+			buf.writeBytes(obj.overlayData);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public JoinAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			ByteBuf overlayData = readField(buf, DATA_LENGTH_FIELD);
+			byte[] data = new byte[overlayData.readableBytes()];
+			buf.readBytes(data);
+			buf.release();
+			return new JoinAnswer(data);
+		}
+
 	}
 
 }

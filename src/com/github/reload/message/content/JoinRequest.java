@@ -1,46 +1,70 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
 import com.github.reload.message.NodeID;
+import com.github.reload.message.content.JoinRequest.JoinRequestCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-public abstract class JoinRequest extends MessageContent {
-
-	private static final int DATA_LENGTH_FIELD = EncUtils.U_INT16;
+@ReloadCodec(JoinRequestCodec.class)
+public class JoinRequest extends Content {
 
 	private final NodeID joiningNode;
+	private final byte[] overlayData;
 
-	public static JoinRequest parseRequest(Context context, UnsignedByteBuffer buf) {
-		NodeID joiningNode = NodeID.valueOf(context.getConfiguration().getNodeIdLength(), buf);
-
-		int len = buf.getLengthValue(DATA_LENGTH_FIELD);
-		byte[] data = new byte[len];
-		buf.getRaw(data);
-		return context.getTopologyPlugin().parseJoinRequest(joiningNode, UnsignedByteBuffer.wrap(data));
-	}
-
-	public JoinRequest(NodeID joiningNode) {
+	public JoinRequest(NodeID joiningNode, byte[] overlayData) {
 		this.joiningNode = joiningNode;
+		this.overlayData = overlayData;
 	}
 
 	public NodeID getJoiningNode() {
 		return joiningNode;
 	}
 
-	@Override
-	protected final void implWriteTo(UnsignedByteBuffer buf) {
-		joiningNode.writeTo(buf);
-
-		byte[] data = getData();
-
-		Field lenFld = buf.allocateLengthField(DATA_LENGTH_FIELD);
-		buf.putRaw(data);
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
+	public byte[] getOverlayData() {
+		return overlayData;
 	}
-
-	protected abstract byte[] getData();
 
 	@Override
 	public ContentType getType() {
 		return ContentType.JOIN_REQ;
+	}
+
+	public static class JoinRequestCodec extends Codec<JoinRequest> {
+
+		private static final int DATA_LENGTH_FIELD = U_INT16;
+
+		private final Codec<NodeID> nodeCodec;
+
+		public JoinRequestCodec(Context context) {
+			super(context);
+			nodeCodec = getCodec(NodeID.class);
+		}
+
+		@Override
+		public void encode(JoinRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			nodeCodec.encode(obj.joiningNode, buf);
+
+			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
+			buf.writeBytes(obj.overlayData);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public JoinRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			NodeID joiningNode = nodeCodec.decode(buf);
+
+			ByteBuf overlayData = readField(buf, DATA_LENGTH_FIELD);
+			byte[] data = new byte[overlayData.readableBytes()];
+			buf.readBytes(data);
+			buf.release();
+
+			return new JoinRequest(joiningNode, data);
+		}
+
 	}
 
 }

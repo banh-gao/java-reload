@@ -1,16 +1,37 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
+import com.github.reload.message.content.ConfigUpdateAnswer.ConfigUpdateAnsCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-public class ConfigUpdateAnswer extends MessageContent {
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		// No content for config answer
-	}
+@ReloadCodec(ConfigUpdateAnsCodec.class)
+public class ConfigUpdateAnswer extends Content {
 
 	@Override
 	public ContentType getType() {
 		return ContentType.CONFIG_UPDATE_ANS;
+	}
+
+	public static class ConfigUpdateAnsCodec extends Codec<ConfigUpdateAnswer> {
+
+		public ConfigUpdateAnsCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(ConfigUpdateAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			// No data carried
+		}
+
+		@Override
+		public ConfigUpdateAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			return new ConfigUpdateAnswer();
+		}
+
 	}
 
 }

@@ -1,10 +1,16 @@
 package com.github.reload.message.content;
 
+import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
+import com.github.reload.message.content.ConfigUpdateRequest.ConfUpdateReqCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-public class ConfigUpdateRequest extends MessageContent {
-
-	private static final int CONF_LENGTH_FIELD = EncUtils.U_INT24;
+@ReloadCodec(ConfUpdateReqCodec.class)
+public class ConfigUpdateRequest extends Content {
 
 	public enum ConfigUpdateType {
 		CONFIG((byte) 1), KIND((byte) 2);
@@ -31,35 +37,6 @@ public class ConfigUpdateRequest extends MessageContent {
 		this.xmlConfigurationData = xmlConfigurationData;
 	}
 
-	public ConfigUpdateRequest(UnsignedByteBuffer buf) {
-		type = ConfigUpdateType.valueOf(buf.getRaw8());
-
-		@SuppressWarnings("unused")
-		long length = buf.getSigned32();
-
-		if (type == null)
-			throw new DecodingException("Unknown configuration type");
-
-		xmlConfigurationData = readConfigData(buf);
-	}
-
-	private static byte[] readConfigData(UnsignedByteBuffer buf) {
-		int confLength = buf.getLengthValue(CONF_LENGTH_FIELD);
-		byte[] xmlConfigurationData = new byte[confLength];
-		buf.getRaw(xmlConfigurationData);
-		return xmlConfigurationData;
-	}
-
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		buf.putRaw8(type.code);
-
-		buf.putUnsigned32(CONF_LENGTH_FIELD + xmlConfigurationData.length);
-		Field lenFld = buf.allocateLengthField(CONF_LENGTH_FIELD);
-		buf.putRaw(xmlConfigurationData);
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-	}
-
 	@Override
 	public ContentType getType() {
 		return ContentType.CONFIG_UPDATE_REQ;
@@ -71,5 +48,48 @@ public class ConfigUpdateRequest extends MessageContent {
 
 	public byte[] getXmlConfigurationData() {
 		return xmlConfigurationData;
+	}
+
+	public static class ConfUpdateReqCodec extends Codec<ConfigUpdateRequest> {
+
+		private static final int CONF_LENGTH_FIELD = U_INT24;
+
+		public ConfUpdateReqCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(ConfigUpdateRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			buf.writeByte(obj.type.code);
+
+			buf.writeInt(CONF_LENGTH_FIELD + obj.xmlConfigurationData.length);
+			Field lenFld = allocateField(buf, CONF_LENGTH_FIELD);
+			buf.writeBytes(obj.xmlConfigurationData);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public ConfigUpdateRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+
+			ConfigUpdateType type = ConfigUpdateType.valueOf(buf.readByte());
+
+			if (type == null)
+				throw new CodecException("Unknown configuration type");
+
+			// Not used length field (only for backward compatibility)
+			buf.readUnsignedInt();
+
+			byte[] xmlConfigurationData = readConfigData(buf);
+			return new ConfigUpdateRequest(type, xmlConfigurationData);
+		}
+
+		private static byte[] readConfigData(ByteBuf buf) {
+			ByteBuf confData = readField(buf, CONF_LENGTH_FIELD);
+			byte[] xmlConfigurationData = new byte[confData.readableBytes()];
+			buf.readBytes(xmlConfigurationData);
+			confData.release();
+			return xmlConfigurationData;
+		}
+
 	}
 }
