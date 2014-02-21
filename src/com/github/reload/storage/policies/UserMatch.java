@@ -3,13 +3,13 @@ package com.github.reload.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import com.github.reload.message.HashAlgorithm;
+import com.github.reload.message.SignerIdentity;
 import net.sf.jReload.AccessPolicyParamsGenerator;
 import net.sf.jReload.Context;
 import net.sf.jReload.ReloadOverlay;
 import net.sf.jReload.crypto.CryptoHelper;
 import net.sf.jReload.crypto.ReloadCertificate;
-import net.sf.jReload.crypto.reload.HashAlgorithm;
-import net.sf.jReload.crypto.reload.SignerIdentity;
 import net.sf.jReload.message.ResourceID;
 import net.sf.jReload.storage.StoredData;
 

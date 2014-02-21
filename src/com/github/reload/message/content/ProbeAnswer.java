@@ -45,7 +45,7 @@ public class ProbeAnswer extends Content {
 		}
 
 		@Override
-		public void encode(ProbeAnswer obj, ByteBuf buf) throws CodecException {
+		public void encode(ProbeAnswer obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, LIST_LENGTH_FIELD);
 
 			for (ProbeInformation info : obj.probeInfo) {
@@ -56,7 +56,7 @@ public class ProbeAnswer extends Content {
 		}
 
 		@Override
-		public ProbeAnswer decode(ByteBuf buf) throws CodecException {
+		public ProbeAnswer decode(ByteBuf buf, Object... params) throws CodecException {
 			List<ProbeInformation> probeInfo = new ArrayList<ProbeInformation>();
 
 			ByteBuf probeInfoData = readField(buf, LIST_LENGTH_FIELD);

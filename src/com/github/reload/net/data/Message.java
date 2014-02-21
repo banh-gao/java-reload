@@ -3,7 +3,6 @@ package com.github.reload.net.data;
 import com.github.reload.message.Content;
 import com.github.reload.message.Header;
 import com.github.reload.message.SecurityBlock;
-import com.github.reload.message.content.PingRequest;
 
 /**
  * A RELOAD message
@@ -14,10 +13,10 @@ public class Message {
 	Content content;
 	SecurityBlock secBlock;
 
-	public Message() {
-		header = new Header();
-		content = new PingRequest(27);
-		secBlock = new SecurityBlock();
+	public Message(Header header, Content content, SecurityBlock secBlock) {
+		this.header = header;
+		this.content = content;
+		this.secBlock = secBlock;
 	}
 
 	public Header getHeader() {

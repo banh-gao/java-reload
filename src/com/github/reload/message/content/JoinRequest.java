@@ -45,7 +45,7 @@ public class JoinRequest extends Content {
 		}
 
 		@Override
-		public void encode(JoinRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(JoinRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			nodeCodec.encode(obj.joiningNode, buf);
 
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
@@ -54,7 +54,7 @@ public class JoinRequest extends Content {
 		}
 
 		@Override
-		public JoinRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public JoinRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			NodeID joiningNode = nodeCodec.decode(buf);
 
 			ByteBuf overlayData = readField(buf, DATA_LENGTH_FIELD);

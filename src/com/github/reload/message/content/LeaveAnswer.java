@@ -23,12 +23,12 @@ public class LeaveAnswer extends Content {
 		}
 
 		@Override
-		public void encode(LeaveAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(LeaveAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			// No data carried
 		}
 
 		@Override
-		public LeaveAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public LeaveAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			return new LeaveAnswer();
 		}
 

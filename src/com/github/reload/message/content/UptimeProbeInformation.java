@@ -44,12 +44,12 @@ public class UptimeProbeInformation extends ProbeInformation {
 		}
 
 		@Override
-		public void encode(UptimeProbeInformation obj, ByteBuf buf) throws CodecException {
+		public void encode(UptimeProbeInformation obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeInt((int) obj.uptime);
 		}
 
 		@Override
-		public UptimeProbeInformation decode(ByteBuf buf) throws CodecException {
+		public UptimeProbeInformation decode(ByteBuf buf, Object... params) throws CodecException {
 			return new UptimeProbeInformation(buf.readUnsignedInt());
 		}
 

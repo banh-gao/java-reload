@@ -26,7 +26,7 @@ public class AppAttachMessageCodec extends Codec<AppAttachMessage> {
 	}
 
 	@Override
-	public void encode(AppAttachMessage obj, ByteBuf buf) throws CodecException {
+	public void encode(AppAttachMessage obj, ByteBuf buf, Object... params) throws CodecException {
 		Field ufragLenFld = allocateField(buf, UFRAG_LENGTH_FIELD);
 		buf.writeBytes(obj.userFragment);
 		ufragLenFld.updateDataLength();
@@ -59,7 +59,7 @@ public class AppAttachMessageCodec extends Codec<AppAttachMessage> {
 	}
 
 	@Override
-	public AppAttachMessage decode(ByteBuf buf) throws CodecException {
+	public AppAttachMessage decode(ByteBuf buf, Object... params) throws CodecException {
 		AppAttachMessage obj = new AppAttachMessage();
 		ByteBuf fragFld = readField(buf, UFRAG_LENGTH_FIELD);
 		obj.userFragment = new byte[fragFld.readableBytes()];

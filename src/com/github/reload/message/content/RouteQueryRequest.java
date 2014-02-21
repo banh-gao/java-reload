@@ -51,7 +51,7 @@ public class RouteQueryRequest extends Content {
 		}
 
 		@Override
-		public void encode(RouteQueryRequest obj, ByteBuf buf) throws CodecException {
+		public void encode(RouteQueryRequest obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeByte(obj.sendUpdate ? 1 : 0);
 
 			destCodec.encode(obj.destination, buf);
@@ -62,7 +62,7 @@ public class RouteQueryRequest extends Content {
 		}
 
 		@Override
-		public RouteQueryRequest decode(ByteBuf buf) throws CodecException {
+		public RouteQueryRequest decode(ByteBuf buf, Object... params) throws CodecException {
 			boolean sendUpdate = buf.readUnsignedByte() > 0;
 
 			RoutableID destination = destCodec.decode(buf);

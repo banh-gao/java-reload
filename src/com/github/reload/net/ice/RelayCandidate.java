@@ -39,12 +39,12 @@ public class RelayCandidate extends IceCandidate {
 		}
 
 		@Override
-		public void encode(RelayCandidate obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(RelayCandidate obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			sockAddrCodec.encode(obj.relayAddrPort, buf);
 		}
 
 		@Override
-		public RelayCandidate decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public RelayCandidate decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			return new RelayCandidate(sockAddrCodec.decode(buf));
 		}
 	}

@@ -41,12 +41,12 @@ public class NumResourcesProbeInformation extends ProbeInformation {
 		}
 
 		@Override
-		public void encode(NumResourcesProbeInformation obj, ByteBuf buf) throws CodecException {
+		public void encode(NumResourcesProbeInformation obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeInt((int) obj.numResources);
 		}
 
 		@Override
-		public NumResourcesProbeInformation decode(ByteBuf buf) throws CodecException {
+		public NumResourcesProbeInformation decode(ByteBuf buf, Object... params) throws CodecException {
 			return new NumResourcesProbeInformation(buf.readUnsignedInt());
 		}
 	}

@@ -45,7 +45,7 @@ public class LeaveRequest extends Content {
 		}
 
 		@Override
-		public void encode(LeaveRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(LeaveRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			nodeCodec.encode(obj.leavingNode, buf);
 
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
@@ -54,7 +54,7 @@ public class LeaveRequest extends Content {
 		}
 
 		@Override
-		public LeaveRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public LeaveRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			NodeID leavingNode = nodeCodec.decode(buf);
 
 			ByteBuf overlayData = readField(buf, DATA_LENGTH_FIELD);

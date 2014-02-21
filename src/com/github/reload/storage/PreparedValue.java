@@ -1,6 +1,7 @@
 package com.github.reload.storage;
 
 import com.github.reload.storage.PreparedData.DataBuildingException;
+import com.github.reload.storage.data.DataValue;
 
 /**
  * A prepared value used to store values of a generic data model

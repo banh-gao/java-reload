@@ -39,16 +39,18 @@ public class PingRequest extends Content {
 		}
 
 		@Override
-		public void encode(PingRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(PingRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			Field lenFld = allocateField(buf, PADDING_LENGTH_FIELD);
 			buf.writerIndex(buf.writerIndex() + obj.payloadLength);
 			lenFld.updateDataLength();
 		}
 
 		@Override
-		public PingRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public PingRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			ByteBuf padding = readField(buf, PADDING_LENGTH_FIELD);
-			return new PingRequest(padding.readableBytes());
+			PingRequest req = new PingRequest(padding.readableBytes());
+			padding.release();
+			return req;
 		}
 
 	}

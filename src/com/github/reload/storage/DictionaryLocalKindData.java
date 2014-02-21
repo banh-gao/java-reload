@@ -7,7 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.DictionaryValue.Key;
+import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredMetadata;
+import com.github.reload.storage.data.DictionaryValue.Key;
 
 /**
  * Class used into the local storage to store array values

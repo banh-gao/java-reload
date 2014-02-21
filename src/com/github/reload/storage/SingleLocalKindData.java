@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.message.ResourceID;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredMetadata;
 
 /**
  * Class used into the local storage to store a single value

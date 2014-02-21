@@ -3,6 +3,7 @@ package com.github.reload.storage;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import com.github.reload.storage.data.StoredData;
 
 /**
  * Used in store and fetch to represent values for a specific data kind

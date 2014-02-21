@@ -123,7 +123,7 @@ public class AttachMessage extends Content {
 		}
 
 		@Override
-		public void encode(AttachMessage obj, ByteBuf buf) throws CodecException {
+		public void encode(AttachMessage obj, ByteBuf buf, Object... params) throws CodecException {
 			Field ufragLenFld = allocateField(buf, UFRAG_LENGTH_FIELD);
 			buf.writeBytes(obj.userFragment);
 			ufragLenFld.updateDataLength();
@@ -159,7 +159,7 @@ public class AttachMessage extends Content {
 		}
 
 		@Override
-		public AttachMessage decode(ByteBuf buf) throws CodecException {
+		public AttachMessage decode(ByteBuf buf, Object... params) throws CodecException {
 			AttachMessage.Builder b = new AttachMessage.Builder();
 			ByteBuf usrFrag = readField(buf, UFRAG_LENGTH_FIELD);
 			b.userFragment = new byte[usrFrag.readableBytes()];

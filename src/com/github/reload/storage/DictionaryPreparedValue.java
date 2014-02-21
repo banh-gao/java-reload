@@ -1,7 +1,8 @@
 package com.github.reload.storage;
 
-import com.github.reload.storage.DictionaryValue.Key;
 import com.github.reload.storage.PreparedData.DataBuildingException;
+import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.DictionaryValue.Key;
 
 /**
  * A dictionary prepared value created by adding a key to a single prepared

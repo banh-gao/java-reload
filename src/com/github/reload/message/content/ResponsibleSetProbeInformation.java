@@ -42,12 +42,12 @@ public class ResponsibleSetProbeInformation extends ProbeInformation {
 		}
 
 		@Override
-		public void encode(ResponsibleSetProbeInformation obj, ByteBuf buf) throws CodecException {
+		public void encode(ResponsibleSetProbeInformation obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeInt((int) obj.responsiblePpb);
 		}
 
 		@Override
-		public ResponsibleSetProbeInformation decode(ByteBuf buf) throws CodecException {
+		public ResponsibleSetProbeInformation decode(ByteBuf buf, Object... params) throws CodecException {
 			return new ResponsibleSetProbeInformation(buf.readUnsignedInt());
 		}
 

@@ -1,7 +1,8 @@
-package com.github.reload.storage;
+package com.github.reload.storage.data;
 
 import java.math.BigInteger;
-import com.github.reload.storage.DictionaryValue.Key;
+import com.github.reload.storage.Metadata;
+import com.github.reload.storage.data.DictionaryValue.Key;
 
 /**
  * Metadata of a stored dictionary entry

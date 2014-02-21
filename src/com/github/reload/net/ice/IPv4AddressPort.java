@@ -30,13 +30,13 @@ public class IPv4AddressPort extends IPAddressPort {
 		}
 
 		@Override
-		public void encode(IPv4AddressPort obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(IPv4AddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			buf.writeBytes(obj.getAddress().getAddress());
 			buf.writeShort(obj.getPort());
 		}
 
 		@Override
-		public IPv4AddressPort decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public IPv4AddressPort decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			return new IPv4AddressPort(decodeAddr(buf), decodePort(buf));
 		}
 

@@ -1,7 +1,10 @@
-package com.github.reload.storage;
+package com.github.reload.storage.data;
 
 import java.math.BigInteger;
-import com.github.reload.storage.DataResponse.ResponseData;
+import com.github.reload.message.SignerIdentity;
+import com.github.reload.storage.DataKind;
+import com.github.reload.storage.Metadata;
+import com.github.reload.storage.ResponseData;
 
 /**
  * A data with a digital signature over the fields defined by the RELOAD
@@ -16,9 +19,6 @@ public class StoredMetadata extends ResponseData {
 
 	public final static int DEFAULT_LIFETIME = 60;
 
-	private final DataKind kind;
-	private final BigInteger storageTime;
-	private final long lifeTime;
 	private final Metadata value;
 
 	private final SignerIdentity signerIdentity;

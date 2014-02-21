@@ -2,6 +2,7 @@ package com.github.reload.storage;
 
 import java.math.BigInteger;
 import java.util.List;
+import com.github.reload.storage.data.StoredMetadata;
 
 /**
  * A response contained in a stat answer, contains all the data for a specific
@@ -10,7 +11,7 @@ import java.util.List;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class StatKindResponse extends DataResponse<StoredMetadata> {
+public class StatKindResponse extends KindResponse<StoredMetadata> {
 
 	public StatKindResponse(DataKind kind, BigInteger generation, List<StoredMetadata> values) {
 		super(kind, generation, values);

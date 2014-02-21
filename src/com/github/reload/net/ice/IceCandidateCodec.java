@@ -32,7 +32,7 @@ public class IceCandidateCodec extends Codec<IceCandidate> {
 	}
 
 	@Override
-	public void encode(IceCandidate obj, ByteBuf buf) throws CodecException {
+	public void encode(IceCandidate obj, ByteBuf buf, Object... params) throws CodecException {
 		socketAddrCodec.encode(obj.addrPort, buf);
 		buf.writeByte(obj.overlayLink.code);
 
@@ -72,7 +72,7 @@ public class IceCandidateCodec extends Codec<IceCandidate> {
 	}
 
 	@Override
-	public IceCandidate decode(ByteBuf buf) throws CodecException {
+	public IceCandidate decode(ByteBuf buf, Object... params) throws CodecException {
 		IPAddressPort addrPort = socketAddrCodec.decode(buf);
 
 		OverlayLinkType overlayLink = OverlayLinkType.valueOf(buf.readByte());

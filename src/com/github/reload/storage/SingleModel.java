@@ -2,6 +2,7 @@ package com.github.reload.storage;
 
 import java.math.BigInteger;
 import com.github.reload.message.ResourceID;
+import com.github.reload.storage.data.DataValue;
 
 /**
  * Factory class used to create objects specialized for the single data model

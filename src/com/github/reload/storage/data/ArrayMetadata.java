@@ -1,4 +1,6 @@
-package com.github.reload.storage;
+package com.github.reload.storage.data;
+
+import com.github.reload.storage.Metadata;
 
 
 /**

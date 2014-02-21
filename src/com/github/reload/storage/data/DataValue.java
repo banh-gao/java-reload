@@ -1,11 +1,10 @@
-package com.github.reload.storage;
+package com.github.reload.storage.data;
 
 import java.util.Arrays;
+import com.github.reload.storage.Metadata;
 
 /**
  * The value of one data stored in the overlay
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 public class DataValue {

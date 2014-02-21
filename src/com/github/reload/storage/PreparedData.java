@@ -6,6 +6,9 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
+import com.github.reload.storage.data.ArrayValue;
+import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.data.StoredData;
 
 /**
  * Helps to generate a signed data

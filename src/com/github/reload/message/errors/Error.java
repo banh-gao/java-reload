@@ -67,7 +67,7 @@ public class Error extends Content {
 		}
 
 		@Override
-		public void encode(Error obj, ByteBuf buf) throws CodecException {
+		public void encode(Error obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeShort(obj.error.getCode());
 
 			Field lenFld = allocateField(buf, INFO_LENGTH_FIELD);
@@ -76,7 +76,7 @@ public class Error extends Content {
 		}
 
 		@Override
-		public Error decode(ByteBuf buf) throws CodecException {
+		public Error decode(ByteBuf buf, Object... params) throws CodecException {
 			ErrorType error = ErrorType.valueOf(buf.readShort());
 
 			ByteBuf info = readField(buf, INFO_LENGTH_FIELD);

@@ -1,6 +1,7 @@
 package com.github.reload.storage;
 
 import com.github.reload.storage.PreparedData.DataBuildingException;
+import com.github.reload.storage.data.ArrayValue;
 
 /**
  * An array prepared value created by adding an index to a single prepared value

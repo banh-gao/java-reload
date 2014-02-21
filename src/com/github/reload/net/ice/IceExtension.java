@@ -27,7 +27,7 @@ public class IceExtension {
 		}
 
 		@Override
-		public void encode(IceExtension obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(IceExtension obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			Field nameLenFld = allocateField(buf, NAME_LENGTH_FIELD);
 			buf.writeBytes(obj.name);
 			nameLenFld.updateDataLength();
@@ -38,7 +38,7 @@ public class IceExtension {
 		}
 
 		@Override
-		public IceExtension decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public IceExtension decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			ByteBuf nameBuf = readField(buf, NAME_LENGTH_FIELD);
 			byte[] name = new byte[nameBuf.readableBytes()];
 			nameBuf.readBytes(name);

@@ -53,6 +53,8 @@ public abstract class Codec<T> {
 
 	protected final Map<Class<?>, Codec<?>> codecs = new HashMap<Class<?>, Codec<?>>();
 
+	private static final Object[] NO_PARAMS = new Object[0];
+
 	public Codec(Context context) {
 		if (context == null)
 			throw new NullPointerException();
@@ -111,10 +113,22 @@ public abstract class Codec<T> {
 	/**
 	 * Encode object to the given byte buffer
 	 * 
-	 * @param data
+	 * @param obj
 	 * @param buf
 	 */
-	public abstract void encode(T obj, ByteBuf buf) throws CodecException;
+	public final void encode(T obj, ByteBuf buf) throws CodecException {
+		encode(obj, buf, NO_PARAMS);
+	}
+
+	/**
+	 * Encode object to the given byte buffer. This method can be used to pass
+	 * additional parameters to the encoder.
+	 * 
+	 * @param obj
+	 * @param buf
+	 * @param params
+	 */
+	public abstract void encode(T obj, ByteBuf buf, Object... params) throws CodecException;
 
 	/**
 	 * Decode object from the given byte buffer
@@ -122,7 +136,19 @@ public abstract class Codec<T> {
 	 * @param buf
 	 * @return
 	 */
-	public abstract T decode(ByteBuf buf) throws CodecException;
+	public final T decode(ByteBuf buf) throws CodecException {
+		return decode(buf, NO_PARAMS);
+	}
+
+	/**
+	 * Decode object from the given byte buffer. This method can be used to pass
+	 * additional parameters to the decoder.
+	 * 
+	 * @param buf
+	 * @param params
+	 * @return
+	 */
+	public abstract T decode(ByteBuf buf, Object... params) throws CodecException;
 
 	/**
 	 * Allocate a field at the current write index that can hold at most the

@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.DataResponse.ResponseData;
 import com.github.reload.storage.StorageController.QueryType;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredMetadata;
 
 /**
  * Contains the values specific to a data kind, the implementations are

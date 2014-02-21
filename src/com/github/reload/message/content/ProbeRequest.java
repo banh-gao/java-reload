@@ -57,7 +57,7 @@ public class ProbeRequest extends Content {
 		}
 
 		@Override
-		public ProbeRequest decode(ByteBuf buf) throws CodecException {
+		public ProbeRequest decode(ByteBuf buf, Object... params) throws CodecException {
 
 			List<ProbeInformationType> requestedInfo = new ArrayList<ProbeRequest.ProbeInformationType>();
 
@@ -79,7 +79,7 @@ public class ProbeRequest extends Content {
 		}
 
 		@Override
-		public void encode(ProbeRequest obj, ByteBuf buf) throws CodecException {
+		public void encode(ProbeRequest obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, LIST_LENGTH_FIELD);
 			for (ProbeInformationType t : obj.requestedInfo) {
 				buf.writeByte(t.getCode());

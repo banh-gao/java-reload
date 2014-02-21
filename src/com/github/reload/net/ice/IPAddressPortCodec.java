@@ -19,7 +19,7 @@ public class IPAddressPortCodec extends Codec<IPAddressPort> {
 	}
 
 	@Override
-	public void encode(IPAddressPort obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public void encode(IPAddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		buf.writeByte(obj.getAddressType().code);
 		Field lenFld = allocateField(buf, ADDR_LENGTH_FIELD);
 
@@ -37,7 +37,7 @@ public class IPAddressPortCodec extends Codec<IPAddressPort> {
 	}
 
 	@Override
-	public IPAddressPort decode(ByteBuf buf) throws CodecException {
+	public IPAddressPort decode(ByteBuf buf, Object... params) throws CodecException {
 		AddressType type = AddressType.valueOf(buf.readByte());
 		if (type == null)
 			throw new CodecException("Unknown address type");

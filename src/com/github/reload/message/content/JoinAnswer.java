@@ -35,14 +35,14 @@ public class JoinAnswer extends Content {
 		}
 
 		@Override
-		public void encode(JoinAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(JoinAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 			buf.writeBytes(obj.overlayData);
 			lenFld.updateDataLength();
 		}
 
 		@Override
-		public JoinAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public JoinAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			ByteBuf overlayData = readField(buf, DATA_LENGTH_FIELD);
 			byte[] data = new byte[overlayData.readableBytes()];
 			buf.readBytes(data);

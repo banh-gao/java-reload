@@ -52,13 +52,13 @@ public class PingAnswer extends Content {
 		}
 
 		@Override
-		public void encode(PingAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(PingAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			buf.writeLong(obj.responseId);
 			buf.writeBytes(obj.responseTime.toByteArray());
 		}
 
 		@Override
-		public PingAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public PingAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			long responseId = buf.readLong();
 			byte[] resposeTimeData = new byte[U_INT64];
 			buf.readBytes(resposeTimeData);

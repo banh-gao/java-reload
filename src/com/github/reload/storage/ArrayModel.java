@@ -2,6 +2,8 @@ package com.github.reload.storage;
 
 import java.math.BigInteger;
 import com.github.reload.message.ResourceID;
+import com.github.reload.storage.data.ArrayMetadata;
+import com.github.reload.storage.data.ArrayValue;
 
 /**
  * Factory class used to create objects specialized for the array data model

@@ -33,11 +33,11 @@ public class HostCandidate extends IceCandidate {
 		}
 
 		@Override
-		public void encode(HostCandidate obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(HostCandidate obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		}
 
 		@Override
-		public HostCandidate decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public HostCandidate decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			return new HostCandidate();
 		}
 	}

@@ -21,7 +21,7 @@ public abstract class ProbeInformation {
 		}
 
 		@Override
-		public void encode(ProbeInformation obj, ByteBuf buf) throws CodecException {
+		public void encode(ProbeInformation obj, ByteBuf buf, Object... params) throws CodecException {
 			ProbeInformationType type = obj.getType();
 
 			buf.writeByte(type.getCode());
@@ -35,7 +35,7 @@ public abstract class ProbeInformation {
 		}
 
 		@Override
-		public ProbeInformation decode(ByteBuf buf) throws CodecException {
+		public ProbeInformation decode(ByteBuf buf, Object... params) throws CodecException {
 			byte typeV = buf.readByte();
 			ProbeInformationType type = ProbeInformationType.valueOf(typeV);
 

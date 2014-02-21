@@ -3,7 +3,8 @@ package com.github.reload.storage;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.storage.DataModel.ModelType;
-import com.github.reload.storage.DictionaryValue.Key;
+import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.DictionaryValue.Key;
 
 /**
  * Specifier used to fetch dictionary values

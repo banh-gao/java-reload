@@ -6,6 +6,7 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
 import com.github.reload.Context;
 import com.github.reload.message.Content;
+import com.github.reload.message.Header;
 import com.github.reload.message.SecurityBlock;
 
 /**
@@ -23,13 +24,12 @@ public class MessageDecoder extends MessageToMessageDecoder<HeadedMessage> {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, HeadedMessage msg, List<Object> out) throws Exception {
-		Message message = new Message();
-		message.header = msg.getHeader();
+		Header header = msg.getHeader();
 		ByteBuf payload = msg.getPayload();
 		try {
-			message.content = contentCodec.decode(payload);
-			message.secBlock = secBlockCodec.decode(payload);
-			out.add(message);
+			Content content = contentCodec.decode(payload);
+			SecurityBlock secBlock = secBlockCodec.decode(payload);
+			out.add(new Message(header, content, secBlock));
 		} finally {
 			payload.release();
 		}

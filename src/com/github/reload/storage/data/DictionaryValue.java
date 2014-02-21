@@ -1,16 +1,15 @@
-package com.github.reload.storage;
+package com.github.reload.storage.data;
 
 import java.util.Arrays;
+import com.github.reload.storage.data.StoredDictionaryData.DictionaryValue.Key;
 
 /**
  * A dictionary value represented by adding a key to a single value
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class DictionaryValue extends DataValue {
 
-	private Key key;
+	private DictionaryValue.Key key;
 
 	DictionaryValue(byte[] key, byte[] value, boolean exists) {
 		super(value, exists);
@@ -26,7 +25,7 @@ public class DictionaryValue extends DataValue {
 		key = new Key(buf);
 	}
 
-	public Key getKey() {
+	public DictionaryValue.Key getKey() {
 		return key;
 	}
 
@@ -104,7 +103,7 @@ public class DictionaryValue extends DataValue {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Key other = (Key) obj;
+			DictionaryValue.Key other = (DictionaryValue.Key) obj;
 			if (!Arrays.equals(key, other.key))
 				return false;
 			return true;

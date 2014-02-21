@@ -7,8 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import com.github.reload.message.GenericSignature;
 import com.github.reload.message.ResourceID;
+import com.github.reload.message.SignerIdentity;
 import com.github.reload.storage.ArrayModelSpecifier.ArrayRange;
+import com.github.reload.storage.data.ArrayMetadata;
+import com.github.reload.storage.data.ArrayValue;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredMetadata;
+import com.github.reload.storage.errors.DataTooLargeException;
 
 /**
  * Class used into the local storage to store array values

@@ -7,6 +7,9 @@ import java.util.Map;
 import javax.naming.ConfigurationException;
 import com.github.reload.message.SecurityBlock;
 import com.github.reload.storage.DataModel.ModelType;
+import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.errors.UnknownKindException;
+import com.github.reload.storage.policies.AccessPolicy;
 
 /**
  * The description of the data kind that a peer can handle

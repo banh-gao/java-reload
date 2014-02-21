@@ -1,10 +1,7 @@
-package com.github.reload.storage;
-
+package com.github.reload.storage.data;
 
 /**
  * An array value represented by adding an index to a single value
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 public class ArrayValue extends DataValue {

@@ -16,8 +16,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.DataResponse.ResponseData;
 import com.github.reload.storage.StorageController.QueryType;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredMetadata;
 
 /**
  * The map of the data stored locally. It stores the data which the peer is
@@ -96,10 +97,10 @@ public class LocalStore {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends DataResponse<?>> List<T> query(ResourceID resourceId, List<DataSpecifier> specifiers, QueryType queryType) throws NotFoundException {
+	public <T extends KindResponse<?>> List<T> query(ResourceID resourceId, List<DataSpecifier> specifiers, QueryType queryType) throws NotFoundException {
 		LocalKinds storedKinds = getStoredKinds(resourceId);
 
-		List<DataResponse<? extends ResponseData>> out = new ArrayList<DataResponse<? extends ResponseData>>();
+		List<KindResponse<? extends ResponseData>> out = new ArrayList<KindResponse<? extends ResponseData>>();
 
 		for (DataSpecifier spec : specifiers) {
 			LocalKindData data = storedKinds.get(spec.getDataKind().getKindId());

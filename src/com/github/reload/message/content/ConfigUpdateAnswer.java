@@ -23,12 +23,12 @@ public class ConfigUpdateAnswer extends Content {
 		}
 
 		@Override
-		public void encode(ConfigUpdateAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(ConfigUpdateAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			// No data carried
 		}
 
 		@Override
-		public ConfigUpdateAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public ConfigUpdateAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			return new ConfigUpdateAnswer();
 		}
 

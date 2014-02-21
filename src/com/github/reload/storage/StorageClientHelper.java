@@ -14,8 +14,9 @@ import com.github.reload.message.ResourceID;
 import com.github.reload.message.errors.ErrorMessageException;
 import com.github.reload.message.errors.NetworkException;
 import com.github.reload.storage.ArrayModelSpecifier.ArrayRange;
-import com.github.reload.storage.DictionaryValue.Key;
 import com.github.reload.storage.PreparedData.DataBuildingException;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.DictionaryValue.Key;
 
 /**
  * Helps a peer to send storage requests into the overlay

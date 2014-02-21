@@ -3,6 +3,7 @@ package com.github.reload.storage;
 import java.math.BigInteger;
 import java.util.EnumSet;
 import com.github.reload.message.ResourceID;
+import com.github.reload.storage.data.DataValue;
 
 public abstract class DataModel {
 

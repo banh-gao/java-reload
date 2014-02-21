@@ -33,12 +33,12 @@ public class UpdateAnswer extends Content {
 		}
 
 		@Override
-		public void encode(UpdateAnswer obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(UpdateAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			buf.writeBytes(obj.overlayData);
 		}
 
 		@Override
-		public UpdateAnswer decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public UpdateAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			byte[] data = new byte[buf.readableBytes()];
 			buf.readBytes(data);
 			return new UpdateAnswer(data);

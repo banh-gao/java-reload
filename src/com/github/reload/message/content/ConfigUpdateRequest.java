@@ -59,7 +59,7 @@ public class ConfigUpdateRequest extends Content {
 		}
 
 		@Override
-		public void encode(ConfigUpdateRequest obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(ConfigUpdateRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			buf.writeByte(obj.type.code);
 
 			buf.writeInt(CONF_LENGTH_FIELD + obj.xmlConfigurationData.length);
@@ -69,7 +69,7 @@ public class ConfigUpdateRequest extends Content {
 		}
 
 		@Override
-		public ConfigUpdateRequest decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public ConfigUpdateRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 
 			ConfigUpdateType type = ConfigUpdateType.valueOf(buf.readByte());
 

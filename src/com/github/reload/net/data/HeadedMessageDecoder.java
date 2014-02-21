@@ -22,8 +22,14 @@ public class HeadedMessageDecoder extends ByteToMessageDecoder {
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 		HeadedMessage message = new HeadedMessage();
 		message.header = hdrCodec.decode(in);
-		message.payload = in.copy();
-		in.clear();
+		message.payload = in.slice();
+		in.retain();
 		out.add(message);
+		in.clear();
+	}
+
+	@Override
+	protected void decodeLast(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+		// Ignore
 	}
 }

@@ -2,6 +2,7 @@ package com.github.reload.storage;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import com.github.reload.storage.data.DataValue;
 
 /**
  * Metadata used to describe a stored data
