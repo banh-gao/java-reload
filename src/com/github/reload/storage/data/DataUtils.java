@@ -10,6 +10,7 @@ import com.github.reload.message.SignerIdentity.IdentityType;
 import com.github.reload.message.SignerIdentity.SignerIdentityException;
 import com.github.reload.storage.ArrayModel;
 import com.github.reload.storage.DataKind;
+import com.github.reload.storage.Metadata;
 import com.github.reload.storage.PreparedData.DataBuildingException;
 import com.github.reload.storage.errors.DataTooLargeException;
 
@@ -65,14 +66,14 @@ public class DataUtils {
 			throw new SignatureException(e);
 		}
 
-		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + DataValue.VALUE_LENGTH_FIELD + value.getSize());
+		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleEntry.VALUE_LENGTH_FIELD + value.getSize());
 		resourceId.writeTo(signBuf);
 		kind.getKindId().writeTo(signBuf);
 		signBuf.putUnsigned64(storageTime);
 
 		// Avoid signature breaking for array
-		if (value instanceof ArrayValue) {
-			ArrayValue signValue = ArrayModel.getValueForSigning((ArrayValue) value, kind);
+		if (value instanceof ArrayEntry) {
+			ArrayEntry signValue = ArrayModel.getValueForSigning((ArrayEntry) value, kind);
 			signValue.writeTo(signBuf);
 		} else {
 			value.writeTo(signBuf);
@@ -86,5 +87,9 @@ public class DataUtils {
 
 	StoredMetadata getMetadata() {
 		return new StoredMetadata(kind, storageTime, lifeTime, value.getMetadata(), signature.getIdentity());
+	}
+
+	Metadata getMetadata() {
+		return new Metadata(this);
 	}
 }

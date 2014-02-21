@@ -1,7 +1,7 @@
 package com.github.reload.storage;
 
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.data.SingleEntry;
 
 /**
  * A prepared value used to store values of a generic data model
@@ -58,7 +58,7 @@ public class PreparedValue {
 	 * @return the generated value
 	 * @throws DataBuildingException
 	 */
-	DataValue build() throws DataBuildingException {
-		return new DataValue(value, exists);
+	SingleEntry build() throws DataBuildingException {
+		return new SingleEntry(value, exists);
 	}
 }

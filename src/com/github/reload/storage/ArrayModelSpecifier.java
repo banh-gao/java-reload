@@ -2,7 +2,7 @@ package com.github.reload.storage;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.storage.DataModel.ModelType;
+import com.github.reload.storage.DataModel.DataType;
 
 /**
  * Specifier used to fetch array values
@@ -18,11 +18,11 @@ public class ArrayModelSpecifier extends DataModelSpecifier {
 	private final List<ArrayRange> ranges = new ArrayList<ArrayRange>();
 
 	ArrayModelSpecifier() {
-		super(ModelType.ARRAY);
+		super(DataType.ARRAY);
 	}
 
 	ArrayModelSpecifier(UnsignedByteBuffer buf) {
-		super(ModelType.ARRAY);
+		super(DataType.ARRAY);
 		int length = buf.getLengthValue(ArrayModelSpecifier.RANGES_LENGTH_FIELD);
 
 		while (length > 0) {

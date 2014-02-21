@@ -41,7 +41,7 @@ public class HeaderCodec extends Codec<Header> {
 	}
 
 	@Override
-	public void encode(Header h, ByteBuf buf) throws CodecException {
+	public void encode(Header h, ByteBuf buf, Object... params) throws CodecException {
 		buf.writeInt(RELOAD_TOKEN);
 		buf.writeInt(h.overlayHash);
 		buf.writeShort(h.configurationSequence);
@@ -101,7 +101,7 @@ public class HeaderCodec extends Codec<Header> {
 	}
 
 	@Override
-	public Header decode(ByteBuf buf) throws CodecException {
+	public Header decode(ByteBuf buf, Object... params) throws CodecException {
 		Header h = new Header();
 
 		h.isReloTokenValid = (buf.readInt() == RELOAD_TOKEN);

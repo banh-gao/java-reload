@@ -66,7 +66,7 @@ public abstract class MessageExtension {
 		}
 
 		@Override
-		public void encode(MessageExtension obj, ByteBuf buf) throws CodecException {
+		public void encode(MessageExtension obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeShort(obj.getExtensionType().code);
 			buf.writeByte(obj.isCritical ? 1 : 0);
 
@@ -81,7 +81,7 @@ public abstract class MessageExtension {
 		}
 
 		@Override
-		public MessageExtension decode(ByteBuf buf) throws CodecException {
+		public MessageExtension decode(ByteBuf buf, Object... params) throws CodecException {
 			MessageExtensionType type = MessageExtensionType.valueOf(buf.readShort());
 
 			boolean isCritical = (buf.readUnsignedByte() > 0);

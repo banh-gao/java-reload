@@ -1,6 +1,6 @@
 package com.github.reload.storage;
 
-import com.github.reload.storage.DataModel.ModelType;
+import com.github.reload.storage.DataModel.DataType;
 
 /**
  * A model specifier used to fetch data of a particular data model
@@ -10,16 +10,16 @@ import com.github.reload.storage.DataModel.ModelType;
  */
 public class DataModelSpecifier {
 
-	private final ModelType modelType;
+	private final DataType modelType;
 
-	DataModelSpecifier(ModelType modelType) {
+	DataModelSpecifier(DataType modelType) {
 		this.modelType = modelType;
 	}
 
 	/**
 	 * @return The data model related with this specifier
 	 */
-	ModelType getModelType() {
+	DataType getModelType() {
 		return modelType;
 	}
 

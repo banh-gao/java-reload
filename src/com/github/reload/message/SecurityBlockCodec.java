@@ -12,13 +12,13 @@ public class SecurityBlockCodec extends Codec<SecurityBlock> {
 	}
 
 	@Override
-	public void encode(SecurityBlock obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public void encode(SecurityBlock obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public SecurityBlock decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public SecurityBlock decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		// TODO Auto-generated method stub
 		return null;
 	}

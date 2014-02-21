@@ -1,13 +1,13 @@
 package com.github.reload.message;
 
+import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
+import com.github.reload.Context;
+import com.github.reload.message.HashAlgorithm.HashAlgorithmCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-/**
- * Defines the hash algorithms encoded as in RFC5246
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
+@ReloadCodec(HashAlgorithmCodec.class)
 public enum HashAlgorithm {
 	NONE((byte) 0x00, "NONE"),
 	MD5((byte) 0x01, "MD5"),
@@ -43,10 +43,28 @@ public enum HashAlgorithm {
 		return null;
 	}
 
+	public static class HashAlgorithmCodec extends Codec<HashAlgorithm> {
+
+		public HashAlgorithmCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(HashAlgorithm obj, ByteBuf buf, Object... params) throws CodecException {
+			buf.writeByte(obj.code);
+		}
+
+		@Override
+		public HashAlgorithm decode(ByteBuf buf, Object... params) throws CodecException {
+			HashAlgorithm hashAlg = HashAlgorithm.valueOf(buf.readByte());
+			if (hashAlg == null)
+				throw new CodecException("Unsupported hash algorithm");
+
+			return hashAlg;
+		}
+	}
+
 	@Override
-	/**
-	 * Get hash algorithm string representation
-	 */
 	public String toString() {
 		return asString;
 	}

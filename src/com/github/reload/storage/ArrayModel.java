@@ -3,7 +3,7 @@ package com.github.reload.storage;
 import java.math.BigInteger;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.data.ArrayMetadata;
-import com.github.reload.storage.data.ArrayValue;
+import com.github.reload.storage.data.ArrayEntry;
 
 /**
  * Factory class used to create objects specialized for the array data model
@@ -30,8 +30,8 @@ public class ArrayModel extends DataModel {
 	}
 
 	@Override
-	public ArrayValue parseValue(UnsignedByteBuffer buf, int length) {
-		return new ArrayValue(buf);
+	public ArrayEntry parseValue(UnsignedByteBuffer buf, int length) {
+		return new ArrayEntry(buf);
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class ArrayModel extends DataModel {
 	 * Get array with index set to 0 to avoid signature breaking when using
 	 * the append feature (index to 0xffffffff)
 	 */
-	public static ArrayValue getValueForSigning(ArrayValue currentValue, DataKind dataKind) {
+	public static ArrayEntry getValueForSigning(ArrayEntry currentValue, DataKind dataKind) {
 		ArrayPreparedValue p = new ArrayPreparedValue(dataKind);
 		p.setIndex(0);
 		p.setExists(currentValue.exists());
@@ -57,8 +57,8 @@ public class ArrayModel extends DataModel {
 	}
 
 	@Override
-	public ModelType getModelType() {
-		return ModelType.ARRAY;
+	public DataType getModelType() {
+		return DataType.ARRAY;
 	}
 
 	@Override

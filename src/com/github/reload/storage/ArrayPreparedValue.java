@@ -1,7 +1,7 @@
 package com.github.reload.storage;
 
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.ArrayValue;
+import com.github.reload.storage.data.ArrayEntry;
 
 /**
  * An array prepared value created by adding an index to a single prepared value
@@ -34,10 +34,10 @@ public class ArrayPreparedValue extends PreparedValue {
 	}
 
 	@Override
-	ArrayValue build() {
+	ArrayEntry build() {
 		if (index == -1)
 			throw new DataBuildingException("Array index not set");
-		return new ArrayValue(index, getValue(), exists());
+		return new ArrayEntry(index, getValue(), exists());
 	}
 
 	@Override

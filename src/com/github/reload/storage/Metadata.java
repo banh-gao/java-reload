@@ -2,7 +2,7 @@ package com.github.reload.storage;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.data.SingleEntry;
 
 /**
  * Metadata used to describe a stored data
@@ -20,7 +20,7 @@ public class Metadata {
 
 	private final byte[] hashValue;
 
-	public Metadata(DataValue value) {
+	public Metadata(SingleEntry value) {
 		exists = value.exists();
 		storedValueSize = value.getSize();
 		if (value.getSize() == 0) {
@@ -32,7 +32,7 @@ public class Metadata {
 		}
 	}
 
-	private static byte[] computeHash(HashAlgorithm hashAlgorithm, DataValue value) {
+	private static byte[] computeHash(HashAlgorithm hashAlgorithm, SingleEntry value) {
 		MessageDigest digestor;
 		try {
 			digestor = MessageDigest.getInstance(hashAlgorithm.toString());

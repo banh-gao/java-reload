@@ -24,7 +24,7 @@ public class RoutableIDCodec extends Codec<RoutableID> {
 	}
 
 	@Override
-	public void encode(RoutableID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public void encode(RoutableID obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		buf.writeByte(obj.getType().code);
 
 		Field lenFld = allocateField(buf, DEST_LENGTH_FIELD);
@@ -47,7 +47,7 @@ public class RoutableIDCodec extends Codec<RoutableID> {
 	}
 
 	@Override
-	public RoutableID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public RoutableID decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		byte firstByte = buf.readByte();
 
 		if ((firstByte & OPAQUE_DEST_MASK) == OPAQUE_DEST_MASK) {

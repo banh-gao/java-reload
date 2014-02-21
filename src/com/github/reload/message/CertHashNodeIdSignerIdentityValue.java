@@ -1,37 +1,29 @@
 package com.github.reload.message;
 
+import io.netty.buffer.ByteBuf;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.NodeID;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import com.github.reload.Context;
+import com.github.reload.message.CertHashNodeIdSignerIdentityValue.CertHashNodeIdSignerIdentityValueCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-/**
- * Indentity value that contains the hashed signer certificate and the nodeid
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
+@ReloadCodec(CertHashNodeIdSignerIdentityValueCodec.class)
 public class CertHashNodeIdSignerIdentityValue extends SignerIdentityValue {
 
-	private final int CERT_HASH_NODEID_LENGTH_FIELD = EncUtils.U_INT8;
-
+	private final HashAlgorithm certHashAlg;
 	private final byte[] certHash;
 
-	public CertHashNodeIdSignerIdentityValue(UnsignedByteBuffer buf, HashAlgorithm certHashAlg) {
-		super(certHashAlg);
-		int len = buf.getLengthValue(CERT_HASH_NODEID_LENGTH_FIELD);
-
-		certHash = new byte[len];
-
-		buf.getRaw(certHash);
+	public CertHashNodeIdSignerIdentityValue(HashAlgorithm certHashAlg, byte[] certHash) {
+		super();
+		this.certHashAlg = certHashAlg;
+		this.certHash = certHash;
 	}
 
 	public CertHashNodeIdSignerIdentityValue(HashAlgorithm certHashAlg, Certificate identityCertificate, NodeID signerNodeId) {
-		super(certHashAlg);
+		this.certHashAlg = certHashAlg;
 		certHash = computeHash(certHashAlg, identityCertificate, signerNodeId);
 	}
 
@@ -47,16 +39,38 @@ public class CertHashNodeIdSignerIdentityValue extends SignerIdentityValue {
 		}
 	}
 
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		Field lenFld = buf.allocateLengthField(CERT_HASH_NODEID_LENGTH_FIELD);
-		buf.putRaw(certHash);
+	public static class CertHashNodeIdSignerIdentityValueCodec extends Codec<CertHashNodeIdSignerIdentityValue> {
 
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-	}
+		private final int CERT_HASH_NODEID_LENGTH_FIELD = U_INT8;
 
-	@Override
-	public byte[] getHashValue() {
-		return certHash;
+		public CertHashNodeIdSignerIdentityValueCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(CertHashNodeIdSignerIdentityValue obj, ByteBuf buf, Object... params) throws CodecException {
+			buf.writeByte(obj.certHashAlg.getCode());
+
+			Field lenFld = allocateField(buf, CERT_HASH_NODEID_LENGTH_FIELD);
+			buf.writeBytes(obj.certHash);
+
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public CertHashNodeIdSignerIdentityValue decode(ByteBuf buf, Object... params) throws CodecException {
+			HashAlgorithm certHashAlg = HashAlgorithm.valueOf(buf.readByte());
+
+			if (certHashAlg == null)
+				throw new CodecException("Unsupported hash algorithm");
+
+			ByteBuf dataFld = readField(buf, CERT_HASH_NODEID_LENGTH_FIELD);
+
+			byte[] certHash = new byte[dataFld.readableBytes()];
+
+			dataFld.readBytes(certHash);
+
+			return new CertHashNodeIdSignerIdentityValue(certHashAlg, certHash);
+		}
 	}
 }

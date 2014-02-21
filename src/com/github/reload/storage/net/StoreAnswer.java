@@ -1,4 +1,4 @@
-package com.github.reload.storage;
+package com.github.reload.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -8,18 +8,18 @@ import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.StoreAnswer.StoreAnswerCodec;
+import com.github.reload.storage.net.StoreAnswer.StoreAnswerCodec;
 
 @ReloadCodec(StoreAnswerCodec.class)
 public class StoreAnswer extends Content {
 
-	private final List<StoreResponse> responses;
+	private final List<StoreKindResponse> responses;
 
-	public StoreAnswer(List<StoreResponse> responses) {
+	public StoreAnswer(List<StoreKindResponse> responses) {
 		this.responses = responses;
 	}
 
-	public List<StoreResponse> getResponses() {
+	public List<StoreKindResponse> getResponses() {
 		return responses;
 	}
 
@@ -32,18 +32,18 @@ public class StoreAnswer extends Content {
 
 		private static final int RESPONSES_LENGTH_FIELD = U_INT16;
 
-		private final Codec<StoreResponse> storeRespCodec;
+		private final Codec<StoreKindResponse> storeRespCodec;
 
 		public StoreAnswerCodec(Context context) {
 			super(context);
-			storeRespCodec = getCodec(StoreResponse.class);
+			storeRespCodec = getCodec(StoreKindResponse.class);
 		}
 
 		@Override
-		public void encode(StoreAnswer obj, ByteBuf buf) throws CodecException {
+		public void encode(StoreAnswer obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, RESPONSES_LENGTH_FIELD);
 
-			for (StoreResponse r : obj.responses) {
+			for (StoreKindResponse r : obj.responses) {
 				storeRespCodec.encode(r, buf);
 			}
 
@@ -51,8 +51,8 @@ public class StoreAnswer extends Content {
 		}
 
 		@Override
-		public StoreAnswer decode(ByteBuf buf) throws CodecException {
-			List<StoreResponse> responses = new ArrayList<StoreResponse>();
+		public StoreAnswer decode(ByteBuf buf, Object... params) throws CodecException {
+			List<StoreKindResponse> responses = new ArrayList<StoreKindResponse>();
 
 			ByteBuf respData = readField(buf, RESPONSES_LENGTH_FIELD);
 

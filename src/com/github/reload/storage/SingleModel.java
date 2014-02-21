@@ -2,7 +2,7 @@ package com.github.reload.storage;
 
 import java.math.BigInteger;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.data.SingleEntry;
 
 /**
  * Factory class used to create objects specialized for the single data model
@@ -14,17 +14,17 @@ public class SingleModel extends DataModel {
 
 	@Override
 	public DataModelSpecifier newSpecifier() {
-		return new DataModelSpecifier(ModelType.SINGLE);
+		return new DataModelSpecifier(DataType.SINGLE);
 	}
 
 	@Override
 	public DataModelSpecifier parseSpecifier(UnsignedByteBuffer buf, int length) {
-		return new DataModelSpecifier(ModelType.SINGLE);
+		return new DataModelSpecifier(DataType.SINGLE);
 	}
 
 	@Override
-	public DataValue parseValue(UnsignedByteBuffer buf, int length) {
-		return new DataValue(buf);
+	public SingleEntry parseValue(UnsignedByteBuffer buf, int length) {
+		return new SingleEntry(buf);
 	}
 
 	@Override
@@ -38,8 +38,8 @@ public class SingleModel extends DataModel {
 	}
 
 	@Override
-	public ModelType getModelType() {
-		return ModelType.SINGLE;
+	public DataType getModelType() {
+		return DataType.SINGLE;
 	}
 
 	@Override

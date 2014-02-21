@@ -16,7 +16,14 @@ import com.github.reload.message.errors.NetworkException;
 import com.github.reload.storage.ArrayModelSpecifier.ArrayRange;
 import com.github.reload.storage.PreparedData.DataBuildingException;
 import com.github.reload.storage.data.StoredData;
-import com.github.reload.storage.data.DictionaryValue.Key;
+import com.github.reload.storage.data.DictionaryEntry.Key;
+import com.github.reload.storage.net.FetchAnswer;
+import com.github.reload.storage.net.FetchKindResponse;
+import com.github.reload.storage.net.FetchRequest;
+import com.github.reload.storage.net.StoreAnswer;
+import com.github.reload.storage.net.StoreKindData;
+import com.github.reload.storage.net.StoreRequest;
+import com.github.reload.storage.net.StoreKindResponse;
 
 /**
  * Helps a peer to send storage requests into the overlay
@@ -34,7 +41,7 @@ public class StorageClientHelper {
 		this.context = context;
 	}
 
-	public List<StoreResponse> sendStoreRequest(DestinationList destination, PreparedData... preparedData) throws StorageException, NetworkException, InterruptedException, DataBuildingException {
+	public List<StoreKindResponse> sendStoreRequest(DestinationList destination, PreparedData... preparedData) throws StorageException, NetworkException, InterruptedException, DataBuildingException {
 		ResourceID resourceId;
 		try {
 			resourceId = (ResourceID) destination.get(destination.size() - 1);
@@ -119,7 +126,7 @@ public class StorageClientHelper {
 		return answer.getResponses();
 	}
 
-	public List<StoreResponse> sendRemoveRequest(DestinationList destination, DataSpecifier dataSpecifier) throws StorageException, NetworkException, InterruptedException {
+	public List<StoreKindResponse> sendRemoveRequest(DestinationList destination, DataSpecifier dataSpecifier) throws StorageException, NetworkException, InterruptedException {
 		DataKind kind = dataSpecifier.getDataKind();
 
 		DataModelSpecifier modelSpec = dataSpecifier.getModelSpecifier();

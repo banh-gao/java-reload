@@ -9,8 +9,6 @@ import com.github.reload.net.data.ReloadCodec;
 /**
  * The identifier of a resource
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 @ReloadCodec(ResourceIDCodec.class)
 public final class ResourceID extends RoutableID {
@@ -48,14 +46,14 @@ public final class ResourceID extends RoutableID {
 		private static final int VALUE_LENGTH_FIELD = U_INT8;
 
 		@Override
-		public void encode(ResourceID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(ResourceID obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			Field lenFld = allocateField(buf, VALUE_LENGTH_FIELD);
 			buf.writeBytes(obj.id);
 			lenFld.updateDataLength();
 		}
 
 		@Override
-		public ResourceID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public ResourceID decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			ByteBuf data = readField(buf, VALUE_LENGTH_FIELD);
 			byte[] id = new byte[data.readableBytes()];
 			data.readBytes(id);

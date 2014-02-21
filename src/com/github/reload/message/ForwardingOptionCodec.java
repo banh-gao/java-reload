@@ -22,7 +22,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 	}
 
 	@Override
-	public void encode(ForwardingOption obj, ByteBuf buf) throws CodecException {
+	public void encode(ForwardingOption obj, ByteBuf buf, Object... params) throws CodecException {
 		buf.writeByte(obj.getType().code);
 		buf.writeByte(getFlags(obj));
 
@@ -55,7 +55,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 	}
 
 	@Override
-	public ForwardingOption decode(ByteBuf buf) throws CodecException {
+	public ForwardingOption decode(ByteBuf buf, Object... params) throws CodecException {
 		ForwardingOptionType type = ForwardingOptionType.valueOf(buf.readByte());
 
 		ForwardingOption option = null;

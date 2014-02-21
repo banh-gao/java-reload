@@ -45,14 +45,14 @@ public class OpaqueID extends RoutableID {
 		}
 
 		@Override
-		public void encode(OpaqueID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(OpaqueID obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			Field lenFld = allocateField(buf, OPAQUE_LENGTH_FIELD);
 			buf.writeBytes(obj.id);
 			lenFld.updateDataLength();
 		}
 
 		@Override
-		public OpaqueID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public OpaqueID decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			ByteBuf data = readField(buf, OPAQUE_LENGTH_FIELD);
 			byte[] id = new byte[data.readableBytes()];
 			data.readBytes(id);

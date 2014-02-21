@@ -1,31 +1,24 @@
 package com.github.reload.message;
 
-import java.security.GeneralSecurityException;
+import io.netty.buffer.ByteBuf;
 import java.security.cert.Certificate;
 import java.util.EnumSet;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.NodeID;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import com.github.reload.Context;
+import com.github.reload.net.data.Codec;
 
-/**
- * The identity of the signer of the message
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
 public class SignerIdentity {
 
 	public enum IdentityType {
-		CERT_HASH((byte) 0x01),
-		CERT_HASH_NODE_ID((byte) 0x02),
-		NONE((byte) 0x03);
+		CERT_HASH((byte) 0x01, CertHashSignerIdentityValue.class),
+		CERT_HASH_NODE_ID((byte) 0x02, CertHashNodeIdSignerIdentityValue.class),
+		NONE((byte) 0x03, NoneSignerIndentityValue.class);
 
 		private final byte value;
+		private final Class<? extends SignerIdentityValue> valueClass;
 
-		private IdentityType(byte value) {
+		private IdentityType(byte value, Class<? extends SignerIdentityValue> valueClass) {
 			this.value = value;
+			this.valueClass = valueClass;
 		}
 
 		public static IdentityType valueOf(byte b) {
@@ -38,13 +31,11 @@ public class SignerIdentity {
 		public byte value() {
 			return value;
 		}
+
+		public Class<? extends SignerIdentityValue> getValueClass() {
+			return valueClass;
+		}
 	}
-
-	private final static int VALUE_LENGTH_FIELD = EncUtils.U_INT16;
-
-	public final static int MAX_LENGTH = EncUtils.U_INT8 + VALUE_LENGTH_FIELD + (int) EncUtils.maxUnsignedInt(VALUE_LENGTH_FIELD);
-
-	public final static SignerIdentity EMPTY_IDENTITY = new SignerIdentity(IdentityType.NONE, new NoneSignerIndentityValue());
 
 	private final IdentityType identityType;
 	private final SignerIdentityValue signerIdentityValue;
@@ -52,21 +43,6 @@ public class SignerIdentity {
 	private SignerIdentity(IdentityType idType, SignerIdentityValue idValue) {
 		identityType = idType;
 		signerIdentityValue = idValue;
-	}
-
-	public static SignerIdentity parse(UnsignedByteBuffer buf) {
-		IdentityType identityType = IdentityType.valueOf(buf.getRaw8());
-		if (identityType == null)
-			throw new DecodingException("Unsupported identity type");
-
-		int identityLength = buf.getLengthValue(VALUE_LENGTH_FIELD);
-
-		SignerIdentityValue idValue = SignerIdentityValue.parse(buf, identityLength, identityType);
-
-		if (identityType == IdentityType.NONE)
-			return EMPTY_IDENTITY;
-
-		return new SignerIdentity(identityType, idValue);
 	}
 
 	/**
@@ -90,16 +66,6 @@ public class SignerIdentity {
 
 	public SignerIdentityValue getSignerIdentityValue() {
 		return signerIdentityValue;
-	}
-
-	public void writeTo(UnsignedByteBuffer buf) {
-		buf.putRaw8(identityType.value());
-
-		Field lenFld = buf.allocateLengthField(VALUE_LENGTH_FIELD);
-
-		signerIdentityValue.writeTo(buf);
-
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
 	}
 
 	@Override
@@ -138,16 +104,41 @@ public class SignerIdentity {
 		return out.toString();
 	}
 
-	/**
-	 * Indicates a problem with the signer identity
-	 * 
-	 * @author Daniel Zozin <zdenial@gmx.com>
-	 * 
-	 */
-	public static class SignerIdentityException extends GeneralSecurityException {
+	public static class SignerIdentityCodec extends Codec<SignerIdentity> {
 
-		public SignerIdentityException(String message) {
-			super(message);
+		private final static int VALUE_LENGTH_FIELD = U_INT16;
+
+		private final Codec<SignerIdentityValue> identityValueCodec;
+
+		public SignerIdentityCodec(Context context) {
+			super(context);
+			identityValueCodec = getCodec(SignerIdentityValue.class);
+		}
+
+		@Override
+		public void encode(SignerIdentity obj, ByteBuf buf, Object... params) throws CodecException {
+			buf.writeByte(obj.identityType.value);
+
+			Field lenFld = allocateField(buf, VALUE_LENGTH_FIELD);
+
+			identityValueCodec.encode(obj.signerIdentityValue, buf);
+
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public SignerIdentity decode(ByteBuf buf, Object... params) throws CodecException {
+			IdentityType idType = IdentityType.valueOf(buf.readByte());
+			if (idType == null)
+				throw new CodecException("Unsupported identity type");
+
+			ByteBuf identityData = readField(buf, VALUE_LENGTH_FIELD);
+
+			SignerIdentityValue idValue = identityValueCodec.decode(identityData, idType);
+
+			identityData.release();
+
+			return new SignerIdentity(idType, idValue);
 		}
 
 	}

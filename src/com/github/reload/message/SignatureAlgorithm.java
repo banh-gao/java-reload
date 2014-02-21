@@ -1,13 +1,13 @@
 package com.github.reload.message;
 
+import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
+import com.github.reload.Context;
+import com.github.reload.message.SignatureAlgorithm.SignatureAlgorithmCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-/**
- * Defines the signature algorithms encoded as in RFC5246
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
+@ReloadCodec(SignatureAlgorithmCodec.class)
 public enum SignatureAlgorithm {
 	ANONYMOUS((byte) 0x00, "ANONYMOUS"),
 	RSA((byte) 0x01, "RSA"),
@@ -38,6 +38,28 @@ public enum SignatureAlgorithm {
 			if (a.asString.equalsIgnoreCase(v))
 				return a;
 		return null;
+	}
+
+	public static class SignatureAlgorithmCodec extends Codec<SignatureAlgorithm> {
+
+		public SignatureAlgorithmCodec(Context context) {
+			super(context);
+		}
+
+		@Override
+		public void encode(SignatureAlgorithm obj, ByteBuf buf, Object... params) throws CodecException {
+			buf.writeByte(obj.code);
+		}
+
+		@Override
+		public SignatureAlgorithm decode(ByteBuf buf, Object... params) throws CodecException {
+			SignatureAlgorithm signAlg = SignatureAlgorithm.valueOf(buf.readByte());
+
+			if (signAlg == null)
+				throw new CodecException("Unsupported signature algorithm");
+			return signAlg;
+		}
+
 	}
 
 	@Override

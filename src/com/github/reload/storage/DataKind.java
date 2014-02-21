@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.naming.ConfigurationException;
 import com.github.reload.message.SecurityBlock;
-import com.github.reload.storage.DataModel.ModelType;
-import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.DataModel.DataType;
+import com.github.reload.storage.data.SingleEntry;
 import com.github.reload.storage.errors.UnknownKindException;
 import com.github.reload.storage.policies.AccessPolicy;
 
@@ -28,20 +28,20 @@ public class DataKind {
 	 * 
 	 */
 	public enum IANA {
-		TURN_SERVICE("TURN-SERVICE", KindId.valueOf(2)),
-		CERTIFICATE_BY_NODE("CERTIFICATE_BY_NODE", KindId.valueOf(3)),
-		CERTIFICATE_BY_USER("CERTIFICATE_BY_USER", KindId.valueOf(16));
+		TURN_SERVICE("TURN-SERVICE", 2),
+		CERTIFICATE_BY_NODE("CERTIFICATE_BY_NODE", 3),
+		CERTIFICATE_BY_USER("CERTIFICATE_BY_USER", 16);
 
 		private final String name;
-		private final KindId id;
+		private final long kindId;
 
-		private IANA(String name, KindId id) {
+		private IANA(String name, long kindId) {
 			this.name = name;
-			this.id = id;
+			this.kindId = kindId;
 		}
 
-		public KindId getId() {
-			return id;
+		public long getKindId() {
+			return kindId;
 		}
 
 		public String getName() {
@@ -55,15 +55,15 @@ public class DataKind {
 			throw new UnknownKindException("Unregistered IANA kind " + name);
 		}
 
-		public static String nameOf(KindId kindId) {
+		public static String nameOf(long kindId) {
 			for (IANA kind : EnumSet.allOf(IANA.class))
-				if (kind.id.equals(kindId))
+				if (kindId == kind.kindId)
 					return kind.name;
 			return "";
 		}
 	}
 
-	private final KindId kindId;
+	private final long kindId;
 	private final String name;
 	private final DataModel dataModel;
 	private final AccessPolicy accessPolicy;
@@ -83,7 +83,7 @@ public class DataKind {
 	/**
 	 * @return the kind-id associated to this data kind
 	 */
-	public KindId getKindId() {
+	public long getKindId() {
 		return kindId;
 	}
 
@@ -117,8 +117,8 @@ public class DataKind {
 	 *             kind data model
 	 */
 	public DataSpecifier newDataSpecifier(DataModelSpecifier modelSpecifier) {
-		if (modelSpecifier.getModelType() != getDataModel().getModelType())
-			throw new IllegalArgumentException("Expected model specifier for type " + getDataModel().getModelType() + ", " + modelSpecifier.getModelType() + " given");
+		if (modelSpecifier.getModelType() != getDataModel().getDataType())
+			throw new IllegalArgumentException("Expected model specifier for type " + getDataModel().getDataType() + ", " + modelSpecifier.getModelType() + " given");
 		return new DataSpecifier(this, modelSpecifier);
 	}
 
@@ -197,7 +197,7 @@ public class DataKind {
 		return dataModel.parseSpecifier(buf, length);
 	}
 
-	DataValue parseValue(UnsignedByteBuffer buf, int length) {
+	SingleEntry parseValue(UnsignedByteBuffer buf, int length) {
 		return dataModel.parseValue(buf, length);
 	}
 
@@ -244,13 +244,13 @@ public class DataKind {
 
 	public static class Builder {
 
-		private final KindId kindId;
+		private final long kindId;
 		private DataModel dataModel;
 		private AccessPolicy accessPolicy;
 		private SecurityBlock signature;
 		private final Map<String, String> attributes = new HashMap<String, String>();
 
-		public Builder(KindId kindId) {
+		public Builder(long kindId) {
 			this.kindId = kindId;
 			attribute(ATTR_MAX_COUNT, EncUtils.maxUnsignedInt(EncUtils.U_INT32) + "");
 			attribute(ATTR_MAX_SIZE, EncUtils.maxUnsignedInt(EncUtils.U_INT32) + "");
@@ -265,7 +265,7 @@ public class DataKind {
 			return dataModel;
 		}
 
-		public Builder dataModel(ModelType mod) {
+		public Builder dataModel(DataType mod) {
 			dataModel = DataModel.getInstance(mod);
 			return this;
 		}

@@ -3,21 +3,27 @@ package com.github.reload.storage;
 import java.math.BigInteger;
 import java.util.EnumSet;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.data.ArrayEntry;
+import com.github.reload.storage.data.SingleEntry;
+import com.github.reload.storage.data.DictionaryEntry;
 
 public abstract class DataModel {
 
-	public enum ModelType {
-		SINGLE("SINGLE"), ARRAY("ARRAY"), DICTIONARY("DICTIONARY");
+	public enum DataType {
+		SINGLE("SINGLE", SingleEntry.class),
+		ARRAY("ARRAY", ArrayEntry.class),
+		DICTIONARY("DICTIONARY", DictionaryEntry.class);
 
 		final String name;
+		final Class<? extends SingleEntry> valueClass;
 
-		private ModelType(String name) {
+		private DataType(String name, Class<? extends SingleEntry> valueClass) {
 			this.name = name;
+			this.valueClass = valueClass;
 		}
 
-		public static ModelType fromString(String v) {
-			for (ModelType t : EnumSet.allOf(ModelType.class))
+		public static DataType fromString(String v) {
+			for (DataType t : EnumSet.allOf(DataType.class))
 				if (t.name.equalsIgnoreCase(v))
 					return t;
 			return null;
@@ -25,6 +31,10 @@ public abstract class DataModel {
 
 		public String getName() {
 			return name;
+		}
+
+		public Class<? extends SingleEntry> getValueClass() {
+			return valueClass;
 		}
 
 		@Override
@@ -37,7 +47,7 @@ public abstract class DataModel {
 	private static final ArrayModel ARRAY_INSTANCE = new ArrayModel();
 	private static final DictionaryModel DICT_INSTANCE = new DictionaryModel();
 
-	public static DataModel getInstance(ModelType mod) {
+	public static DataModel getInstance(DataType mod) {
 		switch (mod) {
 			case SINGLE :
 				return SINGLE_INSTANCE;
@@ -50,25 +60,19 @@ public abstract class DataModel {
 	}
 
 	public static <B extends PreparedValue, S extends DataModelSpecifier> DataModel getInstance(String model) {
-		return getInstance(ModelType.fromString(model));
+		return getInstance(DataType.fromString(model));
 	}
 
 	public abstract DataModelSpecifier newSpecifier();
 
 	protected abstract LocalKindData newLocalKindData(ResourceID resourceId, DataKind dataKind, BigInteger generationCounter, LocalKinds localKinds);
 
-	public abstract DataModelSpecifier parseSpecifier(UnsignedByteBuffer buf, int length);
-
-	public abstract DataValue parseValue(UnsignedByteBuffer buf, int length);
-
-	public abstract Metadata parseMetadata(UnsignedByteBuffer buf, int length);
-
 	public abstract PreparedValue newPreparedValue(DataKind dataKind);
 
-	public abstract ModelType getModelType();
+	public abstract DataType getDataType();
 
 	@Override
 	public String toString() {
-		return getModelType().getName();
+		return getDataType().getName();
 	}
 }

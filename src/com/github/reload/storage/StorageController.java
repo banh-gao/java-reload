@@ -6,6 +6,16 @@ import java.util.List;
 import java.util.Map;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.errors.ErrorMessageException;
+import com.github.reload.storage.net.FetchAnswer;
+import com.github.reload.storage.net.FetchKindResponse;
+import com.github.reload.storage.net.FetchRequest;
+import com.github.reload.storage.net.FindAnswer;
+import com.github.reload.storage.net.FindRequest;
+import com.github.reload.storage.net.StatAnswer;
+import com.github.reload.storage.net.StatRequest;
+import com.github.reload.storage.net.StoreAnswer;
+import com.github.reload.storage.net.StoreRequest;
+import com.github.reload.storage.net.StoreKindResponse;
 
 /**
  * Elaborate the storage messages and is responsible for local storage
@@ -90,7 +100,7 @@ public class StorageController {
 		if (req.getReplicaNumber() > 0 && !context.getTopologyPlugin().isThisNodeValidReplicaFor(requestMessage))
 			throw new NotFoundException("Node not valid replica for requested resource");
 
-		List<StoreResponse> response = localStore.store(req.getResourceId(), req.getKindData());
+		List<StoreKindResponse> response = localStore.store(req.getResourceId(), req.getKindData());
 		StoreAnswer answer = new StoreAnswer(response);
 
 		return getAnswer(requestMessage, answer);

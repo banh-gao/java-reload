@@ -6,12 +6,9 @@ import com.github.reload.Context;
 import com.github.reload.message.GenericSignature;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.StoredDataCodec;
+import com.github.reload.storage.DataModel.DataType;
+import com.github.reload.storage.data.StoredData.StoredDataCodec;
 
-/**
- * A stored data with a digital signature over the fields
- * 
- */
 @ReloadCodec(StoredDataCodec.class)
 public class StoredData {
 
@@ -56,11 +53,8 @@ public class StoredData {
 
 		@Override
 		public StoredData decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
-			if (params.length < 1 || !(DataValue.class.isAssignableFrom(params[0].getClass())))
-				throw new IllegalArgumentException("Data value class needed to decode a stored data");
-
-			@SuppressWarnings("unchecked")
-			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(params[0].getClass());
+			if (params.length < 1 || !(params[0] instanceof DataType))
+				throw new IllegalArgumentException("Data type needed to decode a stored data");
 
 			ByteBuf dataFld = readField(buf, DATA_LENGTH_FIELD);
 
@@ -69,6 +63,9 @@ public class StoredData {
 			BigInteger storageTime = new BigInteger(1, storageTimeRaw);
 
 			long lifeTime = dataFld.readUnsignedInt();
+
+			@SuppressWarnings("unchecked")
+			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataType) params[0]).getValueClass());
 
 			DataValue value = valueCodec.decode(dataFld);
 

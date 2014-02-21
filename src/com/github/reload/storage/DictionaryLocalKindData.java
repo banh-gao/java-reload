@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.DictionaryEntry;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.data.StoredMetadata;
-import com.github.reload.storage.data.DictionaryValue.Key;
+import com.github.reload.storage.data.DictionaryEntry.Key;
 
 /**
  * Class used into the local storage to store array values
@@ -20,7 +20,7 @@ import com.github.reload.storage.data.DictionaryValue.Key;
  */
 public class DictionaryLocalKindData extends LocalKindData {
 
-	Map<Key, StoredData> values = new HashMap<DictionaryValue.Key, StoredData>();
+	Map<Key, StoredData> values = new HashMap<DictionaryEntry.Key, StoredData>();
 
 	protected DictionaryLocalKindData(ResourceID resourceId, DataKind kind, BigInteger generationCounter, LocalKinds localKinds) {
 		super(resourceId, kind, generationCounter, localKinds);
@@ -28,17 +28,17 @@ public class DictionaryLocalKindData extends LocalKindData {
 
 	@Override
 	protected void implAdd(StoredData data) {
-		values.put(((DictionaryValue) data.getValue()).getKey(), data);
+		values.put(((DictionaryEntry) data.getValue()).getKey(), data);
 	}
 
 	@Override
 	protected StoredData getStoredObjectFor(StoredData data) {
-		return values.get(((DictionaryValue) data.getValue()).getKey());
+		return values.get(((DictionaryEntry) data.getValue()).getKey());
 	}
 
 	@Override
 	protected boolean contains(StoredData data) {
-		return values.containsKey(((DictionaryValue) data.getValue()).getKey());
+		return values.containsKey(((DictionaryEntry) data.getValue()).getKey());
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class DictionaryLocalKindData extends LocalKindData {
 
 	@Override
 	protected void implRemove(StoredData data) {
-		values.remove(((DictionaryValue) data.getValue()).getKey());
+		values.remove(((DictionaryEntry) data.getValue()).getKey());
 	}
 
 	@Override

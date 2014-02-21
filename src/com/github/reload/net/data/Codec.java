@@ -151,38 +151,38 @@ public abstract class Codec<T> {
 	public abstract T decode(ByteBuf buf, Object... params) throws CodecException;
 
 	/**
-	 * Allocate a field at the current write index that can hold at most the
-	 * data of the given amount of bytes.
-	 * This method is meant to be used with
-	 * {@link #setVariableLengthField(ByteBuf, int, int)} to set the length
-	 * subfield after the data have been written to the buffer
+	 * Allocate a field at the current write index that can hold at most
+	 * 2<sup>fldLenFactor</sup> bytes
 	 * 
 	 * @param buf
 	 *            the buffer
-	 * @param maxDataLength
-	 *            the data maximum bytes size in power of two
+	 * @param fldLenFactor
+	 *            the data maximum bytes size in the powers of two
+	 * 
+	 * @see #readField(ByteBuf, int)
 	 */
-	public static Field allocateField(ByteBuf buf, int maxDataLength) {
-		return new Field(buf, maxDataLength);
+	public static Field allocateField(ByteBuf buf, int fldLenFactor) {
+		return new Field(buf, fldLenFactor);
 	}
 
 	/**
 	 * Returns the data stored in a variable-length field at the current read
 	 * index and move the readIndex after the field.
 	 * The returned buffer is a {@link ByteBuf#slice()} of the original buffer,
-	 * it remains backed to the original buffer and increases the original
-	 * buffer references count by 1.
-	 * Remember to release the returned buffer after it is consumed.
+	 * it remains backed to the original buffer.
+	 * The reference counter of the buffer is increase by 1 so remember to
+	 * release the returned buffer after it is consumed in order to be recycled
+	 * by the buffer allocator.
 	 * 
 	 * @param buf
 	 *            the buffer
-	 * @param maxDataLength
-	 *            the data maximum bytes size in power of two
+	 * @param fldLenFactor
+	 *            the data maximum bytes size in the powers of two
 	 * 
-	 * @see {@link ByteBuf#slice()}
+	 * @see {@link #allocateField(ByteBuf, int)}
 	 */
-	public static ByteBuf readField(ByteBuf buf, int maxDataLength) {
-		int dataLength = readLength(buf, maxDataLength);
+	public static ByteBuf readField(ByteBuf buf, int fldLenFactor) {
+		int dataLength = readLength(buf, fldLenFactor);
 
 		ByteBuf data = buf.readBytes(dataLength);
 		data.retain();
@@ -219,10 +219,16 @@ public abstract class Codec<T> {
 		 * 
 		 * @return
 		 *         the length of data subfield in bytes
+		 * @throws IndexOutOfBoundsException
+		 *             if the written data exceeds the maximum size of the field
 		 */
 		public int updateDataLength() {
 			// current position - (start of data subfield)
 			int writtenDataLength = buf.writerIndex() - (fieldPos + maxDataLength);
+
+			if (writtenDataLength > maxDataLength)
+				throw new IndexOutOfBoundsException("Written data exceeds maximum field size");
+
 			// Set actual written data subfield length into the length subfield
 			buf.writerIndex(fieldPos);
 			encodeLength(maxDataLength, writtenDataLength, buf);
@@ -273,6 +279,10 @@ public abstract class Codec<T> {
 
 		public CodecException(String message) {
 			super(message);
+		}
+
+		public CodecException(Throwable cause) {
+			super(cause);
 		}
 
 		@Override

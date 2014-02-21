@@ -48,7 +48,7 @@ public class UserNodeMatch extends AccessPolicy {
 		if (!Arrays.equals(nodeIdHash, resourceIdHash))
 			throw new AccessPolicyException("Identity hash value mismatch");
 
-		validateKey(((DictionaryValue) data.getValue()).getKey(), storerReloadCert, signerIdentity, context);
+		validateKey(((DictionaryEntry) data.getValue()).getKey(), storerReloadCert, signerIdentity, context);
 	}
 
 	private static void validateKey(Key key, ReloadCertificate storerReloadCert, SignerIdentity storerIdentity, Context context) throws AccessPolicyException {

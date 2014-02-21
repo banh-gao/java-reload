@@ -6,8 +6,8 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.data.ArrayValue;
-import com.github.reload.storage.data.DataValue;
+import com.github.reload.storage.data.ArrayEntry;
+import com.github.reload.storage.data.SingleEntry;
 import com.github.reload.storage.data.StoredData;
 
 /**
@@ -113,7 +113,7 @@ public class PreparedData {
 
 		CryptoHelper cryptoHelper = context.getCryptoHelper();
 
-		DataValue value = preparedValue.build();
+		SingleEntry value = preparedValue.build();
 
 		HashAlgorithm certHashAlg = cryptoHelper.getCertHashAlg();
 
@@ -129,10 +129,10 @@ public class PreparedData {
 		return new StoredData(kind, storageTime, lifeTime, value, signature);
 	}
 
-	private GenericSignature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, DataValue value) {
+	private GenericSignature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, SingleEntry value) {
 		GenericSignature dataSigner = cryptoHelper.newSigner(signerIdentity);
 
-		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + DataValue.VALUE_LENGTH_FIELD + value.getSize());
+		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleEntry.VALUE_LENGTH_FIELD + value.getSize());
 
 		resourceId.writeTo(signBuf);
 		kind.getKindId().writeTo(signBuf);
@@ -140,8 +140,8 @@ public class PreparedData {
 		signBuf.putUnsigned64(storageTime);
 
 		// Avoid signature breaking for array
-		if (value instanceof ArrayValue) {
-			ArrayValue signValue = ArrayModel.getValueForSigning((ArrayValue) value, kind);
+		if (value instanceof ArrayEntry) {
+			ArrayEntry signValue = ArrayModel.getValueForSigning((ArrayEntry) value, kind);
 			signValue.writeTo(signBuf);
 		} else {
 			value.writeTo(signBuf);

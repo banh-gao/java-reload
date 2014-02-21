@@ -19,6 +19,11 @@ import com.github.reload.message.ResourceID;
 import com.github.reload.storage.StorageController.QueryType;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.data.StoredMetadata;
+import com.github.reload.storage.net.FetchKindResponse;
+import com.github.reload.storage.net.FindAnswer;
+import com.github.reload.storage.net.FindRequest;
+import com.github.reload.storage.net.StoreKindData;
+import com.github.reload.storage.net.StoreKindResponse;
 
 /**
  * The map of the data stored locally. It stores the data which the peer is
@@ -53,7 +58,7 @@ public class LocalStore {
 	 * @throws StorageException
 	 * 
 	 */
-	public List<StoreResponse> store(ResourceID resourceId, List<StoreKindData> data) throws StorageException {
+	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data) throws StorageException {
 		LocalKinds storedKinds = storedResources.get(resourceId);
 
 		if (storedKinds == null) {
@@ -61,18 +66,18 @@ public class LocalStore {
 			context.registerConfigUpdateListener(storedKinds);
 		}
 
-		List<StoreResponse> response = new ArrayList<StoreResponse>();
-		List<StoreResponse> generTooLowResponses = new ArrayList<StoreResponse>();
+		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
+		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
 		for (StoreKindData receivedData : data) {
 			try {
 				BigInteger newGeneration = storedKinds.add(receivedData);
 				List<NodeID> replicaIds = context.getTopologyPlugin().onReplicateData(resourceId, receivedData);
-				response.add(new StoreResponse(receivedData.getKind(), newGeneration, replicaIds));
+				response.add(new StoreKindResponse(receivedData.getKind(), newGeneration, replicaIds));
 			} catch (GenerationTooLowException e) {
 				// Rollback
 				storedKinds.remove(receivedData);
-				generTooLowResponses.add(new StoreResponse(receivedData.getKind(), e.getGeneration(), new ArrayList<NodeID>()));
+				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), e.getGeneration(), new ArrayList<NodeID>()));
 			}
 		}
 

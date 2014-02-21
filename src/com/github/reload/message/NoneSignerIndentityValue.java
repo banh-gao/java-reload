@@ -1,27 +1,30 @@
 package com.github.reload.message;
 
-import net.sf.jReload.message.UnsignedByteBuffer;
+import io.netty.buffer.ByteBuf;
+import com.github.reload.Context;
+import com.github.reload.message.NoneSignerIndentityValue.NoneSignerIdentityValueCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-/**
- * Empty identity value
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
+@ReloadCodec(NoneSignerIdentityValueCodec.class)
 class NoneSignerIndentityValue extends SignerIdentityValue {
 
-	public NoneSignerIndentityValue() {
-		super(HashAlgorithm.NONE);
-	}
+	public static class NoneSignerIdentityValueCodec extends Codec<NoneSignerIndentityValue> {
 
-	@Override
-	protected void implWriteTo(UnsignedByteBuffer buf) {
-		// No data
-	}
+		public NoneSignerIdentityValueCodec(Context context) {
+			super(context);
+		}
 
-	@Override
-	public byte[] getHashValue() {
-		return new byte[0];
+		@Override
+		public void encode(NoneSignerIndentityValue obj, ByteBuf buf, Object... params) throws CodecException {
+			// No data
+		}
+
+		@Override
+		public NoneSignerIndentityValue decode(ByteBuf buf, Object... params) throws CodecException {
+			return new NoneSignerIndentityValue();
+		}
+
 	}
 
 }

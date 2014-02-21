@@ -1,4 +1,4 @@
-package com.github.reload.storage;
+package com.github.reload.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -7,8 +7,10 @@ import java.util.List;
 import com.github.reload.Context;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.FetchKindResponse.FetchKindResponseCodec;
+import com.github.reload.storage.DataKind;
+import com.github.reload.storage.DataModel.DataType;
 import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.net.FetchKindResponse.FetchKindResponseCodec;
 
 /**
  * A response contained in a fetch answer, contains all the data for a specific
@@ -29,6 +31,18 @@ public class FetchKindResponse {
 		this.values = values;
 	}
 
+	public DataKind getKind() {
+		return kind;
+	}
+
+	public BigInteger getGeneration() {
+		return generation;
+	}
+
+	public List<StoredData> getValues() {
+		return values;
+	}
+
 	public static class FetchKindResponseCodec extends Codec<FetchKindResponse> {
 
 		private final static int VALUES_LENGTH_FIELD = U_INT32;
@@ -43,13 +57,21 @@ public class FetchKindResponse {
 		}
 
 		@Override
-		public void encode(FetchKindResponse obj, ByteBuf buf) throws CodecException {
-			// TODO Auto-generated method stub
+		public void encode(FetchKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
+			dataKindCodec.encode(obj.kind, buf);
+			buf.writeBytes(obj.generation.toByteArray());
+			encodeData(obj, buf);
+		}
 
+		private void encodeData(FetchKindResponse obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+			Field dataFld = allocateField(buf, VALUES_LENGTH_FIELD);
+			for (StoredData d : obj.values)
+				storedDataCodec.encode(d, buf);
+			dataFld.updateDataLength();
 		}
 
 		@Override
-		public FetchKindResponse decode(ByteBuf buf) throws CodecException {
+		public FetchKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			DataKind kind = dataKindCodec.decode(buf);
 
 			byte[] genData = new byte[8];
@@ -63,10 +85,12 @@ public class FetchKindResponse {
 		private List<StoredData> decodeData(DataKind kind, ByteBuf buf) throws CodecException {
 			ByteBuf respData = readField(buf, VALUES_LENGTH_FIELD);
 
-			List<ResponseData> out = new ArrayList<ResponseData>();
+			List<StoredData> out = new ArrayList<StoredData>();
+
+			DataType dataType = kind.getDataModel().getDataType();
 
 			while (respData.readableBytes() > 0) {
-				ResponseData data = decodeData(respData);
+				StoredData data = storedDataCodec.decode(respData, dataType);
 				out.add(data);
 			}
 			respData.release();

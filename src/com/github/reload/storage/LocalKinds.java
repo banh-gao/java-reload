@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.net.StoreKindData;
 
 /**
  * Contains all the locally stored kinds related to a resource id

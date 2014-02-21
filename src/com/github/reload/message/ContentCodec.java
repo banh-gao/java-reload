@@ -17,7 +17,7 @@ public class ContentCodec extends Codec<Content> {
 	}
 
 	@Override
-	public void encode(Content obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public void encode(Content obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 		buf.writeShort(obj.getType().getCode());
 
 		Field lenFld = allocateField(buf, BODY_LENGTH_FIELD);
@@ -45,7 +45,7 @@ public class ContentCodec extends Codec<Content> {
 	}
 
 	@Override
-	public Content decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+	public Content decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 
 		short messageCode = buf.readShort();
 

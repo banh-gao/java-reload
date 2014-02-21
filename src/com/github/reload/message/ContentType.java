@@ -18,14 +18,14 @@ import com.github.reload.message.content.RouteQueryRequest;
 import com.github.reload.message.content.UpdateAnswer;
 import com.github.reload.message.content.UpdateRequest;
 import com.github.reload.message.errors.Error;
-import com.github.reload.storage.FetchAnswer;
-import com.github.reload.storage.FetchRequest;
-import com.github.reload.storage.FindAnswer;
-import com.github.reload.storage.FindRequest;
-import com.github.reload.storage.StatAnswer;
-import com.github.reload.storage.StatRequest;
-import com.github.reload.storage.StoreAnswer;
-import com.github.reload.storage.StoreRequest;
+import com.github.reload.storage.net.FetchAnswer;
+import com.github.reload.storage.net.FetchRequest;
+import com.github.reload.storage.net.FindAnswer;
+import com.github.reload.storage.net.FindRequest;
+import com.github.reload.storage.net.StatAnswer;
+import com.github.reload.storage.net.StatRequest;
+import com.github.reload.storage.net.StoreAnswer;
+import com.github.reload.storage.net.StoreRequest;
 
 /**
  * Message type codes, also used to create message content object instances for

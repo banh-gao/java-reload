@@ -2,9 +2,9 @@ package com.github.reload.storage;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.storage.DataModel.ModelType;
-import com.github.reload.storage.data.DictionaryValue;
-import com.github.reload.storage.data.DictionaryValue.Key;
+import com.github.reload.storage.DataModel.DataType;
+import com.github.reload.storage.data.DictionaryEntry;
+import com.github.reload.storage.data.DictionaryEntry.Key;
 
 /**
  * Specifier used to fetch dictionary values
@@ -16,14 +16,14 @@ public class DictionaryModelSpecifier extends DataModelSpecifier {
 
 	private static final int KEYS_LENGTH_FIELD = EncUtils.U_INT16;
 
-	List<Key> keys = new ArrayList<DictionaryValue.Key>();
+	List<Key> keys = new ArrayList<DictionaryEntry.Key>();
 
 	DictionaryModelSpecifier() {
-		super(ModelType.DICTIONARY);
+		super(DataType.DICTIONARY);
 	}
 
 	DictionaryModelSpecifier(UnsignedByteBuffer buf) {
-		super(ModelType.DICTIONARY);
+		super(DataType.DICTIONARY);
 		int length = buf.getLengthValue(DictionaryModelSpecifier.KEYS_LENGTH_FIELD);
 
 		int startPos = buf.position();

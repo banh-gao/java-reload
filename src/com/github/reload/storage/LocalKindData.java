@@ -10,6 +10,7 @@ import com.github.reload.message.ResourceID;
 import com.github.reload.storage.StorageController.QueryType;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.data.StoredMetadata;
+import com.github.reload.storage.net.StoreKindData;
 
 /**
  * Contains the values specific to a data kind, the implementations are

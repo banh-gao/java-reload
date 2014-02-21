@@ -87,15 +87,18 @@ public class NodeID extends RoutableID {
 		}
 
 		@Override
-		public void encode(NodeID obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
+		public void encode(NodeID obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
 			buf.writeBytes(obj.id);
 		}
 
 		@Override
-		public NodeID decode(ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
-			byte[] id = new byte[buf.readableBytes()];
+		public NodeID decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
+			// FIXME: get nodeid length from configuration
+			int nodeidLength = 16;
+
+			byte[] id = new byte[nodeidLength];
 			buf.readBytes(id);
-			buf.release();
+
 			return valueOf(id);
 		}
 	}

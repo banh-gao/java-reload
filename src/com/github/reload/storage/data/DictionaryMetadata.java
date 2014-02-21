@@ -2,7 +2,7 @@ package com.github.reload.storage.data;
 
 import java.math.BigInteger;
 import com.github.reload.storage.Metadata;
-import com.github.reload.storage.data.DictionaryValue.Key;
+import com.github.reload.storage.data.DictionaryEntry.Key;
 
 /**
  * Metadata of a stored dictionary entry
@@ -14,7 +14,7 @@ public class DictionaryMetadata extends Metadata {
 
 	Key key;
 
-	public DictionaryMetadata(DictionaryValue value) {
+	public DictionaryMetadata(DictionaryEntry value) {
 		super(value);
 		key = value.getKey();
 	}
@@ -25,7 +25,7 @@ public class DictionaryMetadata extends Metadata {
 
 	@Override
 	protected void implInitBefore(UnsignedByteBuffer buf) {
-		key = new DictionaryValue.Key(buf);
+		key = new DictionaryEntry.Key(buf);
 	}
 
 	public Key getKey() {

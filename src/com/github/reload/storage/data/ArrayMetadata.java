@@ -13,7 +13,7 @@ public class ArrayMetadata extends Metadata {
 
 	private long index;
 
-	public ArrayMetadata(ArrayValue value) {
+	public ArrayMetadata(ArrayEntry value) {
 		super(value);
 		index = value.getIndex();
 	}

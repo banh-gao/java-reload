@@ -1,8 +1,8 @@
 package com.github.reload.storage;
 
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.DictionaryValue;
-import com.github.reload.storage.data.DictionaryValue.Key;
+import com.github.reload.storage.data.DictionaryEntry;
+import com.github.reload.storage.data.DictionaryEntry.Key;
 
 /**
  * A dictionary prepared value created by adding a key to a single prepared
@@ -29,11 +29,11 @@ public class DictionaryPreparedValue extends PreparedValue {
 	}
 
 	@Override
-	DictionaryValue build() throws DataBuildingException {
+	DictionaryEntry build() throws DataBuildingException {
 		if (key == null)
 			throw new DataBuildingException("Dictionary key not set");
 
-		return new DictionaryValue(key.getValue(), getValue(), exists());
+		return new DictionaryEntry(key.getValue(), getValue(), exists());
 	}
 
 	@Override

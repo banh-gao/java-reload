@@ -3,7 +3,7 @@ package com.github.reload.storage;
 import java.math.BigInteger;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.data.DictionaryMetadata;
-import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.DictionaryEntry;
 
 /**
  * Factory class used to create objects specialized for the dictionary data
@@ -25,8 +25,8 @@ public class DictionaryModel extends DataModel {
 	}
 
 	@Override
-	public DictionaryValue parseValue(UnsignedByteBuffer buf, int length) {
-		return new DictionaryValue(buf);
+	public DictionaryEntry parseValue(UnsignedByteBuffer buf, int length) {
+		return new DictionaryEntry(buf);
 	}
 
 	@Override
@@ -40,8 +40,8 @@ public class DictionaryModel extends DataModel {
 	}
 
 	@Override
-	public ModelType getModelType() {
-		return ModelType.DICTIONARY;
+	public DataType getModelType() {
+		return DataType.DICTIONARY;
 	}
 
 	@Override
