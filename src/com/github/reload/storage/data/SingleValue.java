@@ -4,15 +4,16 @@ import io.netty.buffer.ByteBuf;
 import com.github.reload.Context;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.data.SingleEntry.SingleValueCodec;
+import com.github.reload.storage.data.DataModel.DataValue;
+import com.github.reload.storage.data.SingleValue.SingleEntryCodec;
 
-@ReloadCodec(SingleValueCodec.class)
-public class SingleEntry {
+@ReloadCodec(SingleEntryCodec.class)
+public class SingleValue implements DataValue {
 
 	private final boolean exists;
 	private final byte[] value;
 
-	public SingleEntry(byte[] value, boolean exists) {
+	public SingleValue(byte[] value, boolean exists) {
 		this.value = value;
 		this.exists = exists;
 	}
@@ -33,16 +34,16 @@ public class SingleEntry {
 		return "SingleValue [valueLength=" + value.length + ", exists=" + exists + "]";
 	}
 
-	public static class SingleValueCodec extends Codec<SingleEntry> {
+	public static class SingleEntryCodec extends Codec<SingleValue> {
 
 		final static int VALUE_LENGTH_FIELD = U_INT32;
 
-		public SingleValueCodec(Context context) {
+		public SingleEntryCodec(Context context) {
 			super(context);
 		}
 
 		@Override
-		public void encode(SingleEntry obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(SingleValue obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeByte(obj.exists ? 1 : 0);
 			Field lenFld = allocateField(buf, VALUE_LENGTH_FIELD);
 			buf.writeBytes(obj.value);
@@ -50,7 +51,7 @@ public class SingleEntry {
 		}
 
 		@Override
-		public SingleEntry decode(ByteBuf buf, Object... params) throws CodecException {
+		public SingleValue decode(ByteBuf buf, Object... params) throws CodecException {
 			boolean exists = (buf.readUnsignedByte() >= 1);
 
 			ByteBuf dataFld = readField(buf, VALUE_LENGTH_FIELD);
@@ -59,7 +60,7 @@ public class SingleEntry {
 			dataFld.readBytes(value);
 			dataFld.release();
 
-			return new SingleEntry(value, exists);
+			return new SingleValue(value, exists);
 
 		}
 

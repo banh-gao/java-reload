@@ -1,6 +1,5 @@
 package com.github.reload.storage.data;
 
-import com.github.reload.storage.Metadata;
 
 
 /**
@@ -13,7 +12,7 @@ public class ArrayMetadata extends Metadata {
 
 	private long index;
 
-	public ArrayMetadata(ArrayEntry value) {
+	public ArrayMetadata(ArrayValue value) {
 		super(value);
 		index = value.getIndex();
 	}

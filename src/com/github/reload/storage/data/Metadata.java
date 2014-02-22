@@ -1,13 +1,11 @@
-package com.github.reload.storage;
+package com.github.reload.storage.data;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.github.reload.storage.data.SingleEntry;
+import com.github.reload.message.HashAlgorithm;
 
 /**
  * Metadata used to describe a stored data
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 public class Metadata {
@@ -20,7 +18,7 @@ public class Metadata {
 
 	private final byte[] hashValue;
 
-	public Metadata(SingleEntry value) {
+	public Metadata(SingleValue value) {
 		exists = value.exists();
 		storedValueSize = value.getSize();
 		if (value.getSize() == 0) {
@@ -32,7 +30,7 @@ public class Metadata {
 		}
 	}
 
-	private static byte[] computeHash(HashAlgorithm hashAlgorithm, SingleEntry value) {
+	private static byte[] computeHash(HashAlgorithm hashAlgorithm, SingleValue value) {
 		MessageDigest digestor;
 		try {
 			digestor = MessageDigest.getInstance(hashAlgorithm.toString());

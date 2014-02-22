@@ -12,6 +12,7 @@ import com.github.reload.storage.net.FetchRequest;
 import com.github.reload.storage.net.FindAnswer;
 import com.github.reload.storage.net.FindRequest;
 import com.github.reload.storage.net.StatAnswer;
+import com.github.reload.storage.net.StatKindResponse;
 import com.github.reload.storage.net.StatRequest;
 import com.github.reload.storage.net.StoreAnswer;
 import com.github.reload.storage.net.StoreRequest;

@@ -1,7 +1,8 @@
-package com.github.reload.storage;
+package com.github.reload.storage.net;
 
 import java.math.BigInteger;
 import java.util.List;
+import com.github.reload.storage.DataKind;
 import com.github.reload.storage.data.StoredMetadata;
 
 /**

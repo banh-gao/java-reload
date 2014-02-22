@@ -4,15 +4,16 @@ import io.netty.buffer.ByteBuf;
 import com.github.reload.Context;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.data.DictionaryEntry.DictionaryEntryCodec;
+import com.github.reload.storage.data.DataModel.DataValue;
+import com.github.reload.storage.data.DictionaryValue.DictionaryEntryCodec;
 
 @ReloadCodec(DictionaryEntryCodec.class)
-public class DictionaryEntry implements DataValue {
+public class DictionaryValue implements DataValue {
 
 	private Key key;
-	private final SingleEntry value;
+	private final SingleValue value;
 
-	DictionaryEntry(Key key, SingleEntry value) {
+	DictionaryValue(Key key, SingleValue value) {
 		this.key = key;
 		this.value = value;
 	}
@@ -21,7 +22,7 @@ public class DictionaryEntry implements DataValue {
 		return key;
 	}
 
-	public SingleEntry getValue() {
+	public SingleValue getValue() {
 		return value;
 	}
 
@@ -45,34 +46,34 @@ public class DictionaryEntry implements DataValue {
 		}
 	}
 
-	public static class DictionaryEntryCodec extends Codec<DictionaryEntry> {
+	public static class DictionaryEntryCodec extends Codec<DictionaryValue> {
 
 		private static final int KEY_LENGTH_FIELD = U_INT16;
 
-		private final Codec<SingleEntry> valueCodec;
+		private final Codec<SingleValue> valueCodec;
 
 		public DictionaryEntryCodec(Context context) {
 			super(context);
-			valueCodec = getCodec(SingleEntry.class);
+			valueCodec = getCodec(SingleValue.class);
 		}
 
 		@Override
-		public void encode(DictionaryEntry obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(DictionaryValue obj, ByteBuf buf, Object... params) throws CodecException {
 			encodeKey(obj, buf);
 			valueCodec.encode(obj.value, buf);
 		}
 
-		private void encodeKey(DictionaryEntry obj, ByteBuf buf) {
+		private void encodeKey(DictionaryValue obj, ByteBuf buf) {
 			Field lenFld = allocateField(buf, KEY_LENGTH_FIELD);
 			buf.writeBytes(obj.key.data);
 			lenFld.updateDataLength();
 		}
 
 		@Override
-		public DictionaryEntry decode(ByteBuf buf, Object... params) throws CodecException {
+		public DictionaryValue decode(ByteBuf buf, Object... params) throws CodecException {
 			Key k = decodeKey(buf);
-			SingleEntry v = valueCodec.decode(buf);
-			return new DictionaryEntry(k, v);
+			SingleValue v = valueCodec.decode(buf);
+			return new DictionaryValue(k, v);
 		}
 
 		private Key decodeKey(ByteBuf buf) {

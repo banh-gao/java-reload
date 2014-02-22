@@ -9,7 +9,9 @@ import java.util.concurrent.TimeUnit;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.StorageController.QueryType;
 import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.data.StoredMetadata;
+import com.github.reload.storage.errors.ForbittenException;
 import com.github.reload.storage.net.StoreKindData;
 
 /**
@@ -101,7 +103,7 @@ public abstract class LocalKindData {
 	}
 
 	@SuppressWarnings("unchecked")
-	<T extends ResponseData> List<T> getMatchingValues(DataSpecifier spec, QueryType queryType) {
+	<T extends ResponseData> List<T> getMatchingValues(StoredDataSpecifier spec, QueryType queryType) {
 		if (!spec.getDataKind().equals(kind))
 			return Collections.emptyList();
 
@@ -138,9 +140,9 @@ public abstract class LocalKindData {
 
 	public abstract List<StoredData> getDataValues();
 
-	public abstract List<StoredData> getMatchingDataValues(DataModelSpecifier spec);
+	public abstract List<StoredData> getMatchingDataValues(StoredDataSpecifier spec);
 
-	public abstract List<StoredMetadata> getMatchingMetaDataValues(DataModelSpecifier spec);
+	public abstract List<StoredMetadata> getMatchingMetaDataValues(StoredDataSpecifier spec);
 
 	@Override
 	public int hashCode() {

@@ -8,6 +8,8 @@ import com.github.reload.net.data.Codec;
 
 public class SignerIdentity {
 
+	public static final SignerIdentity EMPTY_IDENTITY = new SignerIdentity(IdentityType.NONE, new NoneSignerIndentityValue());
+
 	public enum IdentityType {
 		CERT_HASH((byte) 0x01, CertHashSignerIdentityValue.class),
 		CERT_HASH_NODE_ID((byte) 0x02, CertHashNodeIdSignerIdentityValue.class),

@@ -49,7 +49,7 @@ public class SingleLocalKindData extends LocalKindData {
 	}
 
 	@Override
-	public List<StoredData> getMatchingDataValues(DataModelSpecifier spec) {
+	public List<StoredData> getMatchingDataValues(StoredDataSpecifier spec) {
 		List<StoredData> v = new ArrayList<StoredData>();
 		if (value != null) {
 			v.add(value);
@@ -58,7 +58,7 @@ public class SingleLocalKindData extends LocalKindData {
 	}
 
 	@Override
-	public List<StoredMetadata> getMatchingMetaDataValues(DataModelSpecifier spec) {
+	public List<StoredMetadata> getMatchingMetaDataValues(StoredDataSpecifier spec) {
 		List<StoredMetadata> v = new ArrayList<StoredMetadata>();
 		if (value != null) {
 			v.add(value.getMetadata());

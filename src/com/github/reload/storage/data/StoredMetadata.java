@@ -3,14 +3,10 @@ package com.github.reload.storage.data;
 import java.math.BigInteger;
 import com.github.reload.message.SignerIdentity;
 import com.github.reload.storage.DataKind;
-import com.github.reload.storage.Metadata;
-import com.github.reload.storage.ResponseData;
 
 /**
  * A data with a digital signature over the fields defined by the RELOAD
  * protocol
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 public class StoredMetadata extends ResponseData {

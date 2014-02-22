@@ -6,8 +6,9 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.data.ArrayEntry;
-import com.github.reload.storage.data.SingleEntry;
+import com.github.reload.storage.data.ArrayValue;
+import com.github.reload.storage.data.ArrayModel;
+import com.github.reload.storage.data.SingleValue;
 import com.github.reload.storage.data.StoredData;
 
 /**
@@ -20,14 +21,14 @@ public class PreparedData {
 
 	private final static int DEFAULT_LIFETIME = 60;
 
-	private final PreparedValue preparedValue;
+	private final ValueBuilder preparedValue;
 	private final DataKind kind;
 
 	private BigInteger generation = BigInteger.ZERO;
 	private BigInteger storageTime = BigInteger.valueOf(new Date().getTime());
 	private long lifeTime = DEFAULT_LIFETIME;
 
-	PreparedData(DataKind kind, PreparedValue preparedValue) {
+	PreparedData(DataKind kind, ValueBuilder preparedValue) {
 		this.preparedValue = preparedValue;
 		this.kind = kind;
 	}
@@ -93,7 +94,7 @@ public class PreparedData {
 	 *         value type depends on the data model used by the associated data
 	 *         kind
 	 */
-	public PreparedValue getValue() {
+	public ValueBuilder getValue() {
 		return preparedValue;
 	}
 
@@ -113,7 +114,7 @@ public class PreparedData {
 
 		CryptoHelper cryptoHelper = context.getCryptoHelper();
 
-		SingleEntry value = preparedValue.build();
+		SingleValue value = preparedValue.build();
 
 		HashAlgorithm certHashAlg = cryptoHelper.getCertHashAlg();
 
@@ -129,10 +130,10 @@ public class PreparedData {
 		return new StoredData(kind, storageTime, lifeTime, value, signature);
 	}
 
-	private GenericSignature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, SingleEntry value) {
+	private GenericSignature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, SingleValue value) {
 		GenericSignature dataSigner = cryptoHelper.newSigner(signerIdentity);
 
-		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleEntry.VALUE_LENGTH_FIELD + value.getSize());
+		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleValue.VALUE_LENGTH_FIELD + value.getSize());
 
 		resourceId.writeTo(signBuf);
 		kind.getKindId().writeTo(signBuf);
@@ -140,8 +141,8 @@ public class PreparedData {
 		signBuf.putUnsigned64(storageTime);
 
 		// Avoid signature breaking for array
-		if (value instanceof ArrayEntry) {
-			ArrayEntry signValue = ArrayModel.getValueForSigning((ArrayEntry) value, kind);
+		if (value instanceof ArrayValue) {
+			ArrayValue signValue = ArrayModel.getValueForSigning((ArrayValue) value, kind);
 			signValue.writeTo(signBuf);
 		} else {
 			value.writeTo(signBuf);

@@ -1,83 +1,110 @@
 package com.github.reload.message;
 
+import io.netty.buffer.ByteBuf;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import net.sf.jReload.message.DecodingException;
-import net.sf.jReload.message.EncUtils;
-import net.sf.jReload.message.UnsignedByteBuffer;
-import net.sf.jReload.message.UnsignedByteBuffer.Field;
+import java.util.EnumSet;
+import com.github.reload.Context;
+import com.github.reload.message.GenericCertificate.GenericCertificateCodec;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
-/**
- * Utility class used to encode and decode certificates to RELOAD
- * GenericCertificate specification
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- */
+@ReloadCodec(GenericCertificateCodec.class)
 public class GenericCertificate {
 
-	private static final int CERT_LENGTH_FIELD = EncUtils.U_INT16;
+	public enum CertificateType {
+		X509((byte) 0, "X.509"), PGP((byte) 1, "openPGP");
 
-	private GenericCertificate() {
+		private final byte code;
+		private final String type;
+
+		private CertificateType(byte code, String type) {
+			this.code = code;
+			this.type = type;
+		}
+
+		public byte getCode() {
+			return code;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public static CertificateType valueOf(byte code) {
+			for (CertificateType t : EnumSet.allOf(CertificateType.class))
+				if (code == t.getCode())
+					return t;
+			return null;
+		}
+
+		@Override
+		public String toString() {
+			return type;
+		}
 	}
 
-	/**
-	 * Parse a GenericCertificate to a Certificate object
-	 * 
-	 * @return
-	 * @throws CertificateException
-	 *             if some error occurs while parsing the certificate
-	 */
-	public static Certificate parse(UnsignedByteBuffer buf) throws CertificateException {
-		CertificateType certType = CertificateType.valueOf(buf.getRaw8());
-		if (certType == null)
-			throw new CertificateException("Unknown certificate type");
+	private final CertificateType type;
+	private final Certificate certificate;
 
-		int length = buf.getLengthValue(CERT_LENGTH_FIELD);
-		byte[] enc = new byte[length];
-		buf.getRaw(enc);
-
-		InputStream in = new ByteArrayInputStream(enc);
-		Certificate cert;
-
-		if (certType == CertificateType.PGP)
-			throw new CertificateException("OpenPGP certificate not supported");
-
-		CertificateFactory f = CertificateFactory.getInstance(certType.toString());
-		cert = f.generateCertificate(in);
-
-		return cert;
+	public GenericCertificate(CertificateType type, Certificate certificate) {
+		this.type = type;
+		this.certificate = certificate;
 	}
 
-	/**
-	 * Write the certificate to the specified buffer in GenericCertificate
-	 * format
-	 */
-	public static void writeGenericTo(Certificate certificate, UnsignedByteBuffer buf) throws CertificateException {
-		String type = certificate.getType();
-		if (type.equalsIgnoreCase(CertificateType.X509.toString())) {
-			buf.putRaw8(CertificateType.X509.getCode());
-		} else if (type.equalsIgnoreCase(CertificateType.PGP.toString())) {
-			buf.putRaw8(CertificateType.PGP.getCode());
-		} else
-			throw new DecodingException("Unhandled certificate type");
+	public static class GenericCertificateCodec extends Codec<GenericCertificate> {
 
-		byte[] encCert = certificate.getEncoded();
+		private static final int CERT_LENGTH_FIELD = U_INT16;
 
-		Field lenFld = buf.allocateLengthField(CERT_LENGTH_FIELD);
-		buf.putRaw(encCert);
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
-	}
+		public GenericCertificateCodec(Context context) {
+			super(context);
+		}
 
-	public static int getGenericLength(Certificate certificate) {
-		try {
-			return EncUtils.U_INT8 + CERT_LENGTH_FIELD + certificate.getEncoded().length;
-		} catch (CertificateEncodingException e) {
-			throw new RuntimeException(e);
+		@Override
+		public void encode(GenericCertificate obj, ByteBuf buf, Object... params) throws CodecException {
+			buf.writeByte(obj.type.getCode());
+
+			byte[] encCert;
+			try {
+				encCert = obj.certificate.getEncoded();
+			} catch (CertificateEncodingException e) {
+				throw new CodecException(e);
+			}
+
+			Field lenFld = allocateField(buf, CERT_LENGTH_FIELD);
+			buf.writeBytes(encCert);
+			lenFld.updateDataLength();
+		}
+
+		@Override
+		public GenericCertificate decode(ByteBuf buf, Object... params) throws CodecException {
+			CertificateType certType = CertificateType.valueOf(buf.readByte());
+
+			if (certType == null)
+				throw new CodecException("Unknown certificate type");
+
+			CertificateFactory f;
+			try {
+				f = CertificateFactory.getInstance(certType.toString());
+			} catch (CertificateException e) {
+				throw new CodecException(e);
+			}
+
+			ByteBuf certFld = readField(buf, CERT_LENGTH_FIELD);
+
+			byte[] certData = new byte[certFld.readableBytes()];
+			certFld.readBytes(certData);
+
+			try {
+				InputStream in = new ByteArrayInputStream(certData);
+				return new GenericCertificate(certType, f.generateCertificate(in));
+			} catch (CertificateException e) {
+				throw new CodecException(e);
+			}
 		}
 	}
 }

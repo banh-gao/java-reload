@@ -12,11 +12,11 @@ import com.github.reload.storage.StatRequest.StatRequestCodec;
 @ReloadCodec(StatRequestCodec.class)
 public class StatRequest extends QueryRequest {
 
-	public StatRequest(ResourceID id, DataSpecifier... specifiers) {
+	public StatRequest(ResourceID id, StoredDataSpecifier... specifiers) {
 		this(id, Arrays.asList(specifiers));
 	}
 
-	public StatRequest(ResourceID id, List<DataSpecifier> specifiers) {
+	public StatRequest(ResourceID id, List<StoredDataSpecifier> specifiers) {
 		super(id, specifiers);
 	}
 
@@ -32,7 +32,7 @@ public class StatRequest extends QueryRequest {
 		}
 
 		@Override
-		protected QueryRequest implDecode(ResourceID resourceId, List<DataSpecifier> specifiers, ByteBuf buf) {
+		protected QueryRequest implDecode(ResourceID resourceId, List<StoredDataSpecifier> specifiers, ByteBuf buf) {
 			return new StatRequest(resourceId, specifiers);
 		}
 	}

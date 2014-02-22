@@ -6,7 +6,7 @@ import com.github.reload.Context;
 import com.github.reload.message.GenericSignature;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.DataModel.DataType;
+import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.StoredData.StoredDataCodec;
 
 @ReloadCodec(StoredDataCodec.class)

@@ -10,10 +10,12 @@ import java.util.TreeMap;
 import com.github.reload.message.GenericSignature;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
-import com.github.reload.storage.ArrayModelSpecifier.ArrayRange;
+import com.github.reload.storage.data.ArrayValue;
 import com.github.reload.storage.data.ArrayMetadata;
-import com.github.reload.storage.data.ArrayEntry;
+import com.github.reload.storage.data.ArrayModel;
+import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
 import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.data.StoredMetadata;
 import com.github.reload.storage.errors.DataTooLargeException;
 
@@ -33,26 +35,26 @@ public class ArrayLocalKindData extends LocalKindData {
 
 	@Override
 	protected void implAdd(StoredData data) throws DataTooLargeException {
-		long newIndex = ((ArrayEntry) data.getValue()).getIndex();
+		long newIndex = ((ArrayValue) data.getValue()).getIndex();
 
 		if (newIndex == ArrayModel.LAST_INDEX) {
 			long index = (values.isEmpty()) ? 0 : values.lastKey() + 1;
-			((ArrayEntry) data.getValue()).index = index;
+			((ArrayValue) data.getValue()).index = index;
 			values.put(index, data);
 		} else if (newIndex <= kind.getLongAttribute(DataKind.ATTR_MAX_COUNT)) {
-			values.put(((ArrayEntry) data.getValue()).getIndex(), data);
+			values.put(((ArrayValue) data.getValue()).getIndex(), data);
 		} else
 			throw new DataTooLargeException("The array index will exceed the kind maximum allowed array size");
 	}
 
 	@Override
 	protected StoredData getStoredObjectFor(StoredData data) {
-		return values.get(((ArrayEntry) data.getValue()).getIndex());
+		return values.get(((ArrayValue) data.getValue()).getIndex());
 	}
 
 	@Override
 	protected boolean contains(StoredData data) {
-		return values.containsKey(((ArrayEntry) data.getValue()).getIndex());
+		return values.containsKey(((ArrayValue) data.getValue()).getIndex());
 	}
 
 	@Override
@@ -62,11 +64,11 @@ public class ArrayLocalKindData extends LocalKindData {
 
 	@Override
 	protected void implRemove(StoredData data) {
-		values.remove(((ArrayEntry) data.getValue()).getIndex());
+		values.remove(((ArrayValue) data.getValue()).getIndex());
 	}
 
 	@Override
-	public List<StoredData> getMatchingDataValues(DataModelSpecifier spec) {
+	public List<StoredData> getMatchingDataValues(StoredDataSpecifier spec) {
 		if (!(spec instanceof ArrayModelSpecifier))
 			throw new IllegalArgumentException("Wrong model specifier");
 
@@ -99,11 +101,11 @@ public class ArrayLocalKindData extends LocalKindData {
 	}
 
 	private StoredData buildEmptyDataValue(long index) {
-		return new StoredData(kind, BigInteger.ZERO, 0, new ArrayEntry(index, new byte[0], false), GenericSignature.EMPTY_SIGNATURE);
+		return new StoredData(kind, BigInteger.ZERO, 0, new ArrayValue(index, new byte[0], false), GenericSignature.EMPTY_SIGNATURE);
 	}
 
 	@Override
-	public List<StoredMetadata> getMatchingMetaDataValues(DataModelSpecifier spec) {
+	public List<StoredMetadata> getMatchingMetaDataValues(StoredDataSpecifier spec) {
 		if (!(spec instanceof ArrayModelSpecifier))
 			throw new IllegalArgumentException("Wrong model specifier");
 
@@ -126,7 +128,7 @@ public class ArrayLocalKindData extends LocalKindData {
 	}
 
 	private StoredMetadata buildPaddingMetadataValue(long index) {
-		return new StoredMetadata(kind, BigInteger.ZERO, 0, new ArrayMetadata(new ArrayEntry(index, new byte[0], false)), SignerIdentity.EMPTY_IDENTITY);
+		return new StoredMetadata(kind, BigInteger.ZERO, 0, new ArrayMetadata(new ArrayValue(index, new byte[0], false)), SignerIdentity.EMPTY_IDENTITY);
 	}
 
 	@Override

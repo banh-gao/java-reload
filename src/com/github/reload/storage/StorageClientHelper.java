@@ -15,8 +15,12 @@ import com.github.reload.message.errors.ErrorMessageException;
 import com.github.reload.message.errors.NetworkException;
 import com.github.reload.storage.ArrayModelSpecifier.ArrayRange;
 import com.github.reload.storage.PreparedData.DataBuildingException;
+import com.github.reload.storage.data.ArrayPreparedValue;
+import com.github.reload.storage.data.DictionaryModelSpecifier;
+import com.github.reload.storage.data.DictionaryPreparedValue;
 import com.github.reload.storage.data.StoredData;
-import com.github.reload.storage.data.DictionaryEntry.Key;
+import com.github.reload.storage.data.StoredDataSpecifier;
+import com.github.reload.storage.data.DictionaryValue.Key;
 import com.github.reload.storage.net.FetchAnswer;
 import com.github.reload.storage.net.FetchKindResponse;
 import com.github.reload.storage.net.FetchRequest;
@@ -87,7 +91,7 @@ public class StorageClientHelper {
 		return answer.getResponses();
 	}
 
-	public List<FetchKindResponse> sendFetchRequest(DestinationList destination, DataSpecifier... specifiers) throws StorageException, NetworkException, InterruptedException {
+	public List<FetchKindResponse> sendFetchRequest(DestinationList destination, StoredDataSpecifier... specifiers) throws StorageException, NetworkException, InterruptedException {
 		ResourceID resourceId;
 		try {
 			resourceId = (ResourceID) destination.get(destination.size() - 1);
@@ -126,10 +130,10 @@ public class StorageClientHelper {
 		return answer.getResponses();
 	}
 
-	public List<StoreKindResponse> sendRemoveRequest(DestinationList destination, DataSpecifier dataSpecifier) throws StorageException, NetworkException, InterruptedException {
+	public List<StoreKindResponse> sendRemoveRequest(DestinationList destination, StoredDataSpecifier dataSpecifier) throws StorageException, NetworkException, InterruptedException {
 		DataKind kind = dataSpecifier.getDataKind();
 
-		DataModelSpecifier modelSpec = dataSpecifier.getModelSpecifier();
+		StoredDataSpecifier modelSpec = dataSpecifier.getModelSpecifier();
 
 		List<PreparedData> preparedDatas = new ArrayList<PreparedData>();
 

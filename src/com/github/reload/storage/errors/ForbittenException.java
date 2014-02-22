@@ -1,4 +1,4 @@
-package com.github.reload.storage;
+package com.github.reload.storage.errors;
 
 import com.github.reload.message.errors.ErrorRespose;
 import com.github.reload.message.errors.ErrorType;

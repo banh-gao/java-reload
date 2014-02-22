@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.naming.ConfigurationException;
 import com.github.reload.message.SecurityBlock;
-import com.github.reload.storage.DataModel.DataType;
-import com.github.reload.storage.data.SingleEntry;
+import com.github.reload.storage.data.DataModel;
+import com.github.reload.storage.data.Metadata;
+import com.github.reload.storage.data.SingleValue;
+import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
 import com.github.reload.storage.policies.AccessPolicy;
 
@@ -99,10 +101,10 @@ public class DataKind {
 	 * 
 	 * @return the specifier for this kind
 	 * @see ReloadOverlay#fetchData(net.sf.jReload.overlay.ResourceID,
-	 *      DataSpecifier...)
+	 *      StoredDataSpecifier...)
 	 */
-	public DataSpecifier newDataSpecifier() {
-		return new DataSpecifier(this, dataModel.newSpecifier());
+	public StoredDataSpecifier newDataSpecifier() {
+		return new StoredDataSpecifier(this, dataModel.newSpecifier());
 	}
 
 	/**
@@ -111,15 +113,15 @@ public class DataKind {
 	 * 
 	 * @return the specifier for this kind
 	 * @see ReloadOverlay#fetchData(net.sf.jReload.overlay.ResourceID,
-	 *      DataSpecifier...)
+	 *      StoredDataSpecifier...)
 	 * @throws IllegalArgumentException
 	 *             if the passed model specifier is not compatible with this
 	 *             kind data model
 	 */
-	public DataSpecifier newDataSpecifier(DataModelSpecifier modelSpecifier) {
+	public StoredDataSpecifier newDataSpecifier(StoredDataSpecifier modelSpecifier) {
 		if (modelSpecifier.getModelType() != getDataModel().getDataType())
 			throw new IllegalArgumentException("Expected model specifier for type " + getDataModel().getDataType() + ", " + modelSpecifier.getModelType() + " given");
-		return new DataSpecifier(this, modelSpecifier);
+		return new StoredDataSpecifier(this, modelSpecifier);
 	}
 
 	/**
@@ -141,7 +143,7 @@ public class DataKind {
 	 *             if the passed prepared value is not compatible with this kind
 	 *             data model
 	 */
-	public PreparedData newPreparedData(PreparedValue preparedValue) {
+	public PreparedData newPreparedData(ValueBuilder preparedValue) {
 		if (!equals(preparedValue.getDataKind()))
 			throw new IllegalArgumentException("Prepared value for kind " + preparedValue.getDataKind().getKindId() + " not compatible with the kind " + getKindId());
 		return new PreparedData(this, preparedValue);
@@ -193,11 +195,11 @@ public class DataKind {
 		return signature;
 	}
 
-	DataModelSpecifier parseModelSpecifier(UnsignedByteBuffer buf, int length) {
+	StoredDataSpecifier parseModelSpecifier(UnsignedByteBuffer buf, int length) {
 		return dataModel.parseSpecifier(buf, length);
 	}
 
-	SingleEntry parseValue(UnsignedByteBuffer buf, int length) {
+	SingleValue parseValue(UnsignedByteBuffer buf, int length) {
 		return dataModel.parseValue(buf, length);
 	}
 
@@ -214,27 +216,6 @@ public class DataKind {
 
 	public DataModel getDataModel() {
 		return dataModel;
-	}
-
-	@Override
-	public final int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + kindId.hashCode();
-		return result;
-	}
-
-	@Override
-	public final boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DataKind other = (DataKind) obj;
-
-		return getKindId().equals(other.getKindId());
 	}
 
 	@Override
