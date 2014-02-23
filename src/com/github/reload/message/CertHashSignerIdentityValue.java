@@ -37,6 +37,16 @@ public class CertHashSignerIdentityValue extends SignerIdentityValue {
 		}
 	}
 
+	@Override
+	public HashAlgorithm getHashAlgorithm() {
+		return certHashAlg;
+	}
+
+	@Override
+	public byte[] getHashValue() {
+		return certHash;
+	}
+
 	public static class CertHashSignerIdentityValueCodec extends Codec<CertHashSignerIdentityValue> {
 
 		private final int CERT_HASH_LENGTH_FIELD = U_INT8;

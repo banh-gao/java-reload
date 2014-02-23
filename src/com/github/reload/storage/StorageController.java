@@ -4,8 +4,12 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import com.github.reload.Context;
+import com.github.reload.message.Content;
+import com.github.reload.message.ContentType;
 import com.github.reload.message.ResourceID;
-import com.github.reload.message.errors.ErrorMessageException;
+import com.github.reload.net.data.Message;
+import com.github.reload.storage.errors.NotFoundException;
 import com.github.reload.storage.net.FetchAnswer;
 import com.github.reload.storage.net.FetchKindResponse;
 import com.github.reload.storage.net.FetchRequest;
@@ -15,8 +19,8 @@ import com.github.reload.storage.net.StatAnswer;
 import com.github.reload.storage.net.StatKindResponse;
 import com.github.reload.storage.net.StatRequest;
 import com.github.reload.storage.net.StoreAnswer;
-import com.github.reload.storage.net.StoreRequest;
 import com.github.reload.storage.net.StoreKindResponse;
+import com.github.reload.storage.net.StoreRequest;
 
 /**
  * Elaborate the storage messages and is responsible for local storage
@@ -58,7 +62,7 @@ public class StorageController {
 	 * @throws StorageException
 	 */
 	public synchronized Message handleStorageRequest(Message message) throws ErrorMessageException {
-		MessageContent content = message.getContent();
+		Content content = message.getContent();
 		switch (content.getType()) {
 			case STORE_REQ :
 				return handleStoreRequest(message);

@@ -9,6 +9,7 @@ import com.github.reload.DataKind;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DataModel;
+import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.net.FetchKindResponse.FetchKindResponseCodec;
 
@@ -86,7 +87,7 @@ public class FetchKindResponse {
 
 			List<StoredData> out = new ArrayList<StoredData>();
 
-			DataModel dataModel = kind.getDataModel();
+			DataModel<? extends DataValue> dataModel = kind.getDataModel();
 
 			while (respData.readableBytes() > 0) {
 				StoredData data = storedDataCodec.decode(respData, dataModel);

@@ -8,7 +8,6 @@ import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.FindKindData;
 import com.github.reload.storage.net.FindAnswer.FindAnswerCodec;
 
 @ReloadCodec(FindAnswerCodec.class)

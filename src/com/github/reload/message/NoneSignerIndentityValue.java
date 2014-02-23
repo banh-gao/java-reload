@@ -27,4 +27,14 @@ class NoneSignerIndentityValue extends SignerIdentityValue {
 
 	}
 
+	@Override
+	public HashAlgorithm getHashAlgorithm() {
+		return HashAlgorithm.NONE;
+	}
+
+	@Override
+	public byte[] getHashValue() {
+		return new byte[0];
+	}
+
 }

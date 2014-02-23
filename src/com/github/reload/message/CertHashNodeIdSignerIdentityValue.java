@@ -39,6 +39,16 @@ public class CertHashNodeIdSignerIdentityValue extends SignerIdentityValue {
 		}
 	}
 
+	@Override
+	public HashAlgorithm getHashAlgorithm() {
+		return certHashAlg;
+	}
+
+	@Override
+	public byte[] getHashValue() {
+		return certHash;
+	}
+
 	public static class CertHashNodeIdSignerIdentityValueCodec extends Codec<CertHashNodeIdSignerIdentityValue> {
 
 		private final int CERT_HASH_NODEID_LENGTH_FIELD = U_INT8;

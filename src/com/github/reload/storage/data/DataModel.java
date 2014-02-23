@@ -8,24 +8,32 @@ import com.github.reload.storage.data.DataModel.DataValue;
 public abstract class DataModel<T extends DataValue> {
 
 	static {
-		registerModel(new SingleModel());
-		registerModel(new ArrayModel());
-		registerModel(new DictionaryModel());
+		try {
+			registerModel(SingleModel.class);
+			registerModel(ArrayModel.class);
+			registerModel(DictionaryModel.class);
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static final Map<String, DataModel<? extends DataValue>> models = new HashMap<String, DataModel<? extends DataValue>>();
 
-	public static DataModel<? extends DataValue> registerModel(DataModel<? extends DataValue> model) {
-		return models.put(model.getName(), model);
+	public static <T extends DataValue> void registerModel(Class<? extends DataModel<T>> modelClazz) throws InstantiationException, IllegalAccessException {
+		DataModel<T> model = modelClazz.newInstance();
+		models.put(model.getName(), model);
 	}
 
 	public static DataModel<? extends DataValue> getInstance(String name) {
 		DataModel<? extends DataValue> model = models.get(name);
 
 		if (model == null)
-			throw new IllegalArgumentException("Unhandled data model " + name);
+			throw new IllegalArgumentException("No data model for type " + name);
 
 		return model;
+	}
+
+	public DataModel() {
 	}
 
 	public abstract String getName();

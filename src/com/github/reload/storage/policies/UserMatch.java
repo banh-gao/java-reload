@@ -3,26 +3,23 @@ package com.github.reload.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import com.github.reload.ReloadOverlay;
 import com.github.reload.message.HashAlgorithm;
+import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
-import net.sf.jReload.AccessPolicyParamsGenerator;
-import net.sf.jReload.Context;
-import net.sf.jReload.ReloadOverlay;
-import net.sf.jReload.crypto.CryptoHelper;
-import net.sf.jReload.crypto.ReloadCertificate;
-import net.sf.jReload.message.ResourceID;
-import net.sf.jReload.storage.StoredData;
+import com.github.reload.storage.data.StoredData;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class UserMatch extends AccessPolicy {
 
-	public UserMatch() {
-		super("user-match");
+	private static final String NAME = "user-match";
+
+	@Override
+	public String getName() {
+		return NAME;
 	}
 
 	@Override

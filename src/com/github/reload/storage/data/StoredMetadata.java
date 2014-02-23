@@ -6,19 +6,21 @@ import com.github.reload.Context;
 import com.github.reload.message.Signature;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.DataModel.Metadata;
 import com.github.reload.storage.data.StoredMetadata.StoredMetadataCodec;
 
 @ReloadCodec(StoredMetadataCodec.class)
 public class StoredMetadata extends StoredData {
 
-	public StoredMetadata(BigInteger storageTime, long lifetime, Metadata value) {
+	public StoredMetadata(BigInteger storageTime, long lifetime, Metadata<? extends DataValue> value) {
 		super(storageTime, lifetime, value, Signature.EMPTY_SIGNATURE);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Metadata getValue() {
-		return (Metadata) super.getValue();
+	public Metadata<? extends DataValue> getValue() {
+		return (Metadata<? extends DataValue>) super.getValue();
 	}
 
 	public static class StoredMetadataCodec extends Codec<StoredMetadata> {
@@ -43,9 +45,9 @@ public class StoredMetadata extends StoredData {
 			long lifeTime = dataFld.readUnsignedInt();
 
 			@SuppressWarnings("unchecked")
-			Codec<Metadata> valueCodec = (Codec<Metadata>) getCodec(((DataModel) params[0]).getMetadataClass());
+			Codec<Metadata<? extends DataValue>> valueCodec = (Codec<Metadata<? extends DataValue>>) getCodec(((DataModel<?>) params[0]).getMetadataClass());
 
-			Metadata value = valueCodec.decode(dataFld);
+			Metadata<? extends DataValue> value = valueCodec.decode(dataFld);
 
 			return new StoredMetadata(storageTime, lifeTime, value);
 		}
@@ -58,7 +60,7 @@ public class StoredMetadata extends StoredData {
 			buf.writeInt((int) obj.getLifeTime());
 
 			@SuppressWarnings("unchecked")
-			Codec<Metadata> valueCodec = (Codec<Metadata>) getCodec(obj.getValue().getClass());
+			Codec<Metadata<? extends DataValue>> valueCodec = (Codec<Metadata<? extends DataValue>>) getCodec(obj.getValue().getClass());
 
 			valueCodec.encode(obj.getValue(), buf);
 

@@ -7,33 +7,30 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Set;
+import javax.naming.ConfigurationException;
+import com.github.reload.DataKind;
+import com.github.reload.ReloadOverlay;
 import com.github.reload.message.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.message.HashAlgorithm;
+import com.github.reload.message.NodeID;
+import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
-import com.github.reload.message.SignerIdentityValue;
 import com.github.reload.message.SignerIdentity.IdentityType;
-import net.sf.jReload.AccessPolicyParamsGenerator;
-import net.sf.jReload.Context;
-import net.sf.jReload.ReloadOverlay;
-import net.sf.jReload.configuration.ConfigurationException;
-import net.sf.jReload.crypto.CryptoHelper;
-import net.sf.jReload.crypto.ReloadCertificate;
-import net.sf.jReload.message.NodeID;
-import net.sf.jReload.message.ResourceID;
-import net.sf.jReload.storage.DataKind;
-import net.sf.jReload.storage.StoredData;
+import com.github.reload.message.SignerIdentityValue;
+import com.github.reload.storage.data.StoredData;
 
 /**
  * Check if the nodeid hash in the sender certificate concatenated with an index
  * value matches the resource id
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class NodeMultipleMatch extends AccessPolicy {
 
-	protected NodeMultipleMatch() {
-		super("node-multiple");
+	private static final String NAME = "node-multiple";
+
+	@Override
+	public String getName() {
+		return NAME;
 	}
 
 	@Override

@@ -18,8 +18,6 @@ import com.github.reload.storage.data.StoredData;
 /**
  * Helps to generate a signed data
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class PreparedData {
 

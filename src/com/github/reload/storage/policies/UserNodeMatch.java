@@ -5,32 +5,28 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.Set;
+import com.github.reload.ReloadOverlay;
 import com.github.reload.message.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.message.HashAlgorithm;
+import com.github.reload.message.NodeID;
+import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
 import com.github.reload.message.SignerIdentityValue;
-import net.sf.jReload.AccessPolicyParamsGenerator;
-import net.sf.jReload.Context;
-import net.sf.jReload.ReloadOverlay;
-import net.sf.jReload.crypto.CryptoHelper;
-import net.sf.jReload.crypto.ReloadCertificate;
-import net.sf.jReload.message.NodeID;
-import net.sf.jReload.message.ResourceID;
-import net.sf.jReload.storage.DictionaryValue;
-import net.sf.jReload.storage.DictionaryValue.Key;
-import net.sf.jReload.storage.StoredData;
+import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.StoredData;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id
  * and nodeid hash matches dictionary key
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class UserNodeMatch extends AccessPolicy {
 
-	protected UserNodeMatch() {
-		super("user-node-match");
+	private static final String NAME = "user-node-match";
+
+	@Override
+	public String getName() {
+		return NAME;
 	}
 
 	@Override

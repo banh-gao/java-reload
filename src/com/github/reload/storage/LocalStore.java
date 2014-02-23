@@ -23,6 +23,7 @@ import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.data.StoredMetadata;
 import com.github.reload.storage.net.FetchKindResponse;
 import com.github.reload.storage.net.FindAnswer;
+import com.github.reload.storage.net.FindKindData;
 import com.github.reload.storage.net.FindRequest;
 import com.github.reload.storage.net.StatKindResponse;
 import com.github.reload.storage.net.StoreKindData;

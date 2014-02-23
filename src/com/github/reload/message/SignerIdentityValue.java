@@ -10,6 +10,10 @@ import com.github.reload.net.data.ReloadCodec;
 @ReloadCodec(SignerIdentityValueCodec.class)
 public abstract class SignerIdentityValue {
 
+	public abstract HashAlgorithm getHashAlgorithm();
+
+	public abstract byte[] getHashValue();
+
 	public static class SignerIdentityValueCodec extends Codec<SignerIdentityValue> {
 
 		public SignerIdentityValueCodec(Context context) {

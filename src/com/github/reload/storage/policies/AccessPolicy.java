@@ -15,8 +15,6 @@ import com.github.reload.storage.errors.ForbittenException;
  * An access control policy used by data kinds that determines if a store
  * request should be accepted
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public abstract class AccessPolicy {
 
@@ -24,24 +22,22 @@ public abstract class AccessPolicy {
 
 	static {
 		// Register default policies
-		registerPolicy(new NodeMatch());
-		registerPolicy(new NodeMultipleMatch());
-		registerPolicy(new UserMatch());
-		registerPolicy(new UserNodeMatch());
+		try {
+			registerPolicy(NodeMatch.class);
+			registerPolicy(NodeMultipleMatch.class);
+			registerPolicy(UserMatch.class);
+			registerPolicy(UserNodeMatch.class);
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
-	private final String name;
-
-	protected AccessPolicy(String name) {
-		this.name = name;
+	protected AccessPolicy() {
 	}
 
-	public static boolean registerPolicy(AccessPolicy policy) {
-		String name = policy.getName().toLowerCase();
-		if (policies.containsKey(name))
-			return false;
-
-		policies.put(name, policy);
+	public static boolean registerPolicy(Class<? extends AccessPolicy> policyClazz) throws InstantiationException, IllegalAccessException {
+		AccessPolicy policy = policyClazz.newInstance();
+		policies.put(policy.getName().toLowerCase(), policy);
 		return true;
 	}
 
@@ -58,6 +54,8 @@ public abstract class AccessPolicy {
 		return Collections.unmodifiableMap(policies);
 	}
 
+	public abstract String getName();
+
 	/**
 	 * Check if the store should be accepted
 	 * 
@@ -70,7 +68,7 @@ public abstract class AccessPolicy {
 	 * Get a parameter generator for this access policy to be used with the
 	 * specified overlay
 	 */
-	public abstract AccessPolicyParamsGenerator getParamsGenerator(Context contexts);
+	public abstract AccessPolicyParamsGenerator getParamsGenerator(Context context);
 
 	/**
 	 * Throw a configuration exception if the given datakind builder doesn't
@@ -81,10 +79,6 @@ public abstract class AccessPolicy {
 	 */
 	public void checkKindParams(DataKind.Builder dataKindBuilder) throws ConfigurationException {
 		// No parameter required by default
-	}
-
-	public final String getName() {
-		return name;
 	}
 
 	@Override
@@ -99,7 +93,7 @@ public abstract class AccessPolicy {
 	public static class AccessPolicyException extends ForbittenException {
 
 		public AccessPolicyException(String message) {
-			super("Policy check failed: " + message);
+			super("Access Policy check failed: " + message);
 		}
 
 	}

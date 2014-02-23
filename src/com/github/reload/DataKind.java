@@ -6,8 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.naming.ConfigurationException;
 import com.github.reload.message.SecurityBlock;
+import com.github.reload.storage.data.ArrayValue;
 import com.github.reload.storage.data.DataModel;
+import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.DataModel.ModelSpecifier;
+import com.github.reload.storage.data.DictionaryValue;
+import com.github.reload.storage.data.SingleValue;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
 import com.github.reload.storage.policies.AccessPolicy;
@@ -18,10 +22,6 @@ import com.github.reload.storage.policies.AccessPolicy.AccessPolicyParamsGenerat
  * 
  */
 public class DataKind {
-
-	public static final String ATTR_MAX_COUNT = "max-count";
-	public static final String ATTR_MAX_SIZE = "max-size";
-	public static final String ATTR_MAX_NODE_MULTIPLE = "max-node-multiple";
 
 	/**
 	 * The data-kinds registered to IANA
@@ -65,7 +65,7 @@ public class DataKind {
 
 	private final long kindId;
 	private final String name;
-	private final DataModel dataModel;
+	private final DataModel<? extends DataValue> dataModel;
 	private final AccessPolicy accessPolicy;
 	private final SecurityBlock signature;
 	private final Map<String, String> attributes;
@@ -103,14 +103,14 @@ public class DataKind {
 	 * @see ReloadOverlay#fetchData(net.sf.jReload.overlay.ResourceID,
 	 *      StoredDataSpecifier...)
 	 */
-	public StoredDataSpecifier newDataSpecifier(ModelSpecifier modelSpecifier) {
+	public StoredDataSpecifier newDataSpecifier(ModelSpecifier<? extends DataValue> modelSpecifier) {
 		return new StoredDataSpecifier(this, modelSpecifier);
 	}
 
 	/**
 	 * @return Get the data model for the data type stored by this kind
 	 */
-	public DataModel getDataModel() {
+	public DataModel<? extends DataValue> getDataModel() {
 		return dataModel;
 	}
 
@@ -157,24 +157,25 @@ public class DataKind {
 
 	public static class Builder {
 
+		public static final Class<SingleValue> TYPE_SINGLE = SingleValue.class;
+		public static final Class<ArrayValue> TYPE_ARRAY = ArrayValue.class;
+		public static final Class<DictionaryValue> TYPE_DICTIONARY = DictionaryValue.class;
+
 		private final long kindId;
-		private DataModel dataModel;
+		private DataModel<? extends DataValue> dataModel;
 		private AccessPolicy accessPolicy;
 		private SecurityBlock signature;
 		private final Map<String, String> attributes = new HashMap<String, String>();
 
 		public Builder(long kindId) {
 			this.kindId = kindId;
-			attribute(ATTR_MAX_COUNT, EncUtils.maxUnsignedInt(EncUtils.U_INT32) + "");
-			attribute(ATTR_MAX_SIZE, EncUtils.maxUnsignedInt(EncUtils.U_INT32) + "");
-			attribute(ATTR_MAX_NODE_MULTIPLE, "0");
 		}
 
 		public long getKindId() {
 			return kindId;
 		}
 
-		public DataModel getDataModel() {
+		public DataModel<? extends DataValue> getDataModel() {
 			return dataModel;
 		}
 

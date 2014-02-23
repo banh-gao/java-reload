@@ -9,31 +9,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.github.reload.Context;
 import com.github.reload.DataKind;
 import com.github.reload.message.DestinationList;
 import com.github.reload.message.ResourceID;
-import com.github.reload.message.errors.ErrorMessageException;
+import com.github.reload.message.SignerIdentity.IdentityType;
 import com.github.reload.message.errors.NetworkException;
-import com.github.reload.storage.ArrayModelSpecifier.ArrayRange;
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.ArrayPreparedValue;
-import com.github.reload.storage.data.DictionaryModelSpecifier;
-import com.github.reload.storage.data.DictionaryPreparedValue;
+import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
+import com.github.reload.storage.data.DictionaryModel.DictionaryModelSpecifier;
+import com.github.reload.storage.data.DictionaryValue.Key;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.data.StoredDataSpecifier;
-import com.github.reload.storage.data.DictionaryValue.Key;
 import com.github.reload.storage.net.FetchAnswer;
 import com.github.reload.storage.net.FetchKindResponse;
 import com.github.reload.storage.net.FetchRequest;
 import com.github.reload.storage.net.StoreAnswer;
 import com.github.reload.storage.net.StoreKindData;
-import com.github.reload.storage.net.StoreRequest;
 import com.github.reload.storage.net.StoreKindResponse;
+import com.github.reload.storage.net.StoreRequest;
 
 /**
  * Helps a peer to send storage requests into the overlay
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 public class StorageClientHelper {

@@ -65,7 +65,7 @@ public class StoredData {
 			long lifeTime = dataFld.readUnsignedInt();
 
 			@SuppressWarnings("unchecked")
-			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel) params[0]).getValueClass());
+			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel<?>) params[0]).getValueClass());
 
 			DataValue value = valueCodec.decode(dataFld);
 
