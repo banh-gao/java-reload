@@ -53,7 +53,7 @@ public class StoredData {
 
 		@Override
 		public StoredData decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
-			if (params.length < 1 || !(params[0] instanceof DataType))
+			if (params.length < 1 || !(params[0] instanceof DataModel))
 				throw new IllegalArgumentException("Data type needed to decode a stored data");
 
 			ByteBuf dataFld = readField(buf, DATA_LENGTH_FIELD);
@@ -65,7 +65,7 @@ public class StoredData {
 			long lifeTime = dataFld.readUnsignedInt();
 
 			@SuppressWarnings("unchecked")
-			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataType) params[0]).getValueClass());
+			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel) params[0]).getValueClass());
 
 			DataValue value = valueCodec.decode(dataFld);
 

@@ -2,6 +2,7 @@ package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
 import com.github.reload.Context;
+import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 
@@ -9,9 +10,9 @@ import com.github.reload.net.data.ReloadCodec;
  * Factory class used to create objects specialized for the single data model
  * 
  */
-public class SingleModel extends DataModel {
+public class SingleModel extends DataModel<SingleValue> {
 
-	private static final String NAME = "SINGLE";
+	public static final String NAME = "SINGLE";
 
 	@Override
 	public String getName() {
@@ -19,21 +20,38 @@ public class SingleModel extends DataModel {
 	}
 
 	@Override
-	public DataValueBuilder newValueBuilder() {
+	public SingleValueBuilder newValueBuilder() {
 		return new SingleValueBuilder();
 	}
 
 	@Override
-	public ModelSpecifier newSpecifier() {
+	public Class<SingleValue> getValueClass() {
+		return SingleValue.class;
+	}
+
+	@Override
+	public SingleMetadata newMetadata(SingleValue value, HashAlgorithm hashAlg) {
+		byte[] hashValue = SingleMetadata.computeHash(hashAlg, value.getValue());
+		return new SingleMetadata(value.exists(), value.getValue().length, hashAlg, hashValue);
+	}
+
+	@Override
+	public Class<? extends Metadata<SingleValue>> getMetadataClass() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SingleModelSpecifier newSpecifier() {
 		return new SingleModelSpecifier();
 	}
 
 	@Override
-	public Class<? extends ModelSpecifier> getSpecifierClass() {
-		return ModelSpecifier.class;
+	public Class<SingleModelSpecifier> getSpecifierClass() {
+		return SingleModelSpecifier.class;
 	}
 
-	public static class SingleValueBuilder implements DataValueBuilder {
+	public static class SingleValueBuilder implements DataValueBuilder<SingleValue> {
 
 		private byte[] value;
 		private boolean exists;
@@ -55,22 +73,22 @@ public class SingleModel extends DataModel {
 	}
 
 	@ReloadCodec(SingleModelSpecifierCodec.class)
-	public static class SingleModelSpecifier implements ModelSpecifier {
+	public static class SingleModelSpecifier implements ModelSpecifier<SingleValue> {
 	}
 
-	public static class SingleModelSpecifierCodec extends Codec<ModelSpecifier> {
+	public static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {
 
 		public SingleModelSpecifierCodec(Context context) {
 			super(context);
 		}
 
 		@Override
-		public void encode(ModelSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(SingleModelSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 
 		}
 
 		@Override
-		public ModelSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
+		public SingleModelSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
 			return new SingleModelSpecifier();
 		}
 

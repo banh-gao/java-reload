@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Context;
+import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DictionaryValue.Key;
@@ -13,9 +14,9 @@ import com.github.reload.storage.data.DictionaryValue.Key;
  * model
  * 
  */
-public class DictionaryModel extends DataModel {
+public class DictionaryModel extends DataModel<DictionaryValue> {
 
-	private static final String NAME = "DICT";
+	public static final String NAME = "DICT";
 
 	@Override
 	public String getName() {
@@ -23,19 +24,35 @@ public class DictionaryModel extends DataModel {
 	}
 
 	@Override
-	public DataValueBuilder newValueBuilder() {
+	public DictionaryValueBuilder newValueBuilder() {
 		return new DictionaryValueBuilder();
 	}
 
 	@Override
-	public Class<? extends ModelSpecifier> getSpecifierClass() {
-		return DictionaryModelSpecifier.class;
+	public Class<DictionaryValue> getValueClass() {
+		return DictionaryValue.class;
 	}
 
 	@Override
-	public ModelSpecifier newSpecifier() {
-		// TODO Auto-generated method stub
-		return null;
+	public DictionaryMetadata newMetadata(DictionaryValue value, HashAlgorithm hashAlg) {
+		SingleModel singleModel = (SingleModel) getInstance(SingleModel.NAME);
+		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
+		return new DictionaryMetadata(value.getKey(), singleMeta);
+	}
+
+	@Override
+	public Class<? extends Metadata<DictionaryValue>> getMetadataClass() {
+		return DictionaryMetadata.class;
+	}
+
+	@Override
+	public DictionaryModelSpecifier newSpecifier() {
+		return new DictionaryModelSpecifier();
+	}
+
+	@Override
+	public Class<? extends ModelSpecifier<DictionaryValue>> getSpecifierClass() {
+		return DictionaryModelSpecifier.class;
 	}
 
 	/**
@@ -43,7 +60,7 @@ public class DictionaryModel extends DataModel {
 	 * value
 	 * 
 	 */
-	public class DictionaryValueBuilder implements DataValueBuilder {
+	public class DictionaryValueBuilder implements DataValueBuilder<DictionaryValue> {
 
 		private Key key;
 		private SingleValue value;
@@ -69,7 +86,7 @@ public class DictionaryModel extends DataModel {
 	 * 
 	 */
 	@ReloadCodec(DictionaryModelSpecifierCodec.class)
-	public static class DictionaryModelSpecifier implements ModelSpecifier {
+	public static class DictionaryModelSpecifier implements ModelSpecifier<DictionaryValue> {
 
 		List<Key> keys = new ArrayList<DictionaryValue.Key>();
 

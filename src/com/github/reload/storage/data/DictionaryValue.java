@@ -5,9 +5,9 @@ import com.github.reload.Context;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DataModel.DataValue;
-import com.github.reload.storage.data.DictionaryValue.DictionaryEntryCodec;
+import com.github.reload.storage.data.DictionaryValue.DictionaryValueCodec;
 
-@ReloadCodec(DictionaryEntryCodec.class)
+@ReloadCodec(DictionaryValueCodec.class)
 public class DictionaryValue implements DataValue {
 
 	private Key key;
@@ -46,42 +46,54 @@ public class DictionaryValue implements DataValue {
 		}
 	}
 
-	public static class DictionaryEntryCodec extends Codec<DictionaryValue> {
+	public static class KeyCodec extends Codec<Key> {
 
 		private static final int KEY_LENGTH_FIELD = U_INT16;
 
-		private final Codec<SingleValue> valueCodec;
-
-		public DictionaryEntryCodec(Context context) {
+		public KeyCodec(Context context) {
 			super(context);
-			valueCodec = getCodec(SingleValue.class);
 		}
 
 		@Override
-		public void encode(DictionaryValue obj, ByteBuf buf, Object... params) throws CodecException {
-			encodeKey(obj, buf);
-			valueCodec.encode(obj.value, buf);
-		}
-
-		private void encodeKey(DictionaryValue obj, ByteBuf buf) {
+		public void encode(Key obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, KEY_LENGTH_FIELD);
-			buf.writeBytes(obj.key.data);
+			buf.writeBytes(obj.data);
 			lenFld.updateDataLength();
 		}
 
 		@Override
-		public DictionaryValue decode(ByteBuf buf, Object... params) throws CodecException {
-			Key k = decodeKey(buf);
-			SingleValue v = valueCodec.decode(buf);
-			return new DictionaryValue(k, v);
-		}
-
-		private Key decodeKey(ByteBuf buf) {
+		public Key decode(ByteBuf buf, Object... params) throws CodecException {
 			ByteBuf keyFld = readField(buf, KEY_LENGTH_FIELD);
 			byte[] keyData = new byte[keyFld.readableBytes()];
 			keyFld.readBytes(keyData);
 			keyFld.release();
 			return new Key(keyData);
+		}
+
+	}
+
+	public static class DictionaryValueCodec extends Codec<DictionaryValue> {
+
+		private final Codec<SingleValue> valueCodec;
+		private final Codec<Key> keyCodec;
+
+		public DictionaryValueCodec(Context context) {
+			super(context);
+			valueCodec = getCodec(SingleValue.class);
+			keyCodec = getCodec(Key.class);
+		}
+
+		@Override
+		public void encode(DictionaryValue obj, ByteBuf buf, Object... params) throws CodecException {
+			keyCodec.encode(obj.key, buf);
+			valueCodec.encode(obj.value, buf);
+		}
+
+		@Override
+		public DictionaryValue decode(ByteBuf buf, Object... params) throws CodecException {
+			Key k = keyCodec.decode(buf);
+			SingleValue v = valueCodec.decode(buf);
+			return new DictionaryValue(k, v);
 		}
 
 	}

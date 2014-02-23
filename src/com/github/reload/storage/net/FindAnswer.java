@@ -1,4 +1,4 @@
-package com.github.reload.storage;
+package com.github.reload.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -8,7 +8,8 @@ import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.FindAnswer.FindAnswerCodec;
+import com.github.reload.storage.FindKindData;
+import com.github.reload.storage.net.FindAnswer.FindAnswerCodec;
 
 @ReloadCodec(FindAnswerCodec.class)
 public class FindAnswer extends Content {
@@ -45,7 +46,7 @@ public class FindAnswer extends Content {
 		}
 
 		@Override
-		public void encode(FindAnswer obj, ByteBuf buf) throws CodecException {
+		public void encode(FindAnswer obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, LIST_LENGTH_FIELD);
 
 			for (FindKindData d : obj.data) {
@@ -56,7 +57,7 @@ public class FindAnswer extends Content {
 		}
 
 		@Override
-		public FindAnswer decode(ByteBuf buf) throws CodecException {
+		public FindAnswer decode(ByteBuf buf, Object... params) throws CodecException {
 			ByteBuf kindDataBuf = readField(buf, LIST_LENGTH_FIELD);
 
 			List<FindKindData> kindData = new ArrayList<FindKindData>();

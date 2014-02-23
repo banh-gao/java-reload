@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.util.Date;
+import com.github.reload.DataKind;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;

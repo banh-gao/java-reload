@@ -1,4 +1,4 @@
-package com.github.reload.storage;
+package com.github.reload;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -7,16 +7,14 @@ import java.util.Map;
 import javax.naming.ConfigurationException;
 import com.github.reload.message.SecurityBlock;
 import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.Metadata;
-import com.github.reload.storage.data.SingleValue;
+import com.github.reload.storage.data.DataModel.ModelSpecifier;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
 import com.github.reload.storage.policies.AccessPolicy;
+import com.github.reload.storage.policies.AccessPolicy.AccessPolicyParamsGenerator;
 
 /**
  * The description of the data kind that a peer can handle
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 public class DataKind {
@@ -79,7 +77,6 @@ public class DataKind {
 		dataModel = builder.dataModel;
 		signature = builder.signature;
 		attributes = builder.attributes;
-
 	}
 
 	/**
@@ -97,65 +94,32 @@ public class DataKind {
 	}
 
 	/**
-	 * Create a data specifier to be used to fetch data from the overlay
+	 * Create a data specifier used to fetch data from the overlay
 	 * 
+	 * @param modelSpecifier
+	 *            the data model specifier used to query for a specific data
+	 *            value
 	 * @return the specifier for this kind
 	 * @see ReloadOverlay#fetchData(net.sf.jReload.overlay.ResourceID,
 	 *      StoredDataSpecifier...)
 	 */
-	public StoredDataSpecifier newDataSpecifier() {
-		return new StoredDataSpecifier(this, dataModel.newSpecifier());
-	}
-
-	/**
-	 * Create a data specifier to be used to fetch data from the overlay, uses
-	 * the passed value as model specifier
-	 * 
-	 * @return the specifier for this kind
-	 * @see ReloadOverlay#fetchData(net.sf.jReload.overlay.ResourceID,
-	 *      StoredDataSpecifier...)
-	 * @throws IllegalArgumentException
-	 *             if the passed model specifier is not compatible with this
-	 *             kind data model
-	 */
-	public StoredDataSpecifier newDataSpecifier(StoredDataSpecifier modelSpecifier) {
-		if (modelSpecifier.getModelType() != getDataModel().getDataType())
-			throw new IllegalArgumentException("Expected model specifier for type " + getDataModel().getDataType() + ", " + modelSpecifier.getModelType() + " given");
+	public StoredDataSpecifier newDataSpecifier(ModelSpecifier modelSpecifier) {
 		return new StoredDataSpecifier(this, modelSpecifier);
 	}
 
 	/**
-	 * Create a prepared data to be used to prepare data that will be stored
-	 * into the overlay
-	 * 
-	 * @return the prepared data for this kind
+	 * @return Get the data model for the data type stored by this kind
 	 */
-	public PreparedData newPreparedData() {
-		return new PreparedData(this, dataModel.newPreparedValue(this));
-	}
-
-	/**
-	 * Create a prepared data to be used to prepare data that will be stored
-	 * into the overlay, uses the passed value as the prepared value
-	 * 
-	 * @return the prepared data for this kind
-	 * @throws IllegalArgumentException
-	 *             if the passed prepared value is not compatible with this kind
-	 *             data model
-	 */
-	public PreparedData newPreparedData(ValueBuilder preparedValue) {
-		if (!equals(preparedValue.getDataKind()))
-			throw new IllegalArgumentException("Prepared value for kind " + preparedValue.getDataKind().getKindId() + " not compatible with the kind " + getKindId());
-		return new PreparedData(this, preparedValue);
+	public DataModel getDataModel() {
+		return dataModel;
 	}
 
 	/**
 	 * Get a parameter generator for the associated access control policy to be
-	 * used with
-	 * the specified overlay
+	 * used with the specified overlay
 	 */
 	public AccessPolicyParamsGenerator getPolicyParamsGenerator(ReloadOverlay overlay) {
-		return accessPolicy.getParamsGenerator(overlay);
+		return accessPolicy.getParamsGenerator(overlay.getContext());
 	}
 
 	public Map<String, String> getAttributes() {
@@ -171,22 +135,6 @@ public class DataKind {
 		return "";
 	}
 
-	public int getIntAttribute(String key) {
-		try {
-			return Integer.parseInt(getAttribute(key));
-		} catch (NumberFormatException e) {
-			return 0;
-		}
-	}
-
-	public long getLongAttribute(String key) {
-		try {
-			return Long.parseLong(getAttribute(key));
-		} catch (NumberFormatException e) {
-			return 0;
-		}
-	}
-
 	public boolean isAttribute(String key) {
 		return attributes.containsKey(key.toLowerCase());
 	}
@@ -195,27 +143,11 @@ public class DataKind {
 		return signature;
 	}
 
-	StoredDataSpecifier parseModelSpecifier(UnsignedByteBuffer buf, int length) {
-		return dataModel.parseSpecifier(buf, length);
-	}
-
-	SingleValue parseValue(UnsignedByteBuffer buf, int length) {
-		return dataModel.parseValue(buf, length);
-	}
-
-	Metadata parseMetadata(UnsignedByteBuffer buf, int length) {
-		return dataModel.parseMetadata(buf, length);
-	}
-
 	/**
 	 * @return The access control policy associated with this data kind
 	 */
 	public AccessPolicy getAccessPolicy() {
 		return accessPolicy;
-	}
-
-	public DataModel getDataModel() {
-		return dataModel;
 	}
 
 	@Override
@@ -238,7 +170,7 @@ public class DataKind {
 			attribute(ATTR_MAX_NODE_MULTIPLE, "0");
 		}
 
-		public KindId getKindId() {
+		public long getKindId() {
 			return kindId;
 		}
 
@@ -246,8 +178,8 @@ public class DataKind {
 			return dataModel;
 		}
 
-		public Builder dataModel(DataType mod) {
-			dataModel = DataModel.getInstance(mod);
+		public Builder dataModel(String name) {
+			dataModel = DataModel.getInstance(name);
 			return this;
 		}
 

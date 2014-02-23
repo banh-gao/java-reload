@@ -5,11 +5,11 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Context;
+import com.github.reload.DataKind;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.DataKind;
+import com.github.reload.storage.data.DataModel;
 import com.github.reload.storage.data.StoredData;
-import com.github.reload.storage.data.DataModel.DataType;
 import com.github.reload.storage.net.FetchKindResponse.FetchKindResponseCodec;
 
 /**
@@ -25,7 +25,6 @@ public class FetchKindResponse {
 	private final List<StoredData> values;
 
 	public FetchKindResponse(DataKind kind, BigInteger generation, List<StoredData> values) {
-		super();
 		this.kind = kind;
 		this.generation = generation;
 		this.values = values;
@@ -87,10 +86,10 @@ public class FetchKindResponse {
 
 			List<StoredData> out = new ArrayList<StoredData>();
 
-			DataType dataType = kind.getDataModel().getDataType();
+			DataModel dataModel = kind.getDataModel();
 
 			while (respData.readableBytes() > 0) {
-				StoredData data = storedDataCodec.decode(respData, dataType);
+				StoredData data = storedDataCodec.decode(respData, dataModel);
 				out.add(data);
 			}
 			respData.release();

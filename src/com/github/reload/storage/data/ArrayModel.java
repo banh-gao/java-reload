@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Context;
+import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.PreparedData.DataBuildingException;
@@ -13,9 +14,9 @@ import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier.ArrayRange;
  * Factory class used to create objects specialized for the array data model
  * 
  */
-public class ArrayModel extends DataModel {
+public class ArrayModel extends DataModel<ArrayValue> {
 
-	private static final String NAME = "ARRAY";
+	public static final String NAME = "ARRAY";
 
 	@Override
 	public String getName() {
@@ -23,17 +24,34 @@ public class ArrayModel extends DataModel {
 	}
 
 	@Override
-	public DataValueBuilder newValueBuilder() {
+	public Class<ArrayValue> getValueClass() {
+		return ArrayValue.class;
+	}
+
+	@Override
+	public DataValueBuilder<ArrayValue> newValueBuilder() {
 		return new ArrayValueBuilder();
 	}
 
 	@Override
-	public ModelSpecifier newSpecifier() {
+	public Metadata<ArrayValue> newMetadata(ArrayValue value, HashAlgorithm hashAlg) {
+		SingleModel singleModel = (SingleModel) getInstance(SingleModel.NAME);
+		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
+		return new ArrayMetadata(value.getIndex(), singleMeta);
+	}
+
+	@Override
+	public Class<? extends Metadata<ArrayValue>> getMetadataClass() {
+		return ArrayMetadata.class;
+	}
+
+	@Override
+	public ModelSpecifier<ArrayValue> newSpecifier() {
 		return new ArrayModelSpecifier();
 	}
 
 	@Override
-	public Class<? extends ModelSpecifier> getSpecifierClass() {
+	public Class<ArrayModelSpecifier> getSpecifierClass() {
 		return ArrayModelSpecifier.class;
 	}
 
@@ -44,7 +62,7 @@ public class ArrayModel extends DataModel {
 	 * @author Daniel Zozin <zdenial@gmx.com>
 	 * 
 	 */
-	public class ArrayValueBuilder implements DataValueBuilder {
+	public class ArrayValueBuilder implements DataValueBuilder<ArrayValue> {
 
 		/**
 		 * Indicates the last index position in an array, used to append
@@ -89,7 +107,7 @@ public class ArrayModel extends DataModel {
 	 * 
 	 */
 	@ReloadCodec(ArrayModelSpecifierCodec.class)
-	public static class ArrayModelSpecifier implements ModelSpecifier {
+	public static class ArrayModelSpecifier implements ModelSpecifier<ArrayValue> {
 
 		private final List<ArrayRange> ranges = new ArrayList<ArrayRange>();
 

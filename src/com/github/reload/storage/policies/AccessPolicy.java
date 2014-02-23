@@ -3,15 +3,13 @@ package com.github.reload.storage.policies;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.naming.ConfigurationException;
+import com.github.reload.Context;
+import com.github.reload.DataKind;
+import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
-import net.sf.jReload.AccessPolicyParamsGenerator;
-import net.sf.jReload.Context;
-import net.sf.jReload.ReloadOverlay;
-import net.sf.jReload.configuration.ConfigurationException;
-import net.sf.jReload.message.ResourceID;
-import net.sf.jReload.storage.DataKind;
-import net.sf.jReload.storage.ForbittenException;
-import net.sf.jReload.storage.StoredData;
+import com.github.reload.storage.data.StoredData;
+import com.github.reload.storage.errors.ForbittenException;
 
 /**
  * An access control policy used by data kinds that determines if a store
@@ -72,7 +70,7 @@ public abstract class AccessPolicy {
 	 * Get a parameter generator for this access policy to be used with the
 	 * specified overlay
 	 */
-	public abstract AccessPolicyParamsGenerator getParamsGenerator(ReloadOverlay conn);
+	public abstract AccessPolicyParamsGenerator getParamsGenerator(Context contexts);
 
 	/**
 	 * Throw a configuration exception if the given datakind builder doesn't
@@ -97,8 +95,6 @@ public abstract class AccessPolicy {
 	/**
 	 * Indicates that the access control policy check fails
 	 * 
-	 * @author Daniel Zozin <zdenial@gmx.com>
-	 * 
 	 */
 	public static class AccessPolicyException extends ForbittenException {
 
@@ -106,5 +102,18 @@ public abstract class AccessPolicy {
 			super("Policy check failed: " + message);
 		}
 
+	}
+
+	/**
+	 * Generate the parameters in conformity to an access control policy
+	 * 
+	 */
+	public abstract class AccessPolicyParamsGenerator {
+
+		protected final Context context;
+
+		public AccessPolicyParamsGenerator(Context context) {
+			this.context = context;
+		}
 	}
 }

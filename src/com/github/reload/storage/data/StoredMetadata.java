@@ -1,118 +1,69 @@
 package com.github.reload.storage.data;
 
+import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.message.SignerIdentity;
-import com.github.reload.storage.DataKind;
+import com.github.reload.Context;
+import com.github.reload.message.Signature;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
+import com.github.reload.storage.data.DataModel.Metadata;
+import com.github.reload.storage.data.StoredMetadata.StoredMetadataCodec;
 
-/**
- * A data with a digital signature over the fields defined by the RELOAD
- * protocol
- * 
- */
-public class StoredMetadata extends ResponseData {
+@ReloadCodec(StoredMetadataCodec.class)
+public class StoredMetadata extends StoredData {
 
-	private static final int METADATA_LENGTH_FIELD = EncUtils.U_INT32;
-
-	public final static int DEFAULT_LIFETIME = 60;
-
-	private final Metadata value;
-
-	private final SignerIdentity signerIdentity;
-
-	public StoredMetadata(DataKind kind, BigInteger storageTime, long lifetime, Metadata value, SignerIdentity signerIdentity) {
-		this.kind = kind;
-		this.storageTime = storageTime;
-		lifeTime = lifetime;
-		this.value = value;
-		this.signerIdentity = signerIdentity;
-	}
-
-	public StoredMetadata(DataKind kind, UnsignedByteBuffer buf) {
-		this.kind = kind;
-
-		int length = buf.getLengthValue(METADATA_LENGTH_FIELD);
-
-		storageTime = buf.getSigned64();
-		lifeTime = buf.getSigned32();
-
-		int metadataLength = length - EncUtils.U_INT64 - EncUtils.U_INT32;
-
-		value = kind.parseMetadata(buf, metadataLength);
-		signerIdentity = null;
+	public StoredMetadata(BigInteger storageTime, long lifetime, Metadata value) {
+		super(storageTime, lifetime, value, Signature.EMPTY_SIGNATURE);
 	}
 
 	@Override
-	public void writeTo(UnsignedByteBuffer buf) {
-		Field lenFld = buf.allocateLengthField(METADATA_LENGTH_FIELD);
-
-		buf.putUnsigned64(storageTime);
-		buf.putUnsigned32(lifeTime);
-		value.writeTo(buf);
-
-		lenFld.setEncodedLength(buf.getConsumedFrom(lenFld.getNextPosition()));
+	public Metadata getValue() {
+		return (Metadata) super.getValue();
 	}
 
-	DataKind getKind() {
-		return kind;
-	}
+	public static class StoredMetadataCodec extends Codec<StoredMetadata> {
 
-	/**
-	 * @return the timestamp storage time in milliseconds
-	 */
-	public BigInteger getStorageTime() {
-		return storageTime;
-	}
+		private static final int DATA_LENGTH_FIELD = U_INT32;
 
-	/**
-	 * @return the lifetime of this data in seconds
-	 */
-	public long getLifeTime() {
-		return lifeTime;
-	}
+		public StoredMetadataCodec(Context context) {
+			super(context);
+		}
 
-	public Metadata getMetadata() {
-		return value;
-	}
+		@Override
+		public StoredMetadata decode(ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
+			if (params.length < 1 || !(params[0] instanceof DataModel))
+				throw new IllegalArgumentException("Data type needed to decode a stored data");
 
-	@Override
-	protected SignerIdentity getSignerIdentity() {
-		return signerIdentity;
-	}
+			ByteBuf dataFld = readField(buf, DATA_LENGTH_FIELD);
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((kind == null) ? 0 : kind.hashCode());
-		result = prime * result + ((storageTime == null) ? 0 : storageTime.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
-	}
+			byte[] storageTimeRaw = new byte[8];
+			dataFld.readBytes(storageTimeRaw);
+			BigInteger storageTime = new BigInteger(1, storageTimeRaw);
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		StoredMetadata other = (StoredMetadata) obj;
-		if (kind == null) {
-			if (other.kind != null)
-				return false;
-		} else if (!kind.equals(other.kind))
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
-	}
+			long lifeTime = dataFld.readUnsignedInt();
 
-	@Override
-	public String toString() {
-		return "StoredMetadata [kind=" + kind.getKindId() + ", storageTime=" + storageTime + ", lifeTime=" + lifeTime + ", value=" + value + "]";
+			@SuppressWarnings("unchecked")
+			Codec<Metadata> valueCodec = (Codec<Metadata>) getCodec(((DataModel) params[0]).getMetadataClass());
+
+			Metadata value = valueCodec.decode(dataFld);
+
+			return new StoredMetadata(storageTime, lifeTime, value);
+		}
+
+		@Override
+		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.data.Codec.CodecException {
+			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
+
+			buf.writeBytes(obj.getStorageTime().toByteArray());
+			buf.writeInt((int) obj.getLifeTime());
+
+			@SuppressWarnings("unchecked")
+			Codec<Metadata> valueCodec = (Codec<Metadata>) getCodec(obj.getValue().getClass());
+
+			valueCodec.encode(obj.getValue(), buf);
+
+			lenFld.updateDataLength();
+		}
+
 	}
 }

@@ -4,10 +4,10 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
+import com.github.reload.DataKind;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.Signature;
 import com.github.reload.message.SignerIdentity.IdentityType;
-import com.github.reload.storage.DataKind;
 import com.github.reload.storage.PreparedData.DataBuildingException;
 import com.github.reload.storage.errors.DataTooLargeException;
 

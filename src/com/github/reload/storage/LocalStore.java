@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import com.github.reload.DataKind;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.StorageController.QueryType;

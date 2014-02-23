@@ -3,9 +3,9 @@ package com.github.reload.storage.data;
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import com.github.reload.Context;
+import com.github.reload.DataKind;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
-import com.github.reload.storage.DataKind;
 import com.github.reload.storage.data.DataModel.ModelSpecifier;
 import com.github.reload.storage.data.StoredDataSpecifier.StoredDataSpecifierCodec;
 
@@ -13,12 +13,11 @@ import com.github.reload.storage.data.StoredDataSpecifier.StoredDataSpecifierCod
 public class StoredDataSpecifier {
 
 	private final DataKind kind;
-	private final BigInteger generation;
+	private BigInteger generation;
 	private final ModelSpecifier modelSpecifier;
 
-	StoredDataSpecifier(DataKind kind, BigInteger generation, ModelSpecifier spec) {
+	public StoredDataSpecifier(DataKind kind, ModelSpecifier spec) {
 		this.kind = kind;
-		this.generation = generation;
 		modelSpecifier = spec;
 	}
 
@@ -32,6 +31,10 @@ public class StoredDataSpecifier {
 
 	public BigInteger getGeneration() {
 		return generation;
+	}
+
+	public void setGeneration(BigInteger generation) {
+		this.generation = generation;
 	}
 
 	public static class StoredDataSpecifierCodec extends Codec<StoredDataSpecifier> {
@@ -75,7 +78,10 @@ public class StoredDataSpecifier {
 
 			ModelSpecifier modelSpec = modelSpecCodec.decode(modelSpecFld);
 
-			return new StoredDataSpecifier(kind, generation, modelSpec);
+			StoredDataSpecifier spec = new StoredDataSpecifier(kind, modelSpec);
+			spec.setGeneration(generation);
+
+			return spec;
 		}
 
 	}

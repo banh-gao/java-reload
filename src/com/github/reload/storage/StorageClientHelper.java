@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.github.reload.DataKind;
 import com.github.reload.message.DestinationList;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.errors.ErrorMessageException;
