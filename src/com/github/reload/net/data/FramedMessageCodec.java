@@ -37,27 +37,31 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-		if (!isEnoughtData(in))
-			return;
+		try {
+			if (!isEnoughtData(in))
+				return;
 
-		FrameType type = FrameType.valueOf(in.readUnsignedByte());
+			FrameType type = FrameType.valueOf(in.readUnsignedByte());
 
-		if (type == null)
-			throw new DecoderException("Unknown frame type");
+			if (type == null)
+				throw new DecoderException("Unknown frame type");
 
-		long sequence = in.readUnsignedInt();
+			long sequence = in.readUnsignedInt();
 
-		FramedMessage msg = null;
+			FramedMessage msg = null;
 
-		switch (type) {
-			case DATA :
-				msg = decodeData(in, sequence);
-				break;
-			case ACK :
-				msg = decodeAck(in, sequence);
-				break;
+			switch (type) {
+				case DATA :
+					msg = decodeData(in, sequence);
+					break;
+				case ACK :
+					msg = decodeAck(in, sequence);
+					break;
+			}
+			out.add(msg);
+		} finally {
+			in.clear();
 		}
-		out.add(msg);
 	}
 
 	/**

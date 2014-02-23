@@ -4,10 +4,9 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
-import com.github.reload.message.GenericSignature;
 import com.github.reload.message.ResourceID;
+import com.github.reload.message.Signature;
 import com.github.reload.message.SignerIdentity.IdentityType;
-import com.github.reload.message.SignerIdentity.SignerIdentityException;
 import com.github.reload.storage.DataKind;
 import com.github.reload.storage.PreparedData.DataBuildingException;
 import com.github.reload.storage.errors.DataTooLargeException;
@@ -45,7 +44,7 @@ public class DataUtils {
 	 */
 	static StoredData getNonExistentData(DataKind kind) {
 		try {
-			return new StoredData(kind, BigInteger.ZERO, 0, kind.newPreparedData().getValue().setExists(false).build(), GenericSignature.EMPTY_SIGNATURE);
+			return new StoredData(kind, BigInteger.ZERO, 0, kind.newPreparedData().getValue().setExists(false).build(), Signature.EMPTY_SIGNATURE);
 		} catch (DataBuildingException e) {
 			throw new RuntimeException(e);
 		}

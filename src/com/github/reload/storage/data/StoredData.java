@@ -3,7 +3,7 @@ package com.github.reload.storage.data;
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import com.github.reload.Context;
-import com.github.reload.message.GenericSignature;
+import com.github.reload.message.Signature;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DataModel.DataValue;
@@ -15,9 +15,9 @@ public class StoredData {
 	private final BigInteger storageTime;
 	private final long lifeTime;
 	private final DataValue value;
-	private final GenericSignature signature;
+	private final Signature signature;
 
-	public StoredData(BigInteger storageTime, long lifeTime, DataValue value, GenericSignature signature) {
+	public StoredData(BigInteger storageTime, long lifeTime, DataValue value, Signature signature) {
 		this.storageTime = storageTime;
 		this.lifeTime = lifeTime;
 		this.value = value;
@@ -36,7 +36,7 @@ public class StoredData {
 		return value;
 	}
 
-	GenericSignature getSignature() {
+	Signature getSignature() {
 		return signature;
 	}
 
@@ -44,11 +44,11 @@ public class StoredData {
 
 		private static final int DATA_LENGTH_FIELD = U_INT32;
 
-		private final Codec<GenericSignature> signatureCodec;
+		private final Codec<Signature> signatureCodec;
 
 		public StoredDataCodec(Context context) {
 			super(context);
-			signatureCodec = getCodec(GenericSignature.class);
+			signatureCodec = getCodec(Signature.class);
 		}
 
 		@Override
@@ -69,7 +69,7 @@ public class StoredData {
 
 			DataValue value = valueCodec.decode(dataFld);
 
-			GenericSignature signature = signatureCodec.decode(buf);
+			Signature signature = signatureCodec.decode(buf);
 
 			return new StoredData(storageTime, lifeTime, value, signature);
 		}

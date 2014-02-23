@@ -7,13 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
-import com.github.reload.message.GenericSignature;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
-import com.github.reload.storage.data.ArrayValue;
 import com.github.reload.storage.data.ArrayMetadata;
 import com.github.reload.storage.data.ArrayModel;
 import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
+import com.github.reload.storage.data.ArrayValue;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.data.StoredMetadata;
@@ -101,7 +100,7 @@ public class ArrayLocalKindData extends LocalKindData {
 	}
 
 	private StoredData buildEmptyDataValue(long index) {
-		return new StoredData(kind, BigInteger.ZERO, 0, new ArrayValue(index, new byte[0], false), GenericSignature.EMPTY_SIGNATURE);
+		return new StoredData(kind, BigInteger.ZERO, 0, new ArrayValue(index, new byte[0], false), Signature.EMPTY_SIGNATURE);
 	}
 
 	@Override

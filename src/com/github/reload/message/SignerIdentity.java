@@ -4,8 +4,11 @@ import io.netty.buffer.ByteBuf;
 import java.security.cert.Certificate;
 import java.util.EnumSet;
 import com.github.reload.Context;
+import com.github.reload.message.SignerIdentity.SignerIdentityCodec;
 import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.ReloadCodec;
 
+@ReloadCodec(SignerIdentityCodec.class)
 public class SignerIdentity {
 
 	public static final SignerIdentity EMPTY_IDENTITY = new SignerIdentity(IdentityType.NONE, new NoneSignerIndentityValue());

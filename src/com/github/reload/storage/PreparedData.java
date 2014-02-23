@@ -4,10 +4,13 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.util.Date;
+import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
-import com.github.reload.storage.data.ArrayValue;
+import com.github.reload.message.Signature;
+import com.github.reload.message.SignerIdentity;
 import com.github.reload.storage.data.ArrayModel;
+import com.github.reload.storage.data.ArrayValue;
 import com.github.reload.storage.data.SingleValue;
 import com.github.reload.storage.data.StoredData;
 
@@ -125,13 +128,13 @@ public class PreparedData {
 		// Use this identity type because it is required by some access policies
 		SignerIdentity localIdentity = SignerIdentity.multipleIdIdentity(certHashAlg, localCert, storerId);
 
-		GenericSignature signature = computeSignature(localIdentity, cryptoHelper, resourceId, value);
+		Signature signature = computeSignature(localIdentity, cryptoHelper, resourceId, value);
 
 		return new StoredData(kind, storageTime, lifeTime, value, signature);
 	}
 
-	private GenericSignature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, SingleValue value) {
-		GenericSignature dataSigner = cryptoHelper.newSigner(signerIdentity);
+	private Signature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, SingleValue value) {
+		Signature dataSigner = cryptoHelper.newSigner(signerIdentity);
 
 		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleValue.VALUE_LENGTH_FIELD + value.getSize());
 

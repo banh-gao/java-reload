@@ -1,6 +1,5 @@
 package com.github.reload.message;
 
-import io.netty.buffer.ByteBuf;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -9,12 +8,8 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Arrays;
-import com.github.reload.Context;
-import com.github.reload.message.GenericSignature.GenericSignatureCodec;
 import com.github.reload.net.data.Codec;
-import com.github.reload.net.data.ReloadCodec;
 
-@ReloadCodec(GenericSignatureCodec.class)
 public class GenericSignature extends Signature implements Cloneable {
 
 	public static GenericSignature EMPTY_SIGNATURE;
@@ -177,51 +172,5 @@ public class GenericSignature extends Signature implements Cloneable {
 		}
 		s.digest = Arrays.copyOf(digest, digest.length);
 		return s;
-	}
-
-	public static class GenericSignatureCodec extends Codec<GenericSignature> {
-
-		private static final int DIGEST_LENGTH_FIELD = U_INT16;
-
-		private Codec<SignatureAlgorithm> signAlgCodec;
-		private Codec<HashAlgorithm> hashAlgCodec;
-		private Codec<SignerIdentity> signIdentityCodec;
-
-		public GenericSignatureCodec(Context context) {
-			super(context);
-			signAlgCodec = getCodec(SignatureAlgorithm.class);
-			hashAlgCodec = getCodec(HashAlgorithm.class);
-			signIdentityCodec = getCodec(SignerIdentity.class);
-		}
-
-		@Override
-		public void encode(GenericSignature obj, ByteBuf buf, Object... params) throws CodecException {
-			hashAlgCodec.encode(obj.hashAlg, buf);
-			signAlgCodec.encode(obj.signAlg, buf);
-			signIdentityCodec.encode(obj.signerIdentity, buf);
-
-			Field lenFld = allocateField(buf, DIGEST_LENGTH_FIELD);
-			buf.writeBytes(obj.digest);
-			lenFld.updateDataLength();
-		}
-
-		@Override
-		public GenericSignature decode(ByteBuf buf, Object... params) throws CodecException {
-			HashAlgorithm hashAlg = hashAlgCodec.decode(buf);
-			SignatureAlgorithm signAlg = signAlgCodec.decode(buf);
-			SignerIdentity identity = signIdentityCodec.decode(buf);
-
-			ByteBuf digestData = readField(buf, DIGEST_LENGTH_FIELD);
-
-			byte[] digest = new byte[digestData.readableBytes()];
-			digestData.readBytes(digest);
-			digestData.release();
-
-			try {
-				return new GenericSignature(digest, identity, hashAlg, signAlg);
-			} catch (NoSuchAlgorithmException e) {
-				throw new CodecException(e);
-			}
-		}
 	}
 }

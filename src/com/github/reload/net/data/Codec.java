@@ -219,15 +219,10 @@ public abstract class Codec<T> {
 		 * 
 		 * @return
 		 *         the length of data subfield in bytes
-		 * @throws IndexOutOfBoundsException
-		 *             if the written data exceeds the maximum size of the field
 		 */
 		public int updateDataLength() {
 			// current position - (start of data subfield)
 			int writtenDataLength = buf.writerIndex() - (fieldPos + maxDataLength);
-
-			if (writtenDataLength > maxDataLength)
-				throw new IndexOutOfBoundsException("Written data exceeds maximum field size");
 
 			// Set actual written data subfield length into the length subfield
 			buf.writerIndex(fieldPos);

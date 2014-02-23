@@ -66,7 +66,7 @@ public class CertHashSignerIdentityValue extends SignerIdentityValue {
 
 			byte[] certHash = new byte[hashFld.readableBytes()];
 
-			buf.readBytes(certHash);
+			hashFld.readBytes(certHash);
 
 			return new CertHashSignerIdentityValue(certHashAlg, certHash);
 		}

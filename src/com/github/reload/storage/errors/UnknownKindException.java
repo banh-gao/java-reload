@@ -9,7 +9,6 @@ import com.github.reload.message.errors.ErrorRespose;
 import com.github.reload.message.errors.ErrorType;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.Codec.Field;
-import com.github.reload.storage.KindId;
 
 /**
  * Indicates that some kinds are unknown and report them in the error
@@ -20,9 +19,9 @@ public class UnknownKindException extends Exception implements ErrorRespose {
 
 	private static final int KINDS_LENGTH_FIELD = Codec.U_INT8;
 
-	private final List<KindId> unknownKinds;
+	private final List<Long> unknownKinds;
 
-	public UnknownKindException(List<KindId> kindIds) {
+	public UnknownKindException(List<Long> kindIds) {
 		super(getEncodedKinds(kindIds));
 		unknownKinds = kindIds;
 	}
@@ -36,23 +35,22 @@ public class UnknownKindException extends Exception implements ErrorRespose {
 		buf.writeBytes(infoData);
 		ByteBuf unknownKindsData = Codec.readField(buf, KINDS_LENGTH_FIELD);
 
-		unknownKinds = new ArrayList<KindId>();
+		unknownKinds = new ArrayList<Long>();
 
 		while (unknownKindsData.readableBytes() > 0) {
-			KindId kindId = KindId.valueOf(buf.readInt());
-			unknownKinds.add(kindId);
+			unknownKinds.add(buf.readUnsignedInt());
 		}
 
 		unknownKindsData.release();
 	}
 
-	private static String getEncodedKinds(List<KindId> kindIds) {
+	private static String getEncodedKinds(List<Long> kindIds) {
 		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer();
 
 		Field lenFld = Codec.allocateField(buf, KINDS_LENGTH_FIELD);
 
-		for (KindId id : kindIds) {
-			buf.writeInt((int) id.getId());
+		for (Long id : kindIds) {
+			buf.writeInt(id.intValue());
 		}
 
 		lenFld.updateDataLength();
@@ -63,7 +61,7 @@ public class UnknownKindException extends Exception implements ErrorRespose {
 		return new String(out, Error.MSG_CHARSET);
 	}
 
-	public List<KindId> getUnknownKinds() {
+	public List<Long> getUnknownKinds() {
 		return unknownKinds;
 	}
 
