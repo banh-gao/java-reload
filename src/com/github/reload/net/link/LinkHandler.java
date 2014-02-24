@@ -1,4 +1,4 @@
-package com.github.reload.net.handlers;
+package com.github.reload.net.link;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;

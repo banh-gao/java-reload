@@ -1,10 +1,9 @@
-package com.github.reload.net.handlers;
+package com.github.reload.net;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import com.github.reload.net.MessageProcessTask;
 import com.github.reload.net.data.Message;
 
 /**

@@ -31,8 +31,6 @@ import com.github.reload.storage.net.StoreRequest;
  * Message type codes, also used to create message content object instances for
  * the corresponding type
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public enum ContentType {
 	PROBE_REQ((short) 0x1, ProbeRequest.class),

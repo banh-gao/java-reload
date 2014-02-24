@@ -16,6 +16,25 @@ import com.github.reload.net.data.ReloadCodec;
 @ReloadCodec(ProbeRequestCodec.class)
 public class ProbeRequest extends Content {
 
+	private final List<ProbeInformationType> requestedInfo;
+
+	public ProbeRequest(List<ProbeInformationType> probeTypes) {
+		requestedInfo = probeTypes;
+	}
+
+	public ProbeRequest(ProbeInformationType... probeTypes) {
+		this(Arrays.asList(probeTypes));
+	}
+
+	public List<ProbeInformationType> getRequestedInfo() {
+		return requestedInfo;
+	}
+
+	@Override
+	public ContentType getType() {
+		return ContentType.PROBE_REQ;
+	}
+
 	public enum ProbeInformationType {
 		RESPONSIBLE_SET((byte) 0x1, ResponsibleSetProbeInformation.class),
 		NUM_RESOUCES((byte) 0x2, NumResourcesProbeInformation.class),
@@ -53,7 +72,6 @@ public class ProbeRequest extends Content {
 
 		public ProbeRequestCodec(Context context) {
 			super(context);
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override
@@ -88,24 +106,4 @@ public class ProbeRequest extends Content {
 		}
 
 	}
-
-	private final List<ProbeInformationType> requestedInfo;
-
-	public ProbeRequest(List<ProbeInformationType> probeTypes) {
-		requestedInfo = probeTypes;
-	}
-
-	public ProbeRequest(ProbeInformationType... probeTypes) {
-		this(Arrays.asList(probeTypes));
-	}
-
-	public List<ProbeInformationType> getRequestedInfo() {
-		return requestedInfo;
-	}
-
-	@Override
-	public ContentType getType() {
-		return ContentType.PROBE_REQ;
-	}
-
 }

@@ -1,15 +1,21 @@
-package com.github.reload.net.handlers;
+package com.github.reload.net;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import com.github.reload.net.data.HeadedMessage;
+import com.github.reload.routing.MessageRouter;
 
 @Sharable
 public class ForwardingHandler extends ChannelDuplexHandler {
 
 	private ChannelHandlerContext ctx;
+	private final MessageRouter router;
+
+	public ForwardingHandler(MessageRouter router) {
+		this.router = router;
+	}
 
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -43,7 +49,9 @@ public class ForwardingHandler extends ChannelDuplexHandler {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		HeadedMessage message = (HeadedMessage) msg;
-		// TODO : determine if this message is local or has to be forwarded
-		ctx.fireChannelRead(message);
+		if (router.isLocalMessage(message.getHeader()))
+			ctx.fireChannelRead(message);
+		else
+			router.sendMessage(message);
 	}
 }

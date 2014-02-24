@@ -13,13 +13,13 @@ import com.github.reload.net.data.ReloadCodec;
 @ReloadCodec(ProbeAnswerCodec.class)
 public class ProbeAnswer extends Content {
 
-	private final List<ProbeInformation> probeInfo;
+	private final List<? extends ProbeInformation> probeInfo;
 
-	public ProbeAnswer(List<ProbeInformation> probeInfo) {
+	public ProbeAnswer(List<? extends ProbeInformation> probeInfo) {
 		this.probeInfo = probeInfo;
 	}
 
-	public List<ProbeInformation> getProbeInformations() {
+	public List<? extends ProbeInformation> getProbeInformations() {
 		return probeInfo;
 	}
 
@@ -62,7 +62,8 @@ public class ProbeAnswer extends Content {
 			ByteBuf probeInfoData = readField(buf, LIST_LENGTH_FIELD);
 
 			while (probeInfoData.readableBytes() > 0) {
-				probeInfo.add(infoCodec.decode(buf));
+				ProbeInformation info = infoCodec.decode(probeInfoData);
+				probeInfo.add(info);
 			}
 
 			return new ProbeAnswer(probeInfo);

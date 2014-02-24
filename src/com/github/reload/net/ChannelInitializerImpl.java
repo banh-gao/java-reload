@@ -8,9 +8,7 @@ import com.github.reload.net.data.FramedMessageCodec;
 import com.github.reload.net.data.HeadedMessageDecoder;
 import com.github.reload.net.data.MessageDecoder;
 import com.github.reload.net.data.MessageEncoder;
-import com.github.reload.net.handlers.ForwardingHandler;
-import com.github.reload.net.handlers.MessageHandler;
-import com.github.reload.net.handlers.SRLinkHandler;
+import com.github.reload.net.link.SRLinkHandler;
 
 /**
  * Initialize an newly created channel
@@ -26,10 +24,12 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 	public static final String FWD_HANDLER = "FWD_HANDLER";
 	public static final String MSG_HANDLER = "MSG_HANDLER";
 
+	private final ForwardingHandler fwdHandler;
 	private final MessageHandler msgHandler;
 
-	public ChannelInitializerImpl(MessageHandler msgHandler) {
+	public ChannelInitializerImpl(ForwardingHandler fwdHandler, MessageHandler msgHandler) {
 		// TODO: share codec instances between channels
+		this.fwdHandler = fwdHandler;
 		this.msgHandler = msgHandler;
 	}
 
@@ -50,7 +50,7 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
 		// IN: Forward to other links the messages not directed to this node
 		// OUT: Forward on this link the messages not directed to this node
-		pipeline.addLast(FWD_HANDLER, new ForwardingHandler());
+		pipeline.addLast(FWD_HANDLER, fwdHandler);
 
 		// IN: Decoder for RELOAD message content and security block, header
 		// must have been already decoded at this point

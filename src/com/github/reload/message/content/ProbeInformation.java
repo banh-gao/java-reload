@@ -42,8 +42,7 @@ public abstract class ProbeInformation {
 			if (type == null)
 				throw new CodecException("Unknown probe information type " + typeV);
 
-			short length = buf.readByte();
-			ByteBuf infoData = buf.readBytes(length);
+			ByteBuf infoData = readField(buf, INFORMATION_LENGTH_FIELD);
 
 			@SuppressWarnings("unchecked")
 			Codec<ProbeInformation> codec = (Codec<ProbeInformation>) getCodec(type.getInfoClass());

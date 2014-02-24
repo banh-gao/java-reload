@@ -28,10 +28,10 @@ public class AttachMessage extends Content {
 	private List<IceCandidate> candidates;
 	private boolean sendUpdate;
 
-	private AttachMessage(Builder builder, ContentType type) {
+	private AttachMessage(Builder builder) {
 		userFragment = builder.userFragment;
 		password = builder.password;
-		this.type = type;
+		this.type = builder.contentType;
 		candidates = builder.candidates;
 		sendUpdate = builder.sendUpdate;
 	}
@@ -75,6 +75,7 @@ public class AttachMessage extends Content {
 		byte[] password = new byte[0];
 		List<IceCandidate> candidates = new ArrayList<IceCandidate>();
 		boolean sendUpdate = false;
+		ContentType contentType;
 
 		public Builder() {
 		}
@@ -100,11 +101,13 @@ public class AttachMessage extends Content {
 		}
 
 		public AttachMessage buildRequest() {
-			return new AttachMessage(this, ContentType.ATTACH_REQ);
+			this.contentType = ContentType.ATTACH_REQ;
+			return new AttachMessage(this);
 		}
 
 		public AttachMessage buildAnswer() {
-			return new AttachMessage(this, ContentType.ATTACH_ANS);
+			this.contentType = ContentType.ATTACH_ANS;
+			return new AttachMessage(this);
 		}
 	}
 
