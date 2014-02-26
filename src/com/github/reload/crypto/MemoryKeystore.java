@@ -6,7 +6,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.NodeID;
 
 /**
@@ -17,10 +17,10 @@ import com.github.reload.message.NodeID;
  */
 public abstract class MemoryKeystore implements Keystore {
 
-	protected Context context;
+	protected Configuration conf;
 	private final PrivateKey privateKey;
 
-	private ReloadCertificate localCert;
+	private final ReloadCertificate localCert;
 	private final Set<ReloadCertificate> storedCerts;
 
 	public MemoryKeystore(ReloadCertificate localCert, PrivateKey privateKey, Set<ReloadCertificate> storedCerts) {
@@ -30,8 +30,8 @@ public abstract class MemoryKeystore implements Keystore {
 	}
 
 	@Override
-	public void init(Context context) throws InitializationException {
-		this.context = context;
+	public void init(Configuration conf) throws InitializationException {
+		context = context;
 	}
 
 	@Override
@@ -56,9 +56,8 @@ public abstract class MemoryKeystore implements Keystore {
 
 	@Override
 	public void removeCertificate(ReloadCertificate cert) {
-		if (localCert.equals(cert)) {
+		if (localCert.equals(cert))
 			return;
-		}
 
 		storedCerts.remove(cert);
 	}

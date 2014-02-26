@@ -1,7 +1,7 @@
 package com.github.reload.storage.net;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.message.ResourceID;
 import com.github.reload.net.data.Codec;
@@ -41,8 +41,8 @@ public class FindKindData {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<ResourceID> resIdCodec;
 
-		public FindKindDataCodec(Context context) {
-			super(context);
+		public FindKindDataCodec(Configuration conf) {
+			super(conf);
 			kindCodec = getCodec(DataKind.class);
 			resIdCodec = getCodec(ResourceID.class);
 		}

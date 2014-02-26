@@ -2,7 +2,7 @@ package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Signature;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -46,8 +46,8 @@ public class StoredData {
 
 		private final Codec<Signature> signatureCodec;
 
-		public StoredDataCodec(Context context) {
-			super(context);
+		public StoredDataCodec(Configuration conf) {
+			super(conf);
 			signatureCodec = getCodec(Signature.class);
 		}
 

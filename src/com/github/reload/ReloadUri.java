@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import javax.security.auth.login.Configuration;
 import com.github.reload.message.DestinationList;
 import com.github.reload.message.RoutableID;
+import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
 
 /**
@@ -22,9 +23,9 @@ public class ReloadUri {
 
 	private final DestinationList destinationList;
 	private final String overlayName;
-	private final DataSpecifier specifier;
+	private final StoredDataSpecifier specifier;
 
-	private ReloadUri(DestinationList destList, String overlayName, DataSpecifier specifier) {
+	private ReloadUri(DestinationList destList, String overlayName, StoredDataSpecifier specifier) {
 		destinationList = destList;
 		this.overlayName = overlayName;
 		this.specifier = specifier;
@@ -67,7 +68,7 @@ public class ReloadUri {
 	 *             if the destination list is empty or the overlay name is not
 	 *             valid
 	 */
-	public static ReloadUri create(DestinationList destList, String overlayName, DataSpecifier dataSpecifier) {
+	public static ReloadUri create(DestinationList destList, String overlayName, StoredDataSpecifier dataSpecifier) {
 		if (destList == null || overlayName == null)
 			throw new NullPointerException();
 		if (destList.isEmpty())
@@ -151,7 +152,7 @@ public class ReloadUri {
 		if (destList.isEmpty())
 			throw new IllegalArgumentException("Empty destination list");
 
-		DataSpecifier specifier = (conf != null) ? parseSpecifier(uri, conf) : null;
+		StoredDataSpecifier specifier = (conf != null) ? parseSpecifier(uri, conf) : null;
 
 		return new ReloadUri(destList, overlayName, specifier);
 	}
@@ -206,7 +207,7 @@ public class ReloadUri {
 		return bytes;
 	}
 
-	private static DataSpecifier parseSpecifier(URI uri, Configuration conf) throws UnknownKindException {
+	private static StoredDataSpecifier parseSpecifier(URI uri, Configuration conf) throws UnknownKindException {
 		String hexSpecifier = uri.getPath();
 		UnsignedByteBuffer encSpecifier = hexToByte(hexSpecifier);
 		return new DataSpecifier(conf, encSpecifier);

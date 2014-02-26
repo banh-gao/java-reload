@@ -8,8 +8,11 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Set;
 import javax.naming.ConfigurationException;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.ReloadOverlay;
+import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.message.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
@@ -34,7 +37,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 	}
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Context context) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
 		long maxIndex = data.getKind().getLongAttribute(DataKind.ATTR_MAX_NODE_MULTIPLE);
@@ -48,7 +51,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 			throw new ConfigurationException("The node-multiple access policy requires max-node-multiple parameter");
 	}
 
-	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, long maxIndex, Context context) throws AccessPolicyException {
+	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, long maxIndex, Configuration conf) throws AccessPolicyException {
 
 		ReloadCertificate storerReloadCert = context.getCryptoHelper().getCertificate(storerIdentity);
 		if (storerReloadCert == null)
@@ -73,7 +76,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 		throw new AccessPolicyException("Matching node-id not found in signer certificate");
 	}
 
-	private static byte[] hashIndexedNodeId(HashAlgorithm hashAlg, NodeID storerId, int index, Context context) {
+	private static byte[] hashIndexedNodeId(HashAlgorithm hashAlg, NodeID storerId, int index, Configuration conf) {
 		int length = context.getTopologyPlugin().getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());

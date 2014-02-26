@@ -3,7 +3,7 @@ package com.github.reload.storage.data;
 import io.netty.buffer.ByteBuf;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -30,7 +30,7 @@ public class SingleMetadata implements Metadata<SingleValue> {
 			hashAlgorithm = HashAlgorithm.NONE;
 			this.hashValue = new byte[0];
 		} else {
-			this.hashAlgorithm = hashAlg;
+			hashAlgorithm = hashAlg;
 			this.hashValue = hashValue;
 		}
 	}
@@ -67,8 +67,8 @@ public class SingleMetadata implements Metadata<SingleValue> {
 
 		private final Codec<HashAlgorithm> hashAlgCodec;
 
-		public SingleMetadataCodec(Context context) {
-			super(context);
+		public SingleMetadataCodec(Configuration conf) {
+			super(conf);
 			hashAlgCodec = getCodec(HashAlgorithm.class);
 		}
 

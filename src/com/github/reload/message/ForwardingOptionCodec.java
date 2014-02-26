@@ -1,7 +1,7 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.ForwardingOption.ForwardingOptionType;
 import com.github.reload.message.errors.ErrorType;
 import com.github.reload.net.data.Codec;
@@ -16,7 +16,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 
 	private final Codec<UnknownForwardingOption> unknownFwdCodec;
 
-	public ForwardingOptionCodec(Context ctx) {
+	public ForwardingOptionCodec(Configuration conf) {
 		super(ctx);
 		unknownFwdCodec = getCodec(UnknownForwardingOption.class);
 	}

@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-
 /**
  * Indicates an already in progress operation
  * 

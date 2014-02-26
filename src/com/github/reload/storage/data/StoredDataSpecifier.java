@@ -2,7 +2,7 @@ package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -44,8 +44,8 @@ public class StoredDataSpecifier {
 
 		private final Codec<DataKind> kindCodec;
 
-		public StoredDataSpecifierCodec(Context context) {
-			super(context);
+		public StoredDataSpecifierCodec(Configuration context) {
+			super(conf);
 			kindCodec = getCodec(DataKind.class);
 		}
 

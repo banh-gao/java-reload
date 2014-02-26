@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content.ContentCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -54,8 +54,8 @@ public abstract class Content {
 		private static final int BODY_LENGTH_FIELD = U_INT32;
 		private static final int EXTENSIONS_LENGTH_FIELD = U_INT32;
 
-		public ContentCodec(Context context) {
-			super(context);
+		public ContentCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

@@ -2,7 +2,7 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import java.security.NoSuchAlgorithmException;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Signature.SignatureCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -25,12 +25,12 @@ public class Signature {
 	private final HashAlgorithm hashAlg;
 	private final SignatureAlgorithm signAlg;
 
-	private byte[] digest;
+	private final byte[] digest;
 
 	private Signature(byte[] digest, SignerIdentity identity, HashAlgorithm hashAlg, SignatureAlgorithm signAlg) throws NoSuchAlgorithmException {
 		this.hashAlg = hashAlg;
 		this.signAlg = signAlg;
-		this.signerIdentity = identity;
+		signerIdentity = identity;
 		this.digest = digest;
 	}
 
@@ -44,7 +44,7 @@ public class Signature {
 	 */
 	public Signature(SignerIdentity signerIdentity, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, byte[] digest) throws NoSuchAlgorithmException {
 		this.signAlg = signAlg;
-		this.hashAlg = signHashAlg;
+		hashAlg = signHashAlg;
 		this.signerIdentity = signerIdentity;
 		this.digest = digest;
 	}
@@ -82,12 +82,12 @@ public class Signature {
 
 		private static final int DIGEST_LENGTH_FIELD = U_INT16;
 
-		private Codec<SignatureAlgorithm> signAlgCodec;
-		private Codec<HashAlgorithm> hashAlgCodec;
-		private Codec<SignerIdentity> signIdentityCodec;
+		private final Codec<SignatureAlgorithm> signAlgCodec;
+		private final Codec<HashAlgorithm> hashAlgCodec;
+		private final Codec<SignerIdentity> signIdentityCodec;
 
-		public SignatureCodec(Context context) {
-			super(context);
+		public SignatureCodec(Configuration conf) {
+			super(conf);
 			signAlgCodec = getCodec(SignatureAlgorithm.class);
 			hashAlgCodec = getCodec(HashAlgorithm.class);
 			signIdentityCodec = getCodec(SignerIdentity.class);

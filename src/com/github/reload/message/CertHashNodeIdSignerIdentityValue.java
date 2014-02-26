@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.CertHashNodeIdSignerIdentityValue.CertHashNodeIdSignerIdentityValueCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -53,8 +53,8 @@ public class CertHashNodeIdSignerIdentityValue extends SignerIdentityValue {
 
 		private final int CERT_HASH_NODEID_LENGTH_FIELD = U_INT8;
 
-		public CertHashNodeIdSignerIdentityValueCodec(Context context) {
-			super(context);
+		public CertHashNodeIdSignerIdentityValueCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

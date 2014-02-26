@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.net.ice.IPv4AddressPort.IPv4AddresPortCodec;
@@ -25,8 +25,8 @@ public class IPv4AddressPort extends IPAddressPort {
 
 		private static final int ADDR_LENGTH = U_INT32;
 
-		public IPv4AddresPortCodec(Context context) {
-			super(context);
+		public IPv4AddresPortCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.content.NumResourcesProbeInformation.NumResCodec;
 import com.github.reload.message.content.ProbeRequest.ProbeInformationType;
 import com.github.reload.net.data.Codec;
@@ -36,8 +36,8 @@ public class NumResourcesProbeInformation extends ProbeInformation {
 
 	public static class NumResCodec extends Codec<NumResourcesProbeInformation> {
 
-		public NumResCodec(Context context) {
-			super(context);
+		public NumResCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

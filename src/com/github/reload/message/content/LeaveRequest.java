@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.NodeID;
@@ -39,8 +39,8 @@ public class LeaveRequest extends Content {
 
 		private final Codec<NodeID> nodeCodec;
 
-		public LeaveRequestCodec(Context context) {
-			super(context);
+		public LeaveRequestCodec(Configuration conf) {
+			super(conf);
 			nodeCodec = getCodec(NodeID.class);
 		}
 

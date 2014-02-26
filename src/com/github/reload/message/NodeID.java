@@ -3,7 +3,7 @@ package com.github.reload.message;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.NodeID.NodeIdCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -82,8 +82,8 @@ public class NodeID extends RoutableID {
 
 	public static class NodeIdCodec extends Codec<NodeID> {
 
-		public NodeIdCodec(Context context) {
-			super(context);
+		public NodeIdCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

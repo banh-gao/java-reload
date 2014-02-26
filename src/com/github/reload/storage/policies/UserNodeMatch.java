@@ -5,7 +5,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.Set;
+import com.github.reload.Configuration;
 import com.github.reload.ReloadOverlay;
+import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.message.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
@@ -30,7 +33,7 @@ public class UserNodeMatch extends AccessPolicy {
 	}
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Context context) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
 		ReloadCertificate storerReloadCert = context.getCryptoHelper().getCertificate(signerIdentity);
 		if (storerReloadCert == null)
 			throw new AccessPolicyException("Unknown signer identity");
@@ -47,7 +50,7 @@ public class UserNodeMatch extends AccessPolicy {
 		validateKey(((DictionaryValue) data.getValue()).getKey(), storerReloadCert, signerIdentity, context);
 	}
 
-	private static void validateKey(Key key, ReloadCertificate storerReloadCert, SignerIdentity storerIdentity, Context context) throws AccessPolicyException {
+	private static void validateKey(Key key, ReloadCertificate storerReloadCert, SignerIdentity storerIdentity, Configuration conf) throws AccessPolicyException {
 		byte[] keyHash = key.getValue();
 
 		Set<NodeID> storerNodeIds = storerReloadCert.getNodeIds();
@@ -63,7 +66,7 @@ public class UserNodeMatch extends AccessPolicy {
 		throw new AccessPolicyException("Wrong dictionary key");
 	}
 
-	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, Context context) {
+	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, Configuration conf) {
 		int length = context.getTopologyPlugin().getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
@@ -73,7 +76,7 @@ public class UserNodeMatch extends AccessPolicy {
 		}
 	}
 
-	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, Context context) {
+	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, Configuration conf) {
 		int length = context.getTopologyPlugin().getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());

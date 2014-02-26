@@ -1,7 +1,7 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.UnknownForwardingOption.UnknownForwardingOptionCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -18,8 +18,8 @@ public class UnknownForwardingOption extends ForwardingOption {
 
 	public static class UnknownForwardingOptionCodec extends Codec<UnknownForwardingOption> {
 
-		public UnknownForwardingOptionCodec(Context context) {
-			super(context);
+		public UnknownForwardingOptionCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

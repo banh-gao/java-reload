@@ -2,7 +2,7 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.HashAlgorithm.HashAlgorithmCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -45,8 +45,8 @@ public enum HashAlgorithm {
 
 	public static class HashAlgorithmCodec extends Codec<HashAlgorithm> {
 
-		public HashAlgorithmCodec(Context context) {
-			super(context);
+		public HashAlgorithmCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

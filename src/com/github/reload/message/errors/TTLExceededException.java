@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-
 /**
  * Indicates that the time to live of the message reaches zero and the message
  * is dropped

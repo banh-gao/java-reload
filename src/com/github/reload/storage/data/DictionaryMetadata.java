@@ -1,7 +1,7 @@
 package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DataModel.Metadata;
@@ -32,8 +32,8 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		private final Codec<Key> keyCodec;
 		private final Codec<SingleMetadata> singleCodec;
 
-		public DictionaryMetadataCodec(Context context) {
-			super(context);
+		public DictionaryMetadataCodec(Configuration conf) {
+			super(conf);
 			keyCodec = getCodec(Key.class);
 			singleCodec = getCodec(SingleMetadata.class);
 		}

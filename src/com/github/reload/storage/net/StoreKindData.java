@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -45,8 +45,8 @@ public class StoreKindData {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<StoredData> dataCodec;
 
-		public StoreKindDataCodec(Context context) {
-			super(context);
+		public StoreKindDataCodec(Configuration conf) {
+			super(conf);
 			kindCodec = getCodec(DataKind.class);
 			dataCodec = getCodec(StoredData.class);
 		}

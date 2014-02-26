@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.content.ProbeInformation.ProbeInformationCodec;
 import com.github.reload.message.content.ProbeRequest.ProbeInformationType;
 import com.github.reload.net.data.Codec;
@@ -16,8 +16,8 @@ public abstract class ProbeInformation {
 
 		private static final int INFORMATION_LENGTH_FIELD = U_INT8;
 
-		public ProbeInformationCodec(Context context) {
-			super(context);
+		public ProbeInformationCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

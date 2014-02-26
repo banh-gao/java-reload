@@ -24,6 +24,9 @@ public abstract class FramedMessage {
 		}
 	};
 
+	// Maximum sequence number
+	public static final long SEQ_MAX_VALUE = 0xffffffff;
+
 	public abstract long getSequence();
 
 	public abstract FrameType getType();
@@ -34,11 +37,11 @@ public abstract class FramedMessage {
 	public static class FramedData extends FramedMessage {
 
 		protected long sequence;
-		protected ByteBuf data;
+		protected ByteBuf payload;
 
-		public FramedData(long sequence, ByteBuf data) {
+		public FramedData(long sequence, ByteBuf payload) {
 			this.sequence = sequence;
-			this.data = data;
+			this.payload = payload;
 		}
 
 		@Override
@@ -51,8 +54,8 @@ public abstract class FramedMessage {
 			return sequence;
 		}
 
-		public ByteBuf getData() {
-			return data;
+		public ByteBuf getPayload() {
+			return payload;
 		}
 	}
 

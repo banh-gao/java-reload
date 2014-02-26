@@ -3,7 +3,7 @@ package com.github.reload.net.data;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.Header;
 import com.github.reload.message.HeaderCodec;
@@ -20,10 +20,10 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	private final Codec<Content> contentCodec;
 	private final Codec<SecurityBlock> secBlockCodec;
 
-	public MessageEncoder(Context context) {
-		hdrCodec = Codec.getCodec(Header.class, context);
-		contentCodec = Codec.getCodec(Content.class, context);
-		secBlockCodec = Codec.getCodec(SecurityBlock.class, context);
+	public MessageEncoder(Configuration conf) {
+		hdrCodec = Codec.getCodec(Header.class, conf);
+		contentCodec = Codec.getCodec(Content.class, conf);
+		secBlockCodec = Codec.getCodec(SecurityBlock.class, conf);
 	}
 
 	@Override

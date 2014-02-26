@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.security.auth.login.Configuration;
-import com.github.reload.Context;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.SignatureAlgorithm;
@@ -34,7 +33,7 @@ public abstract class CryptoHelper {
 	 * @param context
 	 * @throws InitializationException
 	 */
-	public abstract void init(Context context) throws InitializationException;
+	public abstract void init(Configuration conf) throws InitializationException;
 
 	/**
 	 * @return the algorithm used for signatures hashing

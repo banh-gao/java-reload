@@ -5,7 +5,7 @@ import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.SignerIdentity;
 
@@ -16,7 +16,7 @@ import com.github.reload.message.SignerIdentity;
  */
 public interface Keystore {
 
-	public void init(Context context) throws InitializationException;
+	public void init(Configuration conf) throws InitializationException;
 
 	/**
 	 * @return the local certificate used by the local node for overlay

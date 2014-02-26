@@ -2,7 +2,7 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.SignatureAlgorithm.SignatureAlgorithmCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -42,8 +42,8 @@ public enum SignatureAlgorithm {
 
 	public static class SignatureAlgorithmCodec extends Codec<SignatureAlgorithm> {
 
-		public SignatureAlgorithmCodec(Context context) {
-			super(context);
+		public SignatureAlgorithmCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

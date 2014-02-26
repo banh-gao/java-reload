@@ -3,7 +3,7 @@ package com.github.reload.message;
 import io.netty.buffer.ByteBuf;
 import java.security.cert.Certificate;
 import java.util.EnumSet;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.SignerIdentity.SignerIdentityCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -115,8 +115,8 @@ public class SignerIdentity {
 
 		private final Codec<SignerIdentityValue> identityValueCodec;
 
-		public SignerIdentityCodec(Context context) {
-			super(context);
+		public SignerIdentityCodec(Configuration conf) {
+			super(conf);
 			identityValueCodec = getCodec(SignerIdentityValue.class);
 		}
 

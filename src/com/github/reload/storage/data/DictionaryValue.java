@@ -1,7 +1,7 @@
 package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DataModel.DataValue;
@@ -10,7 +10,7 @@ import com.github.reload.storage.data.DictionaryValue.DictionaryValueCodec;
 @ReloadCodec(DictionaryValueCodec.class)
 public class DictionaryValue implements DataValue {
 
-	private Key key;
+	private final Key key;
 	private final SingleValue value;
 
 	DictionaryValue(Key key, SingleValue value) {
@@ -33,7 +33,7 @@ public class DictionaryValue implements DataValue {
 		public Key(byte[] key) {
 			if (key == null)
 				throw new NullPointerException();
-			this.data = key;
+			data = key;
 		}
 
 		public byte[] getValue() {
@@ -50,8 +50,8 @@ public class DictionaryValue implements DataValue {
 
 		private static final int KEY_LENGTH_FIELD = U_INT16;
 
-		public KeyCodec(Context context) {
-			super(context);
+		public KeyCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override
@@ -77,8 +77,8 @@ public class DictionaryValue implements DataValue {
 		private final Codec<SingleValue> valueCodec;
 		private final Codec<Key> keyCodec;
 
-		public DictionaryValueCodec(Context context) {
-			super(context);
+		public DictionaryValueCodec(Configuration conf) {
+			super(conf);
 			valueCodec = getCodec(SingleValue.class);
 			keyCodec = getCodec(Key.class);
 		}

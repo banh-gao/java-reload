@@ -2,7 +2,7 @@ package com.github.reload.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.ResourceID;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.StoredDataSpecifier;
@@ -17,8 +17,8 @@ public class StatRequest extends FetchRequest {
 
 	public static class StatRequestCodec extends FetchRequestCodec {
 
-		public StatRequestCodec(Context context) {
-			super(context);
+		public StatRequestCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

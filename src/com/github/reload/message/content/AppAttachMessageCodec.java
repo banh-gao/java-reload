@@ -4,7 +4,8 @@ import io.netty.buffer.ByteBuf;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.github.reload.Context;
+import com.github.reload.ApplicationID;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.ice.IceCandidate;
 
@@ -20,8 +21,8 @@ public class AppAttachMessageCodec extends Codec<AppAttachMessage> {
 
 	private final Codec<IceCandidate> iceCodec;
 
-	public AppAttachMessageCodec(Context context) {
-		super(context);
+	public AppAttachMessageCodec(Configuration conf) {
+		super(conf);
 		iceCodec = getCodec(IceCandidate.class);
 	}
 

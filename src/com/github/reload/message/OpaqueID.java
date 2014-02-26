@@ -1,7 +1,7 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.OpaqueID.OpaqueIdCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -40,8 +40,8 @@ public class OpaqueID extends RoutableID {
 
 		private static final int OPAQUE_LENGTH_FIELD = U_INT8;
 
-		public OpaqueIdCodec(Context context) {
-			super(context);
+		public OpaqueIdCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

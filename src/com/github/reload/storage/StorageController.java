@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.ResourceID;
@@ -42,13 +42,13 @@ public class StorageController {
 	}
 
 	private final LocalStore localStore;
-	private final Context context;
+	private final Configuration conf;
 
-	public StorageController(Context context) {
+	public StorageController(Configuration conf) {
 		if (context == null)
 			throw new NullPointerException();
 
-		this.context = context;
+		context = context;
 		localStore = new LocalStore(context);
 	}
 

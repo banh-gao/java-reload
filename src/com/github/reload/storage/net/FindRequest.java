@@ -3,7 +3,7 @@ package com.github.reload.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
@@ -45,8 +45,8 @@ public class FindRequest extends Content {
 		private final Codec<ResourceID> resIdCodec;
 		private final Codec<DataKind> kindCodec;
 
-		public FindRequestCodec(Context context) {
-			super(context);
+		public FindRequestCodec(Configuration conf) {
+			super(conf);
 			resIdCodec = getCodec(ResourceID.class);
 			kindCodec = getCodec(DataKind.class);
 		}

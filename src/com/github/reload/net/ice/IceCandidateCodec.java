@@ -3,7 +3,7 @@ package com.github.reload.net.ice;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.util.ArrayList;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.ice.IceCandidate.CandidateType;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
@@ -21,8 +21,8 @@ public class IceCandidateCodec extends Codec<IceCandidate> {
 	private final Codec<RelayCandidate> relayCodec;
 	private final Codec<ServerReflexiveCandidate> serverRefCodec;
 
-	public IceCandidateCodec(Context context) {
-		super(context);
+	public IceCandidateCodec(Configuration conf) {
+		super(conf);
 		socketAddrCodec = getCodec(IPAddressPort.class);
 		iceExtCodec = getCodec(IceExtension.class);
 		hostCandCodec = getCodec(HostCandidate.class);

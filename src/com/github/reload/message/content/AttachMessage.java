@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.AttachMessage.AttachMessageCodec;
@@ -22,16 +22,16 @@ import com.github.reload.net.ice.IceCandidate;
 @ReloadCodec(AttachMessageCodec.class)
 public class AttachMessage extends Content {
 
-	private byte[] userFragment;
-	private byte[] password;
-	private ContentType type;
-	private List<IceCandidate> candidates;
-	private boolean sendUpdate;
+	private final byte[] userFragment;
+	private final byte[] password;
+	private final ContentType type;
+	private final List<IceCandidate> candidates;
+	private final boolean sendUpdate;
 
 	private AttachMessage(Builder builder) {
 		userFragment = builder.userFragment;
 		password = builder.password;
-		this.type = builder.contentType;
+		type = builder.contentType;
 		candidates = builder.candidates;
 		sendUpdate = builder.sendUpdate;
 	}
@@ -101,12 +101,12 @@ public class AttachMessage extends Content {
 		}
 
 		public AttachMessage buildRequest() {
-			this.contentType = ContentType.ATTACH_REQ;
+			contentType = ContentType.ATTACH_REQ;
 			return new AttachMessage(this);
 		}
 
 		public AttachMessage buildAnswer() {
-			this.contentType = ContentType.ATTACH_ANS;
+			contentType = ContentType.ATTACH_ANS;
 			return new AttachMessage(this);
 		}
 	}
@@ -121,8 +121,8 @@ public class AttachMessage extends Content {
 		private final static int ROLE_LENGTH_FIELD = U_INT8;
 		private final static int CANDIDATES_LENGTH_FIELD = U_INT16;
 
-		public AttachMessageCodec(Context context) {
-			super(context);
+		public AttachMessageCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override
@@ -137,10 +137,11 @@ public class AttachMessage extends Content {
 
 			Field roleLenFld = allocateField(buf, ROLE_LENGTH_FIELD);
 
-			if (obj.isRequest())
+			if (obj.isRequest()) {
 				buf.writeBytes(ROLE_PASSIVE);
-			else
+			} else {
 				buf.writeBytes(ROLE_ACTIVE);
+			}
 
 			roleLenFld.updateDataLength();
 

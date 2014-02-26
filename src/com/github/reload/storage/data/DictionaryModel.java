@@ -3,7 +3,7 @@ package com.github.reload.storage.data;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -106,8 +106,8 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 		private static final int KEYS_LENGTH_FIELD = U_INT16;
 		private static final int KEY_ENTRY_FIELD = U_INT16;
 
-		public DictionaryModelSpecifierCodec(Context context) {
-			super(context);
+		public DictionaryModelSpecifierCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

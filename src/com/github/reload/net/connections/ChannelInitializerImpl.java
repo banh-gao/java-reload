@@ -1,14 +1,15 @@
-package com.github.reload.net;
+package com.github.reload.net.connections;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
+import com.github.reload.net.ForwardingHandler;
+import com.github.reload.net.MessageHandler;
 import com.github.reload.net.data.FramedMessageCodec;
 import com.github.reload.net.data.HeadedMessageDecoder;
 import com.github.reload.net.data.MessageDecoder;
 import com.github.reload.net.data.MessageEncoder;
-import com.github.reload.net.link.SRLinkHandler;
 
 /**
  * Initialize an newly created channel
@@ -46,7 +47,7 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		pipeline.addLast(LINK_HANDLER, new SRLinkHandler());
 
 		// IN: Decoder for RELOAD forwarding header
-		pipeline.addLast(FWD_DECODER, new HeadedMessageDecoder(new Context()));
+		pipeline.addLast(FWD_DECODER, new HeadedMessageDecoder(new Configuration()));
 
 		// IN: Forward to other links the messages not directed to this node
 		// OUT: Forward on this link the messages not directed to this node
@@ -54,10 +55,10 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
 		// IN: Decoder for RELOAD message content and security block, header
 		// must have been already decoded at this point
-		pipeline.addLast(MSG_DECODER, new MessageDecoder(new Context()));
+		pipeline.addLast(MSG_DECODER, new MessageDecoder(new Configuration()));
 
 		// OUT: Encoder for complete RELOAD message
-		pipeline.addLast(MSG_ENCODER, new MessageEncoder(new Context()));
+		pipeline.addLast(MSG_ENCODER, new MessageEncoder(new Configuration()));
 
 		// IN: Process incoming messages directed to this node
 		pipeline.addLast(MSG_HANDLER, msgHandler);

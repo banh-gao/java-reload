@@ -3,7 +3,7 @@ package com.github.reload.message;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 
 /**
@@ -34,7 +34,7 @@ public class HeaderCodec extends Codec<Header> {
 	private final Codec<DestinationList> destListCodec;
 	private final Codec<ForwardingOption> fwdOptionCodec;
 
-	public HeaderCodec(Context ctx) {
+	public HeaderCodec(Configuration conf) {
 		super(ctx);
 		destListCodec = getCodec(DestinationList.class);
 		fwdOptionCodec = getCodec(ForwardingOption.class);

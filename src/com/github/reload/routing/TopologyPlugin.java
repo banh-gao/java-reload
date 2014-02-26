@@ -2,7 +2,7 @@ package com.github.reload.routing;
 
 import java.util.Collection;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
@@ -46,7 +46,7 @@ public interface TopologyPlugin {
 	 * 
 	 * @throws InitializationException
 	 */
-	public void init(Context context) throws InitializationException;
+	public void init(Configuration conf) throws InitializationException;
 
 	/**
 	 * Called when the local peer has successfully joined into the overlay

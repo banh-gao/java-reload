@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-
 /**
  * Indicates a message that exceeds the maximum requested response size
  * 

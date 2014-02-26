@@ -1,6 +1,5 @@
 package com.github.reload.message.errors;
 
-
 /**
  * Indicates that the configuration sequence is older than the local
  * 

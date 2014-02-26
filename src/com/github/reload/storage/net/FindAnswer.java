@@ -3,7 +3,7 @@ package com.github.reload.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.net.data.Codec;
@@ -39,9 +39,9 @@ public class FindAnswer extends Content {
 
 		private final Codec<FindKindData> kindDataCodec;
 
-		public FindAnswerCodec(Context context) {
-			super(context);
-			this.kindDataCodec = getCodec(FindKindData.class);
+		public FindAnswerCodec(Configuration conf) {
+			super(conf);
+			kindDataCodec = getCodec(FindKindData.class);
 		}
 
 		@Override

@@ -1,7 +1,7 @@
 package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 
@@ -22,8 +22,8 @@ public class IceExtension {
 		private static final int NAME_LENGTH_FIELD = U_INT16;
 		private static final int VALUE_LENGTH_FIELD = U_INT16;
 
-		public IceExtensionCodec(Context context) {
-			super(context);
+		public IceExtensionCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

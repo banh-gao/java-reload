@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import org.bouncycastle.asn1.ocsp.ResponseData;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
@@ -21,6 +23,8 @@ import com.github.reload.storage.StorageController.QueryType;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.data.StoredMetadata;
+import com.github.reload.storage.errors.GenerationTooLowException;
+import com.github.reload.storage.errors.NotFoundException;
 import com.github.reload.storage.net.FetchKindResponse;
 import com.github.reload.storage.net.FindAnswer;
 import com.github.reload.storage.net.FindKindData;
@@ -38,7 +42,7 @@ import com.github.reload.storage.net.StoreKindResponse;
  */
 public class LocalStore {
 
-	private final Context context;
+	private final Configuration conf;
 
 	private final ConcurrentMap<ResourceID, LocalKinds> storedResources = new ConcurrentHashMap<ResourceID, LocalKinds>();
 
@@ -52,8 +56,8 @@ public class LocalStore {
 		}
 	});
 
-	public LocalStore(Context context) {
-		this.context = context;
+	public LocalStore(Configuration conf) {
+		context = context;
 	}
 
 	/**

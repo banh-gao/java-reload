@@ -2,7 +2,7 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.RoutableID.DestinationType;
 import com.github.reload.net.data.Codec;
 
@@ -16,8 +16,8 @@ public class RoutableIDCodec extends Codec<RoutableID> {
 	private final Codec<ResourceID> resIdCodec;
 	private final Codec<OpaqueID> opaqueIdCodec;
 
-	public RoutableIDCodec(Context context) {
-		super(context);
+	public RoutableIDCodec(Configuration conf) {
+		super(conf);
 		nodeIdCodec = getCodec(NodeID.class);
 		resIdCodec = getCodec(ResourceID.class);
 		opaqueIdCodec = getCodec(OpaqueID.class);

@@ -1,7 +1,7 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.NoneSignerIndentityValue.NoneSignerIdentityValueCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -11,8 +11,8 @@ class NoneSignerIndentityValue extends SignerIdentityValue {
 
 	public static class NoneSignerIdentityValueCodec extends Codec<NoneSignerIndentityValue> {
 
-		public NoneSignerIdentityValueCodec(Context context) {
-			super(context);
+		public NoneSignerIdentityValueCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

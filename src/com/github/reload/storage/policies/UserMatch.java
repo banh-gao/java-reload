@@ -3,7 +3,10 @@ package com.github.reload.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import com.github.reload.Configuration;
 import com.github.reload.ReloadOverlay;
+import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity;
@@ -23,7 +26,7 @@ public class UserMatch extends AccessPolicy {
 	}
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Context context) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
 
 		ReloadCertificate storerReloadCert = context.getCryptoHelper().getCertificate(signerIdentity);
 		if (storerReloadCert == null)
@@ -40,7 +43,7 @@ public class UserMatch extends AccessPolicy {
 
 	}
 
-	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, Context context) {
+	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, Configuration conf) {
 		int length = context.getTopologyPlugin().getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());

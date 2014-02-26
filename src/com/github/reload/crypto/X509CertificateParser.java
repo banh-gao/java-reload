@@ -14,6 +14,9 @@ import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.security.auth.x500.X500Principal;
+import org.apache.log4j.Priority;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DEROctetString;
 import sun.security.x509.GeneralName;
 import sun.security.x509.GeneralNames;
 import com.github.reload.ReloadOverlay;
@@ -63,8 +66,9 @@ public class X509CertificateParser implements ReloadCertificateParser {
 		String username = extractUsernameFromCert(certificate);
 		Set<NodeID> ids = extractNodeIdFromUris(certificate, overlayName);
 		ReloadCertificate reloadCert = new ReloadCertificate(certificate, username, ids);
-		if (reloadCert.isSelfSigned())
+		if (reloadCert.isSelfSigned()) {
 			checkSelfSigned(reloadCert);
+		}
 
 		return reloadCert;
 	}

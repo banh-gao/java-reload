@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -50,8 +50,8 @@ public class StatKindResponse {
 		private final Codec<DataKind> dataKindCodec;
 		private final Codec<StoredMetadata> storedDataCodec;
 
-		public StatKindResponseCodec(Context context) {
-			super(context);
+		public StatKindResponseCodec(Configuration conf) {
+			super(conf);
 			dataKindCodec = getCodec(DataKind.class);
 			storedDataCodec = getCodec(StoredMetadata.class);
 		}
@@ -65,8 +65,9 @@ public class StatKindResponse {
 
 		private void encodeData(StatKindResponse obj, ByteBuf buf) throws com.github.reload.net.data.Codec.CodecException {
 			Field dataFld = allocateField(buf, VALUES_LENGTH_FIELD);
-			for (StoredMetadata d : obj.values)
+			for (StoredMetadata d : obj.values) {
 				storedDataCodec.encode(d, buf);
+			}
 			dataFld.updateDataLength();
 		}
 

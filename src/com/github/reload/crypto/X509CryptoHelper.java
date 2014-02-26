@@ -6,10 +6,12 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.security.auth.x500.X500Principal;
+import com.github.reload.Configuration;
 import com.github.reload.message.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.message.CertHashSignerIdentityValue;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
+import com.github.reload.message.SignatureAlgorithm;
 import com.github.reload.message.SignerIdentity;
 
 /**
@@ -33,7 +35,7 @@ public class X509CryptoHelper extends CryptoHelper {
 	}
 
 	@Override
-	public void init(Context context) throws InitializationException {
+	public void init(Configuration conf) throws InitializationException {
 		keystore.init(context);
 	}
 

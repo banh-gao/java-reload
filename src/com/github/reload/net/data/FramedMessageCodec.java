@@ -133,7 +133,7 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 
 	public static void encodeData(FramedData msg, ByteBuf out) {
 		Field dataFld = Codec.allocateField(out, DATA_MAX_LENGTH);
-		out.writeBytes(msg.getData());
+		out.writeBytes(msg.getPayload());
 		dataFld.updateDataLength();
 	}
 

@@ -1,4 +1,4 @@
-package com.github.reload.message.content;
+package com.github.reload;
 
 import java.util.EnumSet;
 

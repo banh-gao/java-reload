@@ -10,6 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.net.SocketFactory;
 import javax.security.auth.login.Configuration;
 import javax.tools.Diagnostic;
+import org.apache.log4j.Priority;
+import org.apache.log4j.PropertyConfigurator;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.message.DestinationList;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
@@ -39,9 +42,9 @@ public class ReloadOverlay {
 		PropertyConfigurator.configure("log4j.properties");
 	}
 
-	private Context context;
-	private OverlayConnectionHelper connStatusHelper;
-	private StorageClientHelper storageHelper;
+	private Configuration conf;
+	private final OverlayConnectionHelper connStatusHelper;
+	private final StorageClientHelper storageHelper;
 
 	/**
 	 * Get an overlay connection instance using the given overlay connector,

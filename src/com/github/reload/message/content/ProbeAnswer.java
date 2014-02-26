@@ -3,7 +3,7 @@ package com.github.reload.message.content;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.ProbeAnswer.ProbeAnswerCodec;
@@ -39,8 +39,8 @@ public class ProbeAnswer extends Content {
 
 		private final Codec<ProbeInformation> infoCodec;
 
-		public ProbeAnswerCodec(Context context) {
-			super(context);
+		public ProbeAnswerCodec(Configuration conf) {
+			super(conf);
 			infoCodec = getCodec(ProbeInformation.class);
 		}
 

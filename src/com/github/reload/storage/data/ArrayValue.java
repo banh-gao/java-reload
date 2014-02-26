@@ -1,7 +1,7 @@
 package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.ArrayValue.ArrayEntryCodec;
@@ -30,8 +30,8 @@ public class ArrayValue implements DataValue {
 
 		private final Codec<SingleValue> valueCodec;
 
-		public ArrayEntryCodec(Context context) {
-			super(context);
+		public ArrayEntryCodec(Configuration conf) {
+			super(conf);
 			valueCodec = getCodec(SingleValue.class);
 		}
 

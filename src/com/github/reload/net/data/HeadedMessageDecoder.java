@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Header;
 
 /**
@@ -14,8 +14,8 @@ public class HeadedMessageDecoder extends ByteToMessageDecoder {
 
 	private final Codec<Header> hdrCodec;
 
-	public HeadedMessageDecoder(Context ctx) {
-		hdrCodec = Codec.getCodec(Header.class, ctx);
+	public HeadedMessageDecoder(Configuration conf) {
+		hdrCodec = Codec.getCodec(Header.class, conf);
 	}
 
 	@Override

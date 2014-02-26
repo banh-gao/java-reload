@@ -1,7 +1,7 @@
 package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.storage.data.DataModel.DataValue;
@@ -38,8 +38,8 @@ public class SingleValue implements DataValue {
 
 		final static int VALUE_LENGTH_FIELD = U_INT32;
 
-		public SingleEntryCodec(Context context) {
-			super(context);
+		public SingleEntryCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

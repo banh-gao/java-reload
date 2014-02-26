@@ -2,7 +2,7 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.MessageExtension.MessageExtensionCodec;
 import com.github.reload.message.errors.ErrorType;
 import com.github.reload.net.data.Codec;
@@ -61,8 +61,8 @@ public abstract class MessageExtension {
 
 		private static final int EXTENSION_CONTENT_LENGTH_FIELD = U_INT32;
 
-		public MessageExtensionCodec(Context context) {
-			super(context);
+		public MessageExtensionCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

@@ -3,8 +3,7 @@ package com.github.reload.net;
 import com.github.reload.net.data.Message;
 
 /**
- * Main class representing the processing task to be performed for an incoming
- * message
+ * The processing task to be performed for an incoming message
  */
 public class MessageProcessTask implements Runnable {
 

@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import com.github.reload.Configuration;
 import com.github.reload.Context;
 import com.github.reload.message.errors.ErrorRespose;
 import com.github.reload.message.errors.ErrorType;
@@ -49,16 +50,16 @@ public abstract class Codec<T> {
 	 */
 	public static final int U_INT128 = 16;
 
-	protected final Context context;
+	protected final Configuration conf;
 
 	protected final Map<Class<?>, Codec<?>> codecs = new HashMap<Class<?>, Codec<?>>();
 
 	private static final Object[] NO_PARAMS = new Object[0];
 
-	public Codec(Context context) {
-		if (context == null)
+	public Codec(Configuration conf) {
+		if (conf == null)
 			throw new NullPointerException();
-		this.context = context;
+		this.conf = conf;
 	}
 
 	/**
@@ -73,7 +74,7 @@ public abstract class Codec<T> {
 	public <C> Codec<C> getCodec(Class<C> clazz) {
 		Codec<?> codec = codecs.get(clazz);
 		if (codec == null) {
-			codec = getCodec(clazz, context);
+			codec = getCodec(clazz, conf);
 			codecs.put(clazz, codec);
 		}
 
@@ -95,8 +96,8 @@ public abstract class Codec<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Codec<T> getCodec(Class<T> clazz, Context context) {
-		if (context == null)
+	public static <T> Codec<T> getCodec(Class<T> clazz, Configuration conf) {
+		if (conf == null)
 			throw new NullPointerException();
 		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
 		if (codecAnn == null)
@@ -104,7 +105,7 @@ public abstract class Codec<T> {
 
 		try {
 			Constructor<? extends Codec<?>> codecConstr = codecAnn.value().getConstructor(Context.class);
-			return (Codec<T>) codecConstr.newInstance(context);
+			return (Codec<T>) codecConstr.newInstance(conf);
 		} catch (Exception e) {
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);
 		}

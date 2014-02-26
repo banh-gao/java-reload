@@ -3,7 +3,7 @@ package com.github.reload.storage.data;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -95,8 +95,9 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			if (index < 0)
 				throw new DataBuildingException("Array index not set");
 
-			if (append)
+			if (append) {
 				index = LAST_INDEX;
+			}
 
 			return new ArrayValue(index, value);
 		}
@@ -165,8 +166,8 @@ public class ArrayModel extends DataModel<ArrayValue> {
 
 		private static final int RANGES_LENGTH_FIELD = U_INT16;
 
-		public ArrayModelSpecifierCodec(Context context) {
-			super(context);
+		public ArrayModelSpecifierCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

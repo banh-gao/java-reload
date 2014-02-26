@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.PingRequest.PingRequestCodec;
@@ -34,8 +34,8 @@ public class PingRequest extends Content {
 
 		private static final int PADDING_LENGTH_FIELD = U_INT16;
 
-		public PingRequestCodec(Context context) {
-			super(context);
+		public PingRequestCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

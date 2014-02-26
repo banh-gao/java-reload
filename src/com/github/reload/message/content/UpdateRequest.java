@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.UpdateRequest.UpdateRequestCodec;
@@ -28,8 +28,8 @@ public class UpdateRequest extends Content {
 
 	public static class UpdateRequestCodec extends Codec<UpdateRequest> {
 
-		public UpdateRequestCodec(Context context) {
-			super(context);
+		public UpdateRequestCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

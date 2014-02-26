@@ -12,16 +12,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
 public class ICEHelper {
 
-	private final Context context;
+	private final Configuration conf;
 
-	public ICEHelper(Context context) {
-		this.context = context;
+	public ICEHelper(Configuration conf) {
+		context = context;
 	}
 
 	/**

@@ -3,7 +3,7 @@ package com.github.reload.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.ResourceID;
@@ -48,8 +48,8 @@ public class StoreRequest extends Content {
 		private final Codec<ResourceID> resIdCodec;
 		private final Codec<StoreKindData> storeKindDataCodec;
 
-		public StoreRequestCodec(Context context) {
-			super(context);
+		public StoreRequestCodec(Configuration conf) {
+			super(conf);
 			resIdCodec = getCodec(ResourceID.class);
 			storeKindDataCodec = getCodec(StoreKindData.class);
 		}

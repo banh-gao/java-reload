@@ -2,7 +2,7 @@ package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.net.ice.RelayCandidate.RelayCandidateCodec;
@@ -33,8 +33,8 @@ public class RelayCandidate extends IceCandidate {
 
 		private final Codec<IPAddressPort> sockAddrCodec;
 
-		public RelayCandidateCodec(Context context) {
-			super(context);
+		public RelayCandidateCodec(Configuration conf) {
+			super(conf);
 			sockAddrCodec = getCodec(IPAddressPort.class);
 		}
 

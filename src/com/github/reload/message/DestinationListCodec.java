@@ -1,15 +1,15 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 
 public class DestinationListCodec extends Codec<DestinationList> {
 
 	private final Codec<RoutableID> rouIdCodec;
 
-	public DestinationListCodec(Context context) {
-		super(context);
+	public DestinationListCodec(Configuration conf) {
+		super(conf);
 		rouIdCodec = getCodec(RoutableID.class);
 	}
 

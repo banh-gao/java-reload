@@ -2,7 +2,7 @@ package com.github.reload.message.errors;
 
 import io.netty.buffer.ByteBuf;
 import java.nio.charset.Charset;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.errors.Error.ErrorCodec;
@@ -62,8 +62,8 @@ public class Error extends Content {
 
 		private static final int INFO_LENGTH_FIELD = U_INT16;
 
-		public ErrorCodec(Context context) {
-			super(context);
+		public ErrorCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

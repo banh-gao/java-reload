@@ -2,7 +2,7 @@ package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
 import com.github.reload.net.ice.HostCandidate.HostCandidateCodec;
@@ -28,8 +28,8 @@ public class HostCandidate extends IceCandidate {
 
 	public static class HostCandidateCodec extends Codec<HostCandidate> {
 
-		public HostCandidateCodec(Context context) {
-			super(context);
+		public HostCandidateCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

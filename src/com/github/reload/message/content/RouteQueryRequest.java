@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.RoutableID;
@@ -45,8 +45,8 @@ public class RouteQueryRequest extends Content {
 
 		private final Codec<RoutableID> destCodec;
 
-		public RouteQueryRequestCodec(Context context) {
-			super(context);
+		public RouteQueryRequestCodec(Configuration conf) {
+			super(conf);
 			destCodec = getCodec(RoutableID.class);
 		}
 

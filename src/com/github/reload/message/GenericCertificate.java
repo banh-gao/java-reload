@@ -8,7 +8,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.EnumSet;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.GenericCertificate.GenericCertificateCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -60,8 +60,8 @@ public class GenericCertificate {
 
 		private static final int CERT_LENGTH_FIELD = U_INT16;
 
-		public GenericCertificateCodec(Context context) {
-			super(context);
+		public GenericCertificateCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

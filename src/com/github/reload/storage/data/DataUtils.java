@@ -4,11 +4,13 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.Signature;
 import com.github.reload.message.SignerIdentity.IdentityType;
 import com.github.reload.storage.PreparedData.DataBuildingException;
+import com.github.reload.storage.data.DataModel.Metadata;
 import com.github.reload.storage.errors.DataTooLargeException;
 
 public class DataUtils {
@@ -20,7 +22,7 @@ public class DataUtils {
 	 *             if this stored data is not acceptable for the specified data
 	 *             kind
 	 */
-	void updateDataKind(ResourceID resId, DataKind updatedKInd, Context context) throws StorageException {
+	void updateDataKind(ResourceID resId, DataKind updatedKInd, Configuration conf) throws StorageException {
 		performKindChecks(resId, this, updatedKInd, context);
 		kind = updatedKInd;
 	}
@@ -31,7 +33,7 @@ public class DataUtils {
 	 * @throws StorageException
 	 *             if the stored data is not valid
 	 */
-	static void performKindChecks(ResourceID resourceId, StoredData requestData, DataKind kind, Context context) throws StorageException {
+	static void performKindChecks(ResourceID resourceId, StoredData requestData, DataKind kind, Configuration conf) throws StorageException {
 		kind.getAccessPolicy().accept(resourceId, requestData, requestData.getSignerIdentity(), context);
 
 		if (requestData.getValue().getSize() > kind.getLongAttribute(DataKind.ATTR_MAX_SIZE))

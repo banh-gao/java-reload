@@ -3,7 +3,7 @@ package com.github.reload.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.net.data.Codec;
@@ -30,8 +30,8 @@ public class StatAnswer extends Content {
 
 		private final Codec<StatKindResponse> respCodec;
 
-		public StatAnswerCodec(Context context) {
-			super(context);
+		public StatAnswerCodec(Configuration conf) {
+			super(conf);
 			respCodec = getCodec(StatKindResponse.class);
 		}
 

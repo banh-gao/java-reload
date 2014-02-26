@@ -9,12 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.DataKind;
+import com.github.reload.message.ContentType;
 import com.github.reload.message.DestinationList;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity.IdentityType;
 import com.github.reload.message.errors.NetworkException;
+import com.github.reload.net.data.Message;
 import com.github.reload.storage.PreparedData.DataBuildingException;
 import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
 import com.github.reload.storage.data.DictionaryModel.DictionaryModelSpecifier;
@@ -37,10 +39,10 @@ public class StorageClientHelper {
 
 	private static final short REPLICA_NUMBER = 0;
 
-	private final Context context;
+	private final Configuration conf;
 
-	public StorageClientHelper(Context context) {
-		this.context = context;
+	public StorageClientHelper(Configuration conf) {
+		context = context;
 	}
 
 	public List<StoreKindResponse> sendStoreRequest(DestinationList destination, PreparedData... preparedData) throws StorageException, NetworkException, InterruptedException, DataBuildingException {

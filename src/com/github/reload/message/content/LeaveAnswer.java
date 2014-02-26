@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.LeaveAnswer.LeaveAnswerCodec;
@@ -18,8 +18,8 @@ public class LeaveAnswer extends Content {
 
 	public static class LeaveAnswerCodec extends Codec<LeaveAnswer> {
 
-		public LeaveAnswerCodec(Context context) {
-			super(context);
+		public LeaveAnswerCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

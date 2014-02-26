@@ -1,7 +1,7 @@
 package com.github.reload.storage.data;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -78,8 +78,8 @@ public class SingleModel extends DataModel<SingleValue> {
 
 	public static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {
 
-		public SingleModelSpecifierCodec(Context context) {
-			super(context);
+		public SingleModelSpecifierCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

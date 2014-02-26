@@ -2,7 +2,7 @@ package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.ConfigUpdateRequest.ConfUpdateReqCodec;
@@ -54,8 +54,8 @@ public class ConfigUpdateRequest extends Content {
 
 		private static final int CONF_LENGTH_FIELD = U_INT24;
 
-		public ConfUpdateReqCodec(Context context) {
-			super(context);
+		public ConfUpdateReqCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

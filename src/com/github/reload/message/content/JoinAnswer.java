@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.JoinAnswer.JoinAnswerCodec;
@@ -30,8 +30,8 @@ public class JoinAnswer extends Content {
 
 		private static final int DATA_LENGTH_FIELD = U_INT16;
 
-		public JoinAnswerCodec(Context context) {
-			super(context);
+		public JoinAnswerCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

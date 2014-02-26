@@ -1,7 +1,7 @@
 package com.github.reload.message.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.ConfigUpdateAnswer.ConfigUpdateAnsCodec;
@@ -18,8 +18,8 @@ public class ConfigUpdateAnswer extends Content {
 
 	public static class ConfigUpdateAnsCodec extends Codec<ConfigUpdateAnswer> {
 
-		public ConfigUpdateAnsCodec(Context context) {
-			super(context);
+		public ConfigUpdateAnsCodec(Configuration conf) {
+			super(conf);
 		}
 
 		@Override

@@ -1,7 +1,7 @@
 package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.Context;
+import com.github.reload.Configuration;
 import com.github.reload.message.ResourceID.ResourceIDCodec;
 import com.github.reload.net.data.Codec;
 import com.github.reload.net.data.ReloadCodec;
@@ -39,8 +39,8 @@ public final class ResourceID extends RoutableID {
 
 	public static class ResourceIDCodec extends Codec<ResourceID> {
 
-		public ResourceIDCodec(Context context) {
-			super(context);
+		public ResourceIDCodec(Configuration conf) {
+			super(conf);
 		}
 
 		private static final int VALUE_LENGTH_FIELD = U_INT8;
