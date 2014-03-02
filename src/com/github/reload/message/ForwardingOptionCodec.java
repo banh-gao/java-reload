@@ -17,7 +17,7 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 	private final Codec<UnknownForwardingOption> unknownFwdCodec;
 
 	public ForwardingOptionCodec(Configuration conf) {
-		super(ctx);
+		super(conf);
 		unknownFwdCodec = getCodec(UnknownForwardingOption.class);
 	}
 

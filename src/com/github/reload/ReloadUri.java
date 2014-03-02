@@ -1,10 +1,12 @@
 package com.github.reload;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.security.auth.login.Configuration;
 import com.github.reload.message.DestinationList;
-import com.github.reload.message.RoutableID;
+import com.github.reload.net.data.Codec;
+import com.github.reload.net.data.Codec.CodecException;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
 
@@ -76,7 +78,7 @@ public class ReloadUri {
 		if (!overlayName.matches(OVERLAY_NAME_PATTEN))
 			throw new IllegalArgumentException("Invalid overlay name");
 
-		return new ReloadUri(DestinationList.create(destList), overlayName, dataSpecifier);
+		return new ReloadUri(new DestinationList(destList), overlayName, dataSpecifier);
 	}
 
 	/**
@@ -148,7 +150,7 @@ public class ReloadUri {
 		if (!overlayName.matches(OVERLAY_NAME_PATTEN))
 			throw new URISyntaxException(uri.toString(), "Invalid overlay name");
 
-		DestinationList destList = parseDestinationList(uri);
+		DestinationList destList = decodeDestinationList(uri, conf);
 		if (destList.isEmpty())
 			throw new IllegalArgumentException("Empty destination list");
 
@@ -182,89 +184,90 @@ public class ReloadUri {
 		return create(URI.create(uri), conf);
 	}
 
-	private static DestinationList parseDestinationList(URI uri) throws URISyntaxException {
+	private static DestinationList decodeDestinationList(URI uri, Configuration conf) throws URISyntaxException {
 		String hexDestList = uri.getUserInfo();
 
 		if (hexDestList == null)
 			throw new URISyntaxException(uri.toString(), "Missing destination");
 
-		UnsignedByteBuffer encDestList;
 		try {
-			encDestList = hexToByte(hexDestList);
+			ByteBuf encList = hexToByte(hexDestList);
+			Codec<DestinationList> codec = Codec.getCodec(DestinationList.class, conf);
+			return codec.decode(encList);
 		} catch (Exception e) {
 			throw new URISyntaxException(uri.toString(), "Invalid destination-id encoding");
 		}
-
-		return DestinationList.decode(encDestList, encDestList.remaining());
 	}
 
-	private static UnsignedByteBuffer hexToByte(String str) {
-		UnsignedByteBuffer bytes = UnsignedByteBuffer.allocate(str.length() / 2);
-		for (int i = 0; i < bytes.capacity(); i++) {
-			bytes.putRaw8((byte) Integer.parseInt(str.substring(2 * i, 2 * i + 2), 16));
+	private static ByteBuf hexToByte(String str) {
+		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(str.length() / 2);
+		int i = 0;
+		while (buf.writableBytes() > 0) {
+			buf.writeByte(Integer.parseInt(str.substring(2 * i, 2 * i + 2), 16));
+			i++;
 		}
-		bytes.rewind();
-		return bytes;
+		return buf;
 	}
 
 	private static StoredDataSpecifier parseSpecifier(URI uri, Configuration conf) throws UnknownKindException {
 		String hexSpecifier = uri.getPath();
-		UnsignedByteBuffer encSpecifier = hexToByte(hexSpecifier);
-		return new DataSpecifier(conf, encSpecifier);
+		ByteBuf encSpecifier = hexToByte(hexSpecifier);
+		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, conf);
+		try {
+			return codec.decode(encSpecifier);
+		} catch (CodecException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
 	 * @return the URI representation of this ReloadURI
 	 */
-	public URI toURI() {
+	public URI toURI(Configuration conf) {
 		try {
-			String specPath = (specifier != null) ? '/' + getHexSpecifier() : null;
-			return new URI(SCHEME, getHexDestList(), overlayName, -1, specPath, null, null);
+			String specPath = (specifier != null) ? '/' + getHexSpecifier(conf) : null;
+			return new URI(SCHEME, getHexDestList(conf), overlayName, -1, specPath, null, null);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private String getHexDestList() {
-		UnsignedByteBuffer buf = UnsignedByteBuffer.allocate(DEST_BUF_SIZE);
-		writeDestListTo(buf);
+	private String getHexDestList(Configuration conf) {
+		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(DEST_BUF_SIZE);
+		Codec<DestinationList> codec = Codec.getCodec(DestinationList.class, conf);
+		try {
+			codec.encode(destinationList, buf);
+		} catch (CodecException e) {
+			e.printStackTrace();
+		}
 		return byteToHex(buf);
 	}
 
-	private void writeDestListTo(UnsignedByteBuffer buf) {
-		for (RoutableID id : destinationList) {
-			id.writeAsDestinationTo(buf);
-		}
-	}
-
-	private String getHexSpecifier() {
+	private String getHexSpecifier(Configuration conf) {
 		if (specifier == null)
 			return "";
 
-		UnsignedByteBuffer buf = UnsignedByteBuffer.allocate((int) EncUtils.maxUnsignedInt(DataSpecifier.DATA_SPEC_LENGTH_FIELD));
-		specifier.writeTo(buf);
+		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(EncUtils.maxUnsignedInt(DataSpecifier.DATA_SPEC_LENGTH_FIELD));
+
+		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, conf);
+		codec.encode(specifier, buf);
 
 		return byteToHex(buf);
 	}
 
-	private static String byteToHex(UnsignedByteBuffer b) {
+	private static String byteToHex(ByteBuf b) {
 		StringBuilder hexString = new StringBuilder();
 
-		int length = b.position();
-
-		b.rewind();
-
-		int readed = 0;
-
-		while (readed < length) {
-			String stmp = Integer.toHexString(b.getRaw8() & 0XFF);
+		while (b.readableBytes() > 0) {
+			String stmp = Integer.toHexString(b.readUnsignedByte() & 0XFF);
 
 			if (stmp.length() == 1) {
-				hexString.append("0" + stmp);
+				hexString.append('0');
+				hexString.append(stmp);
 			} else {
 				hexString.append(stmp);
 			}
-			readed++;
 		}
 		return hexString.toString();
 	}
@@ -286,7 +289,7 @@ public class ReloadUri {
 	/**
 	 * @return the data specifier contained in the uri, or null if not present
 	 */
-	public DataSpecifier getSpecifier() {
+	public StoredDataSpecifier getSpecifier() {
 		return specifier;
 	}
 

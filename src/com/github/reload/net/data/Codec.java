@@ -3,12 +3,12 @@ package com.github.reload.net.data;
 import io.netty.buffer.ByteBuf;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 import com.github.reload.Configuration;
 import com.github.reload.Context;
 import com.github.reload.message.errors.ErrorRespose;
 import com.github.reload.message.errors.ErrorType;
+import com.google.common.collect.Maps;
 
 /**
  * Encode and decode the object on the given buffer
@@ -52,7 +52,7 @@ public abstract class Codec<T> {
 
 	protected final Configuration conf;
 
-	protected final Map<Class<?>, Codec<?>> codecs = new HashMap<Class<?>, Codec<?>>();
+	protected final Map<Class<?>, Codec<?>> codecs = Maps.newHashMap();
 
 	private static final Object[] NO_PARAMS = new Object[0];
 

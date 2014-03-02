@@ -119,7 +119,7 @@ public class DataKind {
 	 * used with the specified overlay
 	 */
 	public AccessPolicyParamsGenerator getPolicyParamsGenerator(ReloadOverlay overlay) {
-		return accessPolicy.getParamsGenerator(overlay.getContext());
+		return accessPolicy.getParamsGenerator(overlay.getConfiguration());
 	}
 
 	public Map<String, String> getAttributes() {

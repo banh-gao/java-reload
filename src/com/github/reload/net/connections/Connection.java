@@ -2,12 +2,13 @@ package com.github.reload.net.connections;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import org.apache.log4j.Level;
+import java.util.Collections;
 import org.apache.log4j.Logger;
 import com.github.reload.message.NodeID;
-import com.github.reload.net.TransmissionFuture;
+import com.github.reload.net.MessageRouter.ForwardPromise;
 import com.github.reload.net.data.Message;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * A connection to a neighbor node
@@ -25,8 +26,12 @@ public class Connection {
 		this.channel = channel;
 	}
 
-	public TransmissionFuture write(Message message) {
+	public ChannelFuture write(Message message) {
 		return channel.write(message);
+	}
+
+	public NodeID getNodeId() {
+		return nodeId;
 	}
 
 	/**
@@ -50,13 +55,14 @@ public class Connection {
 		return linkType;
 	}
 
-	public TransmissionFuture disconnect(String reason) {
+	public ListenableFuture<NodeID> disconnect(String reason) {
+
+		// TODO: send leave message and close connection
+
+		ForwardPromise fut = new ForwardPromise(Collections.singleton(nodeId));
 
 		ChannelFuture f = channel.close();
 
-		new TransmissionFuture();
-
-		l.log(Level.DEBUG, "Connection with " + this + " closed: " + reason);
 	}
 
 	@Override

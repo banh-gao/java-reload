@@ -107,7 +107,7 @@ public abstract class AccessPolicy {
 		protected final Configuration conf;
 
 		public AccessPolicyParamsGenerator(Configuration conf) {
-			context = context;
+			this.conf = conf;
 		}
 	}
 }

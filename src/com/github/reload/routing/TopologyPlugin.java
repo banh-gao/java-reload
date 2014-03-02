@@ -9,7 +9,9 @@ import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.RoutableID;
 import com.github.reload.message.content.JoinAnswer;
+import com.github.reload.net.MessageReceiver.MessageProcessor;
 import com.github.reload.net.data.Message;
+import com.github.reload.storage.net.StoreKindData;
 
 /**
  * The algorithm that performs the resource based routing and controls the
@@ -17,7 +19,7 @@ import com.github.reload.net.data.Message;
  * the local peer
  * 
  */
-public interface TopologyPlugin {
+public interface TopologyPlugin extends MessageProcessor {
 
 	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
@@ -91,7 +93,7 @@ public interface TopologyPlugin {
 	 *            if true, the remote peer has requested to receive a topology
 	 *            plugin update message
 	 */
-	public void onNeighborConnected(NeighborNode newNode, boolean updateRequested);
+	public void onNeighborConnected(NodeID newNode, boolean updateRequested);
 
 	/**
 	 * Called when a neighbor node is not anymore connected to the local peer.
@@ -99,7 +101,7 @@ public interface TopologyPlugin {
 	 * @param node
 	 *            the disconnected neighbor node
 	 */
-	public void onNeighborDisconnected(NeighborNode node);
+	public void onNeighborDisconnected(NodeID node);
 
 	/**
 	 * Called when another peer request this peer to join the overlay because
@@ -143,7 +145,7 @@ public interface TopologyPlugin {
 	 * @param node
 	 *            the remote node
 	 */
-	public void onTransmissionFailed(NeighborNode node);
+	public void onTransmissionFailed(NodeID node);
 
 	/**
 	 * Called when an update request is received from another node
@@ -182,7 +184,7 @@ public interface TopologyPlugin {
 	 *            the data to be replicated
 	 * @return the id of the nodes where the data will be replicated
 	 */
-	public List<NodeID> onReplicateData(ResourceID resourceId, StoredKindData data);
+	public List<NodeID> onReplicateData(ResourceID resourceId, StoreKindData data);
 
 	/**
 	 * 

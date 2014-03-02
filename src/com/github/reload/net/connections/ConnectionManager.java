@@ -1,27 +1,22 @@
 package com.github.reload.net.connections;
 
-import com.github.reload.message.NodeID;
+import java.util.Map;
 import com.github.reload.message.RoutableID;
-import com.github.reload.net.TransmissionFuture;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * Establish and manage connections for all neighbor nodes
  */
 public class ConnectionManager {
 
-	public ConnectionFuture connect(RoutableID destination) {
+	private final Map<RoutableID, ListenableFuture<Connection>> pendingConnections = Maps.newHashMap();
+
+	public ListenableFuture<Connection> connect(RoutableID destination) {
+		SettableFuture<Connection> fut = SettableFuture.create();
 		// TODO: create connector to manages new connections through attach
 		// messages
-	}
-
-	public Connection getConnection(NodeID node) {
-
-	}
-
-	public class ConnectionFuture extends TransmissionFuture {
-
-		public Connection getConnection() {
-
-		}
+		return fut;
 	}
 }

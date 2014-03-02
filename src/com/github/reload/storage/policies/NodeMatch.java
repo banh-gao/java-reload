@@ -37,7 +37,7 @@ public class NodeMatch extends AccessPolicy {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
 
-		validate(resourceId, signerIdentity, context);
+		validate(resourceId, signerIdentity, conf);
 	}
 
 	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, Configuration conf) throws AccessPolicyException {

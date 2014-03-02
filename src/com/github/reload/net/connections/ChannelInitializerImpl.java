@@ -5,7 +5,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import com.github.reload.Configuration;
 import com.github.reload.net.ForwardingHandler;
-import com.github.reload.net.MessageHandler;
+import com.github.reload.net.MessageReceiver;
 import com.github.reload.net.data.FramedMessageCodec;
 import com.github.reload.net.data.HeadedMessageDecoder;
 import com.github.reload.net.data.MessageDecoder;
@@ -26,9 +26,9 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 	public static final String MSG_HANDLER = "MSG_HANDLER";
 
 	private final ForwardingHandler fwdHandler;
-	private final MessageHandler msgHandler;
+	private final MessageReceiver msgHandler;
 
-	public ChannelInitializerImpl(ForwardingHandler fwdHandler, MessageHandler msgHandler) {
+	public ChannelInitializerImpl(ForwardingHandler fwdHandler, MessageReceiver msgHandler) {
 		// TODO: share codec instances between channels
 		this.fwdHandler = fwdHandler;
 		this.msgHandler = msgHandler;

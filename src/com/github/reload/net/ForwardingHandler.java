@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import com.github.reload.net.data.HeadedMessage;
-import com.github.reload.routing.MessageRouter;
 
 @Sharable
 public class ForwardingHandler extends ChannelDuplexHandler {

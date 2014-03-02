@@ -35,7 +35,7 @@ public class HeaderCodec extends Codec<Header> {
 	private final Codec<ForwardingOption> fwdOptionCodec;
 
 	public HeaderCodec(Configuration conf) {
-		super(ctx);
+		super(conf);
 		destListCodec = getCodec(DestinationList.class);
 		fwdOptionCodec = getCodec(ForwardingOption.class);
 	}
