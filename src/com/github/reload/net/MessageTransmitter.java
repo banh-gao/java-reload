@@ -8,8 +8,6 @@ import org.apache.log4j.Logger;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.errors.ErrorRespose;
 import com.github.reload.message.errors.ErrorType;
-import com.github.reload.net.MessageReceiver.MessageProcessor;
-import com.github.reload.net.MessageRouter.ForwardPromise;
 import com.github.reload.net.data.Message;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -22,7 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
  * Transmit messages on the overlay and provide the request-answer model
  * management
  */
-public class MessageTransmitter implements MessageProcessor {
+public class MessageTransmitter {
 
 	private static final Set<ContentType> HANDLED_CONTENTS = new HashSet<ContentType>();
 

@@ -36,7 +36,7 @@ import com.github.reload.message.content.NumResourcesProbeInformation;
 import com.github.reload.message.content.ProbeAnswer;
 import com.github.reload.message.content.ProbeRequest;
 import com.github.reload.message.content.ProbeRequest.ProbeInformationType;
-import com.github.reload.net.MessageReceiver;
+import com.github.reload.net.MessageDispatcher;
 import com.github.reload.net.connections.ChannelInitializerImpl;
 import com.github.reload.net.data.Message;
 import com.github.reload.storage.net.StoreAnswer;
@@ -55,7 +55,7 @@ public class TestCodecs {
 	public void setUp() throws Exception {
 		ServerBootstrap sb = new ServerBootstrap();
 		serverLoopGroup = new NioEventLoopGroup();
-		sb.group(serverLoopGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializerImpl(new MessageReceiver())).childOption(ChannelOption.SO_KEEPALIVE, true);
+		sb.group(serverLoopGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializerImpl(new MessageDispatcher())).childOption(ChannelOption.SO_KEEPALIVE, true);
 		ChannelFuture f = sb.bind(6084);
 
 		f.await();
@@ -67,7 +67,7 @@ public class TestCodecs {
 
 		Bootstrap b = new Bootstrap();
 		clientLoopGroup = new NioEventLoopGroup();
-		b.group(clientLoopGroup).channel(NioSocketChannel.class).handler(new ChannelInitializerImpl(new MessageReceiver()));
+		b.group(clientLoopGroup).channel(NioSocketChannel.class).handler(new ChannelInitializerImpl(new MessageDispatcher()));
 		ChannelFuture f2 = b.connect(new InetSocketAddress(6084));
 
 		f2.await();

@@ -3,14 +3,10 @@ package com.github.reload.routing;
 import java.util.Collection;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.message.Content;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.RoutableID;
-import com.github.reload.message.content.JoinAnswer;
-import com.github.reload.net.MessageReceiver.MessageProcessor;
-import com.github.reload.net.data.Message;
 import com.github.reload.storage.net.StoreKindData;
 
 /**
@@ -19,7 +15,7 @@ import com.github.reload.storage.net.StoreKindData;
  * the local peer
  * 
  */
-public interface TopologyPlugin extends MessageProcessor {
+public interface TopologyPlugin {
 
 	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
@@ -51,28 +47,11 @@ public interface TopologyPlugin extends MessageProcessor {
 	public void init(Configuration conf) throws InitializationException;
 
 	/**
-	 * Called when the local peer has successfully joined into the overlay
-	 * 
-	 * @param answer
-	 *            the join answer received from the admitting peer
-	 */
-	public void onJoinCompleted(Message answer);
-
-	/**
 	 * Stop the topology plugin agent, this may be used to disconnect neighbors
 	 * and deallocate system resources. This call must return only when the
 	 * topology plugin has been completely stopped and deallocated.
 	 */
 	public void stop();
-
-	/**
-	 * 
-	 * @param storeRequest
-	 *            the replica store request
-	 * @return true if local node closer to the message destination is a valid
-	 *         replica node for the given request
-	 */
-	public boolean isThisNodeValidReplicaFor(Message storeRequest);
 
 	/**
 	 * @param destination
@@ -104,39 +83,6 @@ public interface TopologyPlugin extends MessageProcessor {
 	public void onNeighborDisconnected(NodeID node);
 
 	/**
-	 * Called when another peer request this peer to join the overlay because
-	 * this peer is the admitting peer for the joining peer.
-	 * Returns the join answer to the joining node or throw an exception if the
-	 * joining fails
-	 * 
-	 * @param joinRequest
-	 *            The arrived join request
-	 * @return the join answer that should be returned to the joining node in
-	 *         case of successful join
-	 * @throws Exception
-	 *             if something fails in the join procedure, if the exception is
-	 *             of type {@link ErrorMessageException} the error message will
-	 *             be returned to the joining node
-	 */
-	public JoinAnswer onJoinRequest(Message joinRequest) throws Exception;
-
-	/**
-	 * Called when a neighbor node is leaving the overlay.
-	 * This method is called only if the neighbor has send a leave message, it
-	 * is not reliable to only use this method to manage routing table since a
-	 * neighbor can disconnect from overlay without sending the leave message.
-	 * 
-	 * @param leaveRequest
-	 *            the leave message from the leaving neighbor
-	 * @return
-	 * @throws Exception
-	 *             if something fails, if the exception is of type
-	 *             {@link ErrorMessageException} the error will be notified to
-	 *             the sender
-	 */
-	public void onLeaveRequest(Message leaveRequest) throws Exception;
-
-	/**
 	 * This method is called every time a message transmission to the specified
 	 * neighbor node fails. The transmission can fail for different causes such
 	 * as a network failure or, in case of an acked link, the acknowledgement
@@ -146,30 +92,6 @@ public interface TopologyPlugin extends MessageProcessor {
 	 *            the remote node
 	 */
 	public void onTransmissionFailed(NodeID node);
-
-	/**
-	 * Called when an update request is received from another node
-	 * 
-	 * @return the associated update answer
-	 * 
-	 * @throws Exception
-	 *             if something fails, if the exception is of type
-	 *             {@link ErrorMessageException} the error will be notified to
-	 *             the sender
-	 */
-	public Message onUpdateRequest(Message updateRequest) throws Exception;
-
-	/**
-	 * Called when a route query request is received from another node
-	 * 
-	 * @return The associated route query answer
-	 * 
-	 * @throws Exception
-	 *             if something fails, if the exception is of type
-	 *             {@link ErrorMessageException} the error will be notified to
-	 *             the sender
-	 */
-	public Content onRouteQueryRequest(Message routeQueryRequest) throws Exception;
 
 	/**
 	 * Called when new data are stored, the implementation may replicate the

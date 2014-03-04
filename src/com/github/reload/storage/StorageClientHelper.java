@@ -17,7 +17,6 @@ import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity.IdentityType;
 import com.github.reload.message.errors.NetworkException;
 import com.github.reload.net.data.Message;
-import com.github.reload.storage.PreparedData.DataBuildingException;
 import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
 import com.github.reload.storage.data.DictionaryModel.DictionaryModelSpecifier;
 import com.github.reload.storage.data.DictionaryValue.Key;
@@ -45,7 +44,7 @@ public class StorageClientHelper {
 		context = context;
 	}
 
-	public List<StoreKindResponse> sendStoreRequest(DestinationList destination, PreparedData... preparedData) throws StorageException, NetworkException, InterruptedException, DataBuildingException {
+	public List<StoreKindResponse> sendStoreRequest(DestinationList destination, PreparedData... preparedData) {
 		ResourceID resourceId;
 		try {
 			resourceId = (ResourceID) destination.get(destination.size() - 1);
@@ -91,7 +90,7 @@ public class StorageClientHelper {
 		return answer.getResponses();
 	}
 
-	public List<FetchKindResponse> sendFetchRequest(DestinationList destination, StoredDataSpecifier... specifiers) throws StorageException, NetworkException, InterruptedException {
+	public List<FetchKindResponse> sendFetchRequest(DestinationList destination, StoredDataSpecifier... specifiers) {
 		ResourceID resourceId;
 		try {
 			resourceId = (ResourceID) destination.get(destination.size() - 1);

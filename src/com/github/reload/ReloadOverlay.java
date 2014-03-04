@@ -19,7 +19,10 @@ import com.github.reload.message.ResourceID;
 import com.github.reload.message.errors.NetworkException;
 import com.github.reload.storage.PreparedData;
 import com.github.reload.storage.StorageClientHelper;
+import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
+import com.github.reload.storage.net.FetchKindResponse;
+import com.github.reload.storage.net.StoreKindResponse;
 
 /**
  * Represent the overlay where the local node is connected to, all operations in
@@ -235,7 +238,7 @@ public class ReloadOverlay {
 	 *             overlay algorithm or if the final id in the destination list
 	 *             is not a resource
 	 */
-	public List<StoreResponse> storeData(DestinationList destination, PreparedData... preparedData) throws StorageException, NetworkException, InterruptedException {
+	public List<StoreKindResponse> storeData(DestinationList destination, PreparedData... preparedData) {
 		if (destination == null || preparedData == null)
 			throw new NullPointerException();
 
@@ -273,7 +276,7 @@ public class ReloadOverlay {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public List<StoreResponse> storeData(DestinationList destination, Collection<? extends PreparedData> preparedData) throws StorageException, NetworkException, InterruptedException {
+	public List<StoreKindResponse> storeData(DestinationList destination, Collection<? extends PreparedData> preparedData) {
 		return storeData(destination, preparedData.toArray(new PreparedData[0]));
 	}
 
@@ -302,7 +305,7 @@ public class ReloadOverlay {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public List<FetchResponse> fetchData(DestinationList destination, DataSpecifier... specifiers) throws StorageException, NetworkException, InterruptedException {
+	public List<FetchKindResponse> fetchData(DestinationList destination, StoredDataSpecifier... specifiers) {
 		if (destination == null || specifiers == null)
 			throw new NullPointerException();
 

@@ -10,14 +10,14 @@ import java.util.Set;
 import com.github.reload.message.Header;
 import com.github.reload.message.NodeID;
 import com.github.reload.net.connections.Connection;
-import com.github.reload.net.data.Message;
+import com.github.reload.net.data.HeadedMessage;
 import com.github.reload.routing.RoutingTable;
 import com.google.common.util.concurrent.AbstractFuture;
 
 /**
  * Route the outgoing messages to neighbor nodes by using the routing table
  */
-public class MessageRouter {
+class MessageRouter {
 
 	private final RoutingTable routingTable;
 
@@ -25,7 +25,7 @@ public class MessageRouter {
 		this.routingTable = routingTable;
 	}
 
-	public ForwardFuture sendMessage(Message message) {
+	public ForwardFuture sendMessage(HeadedMessage message) {
 		Header header = message.getHeader();
 
 		List<Connection> hops = routingTable.getNextHops(header.getDestinationId());
@@ -39,7 +39,7 @@ public class MessageRouter {
 		return fwdFut;
 	}
 
-	private void forward(Message message, Connection conn, ForwardFuture fwdFuture) {
+	private void forward(HeadedMessage message, Connection conn, ForwardFuture fwdFuture) {
 		ChannelFuture chFut = conn.write(message);
 		fwdFuture.addChannelFuture(conn.getNodeId(), chFut);
 	}

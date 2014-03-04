@@ -12,17 +12,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import com.github.reload.Configuration;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
 public class ICEHelper {
-
-	private final Configuration conf;
-
-	public ICEHelper(Configuration conf) {
-		context = context;
-	}
 
 	/**
 	 * @return the ICE candidates to be used to reach this peer
