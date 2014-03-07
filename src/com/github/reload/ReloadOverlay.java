@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.net.SocketFactory;
 import javax.tools.Diagnostic;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
@@ -17,6 +18,7 @@ import com.github.reload.message.DestinationList;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.errors.NetworkException;
+import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.storage.PreparedData;
 import com.github.reload.storage.StorageClientHelper;
 import com.github.reload.storage.data.StoredDataSpecifier;
@@ -45,8 +47,8 @@ public class ReloadOverlay {
 		PropertyConfigurator.configure("log4j.properties");
 	}
 
-	private Configuration conf;
-	private final OverlayConnectionHelper connStatusHelper;
+	private Context context;
+	private final PeerInitializer connStatusHelper;
 	private final StorageClientHelper storageHelper;
 
 	/**
@@ -72,8 +74,8 @@ public class ReloadOverlay {
 		context = new Context();
 		context.init(connector);
 
-		connStatusHelper = new OverlayConnectionHelper(context);
-		storageHelper = new StorageClientHelper(context);
+		connStatusHelper = new PeerInitializer();
+		storageHelper = new StorageClientHelper();
 
 	}
 
@@ -94,9 +96,9 @@ public class ReloadOverlay {
 		connStatusHelper.checkConnection();
 
 		Configuration conf = context.getConfiguration();
-		logger.log(Priority.INFO, "Joining to RELOAD overlay " + conf.getOverlayName() + " with " + getLocalId() + " in progress...");
+		logger.log(Level.INFO, "Joining to RELOAD overlay " + conf.getOverlayName() + " with " + getLocalId() + " in progress...");
 		connStatusHelper.join();
-		logger.log(Priority.INFO, "Joining to RELOAD overlay " + conf.getOverlayName() + " with " + getLocalId() + " completed.");
+		logger.log(Level.INFO, "Joining to RELOAD overlay " + conf.getOverlayName() + " with " + getLocalId() + " completed.");
 	}
 
 	/**
@@ -112,7 +114,7 @@ public class ReloadOverlay {
 	 * @return the configuration of this overlay
 	 */
 	public Configuration getConfiguration() {
-		return context.getConfiguration();
+		return context.getComponent(Configuration.class);
 	}
 
 	/**
@@ -146,14 +148,14 @@ public class ReloadOverlay {
 	 *             if the given kind-id is not associated to any existing kind
 	 */
 	public DataKind getDataKind(KindId kindId) throws UnknownKindException {
-		return context.getConfiguration().getDataKind(kindId);
+		return getConfiguration().getDataKind(kindId);
 	}
 
 	/**
 	 * @return the available data kinds ids
 	 */
 	public Set<KindId> getDataKindIds() {
-		return context.getConfiguration().getDataKindIds();
+		return getConfiguration().getDataKindIds();
 	}
 
 	/**
@@ -316,7 +318,7 @@ public class ReloadOverlay {
 
 		connStatusHelper.checkConnection();
 
-		if (resourceId.getData().length > context.getTopologyPlugin().getResourceIdLength())
+		if (resourceId.getData().length > context.getComponent(TopologyPlugin.class).getResourceIdLength())
 			throw new IllegalArgumentException("The resource-id exceeds the overlay allowed length of " + context.getTopologyPlugin().getResourceIdLength() + " bytes");
 
 		return storageHelper.sendFetchRequest(destination, specifiers);
@@ -347,7 +349,7 @@ public class ReloadOverlay {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public List<FetchResponse> fetchData(DestinationList destination, Collection<? extends DataSpecifier> specifiers) throws StorageException, NetworkException, InterruptedException {
+	public List<FetchKindResponse> fetchData(DestinationList destination, Collection<? extends DataSpecifier> specifiers) throws StorageException, NetworkException, InterruptedException {
 		return fetchData(destination, specifiers.toArray(new DataSpecifier[0]));
 	}
 
@@ -386,7 +388,7 @@ public class ReloadOverlay {
 
 		connStatusHelper.checkConnection();
 
-		if (resourceId.getData().length > context.getTopologyPlugin().getResourceIdLength())
+		if (resourceId.getData().length > context.getComponent(TopologyPlugin.class).getResourceIdLength())
 			throw new IllegalArgumentException("The resource-id exceeds the overlay allowed length of " + context.getTopologyPlugin().getResourceIdLength() + " bytes");
 
 		return storageHelper.sendRemoveRequest(destination, dataSpecifier);
@@ -504,7 +506,7 @@ public class ReloadOverlay {
 	@Override
 	public String toString() {
 		if (connStatusHelper.isConnected())
-			return "OverlayConnection [overlay=" + context.getConfiguration().getOverlayName() + ", localId=" + context.getLocalId() + "]";
+			return "OverlayConnection [overlay=" + context.getComponent(Configuration.class).getOverlayName() + ", localId=" + context.getLocalId() + "]";
 		return "OverlayConnection [DISCONNECTED]";
 	}
 }

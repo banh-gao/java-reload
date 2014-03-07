@@ -48,9 +48,10 @@ public class ForwardingHandler extends ChannelDuplexHandler {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		HeadedMessage message = (HeadedMessage) msg;
-		if (router.isLocalMessage(message.getHeader())) {
+		if (router.isPeerResponsible(message.getHeader())) {
 			ctx.fireChannelRead(message);
 		} else {
+			// Forward the message because the peer is not responsible for it
 			router.sendMessage(message);
 		}
 	}

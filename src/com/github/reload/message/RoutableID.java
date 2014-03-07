@@ -16,7 +16,7 @@ import com.github.reload.net.data.ReloadCodec;
 @ReloadCodec(RoutableIDCodec.class)
 public abstract class RoutableID implements Comparable<RoutableID> {
 
-	protected enum DestinationType {
+	public enum DestinationType {
 		NODEID((byte) 0x01), RESOURCEID((byte) 0x02), OPAQUEID((byte) 0x03);
 
 		public final byte code;

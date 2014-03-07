@@ -6,14 +6,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import java.util.Map;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.Context;
+import com.github.reload.Context.Component;
+import com.github.reload.Context.CtxComponent;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.DestinationList;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.RoutableID;
 import com.github.reload.message.content.AttachMessage;
 import com.github.reload.message.errors.NetworkException;
-import com.github.reload.net.MessageTransmitter;
+import com.github.reload.net.MessageRouter;
 import com.github.reload.net.data.Message;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.IceCandidate;
@@ -26,7 +27,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish and manage connections for all neighbor nodes
  */
-public class ConnectionManager {
+public class ConnectionManager implements Component {
 
 	private static final Logger l = Logger.getRootLogger();
 
@@ -34,15 +35,16 @@ public class ConnectionManager {
 
 	private final Map<NodeID, SettableFuture<Connection>> pendingConnections = Maps.newHashMap();
 
-	private final ICEHelper iceHelper;
-	private final MessageTransmitter msgTransmitter;
+	@CtxComponent
+	private ICEHelper iceHelper;
 
-	private NioEventLoopGroup clientLoopGroup;
+	@CtxComponent
+	private MessageRouter msgRouter;
 
-	public ConnectionManager(Context context) {
-		this.iceHelper = context.getIceHelper();
-		this.msgTransmitter = context.getMessageTransmitter();
-		clientLoopGroup = new NioEventLoopGroup();
+	private NioEventLoopGroup clientLoopGroup = new NioEventLoopGroup();
+
+	@Override
+	public void compStart() {
 	}
 
 	public ListenableFuture<Connection> connect(DestinationList destList, boolean requestUpdate) {
@@ -89,7 +91,7 @@ public class ConnectionManager {
 			throw new NetworkException("No suitable direct connection parameters found");
 		}
 
-		ChannelFuture chFut = ClientChannelFactory.connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType(), clientLoopGroup, context);
+		ChannelFuture chFut = ChannelFactory.connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType(), clientLoopGroup, context);
 
 		chFut.addListener(new ChannelFutureListener() {
 

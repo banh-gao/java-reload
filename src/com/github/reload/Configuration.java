@@ -1,5 +1,11 @@
 package com.github.reload;
 
-public class Configuration {
+import com.github.reload.Context.Component;
+
+public class Configuration implements Component {
+
+	@Override
+	public void compStart() {
+	}
 
 }

@@ -10,13 +10,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.github.reload.Configuration;
+import com.github.reload.Context.Component;
+import com.github.reload.Context.CtxComponent;
 import com.github.reload.DataKind;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.DestinationList;
+import com.github.reload.message.MessageBuilder;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.SignerIdentity.IdentityType;
 import com.github.reload.message.errors.NetworkException;
+import com.github.reload.net.MessageRouter;
 import com.github.reload.net.data.Message;
+import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
 import com.github.reload.storage.data.DictionaryModel.DictionaryModelSpecifier;
 import com.github.reload.storage.data.DictionaryValue.Key;
@@ -34,14 +39,25 @@ import com.github.reload.storage.net.StoreRequest;
  * Helps a peer to send storage requests into the overlay
  * 
  */
-public class StorageClientHelper {
+public class StorageClientHelper implements Component {
 
 	private static final short REPLICA_NUMBER = 0;
 
-	private final Configuration conf;
+	@CtxComponent
+	private Configuration conf;
 
-	public StorageClientHelper(Configuration conf) {
-		context = context;
+	@CtxComponent
+	private TopologyPlugin topologyPlugin;
+
+	@CtxComponent
+	private MessageRouter msgRouter;
+
+	@CtxComponent
+	private MessageBuilder msgBuilder;
+
+	@Override
+	public void compStart() {
+		// TODO Auto-generated method stub
 	}
 
 	public List<StoreKindResponse> sendStoreRequest(DestinationList destination, PreparedData... preparedData) {
@@ -55,7 +71,7 @@ public class StorageClientHelper {
 		if (preparedData.length == 0)
 			return Collections.emptyList();
 
-		if (resourceId.getData().length > context.getTopologyPlugin().getResourceIdLength())
+		if (resourceId.getData().length > topologyPlugin.getResourceIdLength())
 			throw new IllegalArgumentException("The resource-id exceeds the overlay allowed length of " + context.getTopologyPlugin().getResourceIdLength() + " bytes");
 
 		Map<KindId, StoreKindData> kindData = new HashMap<KindId, StoreKindData>();
@@ -73,9 +89,9 @@ public class StorageClientHelper {
 		Message response;
 
 		try {
-			Message request = context.getMessageBuilder().newMessage(new StoreRequest(resourceId, REPLICA_NUMBER, new ArrayList<StoreKindData>(kindData.values())), destination);
+			Message request = msgBuilder.newMessage(new StoreRequest(resourceId, REPLICA_NUMBER, new ArrayList<StoreKindData>(kindData.values())), destination);
 
-			response = context.getMessageRouter().sendRequestMessage(request);
+			response = msgRouter.sendRequestMessage(request);
 		} catch (ErrorMessageException e) {
 			if (!(e instanceof StorageException)) {
 				e = new StorageException(e.getError().getStringInfo());
@@ -99,8 +115,8 @@ public class StorageClientHelper {
 		}
 		Message response;
 		try {
-			Message message = context.getMessageBuilder().newMessage(new FetchRequest(resourceId, specifiers), destination);
-			response = context.getMessageRouter().sendRequestMessage(message);
+			Message message = msgBuilder.newMessage(new FetchRequest(resourceId, specifiers), destination);
+			response = msgRouter.sendRequestMessage(message);
 		} catch (ErrorMessageException e) {
 			if (!(e instanceof StorageException)) {
 				e = new StorageException(e.getError().getStringInfo());

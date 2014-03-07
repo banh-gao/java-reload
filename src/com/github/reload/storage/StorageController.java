@@ -4,7 +4,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import com.github.reload.Component;
 import com.github.reload.Configuration;
+import com.github.reload.Context;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.ResourceID;
@@ -29,7 +31,7 @@ import com.github.reload.storage.net.StoreRequest;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class StorageController {
+public class StorageController implements Component {
 
 	private static final ContentType[] HANDLED_TYPES = new ContentType[]{
 																			ContentType.STORE_REQ,
@@ -48,7 +50,6 @@ public class StorageController {
 		if (context == null)
 			throw new NullPointerException();
 
-		context = context;
 		localStore = new LocalStore(context);
 	}
 
@@ -134,5 +135,11 @@ public class StorageController {
 	 */
 	public BigInteger getUsedMemory() {
 		return localStore.getUsedMemory();
+	}
+
+	@Override
+	public void init(Context context) {
+		// TODO Auto-generated method stub
+
 	}
 }
