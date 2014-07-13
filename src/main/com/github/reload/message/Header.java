@@ -2,7 +2,8 @@ package com.github.reload.message;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.github.reload.net.encoding.Message;
+import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.pipeline.encoders.Message;
 
 /**
  * RELOAD message header

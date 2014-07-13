@@ -121,7 +121,7 @@ public abstract class Codec<T> {
 			throw new IllegalStateException("No codec associated with " + clazz.toString());
 
 		try {
-			Constructor<? extends Codec<?>> codecConstr = codecAnn.value().getConstructor(Context.class);
+			Constructor<? extends Codec<?>> codecConstr = codecAnn.value().getConstructor(Configuration.class);
 			return (Codec<T>) codecConstr.newInstance(conf);
 		} catch (Exception e) {
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);

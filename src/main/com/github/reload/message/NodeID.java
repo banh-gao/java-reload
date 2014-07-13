@@ -4,12 +4,11 @@ import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
 import com.github.reload.Configuration;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.NodeID.NodeIdCodec;
 
 /**
  * The identifier of a node
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 @ReloadCodec(NodeIdCodec.class)

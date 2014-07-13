@@ -2,13 +2,12 @@ package com.github.reload.message;
 
 import io.netty.buffer.ByteBuf;
 import com.github.reload.Configuration;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.OpaqueID.OpaqueIdCodec;
 
 /**
  * An opaque id used to substitute other ids by the local peer (also known as
  * compressed id)
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 @ReloadCodec(OpaqueIdCodec.class)

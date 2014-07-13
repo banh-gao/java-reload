@@ -3,6 +3,7 @@ package com.github.reload.message;
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
 import com.github.reload.Configuration;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.SignatureAlgorithm.SignatureAlgorithmCodec;
 
 @ReloadCodec(SignatureAlgorithmCodec.class)

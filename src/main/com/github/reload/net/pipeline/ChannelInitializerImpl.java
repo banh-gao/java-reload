@@ -13,8 +13,8 @@ import com.github.reload.net.MessageRouter;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.net.pipeline.encoders.FramedMessageCodecTest;
 import com.github.reload.net.pipeline.encoders.HeadedMessageDecoder;
-import com.github.reload.net.pipeline.encoders.MessageDecoderTest;
-import com.github.reload.net.pipeline.encoders.MessageEncoderTest;
+import com.github.reload.net.pipeline.encoders.MessageDecoder;
+import com.github.reload.net.pipeline.encoders.MessageEncoder;
 import com.github.reload.net.pipeline.handlers.ForwardingHandler;
 import com.github.reload.net.pipeline.handlers.LinkHandler;
 import com.github.reload.net.pipeline.handlers.MessageDispatcherTest;
@@ -69,10 +69,10 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 
 		// IN: Decoder for RELOAD message content and security block, header
 		// must have been already decoded at this point
-		pipeline.addLast(MSG_DECODER, new MessageDecoderTest(conf));
+		pipeline.addLast(MSG_DECODER, new MessageDecoder(conf));
 
 		// OUT: Encoder for complete RELOAD message
-		pipeline.addLast(MSG_ENCODER, new MessageEncoderTest(conf));
+		pipeline.addLast(MSG_ENCODER, new MessageEncoder(conf));
 
 		MessageDispatcherTest msgReceiver = new MessageDispatcherTest(context.getMessageBus());
 		// IN: Process incoming messages directed to this node

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import com.github.reload.Configuration;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content.ContentCodec;
 
 @ReloadCodec(ContentCodec.class)

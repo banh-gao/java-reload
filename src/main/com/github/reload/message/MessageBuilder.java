@@ -7,7 +7,7 @@ import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.message.content.ConfigUpdateRequest;
 import com.github.reload.message.content.ConfigUpdateRequest.ConfigUpdateType;
 import com.github.reload.message.errors.IncompatibleOverlayException;
-import com.github.reload.net.encoding.Message;
+import com.github.reload.net.pipeline.encoders.Message;
 
 /**
  * Creates new messages to send for a specific connection

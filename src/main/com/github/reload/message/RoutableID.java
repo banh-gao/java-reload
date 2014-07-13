@@ -3,12 +3,11 @@ package com.github.reload.message;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.EnumSet;
+import com.github.reload.message.Codec.ReloadCodec;
 
 /**
  * A routable identitier that can be used as destination for the resource based
  * routing algorithm
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 @ReloadCodec(RoutableIDCodec.class)
