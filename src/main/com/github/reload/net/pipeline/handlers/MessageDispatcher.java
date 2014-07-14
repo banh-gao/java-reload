@@ -4,8 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import com.github.reload.MessageBus;
 import com.github.reload.net.pipeline.encoders.Message;
-import com.google.common.eventbus.EventBus;
 
 /**
  * Message handler at the end of the input pipeline that dispatches incoming
@@ -14,18 +14,16 @@ import com.google.common.eventbus.EventBus;
 public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 
 	private final Logger l = Logger.getRootLogger();
-	private EventBus msgBus;
+	private MessageBus msgBus;
 
-	public MessageDispatcher(EventBus msgBus) {
+	public MessageDispatcher(MessageBus msgBus) {
 		this.msgBus = msgBus;
 	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		Message message = (Message) msg;
-
-		l.log(Level.DEBUG, "Message received: " + message);
-
+		l.log(Level.DEBUG, "Dispatching incoming message #" + message.getHeader().getTransactionId() + " on application bus...");
 		msgBus.post(message);
 	}
 }
