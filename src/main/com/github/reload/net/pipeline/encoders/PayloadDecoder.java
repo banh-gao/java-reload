@@ -14,12 +14,12 @@ import com.github.reload.message.SecurityBlock;
 /**
  * Completely decode the message payload for a HeadedMessage
  */
-public class MessageDecoder extends MessageToMessageDecoder<HeadedMessage> {
+public class PayloadDecoder extends MessageToMessageDecoder<HeadedMessage> {
 
 	private final Codec<Content> contentCodec;
 	private final Codec<SecurityBlock> secBlockCodec;
 
-	public MessageDecoder(Configuration conf) {
+	public PayloadDecoder(Configuration conf) {
 		contentCodec = Codec.getCodec(Content.class, conf);
 		secBlockCodec = Codec.getCodec(SecurityBlock.class, conf);
 	}
@@ -32,7 +32,7 @@ public class MessageDecoder extends MessageToMessageDecoder<HeadedMessage> {
 			Content content = contentCodec.decode(payload);
 			SecurityBlock secBlock = secBlockCodec.decode(payload);
 			out.add(new Message(header, content, secBlock));
-			Logger.getRootLogger().debug("Message #" + header.getTransactionId() + " decoded");
+			Logger.getRootLogger().debug("Message payload #" + header.getTransactionId() + " decoded");
 		} finally {
 			payload.release();
 		}
