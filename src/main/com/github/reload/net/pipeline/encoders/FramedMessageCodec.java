@@ -30,12 +30,13 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 		switch (msg.getType()) {
 			case DATA :
 				encodeData((FramedData) msg, out);
+				Logger.getRootLogger().debug("DATA frame " + msg.getSequence() + " encoded");
 				break;
 			case ACK :
 				encodeAck((FramedAck) msg, out);
+				Logger.getRootLogger().debug("ACK frame " + msg.getSequence() + " encoded");
 				break;
 		}
-		Logger.getRootLogger().debug("Message frame #" + msg.getSequence() + " encoded");
 	}
 
 	@Override
@@ -56,13 +57,14 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 			switch (type) {
 				case DATA :
 					msg = decodeData(in, sequence);
+					Logger.getRootLogger().debug("DATA frame " + msg.getSequence() + " decoded");
 					break;
 				case ACK :
 					msg = decodeAck(in, sequence);
+					Logger.getRootLogger().debug("ACK frame " + msg.getSequence() + " decoded");
 					break;
 			}
 			out.add(msg);
-			Logger.getRootLogger().debug("Message frame #" + msg.getSequence() + " decoded");
 		} finally {
 			in.clear();
 		}
@@ -89,10 +91,10 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 		// Read frame sequence
 		if (in.readableBytes() < 4)
 			return false;
-		in.readUnsignedInt();
 
 		switch (type) {
 			case DATA :
+				in.readUnsignedInt();
 				if (in.readableBytes() < DATA_MAX_LENGTH)
 					return false;
 
