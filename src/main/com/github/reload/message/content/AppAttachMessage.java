@@ -1,22 +1,21 @@
 package com.github.reload.message.content;
 
-import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.ApplicationID;
 import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
-import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.IceCandidate;
 
 @ReloadCodec(AppAttachMessageCodec.class)
 public class AppAttachMessage extends Content {
 
-	byte[] userFragment;
-	byte[] password;
-	ApplicationID applicationID;
-	boolean isActive;
-	List<IceCandidate> candidates;
+	private byte[] userFragment;
+	private byte[] password;
+	private ApplicationID applicationID;
+	private boolean isActive;
+	private List<IceCandidate> candidates;
 
 	AppAttachMessage() {
 	}
@@ -68,22 +67,15 @@ public class AppAttachMessage extends Content {
 	/**
 	 * Builder for AppAttach requests and answers
 	 * 
-	 * @author Daniel Zozin <zdenial@gmx.com>
-	 * 
 	 */
 	public static class Builder {
 
+		byte[] userFragment = new byte[0];
+		byte[] password = new byte[0];
+		List<IceCandidate> candidates = new ArrayList<IceCandidate>();
+		boolean sendUpdate = false;
 		boolean isActive;
-		byte[] userFragment;
-		byte[] password;
 		ApplicationID applicationID;
-		List<IceCandidate> candidates;
-
-		public Builder(int port, ICEHelper iceHelper) {
-			userFragment = iceHelper.getUserFragment();
-			password = iceHelper.getPassword();
-			candidates = iceHelper.getCandidates(new InetSocketAddress(port));
-		}
 
 		public Builder applicationID(ApplicationID applicationID) {
 			this.applicationID = applicationID;
@@ -99,13 +91,33 @@ public class AppAttachMessage extends Content {
 			isActive = true;
 			return new AppAttachMessage(this);
 		}
+
+		public Builder candidates(List<IceCandidate> candidates) {
+			this.candidates = candidates;
+			return this;
+		}
+
+		public Builder password(byte[] password) {
+			this.password = password;
+			return this;
+		}
+
+		public Builder userFragment(byte[] userFragment) {
+			this.userFragment = userFragment;
+			return this;
+		}
+
+		public Builder sendUpdate(boolean sendUpdate) {
+			this.sendUpdate = sendUpdate;
+			return this;
+		}
 	}
 
 	@Override
 	public ContentType getType() {
-		if (isRequest())
-			return ContentType.APPATTACH_REQ;
-		else
+		if (isActive)
 			return ContentType.APPATTACH_ANS;
+		else
+			return ContentType.APPATTACH_REQ;
 	}
 }
