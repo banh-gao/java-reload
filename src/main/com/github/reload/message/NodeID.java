@@ -79,21 +79,23 @@ public class NodeID extends RoutableID {
 
 	public static class NodeIdCodec extends Codec<NodeID> {
 
+		private final int NODE_ID_LENGTH;
+
 		public NodeIdCodec(Configuration conf) {
 			super(conf);
+			NODE_ID_LENGTH = conf.getOverlayAttribute(Configuration.NODE_ID_LENGTH);
 		}
 
 		@Override
-		public void encode(NodeID obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(NodeID obj, ByteBuf buf, Object... params) throws CodecException {
+			if (obj.id.length != NODE_ID_LENGTH)
+				throw new CodecException("Invalid NodeID length");
 			buf.writeBytes(obj.id);
 		}
 
 		@Override
 		public NodeID decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
-			// FIXME: get nodeid length from configuration
-			int nodeidLength = 16;
-
-			byte[] id = new byte[nodeidLength];
+			byte[] id = new byte[NODE_ID_LENGTH];
 			buf.readBytes(id);
 
 			return valueOf(id);
