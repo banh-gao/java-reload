@@ -41,20 +41,21 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 		switch (frame.getType()) {
 			case DATA :
 				handleData((FramedData) frame);
+				l.log(Level.DEBUG, "Passing DATA frame " + frame.getSequence() + " to upper layer...");
+				ctx.fireChannelRead(((FramedData) frame).getPayload());
 				break;
 			case ACK :
+				l.log(Level.DEBUG, "Received ACK for frame " + frame.getSequence());
 				Transmission t = transmissions.remove(frame.getSequence());
 				if (t != null) {
 					handleAck((FramedAck) frame, t);
-					// TODO: update transmission timeout value
 				} else {
-					l.log(Level.DEBUG, "Unexpected ack message on " + ctx);
+					l.log(Level.DEBUG, "Unexpected ACK message on " + ctx);
 				}
 			default :
 				assert false;
 				break;
 		}
-		ctx.fireChannelRead(((FramedData) frame).getPayload());
 	}
 
 	@Override
@@ -63,18 +64,20 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 		Transmission t = new Transmission();
 		t.promise = promise;
 		transmissions.put(data.getSequence(), t);
+		l.log(Level.DEBUG, "Passing DATA frame " + data.getSequence() + " to lower layer...");
 		ctx.write(data);
 		// TODO: detect transmission timeout
 	}
 
 	/**
-	 * Send acknowledgment message and without waiting for the answer
+	 * Send acknowledgment message immediately
 	 * 
 	 * @param ack
 	 * @return
 	 */
 	protected void sendAckFrame(FramedAck ack) {
-		ctx.write(ack);
+		l.log(Level.DEBUG, "Passing ACK frame " + ack.getSequence() + " to lower layer...");
+		ctx.writeAndFlush(ack);
 	}
 
 	protected abstract void handleData(FramedData data);
