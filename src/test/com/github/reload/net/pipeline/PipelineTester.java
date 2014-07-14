@@ -49,17 +49,25 @@ public class PipelineTester {
 			public void initChannel(SocketChannel ch) throws Exception {
 
 				tester.ch = ch;
+				for (ChannelHandler h : handlers) {
+					ch.pipeline().addLast("Handler_" + h.getClass().getCanonicalName(), h);
+				}
 
-				for (ChannelHandler h : handlers)
-					ch.pipeline().addLast(h);
-
-				ch.pipeline().addLast(new SimpleChannelInboundHandler<Object>() {
+				ch.pipeline().addLast("TesterHandler", new SimpleChannelInboundHandler<Object>() {
 
 					@Override
 					protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-						tester.echo = msg;
 						synchronized (tester) {
-							tester.notify();
+							tester.echo = msg;
+							tester.notifyAll();
+						}
+					}
+
+					@Override
+					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+						synchronized (tester) {
+							tester.exception = cause;
+							tester.notifyAll();
 						}
 					}
 				});
@@ -72,6 +80,7 @@ public class PipelineTester {
 
 	public static class MsgTester {
 
+		protected Throwable exception;
 		private Channel ch;
 		private Object echo;
 
@@ -79,11 +88,16 @@ public class PipelineTester {
 			return ch;
 		}
 
-		public Object sendMessage(Object message) throws InterruptedException {
-			ch.writeAndFlush(message).sync();
+		public Object sendMessage(Object message) throws Exception {
+			ch.writeAndFlush(message);
+
 			synchronized (this) {
 				wait();
 			}
+
+			if (exception != null)
+				throw new Exception(exception);
+
 			return echo;
 		}
 
@@ -107,10 +121,17 @@ public class PipelineTester {
 
 						@Override
 						protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+							msg.retain();
 							ctx.writeAndFlush(msg);
+
 						}
 
+						@Override
+						public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+							cause.printStackTrace();
+						}
 					});
+
 				}
 			}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 

@@ -8,13 +8,13 @@ import com.github.reload.net.MessageRouter;
 import com.github.reload.net.pipeline.encoders.HeadedMessage;
 
 @Sharable
-public class ForwardingHandler extends ChannelDuplexHandler {
+public class ForwardingHandlerTest extends ChannelDuplexHandler {
 
 	public static final String NAME = "FWD_HANDLER";
 	private ChannelHandlerContext ctx;
 	private final MessageRouter router;
 
-	public ForwardingHandler(MessageRouter router) {
+	public ForwardingHandlerTest(MessageRouter router) {
 		this.router = router;
 	}
 

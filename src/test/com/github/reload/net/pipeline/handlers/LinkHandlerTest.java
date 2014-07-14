@@ -15,7 +15,7 @@ import com.github.reload.net.pipeline.encoders.FramedMessage.FramedData;
 /**
  * Subclasses will implement a specific link layer protocol to control the link
  */
-public abstract class LinkHandler extends ChannelDuplexHandler {
+public abstract class LinkHandlerTest extends ChannelDuplexHandler {
 
 	private final Logger l = Logger.getRootLogger();
 
