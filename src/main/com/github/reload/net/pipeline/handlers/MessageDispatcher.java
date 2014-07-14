@@ -26,4 +26,9 @@ public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 		l.log(Level.DEBUG, "Dispatching incoming message #" + message.getHeader().getTransactionId() + " on application bus...");
 		msgBus.post(message);
 	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+		Logger.getRootLogger().warn(cause.getMessage(), cause);
+	}
 }
