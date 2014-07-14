@@ -3,7 +3,7 @@ package com.github.reload.net;
 import com.github.reload.message.NodeID;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoding.HeadedMessage;
+import com.github.reload.net.pipeline.encoders.HeadedMessage;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
 
@@ -11,7 +11,7 @@ import com.github.reload.routing.TopologyPlugin;
  * Forwards only messages not addressed to this peer. Forwards them without
  * decoding the payload
  */
-class ForwardingRouter {
+public class ForwardingRouter {
 
 	private final RoutingTable routingTable;
 	private final ConnectionManager connMgr;

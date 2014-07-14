@@ -5,19 +5,14 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import org.apache.log4j.Logger;
-import com.github.reload.net.MessageRouter;
+import com.github.reload.net.ForwardingRouter;
 import com.github.reload.net.pipeline.encoders.HeadedMessage;
 
 @Sharable
 public class ForwardingHandler extends ChannelDuplexHandler {
 
-	public static final String NAME = "FWD_HANDLER";
 	private ChannelHandlerContext ctx;
-	private final MessageRouter router;
-
-	public ForwardingHandler(MessageRouter router) {
-		this.router = router;
-	}
+	private ForwardingRouter router;
 
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -51,9 +46,9 @@ public class ForwardingHandler extends ChannelDuplexHandler {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		HeadedMessage message = (HeadedMessage) msg;
+		Logger.getRootLogger().debug("Passing message #" + message.getHeader().getTransactionId() + " for local peer to upper layer...");
 		ctx.fireChannelRead(message);
 		// FIXME: If the peer is not responsible for it, forward the message
 		// instead passing to upper layer
-		Logger.getRootLogger().debug("Message #" + message.getHeader().getTransactionId() + " for local peer passed to upper layer");
 	}
 }
