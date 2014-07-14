@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
-import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.content.PingAnswer.PingAnswerCodec;
 
 @ReloadCodec(PingAnswerCodec.class)
@@ -16,7 +16,6 @@ public class PingAnswer extends Content {
 	private final BigInteger responseTime;
 
 	public PingAnswer(long responseId, BigInteger responseTime) {
-		super();
 		this.responseId = responseId;
 		this.responseTime = responseTime;
 	}
@@ -47,20 +46,32 @@ public class PingAnswer extends Content {
 
 	public static class PingAnswerCodec extends Codec<PingAnswer> {
 
+		private static final int RESPONSE_TIME_SIZE = U_INT64;
+
 		public PingAnswerCodec(Configuration conf) {
 			super(conf);
 		}
 
 		@Override
-		public void encode(PingAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(PingAnswer obj, ByteBuf buf, Object... params) throws CodecException {
 			buf.writeLong(obj.responseId);
-			buf.writeBytes(obj.responseTime.toByteArray());
+
+			if (obj.responseTime.compareTo(BigInteger.ZERO) < 0 || obj.responseTime.bitCount() > 8 * RESPONSE_TIME_SIZE)
+				throw new CodecException("Invalid response time");
+
+			byte[] respTime = obj.responseTime.toByteArray();
+
+			// Add zeros padding to response time to ensure the field has always
+			// the size specified in RESPONSE_TIME_SIZE
+			buf.writeZero(RESPONSE_TIME_SIZE - respTime.length);
+
+			buf.writeBytes(respTime);
 		}
 
 		@Override
-		public PingAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public PingAnswer decode(ByteBuf buf, Object... params) throws CodecException {
 			long responseId = buf.readLong();
-			byte[] resposeTimeData = new byte[U_INT64];
+			byte[] resposeTimeData = new byte[RESPONSE_TIME_SIZE];
 			buf.readBytes(resposeTimeData);
 			BigInteger responseTime = new BigInteger(1, resposeTimeData);
 
