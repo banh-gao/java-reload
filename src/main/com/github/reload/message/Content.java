@@ -10,6 +10,7 @@ import java.util.Set;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content.ContentCodec;
+import com.google.common.base.Objects;
 
 @ReloadCodec(ContentCodec.class)
 public abstract class Content {
@@ -120,4 +121,10 @@ public abstract class Content {
 			return out;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this).add("messageExtensions", messageExtensions).toString();
+	}
+
 }

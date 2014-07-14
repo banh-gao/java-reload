@@ -7,6 +7,7 @@ import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.content.PingRequest.PingRequestCodec;
+import com.google.common.base.Objects;
 
 @ReloadCodec(PingRequestCodec.class)
 public class PingRequest extends Content {
@@ -53,6 +54,11 @@ public class PingRequest extends Content {
 			return req;
 		}
 
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this).add("super", super.toString()).add("payloadLength", payloadLength).toString();
 	}
 
 }

@@ -6,6 +6,7 @@ import com.github.reload.message.Content;
 import com.github.reload.message.Header;
 import com.github.reload.message.NodeID;
 import com.github.reload.message.SecurityBlock;
+import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
 /**
@@ -51,4 +52,10 @@ public class Message {
 			return (T) a;
 		return null;
 	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this).add("attributes", attributes).add("header", header).add("content", content).add("secBlock", secBlock).toString();
+	}
+
 }

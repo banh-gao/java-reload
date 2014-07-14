@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.net.pipeline.encoders.Message;
+import com.google.common.base.Objects;
 
 /**
  * RELOAD message header
@@ -169,6 +170,7 @@ public class Header {
 
 	@Override
 	public String toString() {
-		return "ForwardingHeader [overlayHash=" + Codec.hexDump(overlayHash) + ", messageLength=" + getMessageLength() + ", headerLength=" + headerLength + ", payloadLength=" + payloadLength + ", ttl=" + ttl + ", transactionId=" + Codec.hexDump(transactionId) + ", viaList=" + viaList + ", destinationList=" + destinationList + ", isLastFragment=" + isLastFragment + ", fragmentOffset=" + fragmentOffset + "]";
+		return Objects.toStringHelper(this).add("isReloTokenValid", isReloTokenValid).add("transactionId", transactionId).add("isLastFragment", isLastFragment).add("fragmentOffset", fragmentOffset).add("maxResponseLength", maxResponseLength).add("configurationSequence", configurationSequence).add("overlayHash", overlayHash).add("version", version).add("ttl", ttl).add("viaList", viaList).add("destinationList", destinationList).add("forwardingOptions", forwardingOptions).add("headerLength", headerLength).add("payloadLength", payloadLength).toString();
 	}
+
 }
