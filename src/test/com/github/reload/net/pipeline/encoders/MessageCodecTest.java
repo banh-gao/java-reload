@@ -12,11 +12,11 @@ import com.github.reload.message.Header;
 import com.github.reload.message.SecurityBlock;
 import com.github.reload.message.Signature;
 import com.github.reload.message.content.PingRequest;
-import com.github.reload.net.pipeline.PipelineTester;
+import com.github.reload.net.NetworkTest;
 import com.github.reload.net.pipeline.handlers.ForwardingHandler;
 import com.github.reload.net.pipeline.handlers.SRLinkHandler;
 
-public class MessageCodecTest extends PipelineTester {
+public class MessageCodecTest extends NetworkTest {
 
 	@Test
 	public void testCodec() throws Exception {
