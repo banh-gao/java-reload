@@ -16,6 +16,7 @@ import com.github.reload.Context.Component;
 import com.github.reload.InitializationException;
 import com.github.reload.message.HashAlgorithm;
 import com.github.reload.message.NodeID;
+import com.github.reload.message.Signature;
 import com.github.reload.message.SignatureAlgorithm;
 import com.github.reload.message.SignerIdentity;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
@@ -237,12 +238,12 @@ public abstract class CryptoHelper implements Component {
 		return reloadCert;
 	}
 
-	public SSLEngine getClientSSLEngine(OverlayLinkType linkType) {
+	public SSLEngine getClientSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public SSLEngine getServerSSLEngine(OverlayLinkType linkType) {
+	public SSLEngine getServerSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
 		// TODO Auto-generated method stub
 		return null;
 	}
