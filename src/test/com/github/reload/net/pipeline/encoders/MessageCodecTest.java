@@ -27,9 +27,9 @@ public class MessageCodecTest extends PipelineTester {
 		codecs.add(new FramedMessageCodec());
 		codecs.add(new SRLinkHandler());
 		codecs.add(new HeadedMessageDecoder(conf));
-		codecs.add(new ForwardingHandler(null));
+		codecs.add(new ForwardingHandler());
 		codecs.add(new MessageEncoder(conf));
-		codecs.add(new MessageDecoder(conf));
+		codecs.add(new PayloadDecoder(conf));
 
 		MsgTester tester = initTester(codecs);
 
@@ -41,8 +41,8 @@ public class MessageCodecTest extends PipelineTester {
 
 		Message ans = (Message) tester.sendMessage(message);
 
-		System.out.println(message.hashCode());
-		System.out.println(ans.hashCode());
+		System.out.println(message.content);
+		System.out.println(ans.content);
 
 		tester.shutdown();
 	}
