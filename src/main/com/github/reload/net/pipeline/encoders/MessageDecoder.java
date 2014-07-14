@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
+import org.apache.log4j.Logger;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
 import com.github.reload.message.Content;
@@ -31,6 +32,7 @@ public class MessageDecoder extends MessageToMessageDecoder<HeadedMessage> {
 			Content content = contentCodec.decode(payload);
 			SecurityBlock secBlock = secBlockCodec.decode(payload);
 			out.add(new Message(header, content, secBlock));
+			Logger.getRootLogger().debug("Message #" + header.getTransactionId() + " decoded");
 		} finally {
 			payload.release();
 		}

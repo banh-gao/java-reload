@@ -6,7 +6,7 @@ import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.content.PingAnswer.PingAnswerCodec;
 
 @ReloadCodec(PingAnswerCodec.class)

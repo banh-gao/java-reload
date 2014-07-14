@@ -3,6 +3,7 @@ package com.github.reload.net.pipeline.encoders;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.apache.log4j.Logger;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
 import com.github.reload.message.Content;
@@ -36,8 +37,8 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 		hdrCodec.encode(msg.header, out);
 		contentCodec.encode(msg.content, out);
 		secBlockCodec.encode(msg.secBlock, out);
-
 		updateMessageLength(out, messageStart);
+		Logger.getRootLogger().debug("Message #" + msg.getHeader().getTransactionId() + " encoded");
 	}
 
 	private void updateMessageLength(ByteBuf buf, int messageStart) {

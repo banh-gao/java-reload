@@ -93,8 +93,8 @@ public class Context {
 	/**
 	 * Use this annotation to indicate a field where a component has to be
 	 * injected.
-	 * If the field type must be compatible with {@link Component}, otherwise a
-	 * {@link ClassCastException} will be thrown
+	 * The field type must be compatible with the {@link Component} type,
+	 * otherwise a {@link ClassCastException} will be thrown
 	 * 
 	 */
 	@Retention(RetentionPolicy.RUNTIME)

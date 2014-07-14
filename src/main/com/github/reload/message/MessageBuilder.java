@@ -1,6 +1,7 @@
 package com.github.reload.message;
 
 import java.security.cert.Certificate;
+import com.github.reload.Context;
 import com.github.reload.Context.Component;
 import com.github.reload.Context.CtxComponent;
 import com.github.reload.crypto.CryptoHelper;
@@ -19,7 +20,8 @@ public class MessageBuilder implements Component {
 	private CryptoHelper cryptoHelper;
 
 	@Override
-	public void compStart() {
+	public void compStart(Context context) {
+		// TODO Auto-generated method stub
 
 	}
 

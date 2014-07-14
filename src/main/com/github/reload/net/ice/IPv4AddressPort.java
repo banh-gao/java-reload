@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.net.ice.IPv4AddressPort.IPv4AddresPortCodec;
 
 @ReloadCodec(IPv4AddresPortCodec.class)

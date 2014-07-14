@@ -5,7 +5,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 
 @ReloadCodec(IPAddressPortCodec.class)
 public abstract class IPAddressPort extends InetSocketAddress {

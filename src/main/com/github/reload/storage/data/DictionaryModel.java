@@ -6,7 +6,7 @@ import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
 import com.github.reload.message.HashAlgorithm;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.storage.data.DictionaryValue.Key;
 
 /**

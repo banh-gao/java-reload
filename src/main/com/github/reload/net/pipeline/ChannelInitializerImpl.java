@@ -11,13 +11,13 @@ import com.github.reload.InitializationException;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.pipeline.encoders.FramedMessageCodecTest;
+import com.github.reload.net.pipeline.encoders.FramedMessageCodec;
 import com.github.reload.net.pipeline.encoders.HeadedMessageDecoder;
 import com.github.reload.net.pipeline.encoders.MessageDecoder;
 import com.github.reload.net.pipeline.encoders.MessageEncoder;
 import com.github.reload.net.pipeline.handlers.ForwardingHandler;
 import com.github.reload.net.pipeline.handlers.LinkHandler;
-import com.github.reload.net.pipeline.handlers.MessageDispatcherTest;
+import com.github.reload.net.pipeline.handlers.MessageDispatcher;
 import com.github.reload.net.pipeline.handlers.SRLinkHandler;
 
 /**
@@ -54,7 +54,7 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		addCryptoLayer(pipeline);
 
 		// IN/OUT: Codec for RELOAD framing message
-		pipeline.addLast(FRAME_CODEC, new FramedMessageCodecTest());
+		pipeline.addLast(FRAME_CODEC, new FramedMessageCodec());
 
 		// IN/OUT: Specific link handler to control link reliability
 		addLinkLayer(pipeline);
@@ -74,7 +74,7 @@ public class ChannelInitializerImpl extends ChannelInitializer<Channel> {
 		// OUT: Encoder for complete RELOAD message
 		pipeline.addLast(MSG_ENCODER, new MessageEncoder(conf));
 
-		MessageDispatcherTest msgReceiver = new MessageDispatcherTest(context.getMessageBus());
+		MessageDispatcher msgReceiver = new MessageDispatcher(context.getMessageBus());
 		// IN: Process incoming messages directed to this node
 		pipeline.addLast(MSG_HANDLER, msgReceiver);
 	}

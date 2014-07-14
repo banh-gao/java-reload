@@ -8,7 +8,7 @@ import com.github.reload.DataKind;
 import com.github.reload.message.Codec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.ResourceID;
 import com.github.reload.message.errors.InvalidMessageException;
 import com.github.reload.storage.net.FindRequest.FindRequestCodec;

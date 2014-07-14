@@ -6,7 +6,7 @@ import com.github.reload.message.Codec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
 import com.github.reload.message.NodeID;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.content.LeaveRequest.LeaveRequestCodec;
 
 @ReloadCodec(LeaveRequestCodec.class)

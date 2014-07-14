@@ -3,7 +3,7 @@ package com.github.reload.net.ice;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
 import java.util.List;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 
 @ReloadCodec(IceCandidateCodec.class)
 public abstract class IceCandidate {

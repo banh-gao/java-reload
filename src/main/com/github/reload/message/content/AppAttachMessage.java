@@ -3,9 +3,9 @@ package com.github.reload.message.content;
 import java.net.InetSocketAddress;
 import java.util.List;
 import com.github.reload.ApplicationID;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
-import com.github.reload.message.ReloadCodec;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.IceCandidate;
 

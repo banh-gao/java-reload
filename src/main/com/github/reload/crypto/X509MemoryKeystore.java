@@ -8,6 +8,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Set;
+import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import com.github.reload.ReloadOverlay;
 import com.github.reload.message.SignerIdentity;

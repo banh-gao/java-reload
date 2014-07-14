@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.util.List;
+import org.apache.log4j.Logger;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
 import com.github.reload.message.Header;
@@ -27,6 +28,7 @@ public class HeadedMessageDecoder extends ByteToMessageDecoder {
 			message.payload = in.slice();
 			in.retain();
 			out.add(message);
+			Logger.getRootLogger().debug("Message header #" + message.header.getTransactionId() + " decoded");
 		} finally {
 			in.clear();
 		}

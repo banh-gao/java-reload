@@ -9,6 +9,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.EnumSet;
 import com.github.reload.Configuration;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.GenericCertificate.GenericCertificateCodec;
 
 @ReloadCodec(GenericCertificateCodec.class)

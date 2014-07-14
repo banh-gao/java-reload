@@ -7,6 +7,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import com.github.reload.Configuration;
 import com.github.reload.message.CertHashSignerIdentityValue.CertHashSignerIdentityValueCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 
 @ReloadCodec(CertHashSignerIdentityValueCodec.class)
 public class CertHashSignerIdentityValue extends SignerIdentityValue {

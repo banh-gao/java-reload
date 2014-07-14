@@ -38,7 +38,6 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		FramedMessage frame = (FramedMessage) msg;
-
 		switch (frame.getType()) {
 			case DATA :
 				handleData((FramedData) frame);

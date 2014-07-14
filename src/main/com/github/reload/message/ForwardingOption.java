@@ -1,11 +1,10 @@
 package com.github.reload.message;
 
 import java.util.EnumSet;
+import com.github.reload.message.Codec.ReloadCodec;
 
 /**
  * Forwarding option contained in the message header
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 @ReloadCodec(ForwardingOptionCodec.class)

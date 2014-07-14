@@ -7,16 +7,14 @@ import java.util.Arrays;
 import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Content;
 import com.github.reload.message.ContentType;
-import com.github.reload.message.ReloadCodec;
 import com.github.reload.message.content.AttachMessage.AttachMessageCodec;
 import com.github.reload.net.ice.IceCandidate;
 
 /**
  * Common representation of attach requests and answers
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
 @ReloadCodec(AttachMessageCodec.class)

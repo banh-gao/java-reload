@@ -3,7 +3,7 @@ package com.github.reload.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.net.StatRequest.StatRequestCodec;

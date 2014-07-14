@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import com.github.reload.Configuration;
 import com.github.reload.message.Codec;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.Signature;
 import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.StoredData.StoredDataCodec;

@@ -1,6 +1,6 @@
 package com.github.reload.net.ice;
 
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.net.ice.RelayCandidate.RelayCandidateCodec;
 
 @ReloadCodec(RelayCandidateCodec.class)

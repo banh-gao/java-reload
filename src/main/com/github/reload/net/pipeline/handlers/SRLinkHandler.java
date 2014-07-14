@@ -71,7 +71,7 @@ public class SRLinkHandler extends LinkHandler {
 	}
 
 	private int computeReceivedMask(long lastSeqNum) {
-		BitSet rcvBitSet = new BitSet(0xffffffff);
+		BitSet rcvBitSet = new BitSet(LAST_RCV_PACKETS_BUF_SIZE);
 
 		long u_lastSeqNum = lastSeqNum;
 		u_lastSeqNum &= 0xff;
@@ -84,7 +84,7 @@ public class SRLinkHandler extends LinkHandler {
 		}
 
 		int rcv = 0;
-		for (int i = 0; i < 32; i++)
+		for (int i = 0; i < LAST_RCV_PACKETS_BUF_SIZE; i++)
 			if (rcvBitSet.get(i)) {
 				rcv |= (1 << i);
 			}

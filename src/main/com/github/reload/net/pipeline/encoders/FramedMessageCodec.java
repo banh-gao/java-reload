@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import io.netty.handler.codec.DecoderException;
 import java.util.List;
+import org.apache.log4j.Logger;
 import com.github.reload.message.Codec;
 import com.github.reload.message.Codec.CodecException;
 import com.github.reload.message.Codec.Field;
@@ -34,6 +35,7 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 				encodeAck((FramedAck) msg, out);
 				break;
 		}
+		Logger.getRootLogger().debug("Message frame #" + msg.getSequence() + " encoded");
 	}
 
 	@Override
@@ -60,6 +62,7 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 					break;
 			}
 			out.add(msg);
+			Logger.getRootLogger().debug("Message frame #" + msg.getSequence() + " decoded");
 		} finally {
 			in.clear();
 		}

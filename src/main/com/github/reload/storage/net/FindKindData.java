@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.message.Codec;
-import com.github.reload.message.ReloadCodec;
+import com.github.reload.message.Codec.ReloadCodec;
 import com.github.reload.message.ResourceID;
 import com.github.reload.storage.net.FindKindData.FindKindDataCodec;
 
