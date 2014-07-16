@@ -80,11 +80,10 @@ public class NodeID extends RoutableID {
 
 	public static class NodeIdCodec extends Codec<NodeID> {
 
-		private final int NODE_ID_LENGTH;
+		private static final int NODE_ID_LENGTH = 16;
 
 		public NodeIdCodec(Configuration conf) {
 			super(conf);
-			NODE_ID_LENGTH = conf.getOverlayAttribute(Configuration.NODE_ID_LENGTH);
 		}
 
 		@Override

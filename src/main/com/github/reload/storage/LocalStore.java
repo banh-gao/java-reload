@@ -17,21 +17,21 @@ import java.util.concurrent.ThreadFactory;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
+import com.github.reload.net.encoders.content.storage.FetchKindResponse;
+import com.github.reload.net.encoders.content.storage.FindAnswer;
+import com.github.reload.net.encoders.content.storage.FindKindData;
+import com.github.reload.net.encoders.content.storage.FindRequest;
+import com.github.reload.net.encoders.content.storage.StatKindResponse;
+import com.github.reload.net.encoders.content.storage.StoreKindData;
+import com.github.reload.net.encoders.content.storage.StoreKindResponse;
+import com.github.reload.net.encoders.content.storage.StoredData;
+import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
+import com.github.reload.net.encoders.content.storage.StoredMetadata;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.storage.StorageController.QueryType;
-import com.github.reload.storage.data.StoredData;
-import com.github.reload.storage.data.StoredDataSpecifier;
-import com.github.reload.storage.data.StoredMetadata;
 import com.github.reload.storage.errors.GenerationTooLowException;
 import com.github.reload.storage.errors.NotFoundException;
-import com.github.reload.storage.net.FetchKindResponse;
-import com.github.reload.storage.net.FindAnswer;
-import com.github.reload.storage.net.FindKindData;
-import com.github.reload.storage.net.FindRequest;
-import com.github.reload.storage.net.StatKindResponse;
-import com.github.reload.storage.net.StoreKindData;
-import com.github.reload.storage.net.StoreKindResponse;
 
 /**
  * The map of the data stored locally. It stores the data which the peer is

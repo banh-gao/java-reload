@@ -1,4 +1,4 @@
-package com.github.reload.storage.net;
+package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.util.LinkedHashSet;
@@ -10,8 +10,8 @@ import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.errors.InvalidMessageException;
+import com.github.reload.net.encoders.content.storage.FindRequest.FindRequestCodec;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.storage.net.FindRequest.FindRequestCodec;
 
 @ReloadCodec(FindRequestCodec.class)
 public class FindRequest extends Content {

@@ -1,4 +1,4 @@
-package com.github.reload.storage.net;
+package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -8,10 +8,9 @@ import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.storage.StatKindResponse.StatKindResponseCodec;
 import com.github.reload.storage.data.DataModel;
 import com.github.reload.storage.data.DataModel.DataValue;
-import com.github.reload.storage.data.StoredMetadata;
-import com.github.reload.storage.net.StatKindResponse.StatKindResponseCodec;
 
 /**
  * A response contained in a stat answer, contains all the data for a specific

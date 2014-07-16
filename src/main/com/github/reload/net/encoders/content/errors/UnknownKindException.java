@@ -1,4 +1,4 @@
-package com.github.reload.storage.errors;
+package com.github.reload.net.encoders.content.errors;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;

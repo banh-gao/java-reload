@@ -17,23 +17,23 @@ import com.github.reload.DataKind;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.errors.NetworkException;
+import com.github.reload.net.encoders.content.storage.FetchAnswer;
+import com.github.reload.net.encoders.content.storage.FetchKindResponse;
+import com.github.reload.net.encoders.content.storage.FetchRequest;
+import com.github.reload.net.encoders.content.storage.StoreAnswer;
+import com.github.reload.net.encoders.content.storage.StoreKindData;
+import com.github.reload.net.encoders.content.storage.StoreKindResponse;
+import com.github.reload.net.encoders.content.storage.StoreRequest;
+import com.github.reload.net.encoders.content.storage.StoredData;
+import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
+import com.github.reload.net.encoders.content.storage.ArrayModel.ArrayModelSpecifier;
+import com.github.reload.net.encoders.content.storage.DictionaryModel.DictionaryModelSpecifier;
+import com.github.reload.net.encoders.content.storage.DictionaryValue.Key;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.net.encoding.Message;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier;
-import com.github.reload.storage.data.DictionaryModel.DictionaryModelSpecifier;
-import com.github.reload.storage.data.DictionaryValue.Key;
-import com.github.reload.storage.data.StoredData;
-import com.github.reload.storage.data.StoredDataSpecifier;
-import com.github.reload.storage.net.FetchAnswer;
-import com.github.reload.storage.net.FetchKindResponse;
-import com.github.reload.storage.net.FetchRequest;
-import com.github.reload.storage.net.StoreAnswer;
-import com.github.reload.storage.net.StoreKindData;
-import com.github.reload.storage.net.StoreKindResponse;
-import com.github.reload.storage.net.StoreRequest;
 
 /**
  * Helps a peer to send storage requests into the overlay

@@ -1,4 +1,4 @@
-package com.github.reload.storage.data;
+package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -6,9 +6,13 @@ import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.storage.ArrayModel.ArrayModelSpecifier.ArrayRange;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.ArrayModel.ArrayModelSpecifier.ArrayRange;
+import com.github.reload.storage.data.DataModel;
+import com.github.reload.storage.data.DataModel.DataValueBuilder;
+import com.github.reload.storage.data.DataModel.Metadata;
+import com.github.reload.storage.data.DataModel.ModelSpecifier;
 
 /**
  * Factory class used to create objects specialized for the array data model

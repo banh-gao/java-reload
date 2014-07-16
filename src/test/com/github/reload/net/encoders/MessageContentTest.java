@@ -36,7 +36,6 @@ import com.github.reload.net.encoders.content.RouteQueryRequest;
 import com.github.reload.net.encoders.content.UpdateAnswer;
 import com.github.reload.net.encoders.content.UpdateRequest;
 import com.github.reload.net.encoders.header.Header;
-import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
@@ -53,7 +52,6 @@ public class MessageContentTest extends NetworkTest {
 	@BeforeClass
 	public static void initPipeline() throws Exception {
 		Configuration conf = new Configuration();
-		conf.setOverlayAttribute(Configuration.NODE_ID_LENGTH, 4);
 		MessageBus messageBus = new MessageBus();
 		ReloadStackInitializer initializer = new ReloadStackInitializer(OverlayLinkType.TLS_TCP_FH_NO_ICE, conf, messageBus);
 
@@ -125,8 +123,7 @@ public class MessageContentTest extends NetworkTest {
 
 	@Test
 	public void testJoinRequest() throws Exception {
-		JoinRequest content = new JoinRequest(NodeID.valueOf(new byte[]{1, 2,
-																		3, 4}), "JOINRQDATA".getBytes());
+		JoinRequest content = new JoinRequest(TEST_NODEID, "JOINRQDATA".getBytes());
 		JoinRequest echo = sendContent(content);
 
 		Assert.assertEquals(content.getJoiningNode(), echo.getJoiningNode());
@@ -214,9 +211,7 @@ public class MessageContentTest extends NetworkTest {
 
 	@Test
 	public void testLeaveRequest() throws Exception {
-		LeaveRequest content = new LeaveRequest(NodeID.valueOf(new byte[]{1, 2,
-																			3,
-																			4,}), "LEAVEREQ".getBytes());
+		LeaveRequest content = new LeaveRequest(TEST_NODEID, "LEAVEREQ".getBytes());
 		LeaveRequest echo = sendContent(content);
 
 		Assert.assertEquals(content.getLeavingNode(), echo.getLeavingNode());

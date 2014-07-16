@@ -8,7 +8,6 @@ import com.github.reload.storage.errors.DataTooOldException;
 import com.github.reload.storage.errors.ForbittenException;
 import com.github.reload.storage.errors.GenerationTooLowException;
 import com.github.reload.storage.errors.NotFoundException;
-import com.github.reload.storage.errors.UnknownKindException;
 
 public enum ErrorType {
 	FORBITTEN((short) 2) {

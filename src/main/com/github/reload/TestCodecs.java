@@ -27,6 +27,8 @@ import com.github.reload.net.encoders.content.NumResourcesProbeInformation;
 import com.github.reload.net.encoders.content.ProbeAnswer;
 import com.github.reload.net.encoders.content.ProbeRequest;
 import com.github.reload.net.encoders.content.ProbeRequest.ProbeInformationType;
+import com.github.reload.net.encoders.content.storage.StoreAnswer;
+import com.github.reload.net.encoders.content.storage.StoreRequest;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
@@ -39,8 +41,6 @@ import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateTyp
 import com.github.reload.net.encoding.Message;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.net.stack.ChannelInitializerTest;
-import com.github.reload.storage.net.StoreAnswer;
-import com.github.reload.storage.net.StoreRequest;
 
 public class TestCodecs {
 

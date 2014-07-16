@@ -1,14 +1,15 @@
-package com.github.reload.storage.data;
+package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.storage.StoredMetadata.StoredMetadataCodec;
 import com.github.reload.net.encoders.secBlock.Signature;
+import com.github.reload.storage.data.DataModel;
 import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.DataModel.Metadata;
-import com.github.reload.storage.data.StoredMetadata.StoredMetadataCodec;
 
 @ReloadCodec(StoredMetadataCodec.class)
 public class StoredMetadata extends StoredData {

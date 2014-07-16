@@ -7,15 +7,15 @@ import java.util.Date;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.net.encoders.content.storage.ArrayModel;
+import com.github.reload.net.encoders.content.storage.ArrayValue;
+import com.github.reload.net.encoders.content.storage.SingleValue;
+import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.storage.data.ArrayModel;
-import com.github.reload.storage.data.ArrayValue;
-import com.github.reload.storage.data.SingleValue;
-import com.github.reload.storage.data.StoredData;
 
 /**
  * Helps to generate a signed data

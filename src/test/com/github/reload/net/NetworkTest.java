@@ -18,10 +18,16 @@ import java.net.InetAddress;
 import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import com.github.reload.net.encoders.header.NodeID;
 
 public class NetworkTest {
 
 	public static int TEST_PORT = 6084;
+	public static NodeID TEST_NODEID = NodeID.valueOf(new byte[]{1, 2, 3, 4, 5,
+																	6, 7, 8, 9,
+																	10, 11, 12,
+																	13, 14, 15,
+																	16});
 
 	private static EventLoopGroup workerGroup = new NioEventLoopGroup();
 

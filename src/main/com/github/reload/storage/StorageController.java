@@ -10,19 +10,19 @@ import com.github.reload.Context.Component;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.storage.FetchAnswer;
+import com.github.reload.net.encoders.content.storage.FetchKindResponse;
+import com.github.reload.net.encoders.content.storage.FetchRequest;
+import com.github.reload.net.encoders.content.storage.FindAnswer;
+import com.github.reload.net.encoders.content.storage.FindRequest;
+import com.github.reload.net.encoders.content.storage.StatAnswer;
+import com.github.reload.net.encoders.content.storage.StatKindResponse;
+import com.github.reload.net.encoders.content.storage.StatRequest;
+import com.github.reload.net.encoders.content.storage.StoreAnswer;
+import com.github.reload.net.encoders.content.storage.StoreKindResponse;
+import com.github.reload.net.encoders.content.storage.StoreRequest;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.storage.errors.NotFoundException;
-import com.github.reload.storage.net.FetchAnswer;
-import com.github.reload.storage.net.FetchKindResponse;
-import com.github.reload.storage.net.FetchRequest;
-import com.github.reload.storage.net.FindAnswer;
-import com.github.reload.storage.net.FindRequest;
-import com.github.reload.storage.net.StatAnswer;
-import com.github.reload.storage.net.StatKindResponse;
-import com.github.reload.storage.net.StatRequest;
-import com.github.reload.storage.net.StoreAnswer;
-import com.github.reload.storage.net.StoreKindResponse;
-import com.github.reload.storage.net.StoreRequest;
 
 /**
  * Elaborate the storage messages and is responsible for local storage

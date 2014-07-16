@@ -1,4 +1,4 @@
-package com.github.reload.storage.net;
+package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -8,9 +8,8 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.storage.FetchRequest.FetchRequestCodec;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.storage.data.StoredDataSpecifier;
-import com.github.reload.storage.net.FetchRequest.FetchRequestCodec;
 
 @ReloadCodec(FetchRequestCodec.class)
 public class FetchRequest extends Content {

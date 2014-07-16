@@ -6,9 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
+import com.github.reload.net.encoders.content.errors.UnknownKindException;
+import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
 import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.storage.data.StoredDataSpecifier;
-import com.github.reload.storage.errors.UnknownKindException;
 
 /**
  * A RELOAD Uniform Resource Identifier defined as:
@@ -224,18 +224,18 @@ public class ReloadUri {
 	/**
 	 * @return the URI representation of this ReloadURI
 	 */
-	public URI toURI(Configuration conf) {
+	public URI toURI() {
 		try {
-			String specPath = (specifier != null) ? '/' + getHexSpecifier(conf) : null;
-			return new URI(SCHEME, getHexDestList(conf), overlayName, -1, specPath, null, null);
+			String specPath = (specifier != null) ? '/' + getHexSpecifier() : null;
+			return new URI(SCHEME, getHexDestList(), overlayName, -1, specPath, null, null);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private String getHexDestList(Configuration conf) {
+	private String getHexDestList() {
 		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(DEST_BUF_SIZE);
-		Codec<DestinationList> codec = Codec.getCodec(DestinationList.class, conf);
+		Codec<DestinationList> codec = Codec.getCodec(DestinationList.class, null);
 		try {
 			codec.encode(destinationList, buf);
 		} catch (CodecException e) {
@@ -244,13 +244,13 @@ public class ReloadUri {
 		return byteToHex(buf);
 	}
 
-	private String getHexSpecifier(Configuration conf) {
+	private String getHexSpecifier() {
 		if (specifier == null)
 			return "";
 
 		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(EncUtils.maxUnsignedInt(DataSpecifier.DATA_SPEC_LENGTH_FIELD));
 
-		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, conf);
+		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, null);
 		codec.encode(specifier, buf);
 
 		return byteToHex(buf);

@@ -25,7 +25,7 @@ public abstract class FramedMessage {
 	};
 
 	// Maximum sequence number
-	public static final long SEQ_MAX_VALUE = 0xffffffff;
+	public static final long SEQ_MAX_VALUE = 0xffffffffl;
 
 	public abstract long getSequence();
 

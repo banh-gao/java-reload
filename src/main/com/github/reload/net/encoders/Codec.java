@@ -9,7 +9,6 @@ import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.Map;
 import com.github.reload.Configuration;
-import com.github.reload.Context;
 import com.github.reload.net.encoders.content.errors.ErrorRespose;
 import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.google.common.collect.Maps;
@@ -73,6 +72,18 @@ public abstract class Codec<T> {
 
 	private static final Object[] NO_PARAMS = new Object[0];
 
+	/**
+	 * Construct new codec without configuration
+	 */
+	public Codec() {
+		conf = null;
+	}
+
+	/**
+	 * Construct new codec with the given configuration
+	 * 
+	 * @param conf
+	 */
 	public Codec(Configuration conf) {
 		if (conf == null)
 			throw new NullPointerException();
@@ -106,25 +117,31 @@ public abstract class Codec<T> {
 	 * Get an instance of the codec associated with the given class. The given
 	 * class must be annotated with the {@link ReloadCodec} annotation to
 	 * declare the codec class.
-	 * The new codec will be initialized with the given {@link Context}.
+	 * The new codec will be initialized with the given {@link Configuration}.
 	 * 
 	 * @param clazz
 	 *            the class that the codec is associated with
-	 * @param ctx
-	 *            the context used to initialize the codec
+	 * @param conf
+	 *            the configuration to be used to initialize to the codec or
+	 *            null if the codec doesn't need one
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Codec<T> getCodec(Class<T> clazz, Configuration conf) {
-		if (conf == null)
-			throw new NullPointerException();
 		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
 		if (codecAnn == null)
 			throw new IllegalStateException("No codec associated with " + clazz.toString());
 
+		Class<? extends Codec<T>> codecClass = (Class<? extends Codec<T>>) codecAnn.value();
+
 		try {
-			Constructor<? extends Codec<?>> codecConstr = codecAnn.value().getConstructor(Configuration.class);
-			return (Codec<T>) codecConstr.newInstance(conf);
+			if (conf == null) {
+				Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor();
+				return (Codec<T>) codecConstr.newInstance();
+			} else {
+				Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(Configuration.class);
+				return (Codec<T>) codecConstr.newInstance(conf);
+			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);
 		}

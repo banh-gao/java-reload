@@ -1,4 +1,4 @@
-package com.github.reload.storage.net;
+package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
