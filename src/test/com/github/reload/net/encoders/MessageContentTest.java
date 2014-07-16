@@ -1,14 +1,9 @@
 package com.github.reload.net.encoders;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -16,7 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.reload.ApplicationID;
 import com.github.reload.Configuration;
-import com.github.reload.MessageBus;
+import com.github.reload.net.MessageBus;
 import com.github.reload.net.NetworkTest;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.AttachMessage;
@@ -41,28 +36,24 @@ import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.stack.ReloadStackInitializer;
+import com.github.reload.net.stack.ReloadStack;
+import com.github.reload.net.stack.ReloadStackBuilder;
 import com.google.common.eventbus.Subscribe;
 
 public class MessageContentTest extends NetworkTest {
 
-	private static Channel ch;
+	private static ReloadStack stack;
 	private static Content answer;
 
 	@BeforeClass
 	public static void initPipeline() throws Exception {
 		Configuration conf = new Configuration();
 		MessageBus messageBus = new MessageBus();
-		ReloadStackInitializer initializer = new ReloadStackInitializer(OverlayLinkType.TLS_TCP_FH_NO_ICE, conf, messageBus);
+		ReloadStackBuilder b = new ReloadStackBuilder(conf, messageBus);
+		b.setLinkType(OverlayLinkType.TLS_TCP_FH_NO_ICE);
 
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		Bootstrap b = new Bootstrap();
-		b.group(workerGroup);
-		b.channel(NioSocketChannel.class);
-		b.option(ChannelOption.SO_KEEPALIVE, true);
-		b.handler(initializer);
-
-		ch = b.connect(InetAddress.getLocalHost(), TEST_PORT).sync().channel();
+		stack = b.buildStack();
+		stack.connect(new InetSocketAddress(InetAddress.getLocalHost(), TEST_PORT)).sync();
 
 		messageBus.register(new TestListener());
 	}
@@ -228,7 +219,7 @@ public class MessageContentTest extends NetworkTest {
 
 	@AfterClass
 	public static void deinitPipeline() throws InterruptedException {
-		ch.close();
+		stack.shutdown();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -237,7 +228,8 @@ public class MessageContentTest extends NetworkTest {
 		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
 
 		Message message = new Message(h, content, s);
-		ChannelFuture f = ch.writeAndFlush(message);
+		ChannelFuture f = stack.write(message);
+		stack.flush();
 
 		f.await(50);
 
@@ -246,8 +238,8 @@ public class MessageContentTest extends NetworkTest {
 			throw new Exception(f.cause());
 		}
 
-		synchronized (ch) {
-			ch.wait(50);
+		synchronized (stack) {
+			stack.wait(50);
 		}
 
 		Assert.assertNotNull(answer);
@@ -261,8 +253,8 @@ public class MessageContentTest extends NetworkTest {
 		public void messageReceived(Message message) {
 			answer = message.getContent();
 
-			synchronized (ch) {
-				ch.notify();
+			synchronized (stack) {
+				stack.notify();
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package com.github.reload;
+package com.github.reload.net;
 
 import com.google.common.eventbus.EventBus;
 

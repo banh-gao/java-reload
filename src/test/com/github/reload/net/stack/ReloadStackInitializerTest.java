@@ -1,16 +1,11 @@
 package com.github.reload.net.stack;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import org.junit.Test;
 import com.github.reload.Configuration;
-import com.github.reload.MessageBus;
+import com.github.reload.net.MessageBus;
 import com.github.reload.net.NetworkTest;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.Content;
@@ -29,16 +24,11 @@ public class ReloadStackInitializerTest extends NetworkTest {
 		Configuration conf = new Configuration();
 		conf.setOverlayAttribute(Configuration.NODE_ID_LENGTH, 4);
 		MessageBus messageBus = new MessageBus();
-		ReloadStackInitializer initializer = new ReloadStackInitializer(OverlayLinkType.TLS_TCP_FH_NO_ICE, conf, messageBus);
+		ReloadStackBuilder b = new ReloadStackBuilder(conf, messageBus);
+		b.setLinkType(OverlayLinkType.TLS_TCP_FH_NO_ICE);
 
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		Bootstrap b = new Bootstrap();
-		b.group(workerGroup);
-		b.channel(NioSocketChannel.class);
-		b.option(ChannelOption.SO_KEEPALIVE, true);
-		b.handler(initializer);
-
-		Channel ch = b.connect(InetAddress.getLocalHost(), TEST_PORT).sync().channel();
+		ReloadStack stack = b.buildStack();
+		stack.connect(new InetSocketAddress(InetAddress.getLocalHost(), TEST_PORT)).sync();
 
 		messageBus.register(new TestListener());
 
@@ -48,7 +38,8 @@ public class ReloadStackInitializerTest extends NetworkTest {
 
 		Message message = new Message(h, content, s);
 
-		ch.writeAndFlush(message);
+		stack.write(message);
+		stack.flush();
 
 		Thread.sleep(1000);
 	}

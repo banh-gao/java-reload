@@ -7,7 +7,6 @@ import com.github.reload.DataKind;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.StoredDataSpecifier.StoredDataSpecifierCodec;
-import com.github.reload.storage.data.DataModel;
 import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.DataModel.ModelSpecifier;
 
@@ -45,7 +44,7 @@ public class StoredDataSpecifier {
 
 		private final Codec<DataKind> kindCodec;
 
-		public StoredDataSpecifierCodec(Configuration context) {
+		public StoredDataSpecifierCodec(Configuration conf) {
 			super(conf);
 			kindCodec = getCodec(DataKind.class);
 		}

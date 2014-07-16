@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.MessageBus;
+import com.github.reload.net.MessageBus;
 import com.github.reload.net.encoders.Message;
 
 /**
