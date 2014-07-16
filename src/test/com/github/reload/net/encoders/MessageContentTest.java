@@ -18,7 +18,6 @@ import com.github.reload.ApplicationID;
 import com.github.reload.Configuration;
 import com.github.reload.MessageBus;
 import com.github.reload.net.NetworkTest;
-import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.Content;
@@ -31,11 +30,11 @@ import com.github.reload.net.encoders.content.PingRequest;
 import com.github.reload.net.encoders.content.ProbeAnswer;
 import com.github.reload.net.encoders.content.ProbeInformation;
 import com.github.reload.net.encoders.content.ProbeRequest;
+import com.github.reload.net.encoders.content.ProbeRequest.ProbeInformationType;
 import com.github.reload.net.encoders.content.RouteQueryAnswer;
 import com.github.reload.net.encoders.content.RouteQueryRequest;
 import com.github.reload.net.encoders.content.UpdateAnswer;
 import com.github.reload.net.encoders.content.UpdateRequest;
-import com.github.reload.net.encoders.content.ProbeRequest.ProbeInformationType;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -245,7 +244,7 @@ public class MessageContentTest extends NetworkTest {
 		Message message = new Message(h, content, s);
 		ChannelFuture f = ch.writeAndFlush(message);
 
-		f.await(100);
+		f.await(50);
 
 		if (f.cause() != null) {
 			System.out.println(f.cause());
@@ -253,7 +252,7 @@ public class MessageContentTest extends NetworkTest {
 		}
 
 		synchronized (ch) {
-			ch.wait(100);
+			ch.wait(50);
 		}
 
 		Assert.assertNotNull(answer);

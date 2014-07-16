@@ -20,7 +20,6 @@ import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.stack.ReloadStackInitializer;
 import com.google.common.eventbus.Subscribe;
 
 public class ReloadStackInitializerTest extends NetworkTest {
@@ -28,6 +27,7 @@ public class ReloadStackInitializerTest extends NetworkTest {
 	@Test
 	public void test() throws Exception {
 		Configuration conf = new Configuration();
+		conf.setOverlayAttribute(Configuration.NODE_ID_LENGTH, 4);
 		MessageBus messageBus = new MessageBus();
 		ReloadStackInitializer initializer = new ReloadStackInitializer(OverlayLinkType.TLS_TCP_FH_NO_ICE, conf, messageBus);
 
