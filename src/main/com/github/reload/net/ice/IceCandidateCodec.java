@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.util.ArrayList;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
+import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.ice.IceCandidate.CandidateType;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 

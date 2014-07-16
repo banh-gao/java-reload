@@ -11,7 +11,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import com.github.reload.ReloadOverlay;
-import com.github.reload.message.SignerIdentity;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 
 /**
  * Memory keystore for x.509 certificates

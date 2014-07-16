@@ -1,7 +1,7 @@
 package com.github.reload.storage.errors;
 
-import com.github.reload.message.errors.ErrorRespose;
-import com.github.reload.message.errors.ErrorType;
+import com.github.reload.net.encoders.content.errors.ErrorRespose;
+import com.github.reload.net.encoders.content.errors.ErrorType;
 
 /**
  * Indicates that the data exceeds the maximum allowed size

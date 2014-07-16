@@ -7,7 +7,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Set;
 import com.github.reload.Configuration;
-import com.github.reload.message.NodeID;
+import com.github.reload.net.encoders.header.NodeID;
 
 /**
  * Keystore that stored initialization values and running crypto material into

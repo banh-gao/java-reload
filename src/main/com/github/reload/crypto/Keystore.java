@@ -6,8 +6,8 @@ import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Set;
 import com.github.reload.Configuration;
-import com.github.reload.message.NodeID;
-import com.github.reload.message.SignerIdentity;
+import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 
 /**
  * Defines the methods to store and retrieve cryptographic material needed for

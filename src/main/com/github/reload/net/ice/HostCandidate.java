@@ -3,8 +3,8 @@ package com.github.reload.net.ice;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.ice.HostCandidate.HostCandidateCodec;
 
 @ReloadCodec(HostCandidateCodec.class)
@@ -33,11 +33,11 @@ public class HostCandidate extends IceCandidate {
 		}
 
 		@Override
-		public void encode(HostCandidate obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(HostCandidate obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 		}
 
 		@Override
-		public HostCandidate decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public HostCandidate decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			return new HostCandidate();
 		}
 	}

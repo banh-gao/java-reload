@@ -10,7 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import java.net.InetSocketAddress;
 import com.github.reload.Context;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.pipeline.ChannelInitializerTest;
+import com.github.reload.net.stack.ChannelInitializerTest;
 import com.google.common.util.concurrent.AbstractIdleService;
 
 public class ReloadServer extends AbstractIdleService {

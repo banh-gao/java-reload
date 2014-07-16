@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.net.StoreKindData.StoreKindDataCodec;
 
@@ -52,7 +52,7 @@ public class StoreKindData {
 		}
 
 		@Override
-		public void encode(StoreKindData obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(StoreKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			kindCodec.encode(obj.kind, buf);
 
 			buf.writeBytes(obj.generationCounter.toByteArray());
@@ -67,7 +67,7 @@ public class StoreKindData {
 		}
 
 		@Override
-		public StoreKindData decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public StoreKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
 			byte[] genCounterData = new byte[8];
@@ -78,7 +78,7 @@ public class StoreKindData {
 			return new StoreKindData(kind, generationCounter, data);
 		}
 
-		private List<StoredData> decodeStoredDataList(DataKind kind, ByteBuf buf) throws com.github.reload.message.Codec.CodecException {
+		private List<StoredData> decodeStoredDataList(DataKind kind, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			ByteBuf dataFld = readField(buf, VALUES_LENGTH_FIELD);
 
 			List<StoredData> data = new ArrayList<StoredData>();

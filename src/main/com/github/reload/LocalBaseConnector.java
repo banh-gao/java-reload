@@ -20,8 +20,8 @@ import javax.naming.ConfigurationException;
 import com.github.reload.Context.CtxComponent;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.message.GenericCertificate.CertificateType;
-import com.github.reload.message.SignatureAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 
 public abstract class LocalBaseConnector extends ReloadConnector {
 

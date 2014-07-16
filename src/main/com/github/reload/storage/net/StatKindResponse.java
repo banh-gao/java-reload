@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.storage.data.DataModel;
 import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.StoredMetadata;
@@ -57,13 +57,13 @@ public class StatKindResponse {
 		}
 
 		@Override
-		public void encode(StatKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(StatKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			dataKindCodec.encode(obj.kind, buf);
 			buf.writeBytes(obj.generation.toByteArray());
 			encodeData(obj, buf);
 		}
 
-		private void encodeData(StatKindResponse obj, ByteBuf buf) throws com.github.reload.message.Codec.CodecException {
+		private void encodeData(StatKindResponse obj, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field dataFld = allocateField(buf, VALUES_LENGTH_FIELD);
 			for (StoredMetadata d : obj.values) {
 				storedDataCodec.encode(d, buf);
@@ -72,7 +72,7 @@ public class StatKindResponse {
 		}
 
 		@Override
-		public StatKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public StatKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = dataKindCodec.decode(buf);
 
 			byte[] genData = new byte[8];

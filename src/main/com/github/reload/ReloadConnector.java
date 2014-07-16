@@ -2,9 +2,9 @@ package com.github.reload;
 
 import java.net.InetSocketAddress;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.message.GenericCertificate.CertificateType;
-import com.github.reload.message.NodeID;
-import com.github.reload.message.errors.NetworkException;
+import com.github.reload.net.encoders.content.errors.NetworkException;
+import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.routing.TopologyPlugin;
 
 /**

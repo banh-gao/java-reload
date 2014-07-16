@@ -3,11 +3,11 @@ package com.github.reload.net.connections;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
-import com.github.reload.message.NodeID;
+import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoding.HeadedMessage;
 import com.github.reload.net.encoding.Message;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.pipeline.handlers.ForwardingHandler;
+import com.github.reload.net.stack.ForwardingHandler;
 
 /**
  * A connection to a neighbor node

@@ -22,7 +22,7 @@ import sun.security.x509.GeneralName;
 import sun.security.x509.GeneralNames;
 import com.github.reload.ReloadOverlay;
 import com.github.reload.ReloadUri;
-import com.github.reload.message.NodeID;
+import com.github.reload.net.encoders.header.NodeID;
 
 public class X509CertificateParser implements ReloadCertificateParser {
 

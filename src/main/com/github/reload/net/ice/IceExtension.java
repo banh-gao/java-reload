@@ -2,10 +2,11 @@ package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.ice.IceExtension.IceExtensionCodec;
 
-@ReloadCodec(IceCandidateCodec.class)
+@ReloadCodec(IceExtensionCodec.class)
 public class IceExtension {
 
 	private final byte[] name;
@@ -27,7 +28,7 @@ public class IceExtension {
 		}
 
 		@Override
-		public void encode(IceExtension obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(IceExtension obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field nameLenFld = allocateField(buf, NAME_LENGTH_FIELD);
 			buf.writeBytes(obj.name);
 			nameLenFld.updateDataLength();
@@ -38,7 +39,7 @@ public class IceExtension {
 		}
 
 		@Override
-		public IceExtension decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public IceExtension decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			ByteBuf nameBuf = readField(buf, NAME_LENGTH_FIELD);
 			byte[] name = new byte[nameBuf.readableBytes()];
 			nameBuf.readBytes(name);

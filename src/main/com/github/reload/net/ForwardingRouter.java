@@ -1,9 +1,9 @@
 package com.github.reload.net;
 
-import com.github.reload.message.NodeID;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.pipeline.encoders.HeadedMessage;
+import com.github.reload.net.encoders.HeadedMessage;
+import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
 

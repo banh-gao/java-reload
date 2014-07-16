@@ -5,8 +5,11 @@ import io.netty.handler.codec.DecoderException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.ice.IPv6AddressPort.IPv6AddressPortCodec;
 
+@ReloadCodec(IPv6AddressPortCodec.class)
 public class IPv6AddressPort extends IPAddressPort {
 
 	public IPv6AddressPort(InetAddress addr, int port) {
@@ -27,13 +30,13 @@ public class IPv6AddressPort extends IPAddressPort {
 		}
 
 		@Override
-		public void encode(IPv6AddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(IPv6AddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			buf.writeBytes(obj.getAddress().getAddress());
 			buf.writeShort(obj.getPort());
 		}
 
 		@Override
-		public IPv6AddressPort decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public IPv6AddressPort decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			return new IPv6AddressPort(parseAddr(buf), parsePort(buf));
 		}
 

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
-import com.github.reload.message.Codec;
-import com.github.reload.message.NodeID;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.header.NodeID;
 
 public class StoreKindResponse {
 
@@ -77,7 +77,7 @@ public class StoreKindResponse {
 			return new StoreKindResponse(kind, genCounter, replicas);
 		}
 
-		private List<NodeID> decodeReplicas(ByteBuf buf) throws com.github.reload.message.Codec.CodecException {
+		private List<NodeID> decodeReplicas(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			ByteBuf replicasFld = readField(buf, REPLICAS_LENGTH_FIELD);
 
 			List<NodeID> replicas = new ArrayList<NodeID>();

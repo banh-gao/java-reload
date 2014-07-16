@@ -43,12 +43,12 @@ import sun.security.x509.GeneralNames;
 import sun.security.x509.RDN;
 import sun.security.x509.X500Name;
 import com.github.reload.ReloadUri;
-import com.github.reload.message.DestinationList;
-import com.github.reload.message.HashAlgorithm;
-import com.github.reload.message.NodeID;
-import com.github.reload.message.SecurityBlock;
-import com.github.reload.message.SignatureAlgorithm;
-import com.github.reload.message.SignerIdentity;
+import com.github.reload.net.encoders.header.DestinationList;
+import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.SecurityBlock;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 
 /**
  * Utility class for PKI infrastructure functionalities

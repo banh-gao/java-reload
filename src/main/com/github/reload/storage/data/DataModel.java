@@ -2,7 +2,7 @@ package com.github.reload.storage.data;
 
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.message.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.storage.data.DataModel.DataValue;
 
 public abstract class DataModel<T extends DataValue> {

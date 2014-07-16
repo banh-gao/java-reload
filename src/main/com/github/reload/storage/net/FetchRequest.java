@@ -4,11 +4,11 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Content;
-import com.github.reload.message.ContentType;
-import com.github.reload.message.Codec.ReloadCodec;
-import com.github.reload.message.ResourceID;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.Content;
+import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.net.FetchRequest.FetchRequestCodec;
 
@@ -55,7 +55,7 @@ public class FetchRequest extends Content {
 			encodeSpecifiers(obj, buf);
 		}
 
-		private void encodeSpecifiers(FetchRequest obj, ByteBuf buf) throws com.github.reload.message.Codec.CodecException {
+		private void encodeSpecifiers(FetchRequest obj, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, SPECIFIERS_LENGTH_FIELD);
 
 			for (StoredDataSpecifier s : obj.specifiers) {
@@ -72,7 +72,7 @@ public class FetchRequest extends Content {
 			return new FetchRequest(resourceId, specifiers);
 		}
 
-		private List<StoredDataSpecifier> decodeSpecifiers(ByteBuf buf) throws com.github.reload.message.Codec.CodecException {
+		private List<StoredDataSpecifier> decodeSpecifiers(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			List<StoredDataSpecifier> out = new ArrayList<StoredDataSpecifier>();
 
 			ByteBuf specifiersData = readField(buf, SPECIFIERS_LENGTH_FIELD);

@@ -7,9 +7,9 @@ import com.github.reload.Configuration;
 import com.github.reload.ReloadOverlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.message.HashAlgorithm;
-import com.github.reload.message.ResourceID;
-import com.github.reload.message.SignerIdentity;
+import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.storage.data.StoredData;
 
 /**

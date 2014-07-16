@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import com.github.reload.message.NodeID;
+import com.github.reload.net.encoders.header.NodeID;
 
 /**
  * A wrapper class that provides access to RELOAD values in certificates

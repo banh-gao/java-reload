@@ -1,7 +1,7 @@
 package com.github.reload.routing;
 
-import com.github.reload.message.Header;
-import com.github.reload.message.OpaqueID;
+import com.github.reload.net.encoders.header.Header;
+import com.github.reload.net.encoders.header.OpaqueID;
 
 /**
  * Compress and decompress header destination lists by replacing it with opaque

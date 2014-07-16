@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import javax.naming.ConfigurationException;
-import com.github.reload.message.SecurityBlock;
+import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.storage.data.ArrayValue;
 import com.github.reload.storage.data.DataModel;
 import com.github.reload.storage.data.DataModel.DataValue;

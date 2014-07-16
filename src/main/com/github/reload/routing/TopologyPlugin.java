@@ -5,10 +5,10 @@ import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.Context.Component;
 import com.github.reload.InitializationException;
-import com.github.reload.message.HashAlgorithm;
-import com.github.reload.message.NodeID;
-import com.github.reload.message.ResourceID;
-import com.github.reload.message.RoutableID;
+import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.storage.net.StoreKindData;
 
 /**

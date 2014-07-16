@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.naming.ConfigurationException;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
-import com.github.reload.message.ResourceID;
-import com.github.reload.message.SignerIdentity;
+import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.storage.data.StoredData;
 import com.github.reload.storage.errors.ForbittenException;
 

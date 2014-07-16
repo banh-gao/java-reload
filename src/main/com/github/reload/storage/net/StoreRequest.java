@@ -4,11 +4,11 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Content;
-import com.github.reload.message.ContentType;
-import com.github.reload.message.Codec.ReloadCodec;
-import com.github.reload.message.ResourceID;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.Content;
+import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.storage.net.StoreRequest.StoreRequestCodec;
 
 @ReloadCodec(StoreRequestCodec.class)
@@ -55,7 +55,7 @@ public class StoreRequest extends Content {
 		}
 
 		@Override
-		public void encode(StoreRequest obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(StoreRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			resIdCodec.encode(obj.resourceId, buf);
 
 			buf.writeByte(obj.replicaNumber);
@@ -70,14 +70,14 @@ public class StoreRequest extends Content {
 		}
 
 		@Override
-		public StoreRequest decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public StoreRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			ResourceID resId = resIdCodec.decode(buf);
 			short replicaNumber = buf.readUnsignedByte();
 			List<StoreKindData> kindData = decodeKindDataList(buf);
 			return new StoreRequest(resId, replicaNumber, kindData);
 		}
 
-		private List<StoreKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.message.Codec.CodecException {
+		private List<StoreKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			List<StoreKindData> out = new ArrayList<StoreKindData>();
 
 			ByteBuf kindData = readField(buf, STOREDKINDDATA_LENGTH_FIELD);

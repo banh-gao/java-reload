@@ -5,8 +5,8 @@ import io.netty.handler.codec.DecoderException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.ice.IPv4AddressPort.IPv4AddresPortCodec;
 
 @ReloadCodec(IPv4AddresPortCodec.class)
@@ -30,13 +30,13 @@ public class IPv4AddressPort extends IPAddressPort {
 		}
 
 		@Override
-		public void encode(IPv4AddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(IPv4AddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			buf.writeBytes(obj.getAddress().getAddress());
 			buf.writeShort(obj.getPort());
 		}
 
 		@Override
-		public IPv4AddressPort decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public IPv4AddressPort decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			return new IPv4AddressPort(decodeAddr(buf), decodePort(buf));
 		}
 

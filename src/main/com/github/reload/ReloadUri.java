@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import java.net.URI;
 import java.net.URISyntaxException;
-import com.github.reload.message.Codec;
-import com.github.reload.message.DestinationList;
-import com.github.reload.message.Codec.CodecException;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.CodecException;
+import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.storage.data.StoredDataSpecifier;
 import com.github.reload.storage.errors.UnknownKindException;
 

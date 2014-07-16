@@ -3,8 +3,8 @@ package com.github.reload.net.ice;
 import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.ice.RelayCandidate.RelayCandidateCodec;
 
 @ReloadCodec(RelayCandidateCodec.class)
@@ -39,12 +39,12 @@ public class RelayCandidate extends IceCandidate {
 		}
 
 		@Override
-		public void encode(RelayCandidate obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(RelayCandidate obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			sockAddrCodec.encode(obj.relayAddrPort, buf);
 		}
 
 		@Override
-		public RelayCandidate decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public RelayCandidate decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			return new RelayCandidate(sockAddrCodec.decode(buf));
 		}
 	}

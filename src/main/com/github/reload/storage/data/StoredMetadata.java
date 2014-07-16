@@ -3,9 +3,9 @@ package com.github.reload.storage.data;
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.ReloadCodec;
-import com.github.reload.message.Signature;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.storage.data.DataModel.DataValue;
 import com.github.reload.storage.data.DataModel.Metadata;
 import com.github.reload.storage.data.StoredMetadata.StoredMetadataCodec;
@@ -32,7 +32,7 @@ public class StoredMetadata extends StoredData {
 		}
 
 		@Override
-		public StoredMetadata decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public StoredMetadata decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			if (params.length < 1 || !(params[0] instanceof DataModel))
 				throw new IllegalArgumentException("Data type needed to decode a stored data");
 
@@ -53,7 +53,7 @@ public class StoredMetadata extends StoredData {
 		}
 
 		@Override
-		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 
 			buf.writeBytes(obj.getStorageTime().toByteArray());

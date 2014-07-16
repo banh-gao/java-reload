@@ -14,11 +14,11 @@ import javax.security.auth.login.Configuration;
 import com.github.reload.Context;
 import com.github.reload.Context.Component;
 import com.github.reload.InitializationException;
-import com.github.reload.message.HashAlgorithm;
-import com.github.reload.message.NodeID;
-import com.github.reload.message.Signature;
-import com.github.reload.message.SignatureAlgorithm;
-import com.github.reload.message.SignerIdentity;
+import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.Signature;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 /**

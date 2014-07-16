@@ -5,12 +5,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import com.github.reload.Configuration;
 import com.github.reload.DataKind;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Content;
-import com.github.reload.message.ContentType;
-import com.github.reload.message.Codec.ReloadCodec;
-import com.github.reload.message.ResourceID;
-import com.github.reload.message.errors.InvalidMessageException;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.Content;
+import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.errors.InvalidMessageException;
+import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.storage.net.FindRequest.FindRequestCodec;
 
 @ReloadCodec(FindRequestCodec.class)

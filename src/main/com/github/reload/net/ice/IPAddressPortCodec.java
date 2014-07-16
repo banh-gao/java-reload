@@ -2,7 +2,7 @@ package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
+import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.ice.IPAddressPort.AddressType;
 
 public class IPAddressPortCodec extends Codec<IPAddressPort> {
@@ -19,7 +19,7 @@ public class IPAddressPortCodec extends Codec<IPAddressPort> {
 	}
 
 	@Override
-	public void encode(IPAddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+	public void encode(IPAddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 		buf.writeByte(obj.getAddressType().code);
 		Field lenFld = allocateField(buf, ADDR_LENGTH_FIELD);
 

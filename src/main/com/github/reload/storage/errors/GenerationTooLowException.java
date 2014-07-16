@@ -1,9 +1,9 @@
 package com.github.reload.storage.errors;
 
 import java.math.BigInteger;
-import com.github.reload.message.errors.Error;
-import com.github.reload.message.errors.ErrorRespose;
-import com.github.reload.message.errors.ErrorType;
+import com.github.reload.net.encoders.content.errors.Error;
+import com.github.reload.net.encoders.content.errors.ErrorRespose;
+import com.github.reload.net.encoders.content.errors.ErrorType;
 
 /**
  * Indicates that a store request has the generation value lower than the stored

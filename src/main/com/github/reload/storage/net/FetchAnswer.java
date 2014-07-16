@@ -4,10 +4,10 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Content;
-import com.github.reload.message.ContentType;
-import com.github.reload.message.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.Content;
+import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.storage.net.FetchAnswer.FetchAnswerCodec;
 
 @ReloadCodec(FetchAnswerCodec.class)
@@ -36,7 +36,7 @@ public class FetchAnswer extends Content {
 		}
 
 		@Override
-		public void encode(FetchAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public void encode(FetchAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, RESPONSES_LENGTH_FIELD);
 
 			for (FetchKindResponse r : obj.responses) {
@@ -47,7 +47,7 @@ public class FetchAnswer extends Content {
 		}
 
 		@Override
-		public FetchAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.message.Codec.CodecException {
+		public FetchAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			ByteBuf resposeData = readField(buf, RESPONSES_LENGTH_FIELD);
 			List<FetchKindResponse> responses = new ArrayList<FetchKindResponse>();
 

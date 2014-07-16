@@ -4,11 +4,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.message.Codec;
-import com.github.reload.message.Codec.Field;
-import com.github.reload.message.errors.Error;
-import com.github.reload.message.errors.ErrorRespose;
-import com.github.reload.message.errors.ErrorType;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.Field;
+import com.github.reload.net.encoders.content.errors.Error;
+import com.github.reload.net.encoders.content.errors.ErrorRespose;
+import com.github.reload.net.encoders.content.errors.ErrorType;
 
 /**
  * Indicates that some kinds are unknown and report them in the error
