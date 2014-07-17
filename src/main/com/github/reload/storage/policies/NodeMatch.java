@@ -16,21 +16,17 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
+import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
+import com.github.reload.storage.AccessPolicy;
+import com.github.reload.storage.AccessPolicy.PolicyName;
 
 /**
  * Check if the nodeid hash in the sender certificate matches the resource id
  * 
  */
+@PolicyName("node-match")
 public class NodeMatch extends AccessPolicy {
-
-	private static final String NAME = "node-match";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
 
 	@Override
 	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
@@ -84,8 +80,6 @@ public class NodeMatch extends AccessPolicy {
 
 	/**
 	 * Parameters generator for NODE-MATCH policy
-	 * 
-	 * @author Daniel Zozin <zdenial@gmx.com>
 	 * 
 	 */
 	public static class NodeParamsGenerator extends AccessPolicyParamsGenerator {

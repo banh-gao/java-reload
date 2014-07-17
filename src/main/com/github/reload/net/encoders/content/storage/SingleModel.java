@@ -5,23 +5,15 @@ import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValueBuilder;
-import com.github.reload.storage.data.DataModel.Metadata;
-import com.github.reload.storage.data.DataModel.ModelSpecifier;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.ModelName;
 
 /**
  * Factory class used to create objects specialized for the single data model
  * 
  */
+@ModelName("SINGLE")
 public class SingleModel extends DataModel<SingleValue> {
-
-	public static final String NAME = "SINGLE";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
 
 	@Override
 	public SingleValueBuilder newValueBuilder() {

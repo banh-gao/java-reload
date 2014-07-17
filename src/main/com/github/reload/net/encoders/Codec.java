@@ -73,13 +73,6 @@ public abstract class Codec<T> {
 	private static final Object[] NO_PARAMS = new Object[0];
 
 	/**
-	 * Construct new codec without configuration
-	 */
-	public Codec() {
-		conf = null;
-	}
-
-	/**
 	 * Construct new codec with the given configuration
 	 * 
 	 * @param conf
@@ -135,13 +128,8 @@ public abstract class Codec<T> {
 		Class<? extends Codec<T>> codecClass = (Class<? extends Codec<T>>) codecAnn.value();
 
 		try {
-			if (conf == null) {
-				Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor();
-				return (Codec<T>) codecConstr.newInstance();
-			} else {
-				Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(Configuration.class);
-				return (Codec<T>) codecConstr.newInstance(conf);
-			}
+			Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(Configuration.class);
+			return (Codec<T>) codecConstr.newInstance(conf);
 		} catch (Exception e) {
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);
 		}

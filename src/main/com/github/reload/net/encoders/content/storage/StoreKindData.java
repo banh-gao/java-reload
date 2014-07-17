@@ -5,10 +5,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.StoreKindData.StoreKindDataCodec;
+import com.github.reload.storage.DataKind;
 
 @ReloadCodec(StoreKindDataCodec.class)
 public class StoreKindData {
@@ -39,6 +39,7 @@ public class StoreKindData {
 
 	public static class StoreKindDataCodec extends Codec<StoreKindData> {
 
+		protected static final int GEN_COUNTER_FIELD = U_INT64;
 		protected static final int VALUES_LENGTH_FIELD = U_INT32;
 
 		private final Codec<DataKind> kindCodec;
@@ -54,7 +55,12 @@ public class StoreKindData {
 		public void encode(StoreKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			kindCodec.encode(obj.kind, buf);
 
-			buf.writeBytes(obj.generationCounter.toByteArray());
+			byte[] genCounterBytes = obj.generationCounter.toByteArray();
+			buf.writeBytes(genCounterBytes);
+
+			// Make sure generation counter field is always of the fixed size by
+			// padding with zeros
+			buf.writeZero(GEN_COUNTER_FIELD - genCounterBytes.length);
 
 			Field lenFld = allocateField(buf, VALUES_LENGTH_FIELD);
 
@@ -69,7 +75,7 @@ public class StoreKindData {
 		public StoreKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
-			byte[] genCounterData = new byte[8];
+			byte[] genCounterData = new byte[GEN_COUNTER_FIELD];
 			buf.readBytes(genCounterData);
 			BigInteger generationCounter = new BigInteger(1, genCounterData);
 

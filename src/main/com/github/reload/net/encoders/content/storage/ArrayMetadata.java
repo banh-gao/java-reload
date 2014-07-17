@@ -5,8 +5,8 @@ import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.ArrayMetadata.ArrayMetadataCodec;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.Metadata;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.Metadata;
 
 /**
  * Metadata of a stored array entry

@@ -8,8 +8,8 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.SingleMetadata.SingleMetadataCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.Metadata;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.Metadata;
 
 /**
  * Metadata used to describe a stored data

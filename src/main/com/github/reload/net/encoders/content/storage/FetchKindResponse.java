@@ -5,12 +5,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.FetchKindResponse.FetchKindResponseCodec;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValue;
+import com.github.reload.storage.DataKind;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.DataValue;
 
 /**
  * A response contained in a fetch answer, contains all the data for a specific

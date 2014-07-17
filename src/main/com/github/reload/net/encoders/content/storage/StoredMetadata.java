@@ -7,9 +7,9 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.StoredMetadata.StoredMetadataCodec;
 import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValue;
-import com.github.reload.storage.data.DataModel.Metadata;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.DataValue;
+import com.github.reload.storage.DataModel.Metadata;
 
 @ReloadCodec(StoredMetadataCodec.class)
 public class StoredMetadata extends StoredData {

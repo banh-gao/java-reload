@@ -5,8 +5,8 @@ import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.ArrayValue.ArrayEntryCodec;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValue;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.DataValue;
 
 @ReloadCodec(ArrayEntryCodec.class)
 public class ArrayValue implements DataValue {

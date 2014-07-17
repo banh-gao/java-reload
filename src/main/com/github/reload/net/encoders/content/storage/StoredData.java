@@ -7,8 +7,8 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.StoredData.StoredDataCodec;
 import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValue;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.DataValue;
 
 @ReloadCodec(StoredDataCodec.class)
 public class StoredData {

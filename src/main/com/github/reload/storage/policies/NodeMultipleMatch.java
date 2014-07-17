@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Set;
 import javax.naming.ConfigurationException;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.ReloadOverlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -19,22 +18,19 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
+import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
+import com.github.reload.storage.AccessPolicy;
+import com.github.reload.storage.AccessPolicy.PolicyName;
+import com.github.reload.storage.DataKind;
 
 /**
  * Check if the nodeid hash in the sender certificate concatenated with an index
  * value matches the resource id
  * 
  */
+@PolicyName("node-multiple")
 public class NodeMultipleMatch extends AccessPolicy {
-
-	private static final String NAME = "node-multiple";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
 
 	@Override
 	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {

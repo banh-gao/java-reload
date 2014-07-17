@@ -8,24 +8,16 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.ArrayModel.ArrayModelSpecifier.ArrayRange;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.ModelName;
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValueBuilder;
-import com.github.reload.storage.data.DataModel.Metadata;
-import com.github.reload.storage.data.DataModel.ModelSpecifier;
 
 /**
  * Factory class used to create objects specialized for the array data model
  * 
  */
+@ModelName("ARRAY")
 public class ArrayModel extends DataModel<ArrayValue> {
-
-	public static final String NAME = "ARRAY";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
 
 	@Override
 	public Class<ArrayValue> getValueClass() {
@@ -39,7 +31,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 
 	@Override
 	public Metadata<ArrayValue> newMetadata(ArrayValue value, HashAlgorithm hashAlg) {
-		SingleModel singleModel = (SingleModel) getInstance(SingleModel.NAME);
+		SingleModel singleModel = (SingleModel) getInstance(DataModel.SINGLE);
 		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
 		return new ArrayMetadata(value.getIndex(), singleMeta);
 	}

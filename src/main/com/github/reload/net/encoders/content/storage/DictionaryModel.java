@@ -8,24 +8,16 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.DictionaryValue.Key;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.storage.data.DataModel;
-import com.github.reload.storage.data.DataModel.DataValueBuilder;
-import com.github.reload.storage.data.DataModel.Metadata;
-import com.github.reload.storage.data.DataModel.ModelSpecifier;
+import com.github.reload.storage.DataModel;
+import com.github.reload.storage.DataModel.ModelName;
 
 /**
  * Factory class used to create objects specialized for the dictionary data
  * model
  * 
  */
+@ModelName("DICT")
 public class DictionaryModel extends DataModel<DictionaryValue> {
-
-	public static final String NAME = "DICT";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
 
 	@Override
 	public DictionaryValueBuilder newValueBuilder() {
@@ -39,7 +31,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 
 	@Override
 	public DictionaryMetadata newMetadata(DictionaryValue value, HashAlgorithm hashAlg) {
-		SingleModel singleModel = (SingleModel) getInstance(SingleModel.NAME);
+		SingleModel singleModel = (SingleModel) getInstance(DataModel.SINGLE);
 		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
 		return new DictionaryMetadata(value.getKey(), singleMeta);
 	}

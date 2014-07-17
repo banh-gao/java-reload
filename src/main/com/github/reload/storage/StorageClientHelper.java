@@ -13,7 +13,6 @@ import com.github.reload.Configuration;
 import com.github.reload.MessageBuilder;
 import com.github.reload.Context.Component;
 import com.github.reload.Context.CtxComponent;
-import com.github.reload.DataKind;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.errors.NetworkException;

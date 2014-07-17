@@ -5,9 +5,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.storage.DataKind;
 
 public class StoreKindResponse {
 

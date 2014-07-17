@@ -5,7 +5,6 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.util.Date;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.content.storage.ArrayModel;
 import com.github.reload.net.encoders.content.storage.ArrayValue;

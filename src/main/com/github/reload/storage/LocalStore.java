@@ -16,7 +16,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import org.bouncycastle.asn1.ocsp.ResponseData;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.net.encoders.content.storage.FetchKindResponse;
 import com.github.reload.net.encoders.content.storage.FindAnswer;
 import com.github.reload.net.encoders.content.storage.FindKindData;

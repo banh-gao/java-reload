@@ -5,7 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.net.encoders.content.storage.ArrayModel;
 import com.github.reload.net.encoders.content.storage.ArrayValue;
 import com.github.reload.net.encoders.content.storage.SingleValue;
@@ -14,8 +13,9 @@ import com.github.reload.net.encoders.content.storage.StoredMetadata;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
+import com.github.reload.storage.DataKind;
+import com.github.reload.storage.DataModel.Metadata;
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.data.DataModel.Metadata;
 import com.github.reload.storage.errors.DataTooLargeException;
 
 public class DataUtils {

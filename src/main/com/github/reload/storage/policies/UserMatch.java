@@ -11,19 +11,15 @@ import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.storage.AccessPolicy;
+import com.github.reload.storage.AccessPolicy.PolicyName;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id
  * 
  */
+@PolicyName("user-match")
 public class UserMatch extends AccessPolicy {
-
-	private static final String NAME = "user-match";
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
 
 	@Override
 	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {

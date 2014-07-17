@@ -1,15 +1,21 @@
-package com.github.reload.storage.policies;
+package com.github.reload.storage;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.naming.ConfigurationException;
 import com.github.reload.Configuration;
-import com.github.reload.DataKind;
 import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.storage.errors.ForbittenException;
+import com.github.reload.storage.policies.NodeMatch;
+import com.github.reload.storage.policies.NodeMultipleMatch;
+import com.github.reload.storage.policies.UserMatch;
+import com.github.reload.storage.policies.UserNodeMatch;
 
 /**
  * An access control policy used by data kinds that determines if a store
@@ -20,41 +26,44 @@ public abstract class AccessPolicy {
 
 	private static final Map<String, AccessPolicy> policies = new HashMap<String, AccessPolicy>();
 
-	static {
-		// Register default policies
-		try {
-			registerPolicy(NodeMatch.class);
-			registerPolicy(NodeMultipleMatch.class);
-			registerPolicy(UserMatch.class);
-			registerPolicy(UserNodeMatch.class);
-		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-	}
+	public static final Class<NodeMatch> NODE = NodeMatch.class;
+	public static final Class<NodeMultipleMatch> NODE_MULTIPLE = NodeMultipleMatch.class;
+	public static final Class<UserMatch> USER = UserMatch.class;
+	public static final Class<UserNodeMatch> USER_NODE = UserNodeMatch.class;
 
 	protected AccessPolicy() {
 	}
 
-	public static boolean registerPolicy(Class<? extends AccessPolicy> policyClazz) throws InstantiationException, IllegalAccessException {
-		AccessPolicy policy = policyClazz.newInstance();
-		policies.put(policy.getName().toLowerCase(), policy);
-		return true;
+	public static <T extends AccessPolicy> T getInstance(Class<T> clazz) {
+
+		String name = getPolicyName(clazz);
+
+		@SuppressWarnings("unchecked")
+		T policy = (T) policies.get(name);
+
+		if (policy == null) {
+			try {
+				policy = clazz.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			policies.put(name, policy);
+		}
+
+		return policy;
 	}
 
-	public static boolean unregisterPolicy(String policyName) {
-		String name = policyName.toLowerCase();
-		return policies.remove(name) != null;
-	}
-
-	public static AccessPolicy getInstance(String policyName) {
-		return policies.get(policyName.toLowerCase());
+	private static String getPolicyName(Class<? extends AccessPolicy> clazz) {
+		return clazz.getAnnotation(PolicyName.class).value().toLowerCase();
 	}
 
 	public static Map<String, AccessPolicy> getSupportedPolicies() {
 		return Collections.unmodifiableMap(policies);
 	}
 
-	public abstract String getName();
+	public String getName() {
+		return getPolicyName(this.getClass());
+	}
 
 	/**
 	 * Check if the store should be accepted
@@ -71,13 +80,12 @@ public abstract class AccessPolicy {
 	public abstract AccessPolicyParamsGenerator getParamsGenerator(Configuration conf);
 
 	/**
-	 * Throw a configuration exception if the given datakind builder doesn't
+	 * Throw an exception if the given datakind builder doesn't
 	 * contain the policy parameters required by this access control policy
 	 * 
 	 * @param dataKindBuilder
-	 * @throws ConfigurationException
 	 */
-	public void checkKindParams(DataKind.Builder dataKindBuilder) throws ConfigurationException {
+	protected void checkKindParams(DataKind.Builder dataKindBuilder) {
 		// No parameter required by default
 	}
 
@@ -109,5 +117,12 @@ public abstract class AccessPolicy {
 		public AccessPolicyParamsGenerator(Configuration conf) {
 			this.conf = conf;
 		}
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public @interface PolicyName {
+
+		public String value();
 	}
 }

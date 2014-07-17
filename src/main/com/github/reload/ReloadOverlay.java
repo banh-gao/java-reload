@@ -15,6 +15,7 @@ import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.content.errors.NetworkException;
+import com.github.reload.net.encoders.content.errors.UnknownKindException;
 import com.github.reload.net.encoders.content.storage.FetchKindResponse;
 import com.github.reload.net.encoders.content.storage.StoreKindResponse;
 import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
@@ -22,9 +23,9 @@ import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.storage.DataKind;
 import com.github.reload.storage.PreparedData;
 import com.github.reload.storage.StorageClientHelper;
-import com.github.reload.storage.errors.UnknownKindException;
 
 /**
  * Represent the overlay where the local node is connected to, all operations in
