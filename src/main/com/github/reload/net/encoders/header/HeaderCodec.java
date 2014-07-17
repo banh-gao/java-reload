@@ -104,7 +104,9 @@ public class HeaderCodec extends Codec<Header> {
 	public Header decode(ByteBuf buf, Object... params) throws CodecException {
 		Header h = new Header();
 
-		h.isReloTokenValid = (buf.readInt() == RELOAD_TOKEN);
+		if (buf.readInt() != RELOAD_TOKEN)
+			throw new CodecException("Invalid RELOAD token");
+
 		h.overlayHash = buf.readInt();
 		h.configurationSequence = buf.readShort();
 		h.version = buf.readUnsignedByte();

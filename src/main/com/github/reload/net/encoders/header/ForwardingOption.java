@@ -27,7 +27,7 @@ public abstract class ForwardingOption {
 		}
 	}
 
-	protected abstract ForwardingOptionType getType();
+	public abstract ForwardingOptionType getType();
 
 	boolean isForwardCritical;
 	boolean isDestinationCritical;

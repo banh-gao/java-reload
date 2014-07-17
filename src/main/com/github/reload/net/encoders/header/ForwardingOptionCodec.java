@@ -42,13 +42,13 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 
 	private byte getFlags(ForwardingOption obj) {
 		byte flags = 0;
-		if (obj.isForwardCritical) {
+		if (obj.isForwardCritical()) {
 			flags = FWD_CRITICAL_MASK;
 		}
-		if (obj.isDestinationCritical) {
+		if (obj.isDestinationCritical()) {
 			flags |= DST_CRITICAL_MASK;
 		}
-		if (obj.isResponseCopy) {
+		if (obj.isResponseCopy()) {
 			flags |= RES_COPY_MASK;
 		}
 		return flags;
@@ -65,9 +65,6 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 		boolean isFwdCritical = (flags & FWD_CRITICAL_MASK) == FWD_CRITICAL_MASK;
 		boolean isDstCritical = (flags & DST_CRITICAL_MASK) == DST_CRITICAL_MASK;
 		boolean isRspCopy = (flags & RES_COPY_MASK) == RES_COPY_MASK;
-
-		if (type == ForwardingOptionType.UNKNOWN_OPTION && (isFwdCritical || isDstCritical))
-			throw new UnsupportedFwdOptionException("Unknown forwarding option");
 
 		ByteBuf data = readField(buf, OPTION_LENGTH_FIELD);
 
@@ -89,8 +86,6 @@ public class ForwardingOptionCodec extends Codec<ForwardingOption> {
 
 	/**
 	 * Indicates an unsupported forwarding option critical for header processing
-	 * 
-	 * @author Daniel Zozin <zdenial@gmx.com>
 	 * 
 	 */
 	public static class UnsupportedFwdOptionException extends CodecException {

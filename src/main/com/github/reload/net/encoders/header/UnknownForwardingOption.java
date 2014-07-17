@@ -12,7 +12,7 @@ public class UnknownForwardingOption extends ForwardingOption {
 	byte[] data;
 
 	@Override
-	protected ForwardingOptionType getType() {
+	public ForwardingOptionType getType() {
 		return ForwardingOptionType.UNKNOWN_OPTION;
 	}
 
@@ -24,7 +24,8 @@ public class UnknownForwardingOption extends ForwardingOption {
 
 		@Override
 		public void encode(UnknownForwardingOption obj, ByteBuf buf, Object... params) {
-			buf.writeBytes(obj.data);
+			if (obj.data != null)
+				buf.writeBytes(obj.data);
 		}
 
 		@Override

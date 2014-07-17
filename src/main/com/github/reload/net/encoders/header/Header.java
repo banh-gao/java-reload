@@ -1,9 +1,10 @@
 package com.github.reload.net.encoders.header;
 
+import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
-import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.Message;
 import com.google.common.base.Objects;
 
 /**
@@ -12,7 +13,6 @@ import com.google.common.base.Objects;
 @ReloadCodec(HeaderCodec.class)
 public class Header {
 
-	boolean isReloTokenValid;
 	long transactionId;
 
 	boolean isLastFragment = true;
@@ -27,16 +27,12 @@ public class Header {
 
 	DestinationList viaList = new DestinationList();
 	DestinationList destinationList = new DestinationList();
-	List<ForwardingOption> forwardingOptions = new LinkedList<ForwardingOption>();
+	List<? extends ForwardingOption> forwardingOptions = new LinkedList<ForwardingOption>();
 
 	int headerLength;
 	int payloadLength;
 
-	public Header() {
-	}
-
-	public boolean hasValidToken() {
-		return isReloTokenValid;
+	Header() {
 	}
 
 	public int getPayloadLength() {
@@ -160,7 +156,7 @@ public class Header {
 	/**
 	 * @return A reference to the header forwarding options
 	 */
-	public List<ForwardingOption> getForwardingOptions() {
+	public List<? extends ForwardingOption> getForwardingOptions() {
 		return forwardingOptions;
 	}
 
@@ -170,7 +166,95 @@ public class Header {
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).add("isReloTokenValid", isReloTokenValid).add("transactionId", transactionId).add("isLastFragment", isLastFragment).add("fragmentOffset", fragmentOffset).add("maxResponseLength", maxResponseLength).add("configurationSequence", configurationSequence).add("overlayHash", overlayHash).add("version", version).add("ttl", ttl).add("viaList", viaList).add("destinationList", destinationList).add("forwardingOptions", forwardingOptions).add("headerLength", headerLength).add("payloadLength", payloadLength).toString();
+		return Objects.toStringHelper(this).add("transactionId", transactionId).add("isLastFragment", isLastFragment).add("fragmentOffset", fragmentOffset).add("maxResponseLength", maxResponseLength).add("configurationSequence", configurationSequence).add("overlayHash", overlayHash).add("version", version).add("ttl", ttl).add("viaList", viaList).add("destinationList", destinationList).add("forwardingOptions", forwardingOptions).add("headerLength", headerLength).add("payloadLength", payloadLength).toString();
+	}
+
+	public static class Builder {
+
+		private static final SecureRandom transIdGen = new SecureRandom();
+
+		boolean isLastFragment = true;
+		int fragmentOffset = 0;
+
+		int maxResponseLength = 0;
+		int configurationSequence = 0;
+
+		int overlayHash;
+		short version;
+		short ttl;
+
+		DestinationList viaList = new DestinationList();
+		DestinationList destinationList = new DestinationList();
+		List<? extends ForwardingOption> forwardingOptions = new LinkedList<ForwardingOption>();
+
+		int headerLength;
+		int payloadLength;
+
+		public Builder setLastFragment(boolean isLastFragment) {
+			this.isLastFragment = isLastFragment;
+			return this;
+		}
+
+		public Builder setFragmentOffset(int fragmentOffset) {
+			this.fragmentOffset = fragmentOffset;
+			return this;
+		}
+
+		public Builder setMaxResponseLength(int maxResponseLength) {
+			this.maxResponseLength = maxResponseLength;
+			return this;
+		}
+
+		public Builder setConfigurationSequence(int configurationSequence) {
+			this.configurationSequence = configurationSequence;
+			return this;
+		}
+
+		public Builder setOverlayHash(int overlayHash) {
+			this.overlayHash = overlayHash;
+			return this;
+		}
+
+		public Builder setVersion(short version) {
+			this.version = version;
+			return this;
+		}
+
+		public Builder setTtl(short ttl) {
+			this.ttl = ttl;
+			return this;
+		}
+
+		public Builder setViaList(DestinationList viaList) {
+			this.viaList = viaList;
+			return this;
+		}
+
+		public Builder setDestinationList(DestinationList destinationList) {
+			this.destinationList = destinationList;
+			return this;
+		}
+
+		public Builder setForwardingOptions(List<? extends ForwardingOption> forwardingOptions) {
+			this.forwardingOptions = forwardingOptions;
+			return this;
+		}
+
+		public Header build() {
+			Header h = new Header();
+			h.configurationSequence = configurationSequence;
+			h.destinationList = destinationList;
+			h.forwardingOptions = forwardingOptions;
+			h.fragmentOffset = fragmentOffset;
+			h.isLastFragment = isLastFragment;
+			h.maxResponseLength = maxResponseLength;
+			h.overlayHash = overlayHash;
+			h.transactionId = transIdGen.nextLong();
+			h.ttl = ttl;
+			h.version = version;
+			h.viaList = viaList;
+			return h;
+		}
 	}
 
 }
