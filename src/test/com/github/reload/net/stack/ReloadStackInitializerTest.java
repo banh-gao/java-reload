@@ -32,7 +32,7 @@ public class ReloadStackInitializerTest extends NetworkTest {
 
 		messageBus.register(new TestListener());
 
-		Header h = new Header();
+		Header h = new Header.Builder().build();
 		Content content = new PingRequest(75);
 		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
 

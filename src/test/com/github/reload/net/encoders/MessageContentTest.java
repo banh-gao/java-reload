@@ -1,18 +1,10 @@
 package com.github.reload.net.encoders;
 
-import io.netty.channel.ChannelFuture;
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.reload.ApplicationID;
-import com.github.reload.Configuration;
-import com.github.reload.net.MessageBus;
-import com.github.reload.net.NetworkTest;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.Content;
@@ -35,27 +27,18 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.stack.ReloadStack;
-import com.github.reload.net.stack.ReloadStackBuilder;
-import com.google.common.eventbus.Subscribe;
 
-public class MessageContentTest extends NetworkTest {
+public class MessageContentTest extends MessageTest {
 
-	private static ReloadStack stack;
-	private static Content answer;
+	@SuppressWarnings("unchecked")
+	protected <T extends Content> T sendContent(T content) throws Exception {
+		Header h = new Header.Builder().build();
+		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
 
-	@BeforeClass
-	public static void initPipeline() throws Exception {
-		Configuration conf = new Configuration();
-		MessageBus messageBus = new MessageBus();
-		ReloadStackBuilder b = new ReloadStackBuilder(conf, messageBus);
-		b.setLinkType(OverlayLinkType.TLS_TCP_FH_NO_ICE);
+		Message message = new Message(h, content, s);
+		Message echo = sendMessage(message);
 
-		stack = b.buildStack();
-		stack.connect(new InetSocketAddress(InetAddress.getLocalHost(), TEST_PORT)).sync();
-
-		messageBus.register(new TestListener());
+		return (T) echo.getContent();
 	}
 
 	@Test
@@ -217,45 +200,4 @@ public class MessageContentTest extends NetworkTest {
 		Assert.assertEquals(content.isAnswer(), echo.isAnswer());
 	}
 
-	@AfterClass
-	public static void deinitPipeline() throws InterruptedException {
-		stack.shutdown();
-	}
-
-	@SuppressWarnings("unchecked")
-	protected <T extends Content> T sendContent(T content) throws Exception {
-		Header h = new Header();
-		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
-
-		Message message = new Message(h, content, s);
-		ChannelFuture f = stack.write(message);
-		stack.flush();
-
-		f.await(50);
-
-		if (f.cause() != null) {
-			System.out.println(f.cause());
-			throw new Exception(f.cause());
-		}
-
-		synchronized (stack) {
-			stack.wait(50);
-		}
-
-		Assert.assertNotNull(answer);
-
-		return (T) answer;
-	}
-
-	static class TestListener {
-
-		@Subscribe
-		public void messageReceived(Message message) {
-			answer = message.getContent();
-
-			synchronized (stack) {
-				stack.notify();
-			}
-		}
-	}
 }
