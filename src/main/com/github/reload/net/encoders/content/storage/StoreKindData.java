@@ -56,11 +56,11 @@ public class StoreKindData {
 			kindCodec.encode(obj.kind, buf);
 
 			byte[] genCounterBytes = obj.generationCounter.toByteArray();
-			buf.writeBytes(genCounterBytes);
-
 			// Make sure generation counter field is always of the fixed size by
 			// padding with zeros
 			buf.writeZero(GEN_COUNTER_FIELD - genCounterBytes.length);
+
+			buf.writeBytes(genCounterBytes);
 
 			Field lenFld = allocateField(buf, VALUES_LENGTH_FIELD);
 
@@ -89,7 +89,7 @@ public class StoreKindData {
 			List<StoredData> data = new ArrayList<StoredData>();
 
 			while (dataFld.readableBytes() > 0) {
-				data.add(dataCodec.decode(dataFld));
+				data.add(dataCodec.decode(dataFld, kind.getDataModel()));
 			}
 
 			return data;

@@ -1,12 +1,13 @@
 package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.SingleValue.SingleEntryCodec;
-import com.github.reload.storage.DataModel;
 import com.github.reload.storage.DataModel.DataValue;
+import com.google.common.base.Objects;
 
 @ReloadCodec(SingleEntryCodec.class)
 public class SingleValue implements DataValue {
@@ -28,6 +29,27 @@ public class SingleValue implements DataValue {
 	 */
 	public boolean exists() {
 		return exists;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(super.hashCode(), exists, value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SingleValue other = (SingleValue) obj;
+		if (exists != other.exists)
+			return false;
+		if (!Arrays.equals(value, other.value))
+			return false;
+		return true;
 	}
 
 	@Override
@@ -66,4 +88,5 @@ public class SingleValue implements DataValue {
 		}
 
 	}
+
 }

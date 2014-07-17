@@ -5,8 +5,8 @@ import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.ArrayValue.ArrayEntryCodec;
-import com.github.reload.storage.DataModel;
 import com.github.reload.storage.DataModel.DataValue;
+import com.google.common.base.Objects;
 
 @ReloadCodec(ArrayEntryCodec.class)
 public class ArrayValue implements DataValue {
@@ -25,6 +25,30 @@ public class ArrayValue implements DataValue {
 
 	public SingleValue getValue() {
 		return value;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(super.hashCode(), index, value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ArrayValue other = (ArrayValue) obj;
+		if (index != other.index)
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
 	}
 
 	public static class ArrayEntryCodec extends Codec<ArrayValue> {

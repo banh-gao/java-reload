@@ -186,12 +186,12 @@ public class DataKind {
 
 		@Override
 		public void encode(DataKind obj, ByteBuf buf, Object... params) throws CodecException {
-			buf.writeLong(obj.kindId);
+			buf.writeInt((int) obj.kindId);
 		}
 
 		@Override
 		public DataKind decode(ByteBuf buf, Object... params) throws CodecException {
-			long kindId = buf.readLong();
+			long kindId = buf.readUnsignedInt();
 
 			DataKind kind = DataKind.getInstance(kindId);
 			if (kind == null)

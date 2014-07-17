@@ -43,6 +43,7 @@ public class StoredData {
 
 	public static class StoredDataCodec extends Codec<StoredData> {
 
+		private static final int STORAGE_TIME_FIELD = U_INT64;
 		private static final int DATA_LENGTH_FIELD = U_INT32;
 
 		private final Codec<Signature> signatureCodec;
@@ -53,33 +54,16 @@ public class StoredData {
 		}
 
 		@Override
-		public StoredData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
-			if (params.length < 1 || !(params[0] instanceof DataModel))
-				throw new IllegalArgumentException("Data type needed to decode a stored data");
-
-			ByteBuf dataFld = readField(buf, DATA_LENGTH_FIELD);
-
-			byte[] storageTimeRaw = new byte[8];
-			dataFld.readBytes(storageTimeRaw);
-			BigInteger storageTime = new BigInteger(1, storageTimeRaw);
-
-			long lifeTime = dataFld.readUnsignedInt();
-
-			@SuppressWarnings("unchecked")
-			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel<?>) params[0]).getValueClass());
-
-			DataValue value = valueCodec.decode(dataFld);
-
-			Signature signature = signatureCodec.decode(buf);
-
-			return new StoredData(storageTime, lifeTime, value, signature);
-		}
-
-		@Override
 		public void encode(StoredData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 
-			buf.writeBytes(obj.storageTime.toByteArray());
+			byte[] storageTimeBytes = obj.storageTime.toByteArray();
+
+			// Make sure field is always of the fixed size by padding with zeros
+			buf.writeZero(STORAGE_TIME_FIELD - storageTimeBytes.length);
+
+			buf.writeBytes(storageTimeBytes);
+
 			buf.writeInt((int) obj.lifeTime);
 
 			@SuppressWarnings("unchecked")
@@ -90,6 +74,29 @@ public class StoredData {
 			signatureCodec.encode(obj.signature, buf);
 
 			lenFld.updateDataLength();
+		}
+
+		@Override
+		public StoredData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+			if (params.length < 1 || !(params[0] instanceof DataModel))
+				throw new IllegalStateException("Data model needed to decode a stored data");
+
+			ByteBuf dataFld = readField(buf, DATA_LENGTH_FIELD);
+
+			byte[] storageTimeBytes = new byte[STORAGE_TIME_FIELD];
+			dataFld.readBytes(storageTimeBytes);
+			BigInteger storageTime = new BigInteger(1, storageTimeBytes);
+
+			long lifeTime = dataFld.readUnsignedInt();
+
+			@SuppressWarnings("unchecked")
+			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel<?>) params[0]).getValueClass());
+
+			DataValue value = valueCodec.decode(dataFld);
+
+			Signature signature = signatureCodec.decode(dataFld);
+
+			return new StoredData(storageTime, lifeTime, value, signature);
 		}
 
 	}

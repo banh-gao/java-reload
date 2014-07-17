@@ -1,12 +1,13 @@
 package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.DictionaryValue.DictionaryValueCodec;
-import com.github.reload.storage.DataModel;
 import com.github.reload.storage.DataModel.DataValue;
+import com.google.common.base.Objects;
 
 @ReloadCodec(DictionaryValueCodec.class)
 public class DictionaryValue implements DataValue {
@@ -27,6 +28,33 @@ public class DictionaryValue implements DataValue {
 		return value;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(super.hashCode(), key, value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DictionaryValue other = (DictionaryValue) obj;
+		if (key == null) {
+			if (other.key != null)
+				return false;
+		} else if (!key.equals(other.key))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
+	}
+
 	static public class Key {
 
 		private final byte[] data;
@@ -39,6 +67,25 @@ public class DictionaryValue implements DataValue {
 
 		public byte[] getValue() {
 			return data;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hashCode(super.hashCode(), data);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Key other = (Key) obj;
+			if (!Arrays.equals(data, other.data))
+				return false;
+			return true;
 		}
 
 		@Override

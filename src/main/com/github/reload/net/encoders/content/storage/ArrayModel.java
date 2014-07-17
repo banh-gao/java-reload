@@ -25,24 +25,24 @@ public class ArrayModel extends DataModel<ArrayValue> {
 	}
 
 	@Override
-	public DataValueBuilder<ArrayValue> newValueBuilder() {
+	public ArrayValueBuilder newValueBuilder() {
 		return new ArrayValueBuilder();
 	}
 
 	@Override
-	public Metadata<ArrayValue> newMetadata(ArrayValue value, HashAlgorithm hashAlg) {
+	public ArrayMetadata newMetadata(ArrayValue value, HashAlgorithm hashAlg) {
 		SingleModel singleModel = (SingleModel) getInstance(DataModel.SINGLE);
 		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
 		return new ArrayMetadata(value.getIndex(), singleMeta);
 	}
 
 	@Override
-	public Class<? extends Metadata<ArrayValue>> getMetadataClass() {
+	public Class<ArrayMetadata> getMetadataClass() {
 		return ArrayMetadata.class;
 	}
 
 	@Override
-	public ModelSpecifier<ArrayValue> newSpecifier() {
+	public ArrayModelSpecifier newSpecifier() {
 		return new ArrayModelSpecifier();
 	}
 
@@ -65,7 +65,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		 * elements to
 		 * the array
 		 */
-		public static final int LAST_INDEX = 0xffffffff;
+		public static final long LAST_INDEX = 0xffffffffl;
 
 		private long index = -1;
 		private boolean append = false;
@@ -81,19 +81,18 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			return this;
 		}
 
-		public ArrayValueBuilder setValue(SingleValue value) {
+		public ArrayValueBuilder value(SingleValue value) {
 			this.value = value;
 			return this;
 		}
 
 		@Override
 		public ArrayValue build() {
+			if (append)
+				index = LAST_INDEX;
+
 			if (index < 0)
 				throw new DataBuildingException("Array index not set");
-
-			if (append) {
-				index = LAST_INDEX;
-			}
 
 			return new ArrayValue(index, value);
 		}
