@@ -1,6 +1,8 @@
 package com.github.reload.net.encoders.secBlock;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -41,4 +43,31 @@ public abstract class SignerIdentityValue {
 		}
 
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), getHashAlgorithm(), getHashValue());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SignerIdentityValue other = (SignerIdentityValue) obj;
+		if (getHashAlgorithm() != other.getHashAlgorithm())
+			return false;
+		if (!Arrays.equals(getHashValue(), other.getHashValue()))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "SignerIdentityValue [hashAlgorithm=" + getHashAlgorithm() + ", hashValue=" + Arrays.toString(getHashValue()) + "]";
+	}
+
 }

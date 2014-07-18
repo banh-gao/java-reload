@@ -2,6 +2,8 @@ package com.github.reload.net.encoders.secBlock;
 
 import io.netty.buffer.ByteBuf;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -66,6 +68,34 @@ public class Signature {
 
 	public byte[] getDigest() {
 		return digest;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), signerIdentity, hashAlg, signAlg, digest);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Signature other = (Signature) obj;
+		if (!Arrays.equals(digest, other.digest))
+			return false;
+		if (hashAlg != other.hashAlg)
+			return false;
+		if (signAlg != other.signAlg)
+			return false;
+		if (signerIdentity == null) {
+			if (other.signerIdentity != null)
+				return false;
+		} else if (!signerIdentity.equals(other.signerIdentity))
+			return false;
+		return true;
 	}
 
 	@Override
