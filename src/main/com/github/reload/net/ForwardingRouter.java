@@ -2,7 +2,7 @@ package com.github.reload.net;
 
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.HeadedMessage;
+import com.github.reload.net.encoders.ForwardMessage;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
@@ -21,7 +21,7 @@ public class ForwardingRouter {
 		this.connMgr = connMgr;
 	}
 
-	public void forwardMessage(HeadedMessage msg) {
+	public void forwardMessage(ForwardMessage msg) {
 		for (NodeID nextHop : routingTable.getNextHops(msg.getHeader().getDestinationId())) {
 			Connection c = connMgr.getConnection(nextHop);
 			// Forward message and ignore delivery status

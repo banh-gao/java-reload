@@ -6,7 +6,7 @@ import com.github.reload.net.encoders.header.Header;
 /**
  * RELOAD message with decoded header and opaque payload
  */
-public class HeadedMessage {
+public class ForwardMessage {
 
 	Header header;
 	ByteBuf payload;

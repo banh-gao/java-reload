@@ -15,9 +15,8 @@ import javax.net.ssl.SSLEngine;
 import com.github.reload.Configuration;
 import com.github.reload.net.MessageBus;
 import com.github.reload.net.encoders.FramedMessageCodec;
-import com.github.reload.net.encoders.HeadedMessageDecoder;
-import com.github.reload.net.encoders.MessageEncoder;
-import com.github.reload.net.encoders.PayloadDecoder;
+import com.github.reload.net.encoders.ForwardMessageCodec;
+import com.github.reload.net.encoders.MessageCodec;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 public class ReloadStackBuilder {
@@ -71,36 +70,28 @@ public class ReloadStackBuilder {
 
 				ChannelPipeline pipeline = ch.pipeline();
 
-				// IN/OUT: add encrypted tunneling layer
+				// Encrypted tunnel handler
 				if (sslHandler != null)
-					pipeline.addLast(ReloadStack.CRYPTO_HANDLER, sslHandler);
+					pipeline.addLast(ReloadStack.HANDLER_SSL, sslHandler);
 
-				// IN/OUT: Codec for RELOAD framing message
-				pipeline.addLast(ReloadStack.FRAME_CODEC, new FramedMessageCodec());
+				// Codec for RELOAD framing message
+				pipeline.addLast(ReloadStack.CODEC_FRAME, new FramedMessageCodec());
 
-				// IN/OUT: Specific link handler to control link reliability
-				pipeline.addLast(ReloadStack.LINK_HANDLER, linkHandler);
+				// Link handler to manage link reliability
+				pipeline.addLast(ReloadStack.HANDLER_LINK, linkHandler);
 
-				// IN: Decoder for RELOAD forwarding header
-				pipeline.addLast(ReloadStack.FWD_DECODER, new HeadedMessageDecoder(conf));
+				// Codec for RELOAD forwarding header
+				pipeline.addLast(ReloadStack.CODEC_FORWARD, new ForwardMessageCodec(conf));
 
-				// IN: Forward to other links the messages not directed to
-				// this node
-				// OUT: Forward on this link the messages not directed to
-				// this node
-				pipeline.addLast(ReloadStack.FWD_HANDLER, new ForwardingHandler());
+				// Decides whether an incoming message has to be processed
+				// locally or forwarded to a neighbor node
+				pipeline.addLast(ReloadStack.HANDLER_FORWARD, new ForwardingHandler());
 
-				// IN: Decoder for RELOAD message content and security
-				// block, header
-				// must have been already decoded at this point
-				pipeline.addLast(ReloadStack.MSG_DECODER, new PayloadDecoder(conf));
+				// Codec for message payload (content + security block)
+				pipeline.addLast(ReloadStack.CODEC_MESSAGE, new MessageCodec(conf));
 
-				// OUT: Encoder for complete RELOAD message
-				pipeline.addLast(ReloadStack.MSG_ENCODER, new MessageEncoder(conf));
-
-				// IN: Dispatch incoming messages on the application message
-				// bus
-				pipeline.addLast(ReloadStack.MSG_HANDLER, new MessageDispatcher(messageBus));
+				// Dispatch incoming messages on the application message bus
+				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, new MessageDispatcher(messageBus));
 			}
 		});
 	}

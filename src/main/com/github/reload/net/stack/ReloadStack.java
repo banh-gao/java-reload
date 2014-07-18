@@ -2,21 +2,19 @@ package com.github.reload.net.stack;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import java.net.SocketAddress;
 import com.github.reload.net.encoders.Message;
 
 public class ReloadStack {
 
-	public static final String FRAME_CODEC = "FRM_CODEC";
-	public static final String FWD_DECODER = "FWD_DECODER";
-	public static final String MSG_DECODER = "MSG_DECODER";
-	public static final String MSG_ENCODER = "MSG_ENCODER";
+	public static final String CODEC_FRAME = "CODEC_FRAME";
+	public static final String CODEC_FORWARD = "CODEC_FORWARD";
+	public static final String CODEC_MESSAGE = "CODEC_MESSAGE";
 
-	public static final String CRYPTO_HANDLER = "CRYPTO_HANDLER";
-	public static final String LINK_HANDLER = "LINK_HANDLER";
-	public static final String FWD_HANDLER = "FWD_HANDLER";
-	public static final String MSG_HANDLER = "MSG_HANDLER";
+	public static final String HANDLER_SSL = "HANDLER_SSL";
+	public static final String HANDLER_LINK = "HANDLER_LINK";
+	public static final String HANDLER_FORWARD = "HANDLER_FORWARD";
+	public static final String HANDLER_DISPATCHER = "HANDLER_DISPATCHER";
 
 	private final Channel channel;
 
@@ -44,7 +42,7 @@ public class ReloadStack {
 		return channel.close();
 	}
 
-	public ChannelHandler getHandler(String name) {
-		return channel.pipeline().get(name);
+	public Channel getChannel() {
+		return channel;
 	}
 }
