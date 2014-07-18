@@ -108,7 +108,7 @@ public class Signature {
 		return out.toString();
 	}
 
-	public static class SignatureCodec extends Codec<Signature> {
+	static class SignatureCodec extends Codec<Signature> {
 
 		private static final int DIGEST_LENGTH_FIELD = U_INT16;
 

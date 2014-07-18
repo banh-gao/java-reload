@@ -40,7 +40,7 @@ public enum SignatureAlgorithm {
 		return null;
 	}
 
-	public static class SignatureAlgorithmCodec extends Codec<SignatureAlgorithm> {
+	static class SignatureAlgorithmCodec extends Codec<SignatureAlgorithm> {
 
 		public SignatureAlgorithmCodec(Configuration conf) {
 			super(conf);

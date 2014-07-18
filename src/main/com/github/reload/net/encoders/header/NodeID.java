@@ -78,7 +78,7 @@ public class NodeID extends RoutableID {
 		return DestinationType.NODEID;
 	}
 
-	public static class NodeIdCodec extends Codec<NodeID> {
+	static class NodeIdCodec extends Codec<NodeID> {
 
 		private static final int NODE_ID_LENGTH = 16;
 

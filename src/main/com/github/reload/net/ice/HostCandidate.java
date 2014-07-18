@@ -26,7 +26,7 @@ public class HostCandidate extends IceCandidate {
 		return CandidateType.HOST;
 	}
 
-	public static class HostCandidateCodec extends Codec<HostCandidate> {
+	static class HostCandidateCodec extends Codec<HostCandidate> {
 
 		public HostCandidateCodec(Configuration conf) {
 			super(conf);

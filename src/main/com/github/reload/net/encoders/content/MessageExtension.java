@@ -57,7 +57,7 @@ public abstract class MessageExtension {
 		}
 	}
 
-	public static class MessageExtensionCodec extends Codec<MessageExtension> {
+	static class MessageExtensionCodec extends Codec<MessageExtension> {
 
 		private static final int EXTENSION_CONTENT_LENGTH_FIELD = U_INT32;
 

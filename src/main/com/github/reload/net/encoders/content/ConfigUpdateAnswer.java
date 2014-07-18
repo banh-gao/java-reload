@@ -14,7 +14,7 @@ public class ConfigUpdateAnswer extends Content {
 		return ContentType.CONFIG_UPDATE_ANS;
 	}
 
-	public static class ConfigUpdateAnsCodec extends Codec<ConfigUpdateAnswer> {
+	static class ConfigUpdateAnsCodec extends Codec<ConfigUpdateAnswer> {
 
 		public ConfigUpdateAnsCodec(Configuration conf) {
 			super(conf);

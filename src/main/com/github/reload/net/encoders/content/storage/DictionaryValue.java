@@ -99,7 +99,7 @@ public class DictionaryValue implements DataValue {
 		}
 	}
 
-	public static class KeyCodec extends Codec<Key> {
+	static class KeyCodec extends Codec<Key> {
 
 		private static final int KEY_LENGTH_FIELD = U_INT16;
 
@@ -125,7 +125,7 @@ public class DictionaryValue implements DataValue {
 
 	}
 
-	public static class DictionaryValueCodec extends Codec<DictionaryValue> {
+	static class DictionaryValueCodec extends Codec<DictionaryValue> {
 
 		private final Codec<SingleValue> valueCodec;
 		private final Codec<Key> keyCodec;

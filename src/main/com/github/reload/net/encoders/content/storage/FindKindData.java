@@ -64,7 +64,7 @@ public class FindKindData {
 		return "FindKindData [kind=" + kind + ", resourceId=" + resourceId + "]";
 	}
 
-	public static class FindKindDataCodec extends Codec<FindKindData> {
+	static class FindKindDataCodec extends Codec<FindKindData> {
 
 		private final Codec<DataKind> kindCodec;
 		private final Codec<ResourceID> resIdCodec;

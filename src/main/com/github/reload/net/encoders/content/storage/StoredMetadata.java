@@ -24,7 +24,7 @@ public class StoredMetadata extends StoredData {
 		return (Metadata<? extends DataValue>) super.getValue();
 	}
 
-	public static class StoredMetadataCodec extends Codec<StoredMetadata> {
+	static class StoredMetadataCodec extends Codec<StoredMetadata> {
 
 		private static final int STORAGE_TIME_FIELD = U_INT64;
 		private static final int DATA_LENGTH_FIELD = U_INT32;

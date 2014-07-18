@@ -35,7 +35,7 @@ public class FetchRequest extends Content {
 		return ContentType.FETCH_REQ;
 	}
 
-	public static class FetchRequestCodec extends Codec<FetchRequest> {
+	static class FetchRequestCodec extends Codec<FetchRequest> {
 
 		private static final int SPECIFIERS_LENGTH_FIELD = U_INT16;
 

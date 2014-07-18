@@ -7,12 +7,17 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.header.Header;
-import com.github.reload.net.encoders.header.HeaderCodec;
 
 /**
  * Codec used to process only the Forwarding Header part of the message
  */
 public class ForwardMessageCodec extends ByteToMessageCodec<ForwardMessage> {
+
+	/**
+	 * Size in bytes of the first part of the header from the beginning to the
+	 * message length field
+	 */
+	public static int HDR_LEADING_LEN = 16;
 
 	private final Codec<Header> hdrCodec;
 
@@ -48,6 +53,6 @@ public class ForwardMessageCodec extends ByteToMessageCodec<ForwardMessage> {
 
 	private void setMessageLength(ByteBuf buf, int messageStart) {
 		int messageLength = buf.writerIndex() - messageStart;
-		buf.setInt(messageStart + HeaderCodec.HDR_LEADING_LEN, messageLength);
+		buf.setInt(messageStart + HDR_LEADING_LEN, messageLength);
 	}
 }

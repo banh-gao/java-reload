@@ -60,7 +60,7 @@ public class ArrayMetadata implements Metadata<ArrayValue> {
 		return "ArrayMetadata [index=" + index + ", singleMeta=" + singleMeta + "]";
 	}
 
-	public static class ArrayMetadataCodec extends Codec<ArrayMetadata> {
+	static class ArrayMetadataCodec extends Codec<ArrayMetadata> {
 
 		private final Codec<SingleMetadata> singleCodec;
 

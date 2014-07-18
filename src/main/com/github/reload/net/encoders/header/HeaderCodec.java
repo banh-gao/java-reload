@@ -10,7 +10,7 @@ import com.github.reload.net.encoders.Codec;
  * RELOAD Header codec
  */
 
-public class HeaderCodec extends Codec<Header> {
+class HeaderCodec extends Codec<Header> {
 
 	private static final int RELOAD_TOKEN = (int) 0xd2454c4fL;
 
@@ -22,12 +22,6 @@ public class HeaderCodec extends Codec<Header> {
 	private static final short LAST_FRAGMENT_MASK = (short) 0x4000;
 
 	private static final int LISTS_LENGTH_FIELD = U_INT16;
-
-	/**
-	 * Size in bytes of the first part of the header from the beginning to the
-	 * message length field
-	 */
-	public static int HDR_LEADING_LEN = 16;
 
 	private static final short HEADER_MIN_LENGTH = 38;
 

@@ -48,7 +48,7 @@ public class ConfigUpdateRequest extends Content {
 		return xmlConfigurationData;
 	}
 
-	public static class ConfUpdateReqCodec extends Codec<ConfigUpdateRequest> {
+	static class ConfUpdateReqCodec extends Codec<ConfigUpdateRequest> {
 
 		private static final int CONF_LENGTH_FIELD = U_INT24;
 

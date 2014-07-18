@@ -7,11 +7,11 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import com.github.reload.Configuration;
-import com.github.reload.net.MessageBus;
 import com.github.reload.net.NetworkTest;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.net.stack.ReloadStack;
 import com.github.reload.net.stack.ReloadStackBuilder;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 public class MessageTest extends NetworkTest {
@@ -43,7 +43,7 @@ public class MessageTest extends NetworkTest {
 	@BeforeClass
 	public static void initPipeline() throws Exception {
 		Configuration conf = new Configuration();
-		MessageBus messageBus = new MessageBus();
+		EventBus messageBus = new EventBus();
 		ReloadStackBuilder b = new ReloadStackBuilder(conf, messageBus);
 		b.setLinkType(OverlayLinkType.TLS_TCP_FH_NO_ICE);
 

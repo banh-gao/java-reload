@@ -178,7 +178,7 @@ public class DataKind {
 		}
 	}
 
-	public static class DataKindCodec extends Codec<DataKind> {
+	static class DataKindCodec extends Codec<DataKind> {
 
 		public DataKindCodec(Configuration conf) {
 			super(conf);

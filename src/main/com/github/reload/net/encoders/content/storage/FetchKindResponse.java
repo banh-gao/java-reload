@@ -42,7 +42,7 @@ public class FetchKindResponse {
 		return values;
 	}
 
-	public static class FetchKindResponseCodec extends Codec<FetchKindResponse> {
+	static class FetchKindResponseCodec extends Codec<FetchKindResponse> {
 
 		private final static int GENERATION_FIELD = U_INT64;
 		private final static int VALUES_LENGTH_FIELD = U_INT32;

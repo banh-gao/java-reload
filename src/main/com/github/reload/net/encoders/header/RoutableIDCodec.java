@@ -6,7 +6,7 @@ import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.header.RoutableID.DestinationType;
 
-public class RoutableIDCodec extends Codec<RoutableID> {
+class RoutableIDCodec extends Codec<RoutableID> {
 
 	private static final int DEST_LENGTH_FIELD = U_INT8;
 

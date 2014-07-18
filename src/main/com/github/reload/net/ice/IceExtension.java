@@ -18,7 +18,7 @@ public class IceExtension {
 		this.value = value;
 	}
 
-	public static class IceExtensionCodec extends Codec<IceExtension> {
+	static class IceExtensionCodec extends Codec<IceExtension> {
 
 		private static final int NAME_LENGTH_FIELD = U_INT16;
 		private static final int VALUE_LENGTH_FIELD = U_INT16;

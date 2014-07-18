@@ -24,7 +24,7 @@ public class UpdateRequest extends Content {
 		return ContentType.UPDATE_REQ;
 	}
 
-	public static class UpdateRequestCodec extends Codec<UpdateRequest> {
+	static class UpdateRequestCodec extends Codec<UpdateRequest> {
 
 		public UpdateRequestCodec(Configuration conf) {
 			super(conf);

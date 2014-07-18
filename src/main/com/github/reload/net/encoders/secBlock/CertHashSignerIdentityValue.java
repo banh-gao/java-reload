@@ -47,7 +47,7 @@ public class CertHashSignerIdentityValue extends SignerIdentityValue {
 		return certHash;
 	}
 
-	public static class CertHashSignerIdentityValueCodec extends Codec<CertHashSignerIdentityValue> {
+	static class CertHashSignerIdentityValueCodec extends Codec<CertHashSignerIdentityValue> {
 
 		private final int CERT_HASH_LENGTH_FIELD = U_INT8;
 

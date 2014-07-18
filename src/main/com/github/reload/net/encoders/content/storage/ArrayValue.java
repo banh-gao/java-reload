@@ -56,7 +56,7 @@ public class ArrayValue implements DataValue {
 		return "ArrayValue [index=" + index + ", value=" + value + "]";
 	}
 
-	public static class ArrayEntryCodec extends Codec<ArrayValue> {
+	static class ArrayEntryCodec extends Codec<ArrayValue> {
 
 		private final Codec<SingleValue> valueCodec;
 

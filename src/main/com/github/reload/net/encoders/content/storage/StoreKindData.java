@@ -37,7 +37,7 @@ public class StoreKindData {
 		return data;
 	}
 
-	public static class StoreKindDataCodec extends Codec<StoreKindData> {
+	static class StoreKindDataCodec extends Codec<StoreKindData> {
 
 		protected static final int GEN_COUNTER_FIELD = U_INT64;
 		protected static final int VALUES_LENGTH_FIELD = U_INT32;

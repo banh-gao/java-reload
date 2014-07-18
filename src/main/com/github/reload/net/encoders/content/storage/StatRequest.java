@@ -20,7 +20,7 @@ public class StatRequest extends FetchRequest {
 		return ContentType.STAT_REQ;
 	}
 
-	public static class StatRequestCodec extends FetchRequestCodec {
+	static class StatRequestCodec extends FetchRequestCodec {
 
 		public StatRequestCodec(Configuration conf) {
 			super(conf);

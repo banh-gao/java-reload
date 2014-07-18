@@ -31,7 +31,7 @@ public class LeaveRequest extends Content {
 		return ContentType.LEAVE_REQ;
 	}
 
-	public static class LeaveRequestCodec extends Codec<LeaveRequest> {
+	static class LeaveRequestCodec extends Codec<LeaveRequest> {
 
 		private static final int DATA_LENGTH_FIELD = U_INT16;
 

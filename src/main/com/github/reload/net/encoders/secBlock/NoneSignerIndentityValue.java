@@ -9,7 +9,17 @@ import com.github.reload.net.encoders.secBlock.NoneSignerIndentityValue.NoneSign
 @ReloadCodec(NoneSignerIdentityValueCodec.class)
 class NoneSignerIndentityValue extends SignerIdentityValue {
 
-	public static class NoneSignerIdentityValueCodec extends Codec<NoneSignerIndentityValue> {
+	@Override
+	public HashAlgorithm getHashAlgorithm() {
+		return HashAlgorithm.NONE;
+	}
+
+	@Override
+	public byte[] getHashValue() {
+		return new byte[0];
+	}
+
+	static class NoneSignerIdentityValueCodec extends Codec<NoneSignerIndentityValue> {
 
 		public NoneSignerIdentityValueCodec(Configuration conf) {
 			super(conf);
@@ -25,16 +35,6 @@ class NoneSignerIndentityValue extends SignerIdentityValue {
 			return new NoneSignerIndentityValue();
 		}
 
-	}
-
-	@Override
-	public HashAlgorithm getHashAlgorithm() {
-		return HashAlgorithm.NONE;
-	}
-
-	@Override
-	public byte[] getHashValue() {
-		return new byte[0];
 	}
 
 }

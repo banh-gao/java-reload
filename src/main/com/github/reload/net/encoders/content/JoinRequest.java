@@ -31,7 +31,7 @@ public class JoinRequest extends Content {
 		return ContentType.JOIN_REQ;
 	}
 
-	public static class JoinRequestCodec extends Codec<JoinRequest> {
+	static class JoinRequestCodec extends Codec<JoinRequest> {
 
 		private static final int DATA_LENGTH_FIELD = U_INT16;
 

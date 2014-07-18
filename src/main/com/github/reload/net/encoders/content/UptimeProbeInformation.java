@@ -37,7 +37,7 @@ public class UptimeProbeInformation extends ProbeInformation {
 		return "UptimeProbeInformation [uptime=" + uptime + "]";
 	}
 
-	public static class UptimeCodec extends Codec<UptimeProbeInformation> {
+	static class UptimeCodec extends Codec<UptimeProbeInformation> {
 
 		public UptimeCodec(Configuration conf) {
 			super(conf);

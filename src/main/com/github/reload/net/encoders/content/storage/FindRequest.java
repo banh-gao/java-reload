@@ -38,7 +38,7 @@ public class FindRequest extends Content {
 		return kinds;
 	}
 
-	public static class FindRequestCodec extends Codec<FindRequest> {
+	static class FindRequestCodec extends Codec<FindRequest> {
 
 		private static final int KINDS_LENGTH_FIELD = U_INT8;
 

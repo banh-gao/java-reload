@@ -31,7 +31,7 @@ public class ProbeAnswer extends Content {
 		return "ProbeAnswer [info=" + probeInfo + "]";
 	}
 
-	public static class ProbeAnswerCodec extends Codec<ProbeAnswer> {
+	static class ProbeAnswerCodec extends Codec<ProbeAnswer> {
 
 		private static final int LIST_LENGTH_FIELD = U_INT16;
 

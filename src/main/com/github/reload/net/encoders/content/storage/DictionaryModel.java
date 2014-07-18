@@ -121,7 +121,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 
 	}
 
-	public static class DictionaryModelSpecifierCodec extends Codec<DictionaryModelSpecifier> {
+	static class DictionaryModelSpecifierCodec extends Codec<DictionaryModelSpecifier> {
 
 		private static final int KEYS_LENGTH_FIELD = U_INT16;
 		private static final int KEY_ENTRY_FIELD = U_INT16;

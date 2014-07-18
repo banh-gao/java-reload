@@ -58,7 +58,7 @@ public class Error extends Content {
 		return true;
 	}
 
-	public static class ErrorCodec extends Codec<Error> {
+	static class ErrorCodec extends Codec<Error> {
 
 		private static final int INFO_LENGTH_FIELD = U_INT16;
 

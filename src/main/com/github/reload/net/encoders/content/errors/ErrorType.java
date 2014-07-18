@@ -2,7 +2,7 @@ package com.github.reload.net.encoders.content.errors;
 
 import java.util.EnumSet;
 import com.github.reload.net.encoders.content.MessageExtension.UnknownExtensionException;
-import com.github.reload.net.encoders.header.ForwardingOptionCodec.UnsupportedFwdOptionException;
+import com.github.reload.net.encoders.header.ForwardingOption.UnsupportedFwdOptionException;
 import com.github.reload.storage.errors.DataTooLargeException;
 import com.github.reload.storage.errors.DataTooOldException;
 import com.github.reload.storage.errors.ForbittenException;

@@ -14,7 +14,7 @@ public class LeaveAnswer extends Content {
 		return ContentType.LEAVE_ANS;
 	}
 
-	public static class LeaveAnswerCodec extends Codec<LeaveAnswer> {
+	static class LeaveAnswerCodec extends Codec<LeaveAnswer> {
 
 		public LeaveAnswerCodec(Configuration conf) {
 			super(conf);

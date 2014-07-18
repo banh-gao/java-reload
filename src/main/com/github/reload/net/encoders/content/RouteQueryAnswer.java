@@ -24,7 +24,7 @@ public class RouteQueryAnswer extends Content {
 		return ContentType.ROUTE_QUERY_ANS;
 	}
 
-	public static class RouteQueryAnswerCodec extends Codec<RouteQueryAnswer> {
+	static class RouteQueryAnswerCodec extends Codec<RouteQueryAnswer> {
 
 		public RouteQueryAnswerCodec(Configuration conf) {
 			super(conf);

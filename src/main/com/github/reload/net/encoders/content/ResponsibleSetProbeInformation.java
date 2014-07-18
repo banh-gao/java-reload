@@ -35,7 +35,7 @@ public class ResponsibleSetProbeInformation extends ProbeInformation {
 		return "ResponsibleSetProbeInformation [responsiblePpb=" + responsiblePpb + "]";
 	}
 
-	public static class RespSetCodec extends Codec<ResponsibleSetProbeInformation> {
+	static class RespSetCodec extends Codec<ResponsibleSetProbeInformation> {
 
 		public RespSetCodec(Configuration conf) {
 			super(conf);

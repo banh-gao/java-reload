@@ -110,7 +110,7 @@ public class SignerIdentity {
 		return out.toString();
 	}
 
-	public static class SignerIdentityCodec extends Codec<SignerIdentity> {
+	static class SignerIdentityCodec extends Codec<SignerIdentity> {
 
 		private final static int VALUE_LENGTH_FIELD = U_INT16;
 

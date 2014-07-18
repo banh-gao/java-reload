@@ -33,7 +33,7 @@ public class FindAnswer extends Content {
 		return "FindAnswer [data=" + data + "]";
 	}
 
-	public static class FindAnswerCodec extends Codec<FindAnswer> {
+	static class FindAnswerCodec extends Codec<FindAnswer> {
 
 		private static final int LIST_LENGTH_FIELD = U_INT16;
 

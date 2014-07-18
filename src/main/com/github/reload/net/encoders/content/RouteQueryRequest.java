@@ -37,7 +37,7 @@ public class RouteQueryRequest extends Content {
 		return overlayData;
 	}
 
-	public static class RouteQueryRequestCodec extends Codec<RouteQueryRequest> {
+	static class RouteQueryRequestCodec extends Codec<RouteQueryRequest> {
 
 		private static final int DATA_LENGTH_FIELD = U_INT16;
 

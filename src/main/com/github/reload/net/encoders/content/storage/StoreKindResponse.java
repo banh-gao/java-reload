@@ -41,7 +41,7 @@ public class StoreKindResponse {
 		return "StoreKindResponse [kind=" + kind.getKindId() + ", generation=" + generation + ", replicas=" + replicas + "]";
 	}
 
-	public static class StoreKindResponseCodec extends Codec<StoreKindResponse> {
+	static class StoreKindResponseCodec extends Codec<StoreKindResponse> {
 
 		private static final int GENERATION_FIELD = U_INT64;
 		private static final int REPLICAS_LENGTH_FIELD = U_INT16;

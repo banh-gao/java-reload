@@ -129,6 +129,7 @@ public abstract class Codec<T> {
 
 		try {
 			Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(Configuration.class);
+			codecConstr.setAccessible(true);
 			return (Codec<T>) codecConstr.newInstance(conf);
 		} catch (Exception e) {
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);

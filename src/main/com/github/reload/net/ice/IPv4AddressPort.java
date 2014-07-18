@@ -21,7 +21,7 @@ public class IPv4AddressPort extends IPAddressPort {
 		return AddressType.IPv4;
 	}
 
-	public static class IPv4AddresPortCodec extends Codec<IPv4AddressPort> {
+	static class IPv4AddresPortCodec extends Codec<IPv4AddressPort> {
 
 		private static final int ADDR_LENGTH = U_INT32;
 

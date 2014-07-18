@@ -37,7 +37,7 @@ public final class ResourceID extends RoutableID {
 		return DestinationType.RESOURCEID;
 	}
 
-	public static class ResourceIDCodec extends Codec<ResourceID> {
+	static class ResourceIDCodec extends Codec<ResourceID> {
 
 		public ResourceIDCodec(Configuration conf) {
 			super(conf);

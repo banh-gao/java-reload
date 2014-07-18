@@ -73,7 +73,7 @@ public class SingleModel extends DataModel<SingleValue> {
 
 	}
 
-	public static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {
+	static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {
 
 		public SingleModelSpecifierCodec(Configuration conf) {
 			super(conf);

@@ -43,7 +43,7 @@ public enum HashAlgorithm {
 		return null;
 	}
 
-	public static class HashAlgorithmCodec extends Codec<HashAlgorithm> {
+	static class HashAlgorithmCodec extends Codec<HashAlgorithm> {
 
 		public HashAlgorithmCodec(Configuration conf) {
 			super(conf);

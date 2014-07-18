@@ -12,7 +12,7 @@ public abstract class ProbeInformation {
 
 	protected abstract ProbeInformationType getType();
 
-	public static class ProbeInformationCodec extends Codec<ProbeInformation> {
+	static class ProbeInformationCodec extends Codec<ProbeInformation> {
 
 		private static final int INFORMATION_LENGTH_FIELD = U_INT8;
 

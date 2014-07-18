@@ -24,7 +24,7 @@ public class JoinAnswer extends Content {
 		return ContentType.JOIN_ANS;
 	}
 
-	public static class JoinAnswerCodec extends Codec<JoinAnswer> {
+	static class JoinAnswerCodec extends Codec<JoinAnswer> {
 
 		private static final int DATA_LENGTH_FIELD = U_INT16;
 

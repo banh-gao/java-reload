@@ -76,7 +76,7 @@ public class StoredDataSpecifier {
 		return "StoredDataSpecifier [kind=" + kind + ", generation=" + generation + ", modelSpecifier=" + modelSpecifier + "]";
 	}
 
-	public static class StoredDataSpecifierCodec extends Codec<StoredDataSpecifier> {
+	static class StoredDataSpecifierCodec extends Codec<StoredDataSpecifier> {
 
 		private static final int GENERATION_FIELD = U_INT64;
 		private static final int MODEL_SPEC_LENGTH_FIELD = U_INT16;

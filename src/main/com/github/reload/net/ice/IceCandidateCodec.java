@@ -8,7 +8,7 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.ice.IceCandidate.CandidateType;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
-public class IceCandidateCodec extends Codec<IceCandidate> {
+class IceCandidateCodec extends Codec<IceCandidate> {
 
 	private static final int FOUNDATION_LENGTH_FIELD = U_INT8;
 	private static final int EXTENSIONS_LENGTH_FIELD = U_INT16;

@@ -29,7 +29,7 @@ public class PingRequest extends Content {
 		return ContentType.PING_REQ;
 	}
 
-	public static class PingRequestCodec extends Codec<PingRequest> {
+	static class PingRequestCodec extends Codec<PingRequest> {
 
 		private static final int PADDING_LENGTH_FIELD = U_INT16;
 

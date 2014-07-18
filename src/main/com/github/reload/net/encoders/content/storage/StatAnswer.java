@@ -28,7 +28,7 @@ public class StatAnswer extends Content {
 		return ContentType.STAT_ANS;
 	}
 
-	public static class StatAnswerCodec extends Codec<StatAnswer> {
+	static class StatAnswerCodec extends Codec<StatAnswer> {
 
 		private static final int RESPONSES_LENGTH_FIELD = U_INT32;
 

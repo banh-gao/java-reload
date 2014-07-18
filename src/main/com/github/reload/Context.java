@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.Map;
+import com.github.reload.net.MessageBus;
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.EventBus;
 
 /**
  * Application context where all application components are registered.
@@ -18,10 +18,10 @@ public class Context {
 
 	private final Map<Class<? extends Component>, Component> components = Maps.newHashMap();
 
-	private final EventBus messageBus;
+	private final MessageBus messageBus;
 
 	public Context() {
-		this.messageBus = new EventBus();
+		this.messageBus = new MessageBus();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -73,7 +73,7 @@ public class Context {
 		return cmp;
 	}
 
-	public EventBus getMessageBus() {
+	public MessageBus getMessageBus() {
 		return messageBus;
 	}
 

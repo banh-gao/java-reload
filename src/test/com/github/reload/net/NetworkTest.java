@@ -62,7 +62,7 @@ public class NetworkTest {
 
 	@AfterClass
 	public static void shutdownServer() throws InterruptedException {
-		workerGroup.shutdownGracefully().sync();
+		workerGroup.shutdownGracefully();
 	}
 
 	public static MsgTester initTester(final List<? extends ChannelHandler> handlers) throws Exception {

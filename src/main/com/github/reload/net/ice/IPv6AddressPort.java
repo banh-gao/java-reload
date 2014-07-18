@@ -21,7 +21,7 @@ public class IPv6AddressPort extends IPAddressPort {
 		return AddressType.IPv6;
 	}
 
-	public static class IPv6AddressPortCodec extends Codec<IPv6AddressPort> {
+	static class IPv6AddressPortCodec extends Codec<IPv6AddressPort> {
 
 		private static final int ADDR_LENGTH = U_INT128;
 

@@ -57,7 +57,7 @@ public class SingleValue implements DataValue {
 		return "SingleValue [valueLength=" + value.length + ", exists=" + exists + "]";
 	}
 
-	public static class SingleEntryCodec extends Codec<SingleValue> {
+	static class SingleEntryCodec extends Codec<SingleValue> {
 
 		final static int VALUE_LENGTH_FIELD = U_INT32;
 

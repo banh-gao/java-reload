@@ -28,7 +28,7 @@ public class FetchAnswer extends Content {
 		return ContentType.FETCH_ANS;
 	}
 
-	public static class FetchAnswerCodec extends Codec<FetchAnswer> {
+	static class FetchAnswerCodec extends Codec<FetchAnswer> {
 
 		private static final int RESPONSES_LENGTH_FIELD = U_INT32;
 

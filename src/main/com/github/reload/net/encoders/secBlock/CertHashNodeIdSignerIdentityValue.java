@@ -50,7 +50,7 @@ public class CertHashNodeIdSignerIdentityValue extends SignerIdentityValue {
 		return certHash;
 	}
 
-	public static class CertHashNodeIdSignerIdentityValueCodec extends Codec<CertHashNodeIdSignerIdentityValue> {
+	static class CertHashNodeIdSignerIdentityValueCodec extends Codec<CertHashNodeIdSignerIdentityValue> {
 
 		private final int CERT_HASH_NODEID_LENGTH_FIELD = U_INT8;
 

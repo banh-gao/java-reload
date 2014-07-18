@@ -23,7 +23,7 @@ public class SecurityBlock {
 		this.signature = signature;
 	}
 
-	public static class SecurityBlockCodec extends Codec<SecurityBlock> {
+	static class SecurityBlockCodec extends Codec<SecurityBlock> {
 
 		private static final int CERTS_LENGTH_FIELD = U_INT16;
 

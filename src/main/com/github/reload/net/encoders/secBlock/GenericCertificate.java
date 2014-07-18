@@ -56,7 +56,7 @@ public class GenericCertificate {
 		this.certificate = certificate;
 	}
 
-	public static class GenericCertificateCodec extends Codec<GenericCertificate> {
+	static class GenericCertificateCodec extends Codec<GenericCertificate> {
 
 		private static final int CERT_LENGTH_FIELD = U_INT16;
 

@@ -16,7 +16,7 @@ public class UnknownForwardingOption extends ForwardingOption {
 		return ForwardingOptionType.UNKNOWN_OPTION;
 	}
 
-	public static class UnknownForwardingOptionCodec extends Codec<UnknownForwardingOption> {
+	static class UnknownForwardingOptionCodec extends Codec<UnknownForwardingOption> {
 
 		public UnknownForwardingOptionCodec(Configuration conf) {
 			super(conf);

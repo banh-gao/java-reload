@@ -41,7 +41,7 @@ public class StoreRequest extends Content {
 		return replicaNumber;
 	}
 
-	public static class StoreRequestCodec extends Codec<StoreRequest> {
+	static class StoreRequestCodec extends Codec<StoreRequest> {
 
 		private static final int STOREDKINDDATA_LENGTH_FIELD = U_INT32;
 

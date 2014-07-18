@@ -107,7 +107,7 @@ public class AttachMessage extends Content {
 		}
 	}
 
-	public static class AttachMessageCodec extends Codec<AttachMessage> {
+	static class AttachMessageCodec extends Codec<AttachMessage> {
 
 		private final static byte[] ROLE_ACTIVE = "active".getBytes(Charset.forName("US-ASCII"));
 		private final static byte[] ROLE_PASSIVE = "passive".getBytes(Charset.forName("US-ASCII"));

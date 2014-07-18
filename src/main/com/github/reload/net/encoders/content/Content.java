@@ -50,7 +50,7 @@ public abstract class Content {
 		return getType().isAnswer();
 	}
 
-	public static class ContentCodec extends Codec<Content> {
+	static class ContentCodec extends Codec<Content> {
 
 		private static final int BODY_LENGTH_FIELD = U_INT32;
 		private static final int EXTENSIONS_LENGTH_FIELD = U_INT32;

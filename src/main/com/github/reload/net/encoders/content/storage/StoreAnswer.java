@@ -28,7 +28,7 @@ public class StoreAnswer extends Content {
 		return ContentType.STORE_ANS;
 	}
 
-	public static class StoreAnswerCodec extends Codec<StoreAnswer> {
+	static class StoreAnswerCodec extends Codec<StoreAnswer> {
 
 		private static final int RESPONSES_LENGTH_FIELD = U_INT16;
 

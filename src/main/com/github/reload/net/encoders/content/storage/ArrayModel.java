@@ -201,7 +201,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		}
 	}
 
-	public static class ArrayModelSpecifierCodec extends Codec<ArrayModelSpecifier> {
+	static class ArrayModelSpecifierCodec extends Codec<ArrayModelSpecifier> {
 
 		private static final int RANGES_LENGTH_FIELD = U_INT16;
 

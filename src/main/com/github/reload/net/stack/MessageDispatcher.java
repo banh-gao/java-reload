@@ -4,8 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.net.MessageBus;
 import com.github.reload.net.encoders.Message;
+import com.google.common.eventbus.EventBus;
 
 /**
  * Message handler at the end of the input pipeline that dispatches incoming
@@ -14,9 +14,9 @@ import com.github.reload.net.encoders.Message;
 public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 
 	private final Logger l = Logger.getRootLogger();
-	private MessageBus msgBus;
+	private EventBus msgBus;
 
-	public MessageDispatcher(MessageBus msgBus) {
+	public MessageDispatcher(EventBus msgBus) {
 		this.msgBus = msgBus;
 	}
 

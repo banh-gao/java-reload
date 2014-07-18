@@ -124,7 +124,7 @@ public class AppAttachMessage extends Content {
 			return ContentType.APPATTACH_REQ;
 	}
 
-	public static class AppAttachMessageCodec extends Codec<AppAttachMessage> {
+	static class AppAttachMessageCodec extends Codec<AppAttachMessage> {
 
 		private final static int UFRAG_LENGTH_FIELD = U_INT8;
 		private final static int PASS_LENGTH_FIELD = U_INT8;

@@ -34,7 +34,7 @@ public class OpaqueID extends RoutableID {
 		return DestinationType.OPAQUEID;
 	}
 
-	public static class OpaqueIdCodec extends Codec<OpaqueID> {
+	static class OpaqueIdCodec extends Codec<OpaqueID> {
 
 		private static final int OPAQUE_LENGTH_FIELD = U_INT8;
 

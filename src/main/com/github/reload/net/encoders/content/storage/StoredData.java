@@ -81,7 +81,7 @@ public class StoredData {
 		return "StoredData [storageTime=" + storageTime + ", lifeTime=" + lifeTime + ", value=" + value + ", signature=" + signature + "]";
 	}
 
-	public static class StoredDataCodec extends Codec<StoredData> {
+	static class StoredDataCodec extends Codec<StoredData> {
 
 		private static final int STORAGE_TIME_FIELD = U_INT64;
 		private static final int DATA_LENGTH_FIELD = U_INT32;

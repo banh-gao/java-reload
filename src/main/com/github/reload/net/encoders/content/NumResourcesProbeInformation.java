@@ -34,7 +34,7 @@ public class NumResourcesProbeInformation extends ProbeInformation {
 		return "NumResourcesProbeInformation [numResources=" + numResources + "]";
 	}
 
-	public static class NumResCodec extends Codec<NumResourcesProbeInformation> {
+	static class NumResCodec extends Codec<NumResourcesProbeInformation> {
 
 		public NumResCodec(Configuration conf) {
 			super(conf);

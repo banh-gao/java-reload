@@ -93,7 +93,7 @@ public class SingleMetadata implements Metadata<SingleValue> {
 		return "SingleMetadata [exists=" + exists + ", storedValueSize=" + storedValueSize + ", hashAlgorithm=" + hashAlgorithm + ", hashValue=" + Arrays.toString(hashValue) + "]";
 	}
 
-	public static class SingleMetadataCodec extends Codec<SingleMetadata> {
+	static class SingleMetadataCodec extends Codec<SingleMetadata> {
 
 		private static final int HASHVALUE_LENGTH_FIELD = U_INT8;
 

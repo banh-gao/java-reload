@@ -64,7 +64,7 @@ public class ProbeRequest extends Content {
 		}
 	}
 
-	public static class ProbeRequestCodec extends Codec<ProbeRequest> {
+	static class ProbeRequestCodec extends Codec<ProbeRequest> {
 
 		private static final int LIST_LENGTH_FIELD = U_INT8;
 

@@ -13,23 +13,23 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.Configuration;
-import com.github.reload.net.MessageBus;
-import com.github.reload.net.encoders.FramedMessageCodec;
 import com.github.reload.net.encoders.ForwardMessageCodec;
+import com.github.reload.net.encoders.FramedMessageCodec;
 import com.github.reload.net.encoders.MessageCodec;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.google.common.eventbus.EventBus;
 
 public class ReloadStackBuilder {
 
 	private final Configuration conf;
-	private final MessageBus messageBus;
+	private final EventBus messageBus;
 
 	private Bootstrap bootstrap = new Bootstrap();
 	private SslHandler sslHandler;
 	private LinkHandler linkHandler;
 	private InetSocketAddress localAddress;
 
-	public ReloadStackBuilder(Configuration conf, MessageBus messageBus) {
+	public ReloadStackBuilder(Configuration conf, EventBus messageBus) {
 		this.conf = conf;
 		this.messageBus = messageBus;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();

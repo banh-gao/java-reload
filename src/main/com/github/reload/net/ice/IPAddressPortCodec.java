@@ -5,7 +5,7 @@ import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.ice.IPAddressPort.AddressType;
 
-public class IPAddressPortCodec extends Codec<IPAddressPort> {
+class IPAddressPortCodec extends Codec<IPAddressPort> {
 
 	public static final int ADDR_LENGTH_FIELD = U_INT8;
 

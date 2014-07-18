@@ -16,7 +16,7 @@ public abstract class SignerIdentityValue {
 
 	public abstract byte[] getHashValue();
 
-	public static class SignerIdentityValueCodec extends Codec<SignerIdentityValue> {
+	static class SignerIdentityValueCodec extends Codec<SignerIdentityValue> {
 
 		public SignerIdentityValueCodec(Configuration conf) {
 			super(conf);

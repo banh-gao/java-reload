@@ -80,7 +80,7 @@ public class StatKindResponse {
 		return "StatKindResponse [kind=" + kind + ", generation=" + generation + ", values=" + values + "]";
 	}
 
-	public static class StatKindResponseCodec extends Codec<StatKindResponse> {
+	static class StatKindResponseCodec extends Codec<StatKindResponse> {
 
 		private final static int GENERATION_FIELD = U_INT64;
 		private final static int VALUES_LENGTH_FIELD = U_INT32;

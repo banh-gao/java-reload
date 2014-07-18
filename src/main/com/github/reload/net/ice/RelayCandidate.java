@@ -29,7 +29,7 @@ public class RelayCandidate extends IceCandidate {
 		return CandidateType.RELAY;
 	}
 
-	public static class RelayCandidateCodec extends Codec<RelayCandidate> {
+	static class RelayCandidateCodec extends Codec<RelayCandidate> {
 
 		private final Codec<IPAddressPort> sockAddrCodec;
 

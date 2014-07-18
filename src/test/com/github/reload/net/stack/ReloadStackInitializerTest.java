@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import org.junit.Test;
 import com.github.reload.Configuration;
-import com.github.reload.net.MessageBus;
 import com.github.reload.net.NetworkTest;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.Content;
@@ -15,6 +14,7 @@ import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 public class ReloadStackInitializerTest extends NetworkTest {
@@ -23,7 +23,7 @@ public class ReloadStackInitializerTest extends NetworkTest {
 	public void test() throws Exception {
 		Configuration conf = new Configuration();
 		conf.setOverlayAttribute(Configuration.NODE_ID_LENGTH, 4);
-		MessageBus messageBus = new MessageBus();
+		EventBus messageBus = new EventBus();
 		ReloadStackBuilder b = new ReloadStackBuilder(conf, messageBus);
 		b.setLinkType(OverlayLinkType.TLS_TCP_FH_NO_ICE);
 

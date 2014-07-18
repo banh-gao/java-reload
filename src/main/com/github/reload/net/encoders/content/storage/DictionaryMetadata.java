@@ -60,7 +60,7 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		return "DictionaryMetadata [key=" + key + ", singleMeta=" + singleMeta + "]";
 	}
 
-	public static class DictionaryMetadataCodec extends Codec<DictionaryMetadata> {
+	static class DictionaryMetadataCodec extends Codec<DictionaryMetadata> {
 
 		private final Codec<Key> keyCodec;
 		private final Codec<SingleMetadata> singleCodec;

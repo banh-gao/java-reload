@@ -42,7 +42,7 @@ public class PingAnswer extends Content {
 		return "PingAnswer [responseId=" + responseId + ", responseTime=" + responseTime + "]";
 	}
 
-	public static class PingAnswerCodec extends Codec<PingAnswer> {
+	static class PingAnswerCodec extends Codec<PingAnswer> {
 
 		private static final int RESPONSE_TIME_SIZE = U_INT64;
 
