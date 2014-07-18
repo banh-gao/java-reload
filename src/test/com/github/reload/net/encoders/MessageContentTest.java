@@ -22,6 +22,8 @@ import com.github.reload.net.encoders.content.RouteQueryAnswer;
 import com.github.reload.net.encoders.content.RouteQueryRequest;
 import com.github.reload.net.encoders.content.UpdateAnswer;
 import com.github.reload.net.encoders.content.UpdateRequest;
+import com.github.reload.net.encoders.content.errors.Error;
+import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
@@ -198,6 +200,16 @@ public class MessageContentTest extends MessageTest {
 		LeaveAnswer echo = sendContent(content);
 
 		Assert.assertEquals(content.isAnswer(), echo.isAnswer());
+	}
+
+	@Test
+	public void testError() throws Exception {
+		Error content = new Error(ErrorType.NOT_FOUND, "Test error message");
+
+		Error echo = sendContent(content);
+
+		Assert.assertEquals(content.getErrorType(), echo.getErrorType());
+		Assert.assertEquals(content.getInfo(), echo.getInfo());
 	}
 
 }
