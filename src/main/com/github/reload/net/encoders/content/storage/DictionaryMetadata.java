@@ -1,12 +1,12 @@
 package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.DictionaryMetadata.DictionaryMetadataCodec;
 import com.github.reload.net.encoders.content.storage.DictionaryValue.Key;
-import com.github.reload.storage.DataModel;
 import com.github.reload.storage.DataModel.Metadata;
 
 /**
@@ -26,6 +26,38 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 
 	public Key getKey() {
 		return key;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), key, singleMeta);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DictionaryMetadata other = (DictionaryMetadata) obj;
+		if (key == null) {
+			if (other.key != null)
+				return false;
+		} else if (!key.equals(other.key))
+			return false;
+		if (singleMeta == null) {
+			if (other.singleMeta != null)
+				return false;
+		} else if (!singleMeta.equals(other.singleMeta))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "DictionaryMetadata [key=" + key + ", singleMeta=" + singleMeta + "]";
 	}
 
 	public static class DictionaryMetadataCodec extends Codec<DictionaryMetadata> {
@@ -53,4 +85,5 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		}
 
 	}
+
 }

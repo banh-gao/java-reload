@@ -44,6 +44,7 @@ public class FetchKindResponse {
 
 	public static class FetchKindResponseCodec extends Codec<FetchKindResponse> {
 
+		private final static int GENERATION_FIELD = U_INT64;
 		private final static int VALUES_LENGTH_FIELD = U_INT32;
 
 		private final Codec<DataKind> dataKindCodec;
@@ -58,7 +59,14 @@ public class FetchKindResponse {
 		@Override
 		public void encode(FetchKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			dataKindCodec.encode(obj.kind, buf);
-			buf.writeBytes(obj.generation.toByteArray());
+
+			byte[] genBytes = obj.generation.toByteArray();
+
+			// Make sure the field is of a fixed size by padding with zeros
+			buf.writeZero(GENERATION_FIELD - genBytes.length);
+
+			buf.writeBytes(genBytes);
+
 			encodeData(obj, buf);
 		}
 
@@ -74,7 +82,7 @@ public class FetchKindResponse {
 		public FetchKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = dataKindCodec.decode(buf);
 
-			byte[] genData = new byte[8];
+			byte[] genData = new byte[GENERATION_FIELD];
 			buf.readBytes(genData);
 			BigInteger generation = new BigInteger(1, genData);
 

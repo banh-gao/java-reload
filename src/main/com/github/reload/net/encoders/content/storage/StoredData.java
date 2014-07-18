@@ -2,6 +2,7 @@ package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -39,6 +40,45 @@ public class StoredData {
 
 	Signature getSignature() {
 		return signature;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), storageTime, lifeTime, value, signature);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		StoredData other = (StoredData) obj;
+		if (lifeTime != other.lifeTime)
+			return false;
+		if (signature == null) {
+			if (other.signature != null)
+				return false;
+		} else if (!signature.equals(other.signature))
+			return false;
+		if (storageTime == null) {
+			if (other.storageTime != null)
+				return false;
+		} else if (!storageTime.equals(other.storageTime))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "StoredData [storageTime=" + storageTime + ", lifeTime=" + lifeTime + ", value=" + value + ", signature=" + signature + "]";
 	}
 
 	public static class StoredDataCodec extends Codec<StoredData> {

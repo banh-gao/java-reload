@@ -55,6 +55,11 @@ public class DictionaryValue implements DataValue {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "DictionaryValue [key=" + key + ", value=" + value + "]";
+	}
+
 	static public class Key {
 
 		private final byte[] data;
@@ -145,4 +150,5 @@ public class DictionaryValue implements DataValue {
 		}
 
 	}
+
 }

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -42,8 +43,46 @@ public class StatKindResponse {
 		return values;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), kind, generation, values);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		StatKindResponse other = (StatKindResponse) obj;
+		if (generation == null) {
+			if (other.generation != null)
+				return false;
+		} else if (!generation.equals(other.generation))
+			return false;
+		if (kind == null) {
+			if (other.kind != null)
+				return false;
+		} else if (!kind.equals(other.kind))
+			return false;
+		if (values == null) {
+			if (other.values != null)
+				return false;
+		} else if (!values.equals(other.values))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "StatKindResponse [kind=" + kind + ", generation=" + generation + ", values=" + values + "]";
+	}
+
 	public static class StatKindResponseCodec extends Codec<StatKindResponse> {
 
+		private final static int GENERATION_FIELD = U_INT64;
 		private final static int VALUES_LENGTH_FIELD = U_INT32;
 
 		private final Codec<DataKind> dataKindCodec;
@@ -58,7 +97,13 @@ public class StatKindResponse {
 		@Override
 		public void encode(StatKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			dataKindCodec.encode(obj.kind, buf);
-			buf.writeBytes(obj.generation.toByteArray());
+
+			byte[] genBytes = obj.generation.toByteArray();
+
+			// Make sure the field has a fixed size by padding with zeros
+			buf.writeZero(GENERATION_FIELD - genBytes.length);
+			buf.writeBytes(genBytes);
+
 			encodeData(obj, buf);
 		}
 
@@ -74,7 +119,7 @@ public class StatKindResponse {
 		public StatKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = dataKindCodec.decode(buf);
 
-			byte[] genData = new byte[8];
+			byte[] genData = new byte[GENERATION_FIELD];
 			buf.readBytes(genData);
 			BigInteger generation = new BigInteger(1, genData);
 
@@ -99,4 +144,5 @@ public class StatKindResponse {
 		}
 
 	}
+
 }

@@ -26,10 +26,30 @@ public class StoredMetadata extends StoredData {
 
 	public static class StoredMetadataCodec extends Codec<StoredMetadata> {
 
+		private static final int STORAGE_TIME_FIELD = U_INT64;
 		private static final int DATA_LENGTH_FIELD = U_INT32;
 
 		public StoredMetadataCodec(Configuration conf) {
 			super(conf);
+		}
+
+		@Override
+		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
+
+			byte[] storTimeBytes = obj.getStorageTime().toByteArray();
+			// Make sure the field has always a fixed size by padding with zeros
+			buf.writeZero(STORAGE_TIME_FIELD - storTimeBytes.length);
+			buf.writeBytes(storTimeBytes);
+
+			buf.writeInt((int) obj.getLifeTime());
+
+			@SuppressWarnings("unchecked")
+			Codec<Metadata<? extends DataValue>> valueCodec = (Codec<Metadata<? extends DataValue>>) getCodec(obj.getValue().getClass());
+
+			valueCodec.encode(obj.getValue(), buf);
+
+			lenFld.updateDataLength();
 		}
 
 		@Override
@@ -39,7 +59,7 @@ public class StoredMetadata extends StoredData {
 
 			ByteBuf dataFld = readField(buf, DATA_LENGTH_FIELD);
 
-			byte[] storageTimeRaw = new byte[8];
+			byte[] storageTimeRaw = new byte[STORAGE_TIME_FIELD];
 			dataFld.readBytes(storageTimeRaw);
 			BigInteger storageTime = new BigInteger(1, storageTimeRaw);
 
@@ -51,21 +71,6 @@ public class StoredMetadata extends StoredData {
 			Metadata<? extends DataValue> value = valueCodec.decode(dataFld);
 
 			return new StoredMetadata(storageTime, lifeTime, value);
-		}
-
-		@Override
-		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
-			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
-
-			buf.writeBytes(obj.getStorageTime().toByteArray());
-			buf.writeInt((int) obj.getLifeTime());
-
-			@SuppressWarnings("unchecked")
-			Codec<Metadata<? extends DataValue>> valueCodec = (Codec<Metadata<? extends DataValue>>) getCodec(obj.getValue().getClass());
-
-			valueCodec.encode(obj.getValue(), buf);
-
-			lenFld.updateDataLength();
 		}
 
 	}

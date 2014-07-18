@@ -51,6 +51,11 @@ public class ArrayValue implements DataValue {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "ArrayValue [index=" + index + ", value=" + value + "]";
+	}
+
 	public static class ArrayEntryCodec extends Codec<ArrayValue> {
 
 		private final Codec<SingleValue> valueCodec;

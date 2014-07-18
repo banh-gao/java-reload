@@ -1,8 +1,8 @@
 package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -13,9 +13,9 @@ import com.github.reload.net.encoders.content.storage.FindAnswer.FindAnswerCodec
 @ReloadCodec(FindAnswerCodec.class)
 public class FindAnswer extends Content {
 
-	private final List<FindKindData> data;
+	private final Set<FindKindData> data;
 
-	public FindAnswer(List<FindKindData> data) {
+	public FindAnswer(Set<FindKindData> data) {
 		this.data = data;
 	}
 
@@ -24,7 +24,7 @@ public class FindAnswer extends Content {
 		return ContentType.FIND_ANS;
 	}
 
-	public List<FindKindData> getData() {
+	public Set<FindKindData> getData() {
 		return data;
 	}
 
@@ -59,7 +59,7 @@ public class FindAnswer extends Content {
 		public FindAnswer decode(ByteBuf buf, Object... params) throws CodecException {
 			ByteBuf kindDataBuf = readField(buf, LIST_LENGTH_FIELD);
 
-			List<FindKindData> kindData = new ArrayList<FindKindData>();
+			Set<FindKindData> kindData = new HashSet<FindKindData>();
 
 			while (kindDataBuf.readableBytes() > 0) {
 				kindData.add(kindDataCodec.decode(kindDataBuf));

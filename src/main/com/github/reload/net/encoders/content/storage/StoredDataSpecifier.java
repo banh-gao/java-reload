@@ -2,6 +2,7 @@ package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -14,7 +15,7 @@ import com.github.reload.storage.DataModel.ModelSpecifier;
 public class StoredDataSpecifier {
 
 	private final DataKind kind;
-	private BigInteger generation;
+	private BigInteger generation = BigInteger.ZERO;
 	private final ModelSpecifier<? extends DataValue> modelSpecifier;
 
 	public StoredDataSpecifier(DataKind kind, ModelSpecifier<? extends DataValue> spec) {
@@ -22,7 +23,7 @@ public class StoredDataSpecifier {
 		modelSpecifier = spec;
 	}
 
-	public DataKind getDataKind() {
+	public DataKind getKind() {
 		return kind;
 	}
 
@@ -38,8 +39,46 @@ public class StoredDataSpecifier {
 		this.generation = generation;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), kind, generation, modelSpecifier);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		StoredDataSpecifier other = (StoredDataSpecifier) obj;
+		if (generation == null) {
+			if (other.generation != null)
+				return false;
+		} else if (!generation.equals(other.generation))
+			return false;
+		if (kind == null) {
+			if (other.kind != null)
+				return false;
+		} else if (!kind.equals(other.kind))
+			return false;
+		if (modelSpecifier == null) {
+			if (other.modelSpecifier != null)
+				return false;
+		} else if (!modelSpecifier.equals(other.modelSpecifier))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "StoredDataSpecifier [kind=" + kind + ", generation=" + generation + ", modelSpecifier=" + modelSpecifier + "]";
+	}
+
 	public static class StoredDataSpecifierCodec extends Codec<StoredDataSpecifier> {
 
+		private static final int GENERATION_FIELD = U_INT64;
 		private static final int MODEL_SPEC_LENGTH_FIELD = U_INT16;
 
 		private final Codec<DataKind> kindCodec;
@@ -53,7 +92,12 @@ public class StoredDataSpecifier {
 		public void encode(StoredDataSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 			kindCodec.encode(obj.kind, buf);
 
-			buf.writeBytes(obj.generation.toByteArray());
+			byte[] genBytes = obj.generation.toByteArray();
+
+			// Make sure the field is of a fixed size by padding with zeros
+			buf.writeZero(GENERATION_FIELD - genBytes.length);
+
+			buf.writeBytes(genBytes);
 
 			Field lenFld = allocateField(buf, MODEL_SPEC_LENGTH_FIELD);
 
@@ -68,7 +112,7 @@ public class StoredDataSpecifier {
 		public StoredDataSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
-			byte[] genData = new byte[8];
+			byte[] genData = new byte[GENERATION_FIELD];
 			buf.readBytes(genData);
 			BigInteger generation = new BigInteger(1, genData);
 

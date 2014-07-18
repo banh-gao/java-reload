@@ -3,6 +3,7 @@ package com.github.reload.net.encoders.content.storage;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -95,6 +96,29 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 		public List<Key> getKeys() {
 			return keys;
 		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DictionaryModelSpecifier other = (DictionaryModelSpecifier) obj;
+			if (keys == null) {
+				if (other.keys != null)
+					return false;
+			} else if (!keys.equals(other.keys))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(super.hashCode(), keys);
+		}
+
 	}
 
 	public static class DictionaryModelSpecifierCodec extends Codec<DictionaryModelSpecifier> {

@@ -70,6 +70,7 @@ public class SingleModel extends DataModel<SingleValue> {
 
 	@ReloadCodec(SingleModelSpecifierCodec.class)
 	public static class SingleModelSpecifier implements ModelSpecifier<SingleValue> {
+
 	}
 
 	public static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {

@@ -57,7 +57,7 @@ public class StoreAnswer extends Content {
 			ByteBuf respData = readField(buf, RESPONSES_LENGTH_FIELD);
 
 			while (respData.readableBytes() > 0) {
-				responses.add(storeRespCodec.decode(buf));
+				responses.add(storeRespCodec.decode(respData));
 			}
 
 			respData.release();

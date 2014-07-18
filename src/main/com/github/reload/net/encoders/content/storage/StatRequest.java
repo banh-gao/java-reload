@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.List;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.storage.StatRequest.StatRequestCodec;
 import com.github.reload.net.encoders.header.ResourceID;
 
@@ -12,6 +13,11 @@ public class StatRequest extends FetchRequest {
 
 	public StatRequest(ResourceID resId, List<StoredDataSpecifier> specifiers) {
 		super(resId, specifiers);
+	}
+
+	@Override
+	public ContentType getType() {
+		return ContentType.STAT_REQ;
 	}
 
 	public static class StatRequestCodec extends FetchRequestCodec {

@@ -19,6 +19,10 @@ public class StatAnswer extends Content {
 		this.responses = responses;
 	}
 
+	public List<StatKindResponse> getResponses() {
+		return responses;
+	}
+
 	@Override
 	public ContentType getType() {
 		return ContentType.STAT_ANS;
@@ -52,7 +56,7 @@ public class StatAnswer extends Content {
 			List<StatKindResponse> responses = new ArrayList<StatKindResponse>();
 
 			while (resposeData.readableBytes() > 0) {
-				responses.add(respCodec.decode(buf));
+				responses.add(respCodec.decode(resposeData));
 			}
 
 			resposeData.release();

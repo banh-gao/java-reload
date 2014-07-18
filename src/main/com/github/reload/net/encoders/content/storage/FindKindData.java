@@ -1,6 +1,7 @@
 package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -29,6 +30,33 @@ public class FindKindData {
 
 	public ResourceID getResourceId() {
 		return resourceId;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), kind, resourceId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FindKindData other = (FindKindData) obj;
+		if (kind == null) {
+			if (other.kind != null)
+				return false;
+		} else if (!kind.equals(other.kind))
+			return false;
+		if (resourceId == null) {
+			if (other.resourceId != null)
+				return false;
+		} else if (!resourceId.equals(other.resourceId))
+			return false;
+		return true;
 	}
 
 	@Override
@@ -61,4 +89,5 @@ public class FindKindData {
 		}
 
 	}
+
 }

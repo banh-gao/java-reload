@@ -19,6 +19,10 @@ public class FetchAnswer extends Content {
 		this.responses = responses;
 	}
 
+	public List<FetchKindResponse> getResponses() {
+		return responses;
+	}
+
 	@Override
 	public ContentType getType() {
 		return ContentType.FETCH_ANS;
@@ -52,7 +56,7 @@ public class FetchAnswer extends Content {
 			List<FetchKindResponse> responses = new ArrayList<FetchKindResponse>();
 
 			while (resposeData.readableBytes() > 0) {
-				responses.add(respCodec.decode(buf));
+				responses.add(respCodec.decode(resposeData));
 			}
 
 			resposeData.release();

@@ -3,6 +3,7 @@ package com.github.reload.net.encoders.content.storage;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -133,6 +134,28 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			return ranges;
 		}
 
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ArrayModelSpecifier other = (ArrayModelSpecifier) obj;
+			if (ranges == null) {
+				if (other.ranges != null)
+					return false;
+			} else if (!ranges.equals(other.ranges))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(super.hashCode(), ranges);
+		}
+
 		class ArrayRange {
 
 			private final long startIndex;
@@ -153,6 +176,27 @@ public class ArrayModel extends DataModel<ArrayValue> {
 
 			public boolean contains(long index) {
 				return startIndex <= index && index <= endIndex;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (this == obj)
+					return true;
+				if (obj == null)
+					return false;
+				if (getClass() != obj.getClass())
+					return false;
+				ArrayRange other = (ArrayRange) obj;
+				if (endIndex != other.endIndex)
+					return false;
+				if (startIndex != other.startIndex)
+					return false;
+				return true;
+			}
+
+			@Override
+			public int hashCode() {
+				return Objects.hash(super.hashCode(), startIndex, endIndex);
 			}
 		}
 	}
@@ -185,10 +229,12 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			ArrayModelSpecifier spec = new ArrayModelSpecifier();
 
 			while (rangesData.readableBytes() > 0) {
-				long startIndex = buf.readUnsignedInt();
-				long endIndex = buf.readUnsignedInt();
+				long startIndex = rangesData.readUnsignedInt();
+				long endIndex = rangesData.readUnsignedInt();
 				spec.addRange(startIndex, endIndex);
 			}
+
+			rangesData.release();
 
 			return spec;
 		}

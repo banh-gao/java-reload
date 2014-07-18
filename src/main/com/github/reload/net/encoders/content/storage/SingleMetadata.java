@@ -3,12 +3,13 @@ package com.github.reload.net.encoders.content.storage;
 import io.netty.buffer.ByteBuf;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Objects;
 import com.github.reload.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.SingleMetadata.SingleMetadataCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.storage.DataModel;
 import com.github.reload.storage.DataModel.Metadata;
 
 /**
@@ -62,6 +63,36 @@ public class SingleMetadata implements Metadata<SingleValue> {
 		return hashValue;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), exists, storedValueSize, hashAlgorithm);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SingleMetadata other = (SingleMetadata) obj;
+		if (exists != other.exists)
+			return false;
+		if (hashAlgorithm != other.hashAlgorithm)
+			return false;
+		if (!Arrays.equals(hashValue, other.hashValue))
+			return false;
+		if (storedValueSize != other.storedValueSize)
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "SingleMetadata [exists=" + exists + ", storedValueSize=" + storedValueSize + ", hashAlgorithm=" + hashAlgorithm + ", hashValue=" + Arrays.toString(hashValue) + "]";
+	}
+
 	public static class SingleMetadataCodec extends Codec<SingleMetadata> {
 
 		private static final int HASHVALUE_LENGTH_FIELD = U_INT8;
@@ -95,7 +126,9 @@ public class SingleMetadata implements Metadata<SingleValue> {
 			ByteBuf hashFld = readField(buf, HASHVALUE_LENGTH_FIELD);
 
 			byte[] hashValue = new byte[hashFld.readableBytes()];
-			buf.readBytes(hashValue);
+			hashFld.readBytes(hashValue);
+
+			hashFld.release();
 
 			return new SingleMetadata(exists, storedValueSize, hashAlgorithm, hashValue);
 		}
