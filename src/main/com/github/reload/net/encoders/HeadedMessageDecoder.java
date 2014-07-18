@@ -27,7 +27,7 @@ public class HeadedMessageDecoder extends ByteToMessageDecoder {
 			message.payload = in.slice();
 			in.retain();
 			out.add(message);
-			Logger.getRootLogger().debug("Message header #" + message.header.getTransactionId() + " decoded");
+			Logger.getRootLogger().debug(String.format("Message header %#x decoded", message.header.getTransactionId()));
 		} finally {
 			in.clear();
 		}

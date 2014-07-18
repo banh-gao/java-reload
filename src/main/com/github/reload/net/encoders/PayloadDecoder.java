@@ -31,7 +31,7 @@ public class PayloadDecoder extends MessageToMessageDecoder<HeadedMessage> {
 			Content content = contentCodec.decode(payload);
 			SecurityBlock secBlock = secBlockCodec.decode(payload);
 			out.add(new Message(header, content, secBlock));
-			Logger.getRootLogger().debug("Message payload #" + header.getTransactionId() + " decoded");
+			Logger.getRootLogger().debug(String.format("Message payload %#x decoded", header.getTransactionId()));
 		} finally {
 			payload.release();
 		}

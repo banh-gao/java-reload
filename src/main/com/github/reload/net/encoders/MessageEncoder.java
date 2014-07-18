@@ -37,7 +37,7 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 		contentCodec.encode(msg.content, out);
 		secBlockCodec.encode(msg.secBlock, out);
 		updateMessageLength(out, messageStart);
-		Logger.getRootLogger().debug("Message #" + msg.getHeader().getTransactionId() + " encoded");
+		Logger.getRootLogger().debug(String.format("Message %#x encoded", msg.getHeader().getTransactionId()));
 	}
 
 	private void updateMessageLength(ByteBuf buf, int messageStart) {

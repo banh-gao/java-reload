@@ -23,7 +23,7 @@ public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		Message message = (Message) msg;
-		l.log(Level.DEBUG, "Dispatching incoming message #" + message.getHeader().getTransactionId() + " on application bus...");
+		l.log(Level.DEBUG, String.format("Dispatching incoming message %#x on application bus...", message.getHeader().getTransactionId()));
 		msgBus.post(message);
 	}
 
