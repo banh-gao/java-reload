@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
 import com.github.reload.net.NetworkTest;
-import com.github.reload.net.encoders.FramedMessage;
 import com.github.reload.net.encoders.FramedMessageCodec;
+import com.github.reload.net.encoders.FramedMessage;
 import com.github.reload.net.encoders.FramedMessage.FramedData;
 import com.github.reload.net.stack.SRLinkHandler;
 

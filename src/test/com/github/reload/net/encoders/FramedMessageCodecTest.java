@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.github.reload.net.NetworkTest;
 import com.github.reload.net.encoders.FramedMessage;
-import com.github.reload.net.encoders.FramedMessageCodec;
 import com.github.reload.net.encoders.FramedMessage.FramedData;
 
 public class FramedMessageCodecTest extends NetworkTest {
