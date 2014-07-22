@@ -44,7 +44,7 @@ public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 
 			@MessageHandler(ContentType.UNKNOWN)
 			void handlerUnknown(Message msg) {
-				l.warn(String.format("No handler registered for message %#h of type %s", msg.getHeader().getTransactionId(), msg.getContent().getType()));
+				l.warn(String.format("No handler registered for message %#x of type %s", msg.getHeader().getTransactionId(), msg.getContent().getType()));
 			}
 		});
 	}
@@ -76,7 +76,7 @@ public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 		}
 
 		if (!isAnnotationPresent)
-			l.warn(String.format("No method annotated as RequestHandler in the given object of type %s", obj.getClass().getCanonicalName()));
+			l.warn(String.format("No method annotated as a handler in the given object of type %s", obj.getClass().getCanonicalName()));
 	}
 
 	private boolean checkMethodSignature(Method m) {
@@ -104,16 +104,19 @@ public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 			ContentType type = message.getContent().getType();
 
 			if (type.isAnswer()) {
-				l.log(Level.DEBUG, String.format("Handling incoming answer %#x", message.getHeader().getTransactionId()));
 				router.handleAnswer(message);
 			}
 
 			RequestHandlerMethod handler = handlers.get(type);
 
-			if (handler == null)
-				handler = handlers.get(ContentType.UNKNOWN);
-			else
-				l.log(Level.DEBUG, String.format("Handling incoming request %#x", message.getHeader().getTransactionId()));
+			if (handler == null) {
+				if (type.isRequest())
+					handler = handlers.get(ContentType.UNKNOWN);
+				else
+					return;
+			} else {
+				l.log(Level.DEBUG, String.format("Handling incoming message %#x of type %s using %s", message.getHeader().getTransactionId(), type, handler));
+			}
 
 			try {
 				handler.callHandler(message);
