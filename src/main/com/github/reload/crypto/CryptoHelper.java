@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Set;
 import javax.net.ssl.SSLEngine;
 import javax.security.auth.login.Configuration;
-import com.github.reload.Context;
-import com.github.reload.Context.Component;
-import com.github.reload.InitializationException;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
@@ -26,21 +23,12 @@ import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
  * node
  * 
  */
-public abstract class CryptoHelper implements Component {
+public abstract class CryptoHelper {
 
 	/**
 	 * The hashing algorithm of the overlay
 	 */
 	public static final HashAlgorithm OVERLAY_HASHALG = HashAlgorithm.SHA1;
-
-	/**
-	 * Initialize the helper and the associated keystore for the given context
-	 * 
-	 * @param context
-	 * @throws InitializationException
-	 */
-	@Override
-	public abstract void compStart(Context context);
 
 	/**
 	 * @return the algorithm used for signatures hashing
