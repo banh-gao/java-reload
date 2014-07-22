@@ -76,6 +76,8 @@ public class MessageRouter {
 
 		final SettableFuture<Message> reqFut = SettableFuture.create();
 
+		pendingRequests.put(request.getHeader().getTransactionId(), reqFut);
+
 		final ListenableFuture<ForwardStatus> fwdFut = sendMessage(request);
 		// Fail fast if request fails already in the neighbors transmission
 		fwdFut.addListener(new Runnable() {
@@ -94,8 +96,6 @@ public class MessageRouter {
 				}
 			}
 		}, MoreExecutors.sameThreadExecutor());
-
-		pendingRequests.put(request.getHeader().getTransactionId(), reqFut);
 
 		return reqFut;
 	}
