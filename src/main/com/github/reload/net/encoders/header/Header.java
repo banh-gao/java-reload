@@ -176,6 +176,8 @@ public class Header {
 		boolean isLastFragment = true;
 		int fragmentOffset = 0;
 
+		long transactionId;
+
 		int maxResponseLength = 0;
 		int configurationSequence = 0;
 
@@ -197,6 +199,11 @@ public class Header {
 
 		public Builder setFragmentOffset(int fragmentOffset) {
 			this.fragmentOffset = fragmentOffset;
+			return this;
+		}
+
+		public Builder setTransactionId(long transactionId) {
+			this.transactionId = transactionId;
 			return this;
 		}
 
@@ -249,7 +256,10 @@ public class Header {
 			h.isLastFragment = isLastFragment;
 			h.maxResponseLength = maxResponseLength;
 			h.overlayHash = overlayHash;
-			h.transactionId = transIdGen.nextLong();
+			if (h.transactionId == 0)
+				h.transactionId = transIdGen.nextLong();
+			else
+				h.transactionId = transactionId;
 			h.ttl = ttl;
 			h.version = version;
 			h.viaList = viaList;
