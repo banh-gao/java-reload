@@ -9,7 +9,7 @@ import com.github.reload.net.encoders.header.RoutableID;
  * Routing table of the neighbor nodes managed by the topology plugin.
  * 
  */
-public interface RoutingTable extends Set<NodeID> {
+public interface RoutingTable {
 
 	/**
 	 * @return the the next hops node-ids

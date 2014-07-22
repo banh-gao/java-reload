@@ -3,7 +3,6 @@ package com.github.reload.routing;
 import java.util.Collection;
 import java.util.List;
 import com.github.reload.Configuration;
-import com.github.reload.Context.Component;
 import com.github.reload.InitializationException;
 import com.github.reload.net.encoders.content.storage.StoreKindData;
 import com.github.reload.net.encoders.header.NodeID;
@@ -17,7 +16,7 @@ import com.github.reload.net.encoders.secBlock.HashAlgorithm;
  * the local peer
  * 
  */
-public interface TopologyPlugin extends Component {
+public interface TopologyPlugin {
 
 	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
