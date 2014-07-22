@@ -33,7 +33,7 @@ public class ForwardMessageCodec extends ByteToMessageCodec<ForwardMessage> {
 			message.payload = in.slice();
 			in.retain();
 			out.add(message);
-			Logger.getRootLogger().debug(String.format("Message header %#x decoded", message.header.getTransactionId()));
+			Logger.getRootLogger().trace(String.format("Message header %#x decoded", message.header.getTransactionId()));
 		} finally {
 			in.clear();
 		}
@@ -44,7 +44,7 @@ public class ForwardMessageCodec extends ByteToMessageCodec<ForwardMessage> {
 		int messageStart = out.writerIndex();
 
 		hdrCodec.encode(msg.header, out);
-		Logger.getRootLogger().debug(String.format("Message header %#x encoded", msg.header.getTransactionId()));
+		Logger.getRootLogger().trace(String.format("Message header %#x encoded", msg.header.getTransactionId()));
 
 		out.writeBytes(msg.payload);
 

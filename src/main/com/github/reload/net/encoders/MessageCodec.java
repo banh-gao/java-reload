@@ -33,7 +33,7 @@ public class MessageCodec extends MessageToMessageCodec<ForwardMessage, Message>
 			Content content = contentCodec.decode(payload);
 			SecurityBlock secBlock = secBlockCodec.decode(payload);
 			out.add(new Message(header, content, secBlock));
-			Logger.getRootLogger().debug(String.format("Message payload %#x decoded", header.getTransactionId()));
+			Logger.getRootLogger().trace(String.format("Message payload %#x decoded", header.getTransactionId()));
 		} finally {
 			payload.release();
 		}
@@ -52,6 +52,6 @@ public class MessageCodec extends MessageToMessageCodec<ForwardMessage, Message>
 
 		out.add(fwdMsg);
 
-		Logger.getRootLogger().debug(String.format("Message payload %#x encoded", msg.getHeader().getTransactionId()));
+		Logger.getRootLogger().trace(String.format("Message payload %#x encoded", msg.getHeader().getTransactionId()));
 	}
 }

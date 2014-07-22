@@ -15,7 +15,7 @@ public class ForwardingHandler extends ChannelDuplexHandler {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		ForwardMessage message = (ForwardMessage) msg;
-		Logger.getRootLogger().debug(String.format("Passing message %#x for local peer to upper layer...", message.getHeader().getTransactionId()));
+		Logger.getRootLogger().trace(String.format("Passing message %#x for local peer to upper layer...", message.getHeader().getTransactionId()));
 		ctx.fireChannelRead(message);
 		// FIXME: If the peer is not responsible for it, forward the message
 		// instead passing to upper layer

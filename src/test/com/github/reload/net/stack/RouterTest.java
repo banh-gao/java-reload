@@ -4,12 +4,13 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.reload.Components;
+import com.github.reload.Components.MessageHandler;
 import com.github.reload.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkTest;
@@ -25,7 +26,6 @@ import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.net.stack.MessageDispatcher.MessageHandler;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -41,12 +41,10 @@ public class RouterTest extends NetworkTest {
 
 		ConnectionManager connMgr = new ConnectionManager();
 		msgRouter = new MessageRouter();
-		MessageDispatcher msgDispatcher = new MessageDispatcher(Executors.newSingleThreadExecutor(), msgRouter);
-		msgDispatcher.registerHandler(new TestListener());
 
+		Components.register(new TestListener());
 		Components.register(new TestRouting());
 		Components.register(new TestCrypto());
-		Components.register(msgDispatcher);
 		Components.register(msgRouter);
 		Components.register(conf);
 		Components.register(connMgr);
@@ -58,6 +56,7 @@ public class RouterTest extends NetworkTest {
 		Futures.get(c, 50, TimeUnit.MILLISECONDS, Exception.class);
 	}
 
+	@AfterClass
 	public static void deinit() {
 		Components.deinitComponents();
 	}
@@ -84,7 +83,7 @@ public class RouterTest extends NetworkTest {
 		Message ans = new Message(header, new PingAnswer(2, BigInteger.ONE), new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE));
 		msgRouter.sendMessage(ans);
 
-		Message rcvAns = Futures.get(ansFut, 50, TimeUnit.MILLISECONDS, Exception.class);
+		Message rcvAns = Futures.get(ansFut, 100, TimeUnit.MILLISECONDS, Exception.class);
 
 		Assert.assertNotNull(answer);
 		Assert.assertEquals(ans.getHeader().getTransactionId(), rcvAns.getHeader().getTransactionId());

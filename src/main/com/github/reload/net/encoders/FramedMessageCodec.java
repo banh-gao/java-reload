@@ -29,11 +29,11 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 		switch (msg.getType()) {
 			case DATA :
 				encodeData((FramedData) msg, out);
-				Logger.getRootLogger().debug("DATA frame " + msg.getSequence() + " encoded");
+				Logger.getRootLogger().trace("DATA frame " + msg.getSequence() + " encoded");
 				break;
 			case ACK :
 				encodeAck((FramedAck) msg, out);
-				Logger.getRootLogger().debug("ACK frame " + msg.getSequence() + " encoded");
+				Logger.getRootLogger().trace("ACK frame " + msg.getSequence() + " encoded");
 				break;
 		}
 	}
@@ -56,11 +56,11 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 			switch (type) {
 				case DATA :
 					msg = decodeData(in, sequence);
-					Logger.getRootLogger().debug("DATA frame " + msg.getSequence() + " decoded");
+					Logger.getRootLogger().trace("DATA frame " + msg.getSequence() + " decoded");
 					break;
 				case ACK :
 					msg = decodeAck(in, sequence);
-					Logger.getRootLogger().debug("ACK frame " + msg.getSequence() + " decoded");
+					Logger.getRootLogger().trace("ACK frame " + msg.getSequence() + " decoded");
 					break;
 			}
 			out.add(msg);

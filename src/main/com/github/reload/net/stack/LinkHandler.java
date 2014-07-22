@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.net.encoders.FramedMessage;
 import com.github.reload.net.encoders.FramedMessage.FramedAck;
@@ -41,16 +40,16 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 		switch (frame.getType()) {
 			case DATA :
 				handleData((FramedData) frame);
-				l.log(Level.DEBUG, "Passing DATA frame " + frame.getSequence() + " to upper layer...");
+				l.trace("Passing DATA frame " + frame.getSequence() + " to upper layer...");
 				ctx.fireChannelRead(((FramedData) frame).getPayload());
 				break;
 			case ACK :
-				l.log(Level.DEBUG, "Received ACK for frame " + frame.getSequence());
+				l.trace("Received ACK for frame " + frame.getSequence());
 				Transmission t = transmissions.remove(frame.getSequence());
 				if (t != null) {
 					handleAck((FramedAck) frame, t);
 				} else {
-					l.log(Level.DEBUG, "Unexpected ACK message on " + ctx);
+					l.trace("Unexpected ACK message on " + ctx);
 				}
 			default :
 				assert false;
@@ -64,7 +63,7 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 		Transmission t = new Transmission();
 		t.promise = promise;
 		transmissions.put(data.getSequence(), t);
-		l.log(Level.DEBUG, "Passing DATA frame " + data.getSequence() + " to lower layer...");
+		l.trace("Passing DATA frame " + data.getSequence() + " to lower layer...");
 		ctx.write(data);
 		// TODO: detect transmission timeout
 	}
@@ -76,7 +75,7 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 	 * @return
 	 */
 	protected void sendAckFrame(FramedAck ack) {
-		l.log(Level.DEBUG, "Passing ACK frame " + ack.getSequence() + " to lower layer...");
+		l.trace("Passing ACK frame " + ack.getSequence() + " to lower layer...");
 		ctx.writeAndFlush(ack);
 	}
 

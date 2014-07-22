@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
+import com.github.reload.Components;
+import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.storage.ArrayModel;
 import com.github.reload.net.encoders.content.storage.ArrayModel.ArrayModelSpecifier;
@@ -148,7 +150,7 @@ public class MessageStorageTest extends MessageTest {
 
 	@Test
 	public void testFetchAns() throws Exception {
-
+		Components.unregister(MessageRouter.class);
 		List<StoredData> storedData = new ArrayList<StoredData>();
 
 		ArrayModel model = (ArrayModel) TEST_KIND.getDataModel();

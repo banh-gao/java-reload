@@ -15,7 +15,6 @@ import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.AttachMessage;
-import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
@@ -25,10 +24,11 @@ import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.net.ice.NoSuitableCandidateException;
 import com.github.reload.net.server.ServerManager;
 import com.github.reload.net.stack.MessageDispatcher;
-import com.github.reload.net.stack.MessageDispatcher.MessageHandler;
 import com.github.reload.net.stack.ReloadStack;
 import com.github.reload.net.stack.ReloadStackBuilder;
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -42,6 +42,8 @@ public class ConnectionManager {
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
 	private final Map<RoutableID, SettableFuture<Connection>> pendingConnections = Maps.newHashMap();
+
+	private final MessageDispatcher msgDispatcher = new MessageDispatcher();
 
 	@Component
 	private ICEHelper iceHelper;
@@ -61,13 +63,15 @@ public class ConnectionManager {
 	@Component
 	private Configuration conf;
 
-	@Component
-	private MessageDispatcher msgDispatcher;
+	@stop
+	private void shutdown() {
+		for (Connection c : connections.values())
+			c.close();
+	}
 
 	public ListenableFuture<Connection> attachTo(DestinationList destList, boolean requestUpdate) {
-		SettableFuture<Connection> fut = SettableFuture.create();
-
-		RoutableID destinationID = destList.getDestination();
+		final SettableFuture<Connection> fut = SettableFuture.create();
+		final RoutableID destinationID = destList.getDestination();
 
 		if (destinationID instanceof NodeID) {
 			Connection c = connections.get(destinationID);
@@ -86,17 +90,26 @@ public class ConnectionManager {
 
 		l.log(Level.DEBUG, "Attach to " + destinationID + " in progress...");
 
-		// Register pending connection request prior to send it
 		pendingConnections.put(destinationID, fut);
 
-		msgRouter.sendRequestMessage(req);
+		ListenableFuture<Message> attachAnsFut = msgRouter.sendRequestMessage(req);
+
+		Futures.addCallback(attachAnsFut, new FutureCallback<Message>() {
+
+			@Override
+			public void onSuccess(Message result) {
+				attachAnswerReceived(result);
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				pendingConnections.remove(destinationID);
+
+				fut.setException(t);
+			}
+		});
 
 		return fut;
-	}
-
-	@MessageHandler(ContentType.ATTACH_REQ)
-	private void handleAttachRequest(Message attachReq) {
-		// TODO
 	}
 
 	private void attachAnswerReceived(Message msg) {
@@ -106,7 +119,7 @@ public class ConnectionManager {
 		final NodeID remoteNode = msg.getHeader().getSenderId();
 
 		if (!pendingConnections.containsKey(remoteNode)) {
-			l.log(Level.DEBUG, String.format("Unattended attach answer %#h ignored", msg.getHeader().getTransactionId()));
+			l.log(Level.DEBUG, String.format("Unattended attach answer %#x ignored", msg.getHeader().getTransactionId()));
 			return;
 		}
 
@@ -116,7 +129,7 @@ public class ConnectionManager {
 			remoteCandidate = iceHelper.testAndSelectCandidate(answer.getCandidates());
 			connectTo(remoteNode, remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
 		} catch (NoSuitableCandidateException e) {
-			// TODO
+			// TODO: send error message
 			e.printStackTrace();
 		}
 
@@ -173,11 +186,5 @@ public class ConnectionManager {
 
 	public Connection getConnection(NodeID neighbor) {
 		return connections.get(neighbor);
-	}
-
-	@stop
-	private void shutdown() {
-		for (Connection c : connections.values())
-			c.close();
 	}
 }
