@@ -1,26 +1,21 @@
 package com.github.reload.net.connections;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
 import java.util.Map;
+import javax.net.ssl.SSLEngine;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.Context;
+import com.github.reload.Components.Component;
+import com.github.reload.Components.stop;
+import com.github.reload.Configuration;
 import com.github.reload.MessageBuilder;
-import com.github.reload.Context.Component;
-import com.github.reload.Context.CtxComponent;
+import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
@@ -29,16 +24,18 @@ import com.github.reload.net.ice.IceCandidate;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.net.ice.NoSuitableCandidateException;
 import com.github.reload.net.server.ServerManager;
-import com.github.reload.net.stack.ChannelInitializerTest;
+import com.github.reload.net.stack.MessageDispatcher;
+import com.github.reload.net.stack.MessageDispatcher.MessageHandler;
+import com.github.reload.net.stack.ReloadStack;
+import com.github.reload.net.stack.ReloadStackBuilder;
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * Establish and manage connections for all neighbor nodes
  */
-public class ConnectionManager implements Component {
+public class ConnectionManager {
 
 	private static final Logger l = Logger.getRootLogger();
 
@@ -46,25 +43,28 @@ public class ConnectionManager implements Component {
 
 	private final Map<RoutableID, SettableFuture<Connection>> pendingConnections = Maps.newHashMap();
 
-	@CtxComponent
+	@Component
 	private ICEHelper iceHelper;
-	@CtxComponent
+
+	@Component
 	private MessageRouter msgRouter;
-	@CtxComponent
+
+	@Component
 	private MessageBuilder msgBuilder;
-	@CtxComponent
+
+	@Component
 	private ServerManager serverManager;
 
-	private Context context;
+	@Component
+	private CryptoHelper cryptoHelper;
 
-	private NioEventLoopGroup clientLoopGroup = new NioEventLoopGroup();
+	@Component
+	private Configuration conf;
 
-	@Override
-	public void compStart(Context context) {
-		this.context = context;
-	}
+	@Component
+	private MessageDispatcher msgDispatcher;
 
-	public ListenableFuture<Connection> connect(DestinationList destList, boolean requestUpdate) {
+	public ListenableFuture<Connection> attachTo(DestinationList destList, boolean requestUpdate) {
 		SettableFuture<Connection> fut = SettableFuture.create();
 
 		RoutableID destinationID = destList.getDestination();
@@ -94,50 +94,90 @@ public class ConnectionManager implements Component {
 		return fut;
 	}
 
-	@Subscribe
-	public void attachAnswerReceived(Message msg) throws NetworkException {
-		if (msg.getContent().getType() != ContentType.ATTACH_ANS)
-			return;
+	@MessageHandler(ContentType.ATTACH_REQ)
+	private void handleAttachRequest(Message attachReq) {
+		// TODO
+	}
+
+	private void attachAnswerReceived(Message msg) {
 
 		AttachMessage answer = (AttachMessage) msg.getContent();
 
 		final NodeID remoteNode = msg.getHeader().getSenderId();
 
+		if (!pendingConnections.containsKey(remoteNode)) {
+			l.log(Level.DEBUG, String.format("Unattended attach answer %#h ignored", msg.getHeader().getTransactionId()));
+			return;
+		}
+
 		final IceCandidate remoteCandidate;
 
 		try {
 			remoteCandidate = iceHelper.testAndSelectCandidate(answer.getCandidates());
+			connectTo(remoteNode, remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
 		} catch (NoSuitableCandidateException e) {
-			throw new NetworkException("No suitable direct connection parameters found");
+			// TODO
+			e.printStackTrace();
 		}
 
-		ChannelFuture chFut = connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType(), clientLoopGroup);
+	}
 
-		chFut.addListener(new ChannelFutureListener() {
+	public ListenableFuture<Connection> connectTo(final NodeID remoteId, final InetSocketAddress remoteAddr, OverlayLinkType linkType) {
+		final ReloadStack stack;
+
+		final SettableFuture<Connection> outcome = SettableFuture.create();
+
+		try {
+			ReloadStackBuilder b = new ReloadStackBuilder(conf, msgDispatcher);
+			b.setLinkType(linkType);
+			SSLEngine sslEngine = cryptoHelper.getClientSSLEngine(linkType);
+			if (sslEngine != null)
+				b.setSslEngine(sslEngine);
+			stack = b.buildStack();
+		} catch (Exception e) {
+			outcome.setException(e);
+			return outcome;
+		}
+		ChannelFuture cf = stack.connect(remoteAddr);
+
+		cf.addListener(new ChannelFutureListener() {
 
 			@Override
 			public void operationComplete(ChannelFuture future) throws Exception {
-				Connection newConnection = new Connection(remoteCandidate.getOverlayLinkType(), future.channel(), remoteNode);
-				SettableFuture<Connection> connFut = pendingConnections.get(remoteNode);
-				if (connFut == null)
-					return;
 
-				connFut.set(newConnection);
-				l.log(Level.DEBUG, "Attach to " + remoteNode + " at " + future.channel().remoteAddress() + " completed");
+				final SettableFuture<Connection> pendingAttach = pendingConnections.remove(remoteId);
+
+				if (future.isSuccess()) {
+					Connection c = new Connection(remoteId, stack);
+
+					connections.put(remoteId, c);
+					l.debug("Connection to " + remoteId + " at " + remoteAddr + " completed");
+					outcome.set(c);
+
+					if (pendingAttach != null) {
+						pendingAttach.set(c);
+					}
+				} else {
+					l.warn("Connection to " + remoteId + " at " + remoteAddr + " failed", future.cause());
+					outcome.setException(future.cause());
+					if (pendingAttach != null) {
+						pendingAttach.setException(future.cause());
+					}
+				}
+
 			}
 		});
-	}
 
-	private ChannelFuture connectTo(InetSocketAddress remoteAddr, OverlayLinkType linkType, EventLoopGroup loopGroup) {
-		Bootstrap b = new Bootstrap();
-		ChannelInitializer<Channel> chInit = new ChannelInitializerTest(context, linkType);
-		b.group(loopGroup).channel(NioSocketChannel.class);
-		b.handler(chInit);
-		return b.connect(remoteAddr);
+		return outcome;
 	}
 
 	public Connection getConnection(NodeID neighbor) {
-		// TODO Auto-generated method stub
-		return null;
+		return connections.get(neighbor);
+	}
+
+	@stop
+	private void shutdown() {
+		for (Connection c : connections.values())
+			c.close();
 	}
 }

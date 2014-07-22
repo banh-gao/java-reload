@@ -10,24 +10,21 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.Context;
-import com.github.reload.Context.Component;
-import com.github.reload.Context.CtxComponent;
+import com.github.reload.Components.Component;
+import com.github.reload.Components.start;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.errors.ErrorRespose;
 import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
-import com.github.reload.net.encoding.Message;
 import com.github.reload.routing.RoutingTable;
-import com.github.reload.routing.TopologyPlugin;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
@@ -35,7 +32,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Send the outgoing messages to neighbor nodes by using the routing table
  */
-public class MessageRouter implements Component {
+public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
 	private static final int REQUEST_TIMEOUT = 3000;
@@ -52,19 +49,16 @@ public class MessageRouter implements Component {
 		}
 	};
 
-	@CtxComponent
-	private TopologyPlugin topologyPlugin;
-
-	@CtxComponent
+	@Component
 	private ConnectionManager connManager;
 
+	@Component
 	private RoutingTable routingTable;
 
 	private Cache<Long, SettableFuture<Message>> pendingRequests;
 
-	@Override
-	public void compStart(Context context) {
-		this.routingTable = topologyPlugin.getRoutingTable();
+	@start
+	public void compStart() {
 		pendingRequests = CacheBuilder.newBuilder().expireAfterWrite(REQUEST_TIMEOUT, TimeUnit.MILLISECONDS).removalListener(EXP_REQ_LISTERNER).build();
 	}
 
@@ -106,7 +100,6 @@ public class MessageRouter implements Component {
 		return reqFut;
 	}
 
-	@Subscribe
 	public void handleAnswer(Message message) {
 
 		if (!message.getContent().isAnswer())

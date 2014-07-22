@@ -27,7 +27,7 @@ public class ReloadStack {
 	}
 
 	public ChannelFuture write(Message message) {
-		return channel.write(message);
+		return channel.writeAndFlush(message);
 	}
 
 	public void flush() {

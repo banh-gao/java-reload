@@ -48,7 +48,7 @@ public class ReloadOverlay {
 		PropertyConfigurator.configure("log4j.properties");
 	}
 
-	private Context context;
+	private Components context;
 	private final PeerInitializer connStatusHelper;
 	private final StorageClientHelper storageHelper;
 
@@ -72,8 +72,8 @@ public class ReloadOverlay {
 	}
 
 	private ReloadOverlay(ReloadConnector connector) throws InitializationException, NetworkException {
-		context = new Context();
-		context.setComponent(ReloadConnector.class, connector);
+		context = new Components();
+		context.registerComponent(ReloadConnector.class, connector);
 
 		connStatusHelper = new PeerInitializer();
 		storageHelper = new StorageClientHelper();
@@ -107,7 +107,7 @@ public class ReloadOverlay {
 	 * 
 	 * @return the overlay context for this connection
 	 */
-	Context getContext() {
+	Components getContext() {
 		return context;
 	}
 

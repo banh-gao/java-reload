@@ -4,9 +4,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import com.github.reload.Components;
 import com.github.reload.Configuration;
-import com.github.reload.Context;
-import com.github.reload.Context.Component;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
@@ -28,10 +27,8 @@ import com.github.reload.storage.errors.NotFoundException;
  * Elaborate the storage messages and is responsible for local storage
  * management
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
-public class StorageController implements Component {
+public class StorageController {
 
 	private static final ContentType[] HANDLED_TYPES = new ContentType[]{
 																			ContentType.STORE_REQ,
@@ -138,7 +135,7 @@ public class StorageController implements Component {
 	}
 
 	@Override
-	public void init(Context context) {
+	public void init(Components context) {
 		// TODO Auto-generated method stub
 
 	}

@@ -23,7 +23,7 @@ public class MessageBuilder implements Component {
 	private CryptoHelper cryptoHelper;
 
 	@Override
-	public void compStart(Context context) {
+	public void compStart(Components context) {
 		// TODO Auto-generated method stub
 
 	}

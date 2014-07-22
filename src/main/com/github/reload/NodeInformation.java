@@ -2,7 +2,7 @@ package com.github.reload;
 
 import io.netty.util.AttributeKey;
 import java.util.Map;
-import com.github.reload.Context.Component;
+import com.github.reload.Components.Component;
 import com.google.common.collect.Maps;
 
 public class NodeInformation implements Component {

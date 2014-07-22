@@ -37,5 +37,10 @@
   		<artifactId>bcprov-jdk15</artifactId>
   		<version>140</version>
   	</dependency>
+  	<dependency>
+  		<groupId>com.google.guava</groupId>
+  		<artifactId>guava</artifactId>
+  		<version>17.0</version>
+  	</dependency>
   </dependencies>
 </project>

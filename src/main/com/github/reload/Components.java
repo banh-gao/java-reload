@@ -70,6 +70,7 @@ public class Components {
 		for (Method m : c.getClass().getDeclaredMethods()) {
 			if (m.isAnnotationPresent(stop.class)) {
 				try {
+					m.setAccessible(true);
 					m.invoke(c);
 				} catch (IllegalArgumentException | IllegalAccessException
 						| InvocationTargetException e) {

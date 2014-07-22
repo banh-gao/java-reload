@@ -17,21 +17,20 @@ import com.github.reload.net.encoders.ForwardMessageCodec;
 import com.github.reload.net.encoders.FramedMessageCodec;
 import com.github.reload.net.encoders.MessageCodec;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.google.common.eventbus.EventBus;
 
 public class ReloadStackBuilder {
 
 	private final Configuration conf;
-	private final EventBus messageBus;
+	private final MessageDispatcher msgDispatcher;
 
 	private Bootstrap bootstrap = new Bootstrap();
 	private SslHandler sslHandler;
 	private LinkHandler linkHandler;
 	private InetSocketAddress localAddress;
 
-	public ReloadStackBuilder(Configuration conf, EventBus messageBus) {
+	public ReloadStackBuilder(Configuration conf, MessageDispatcher msgDispatcher) {
 		this.conf = conf;
-		this.messageBus = messageBus;
+		this.msgDispatcher = msgDispatcher;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		bootstrap.group(workerGroup);
 		bootstrap.channel(NioSocketChannel.class);
@@ -91,7 +90,7 @@ public class ReloadStackBuilder {
 				pipeline.addLast(ReloadStack.CODEC_MESSAGE, new MessageCodec(conf));
 
 				// Dispatch incoming messages on the application message bus
-				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, new MessageDispatcher(messageBus));
+				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, msgDispatcher);
 			}
 		});
 	}

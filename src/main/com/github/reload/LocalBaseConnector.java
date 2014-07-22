@@ -17,7 +17,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashSet;
 import java.util.Set;
 import javax.naming.ConfigurationException;
-import com.github.reload.Context.CtxComponent;
+import com.github.reload.Components.CtxComponent;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;

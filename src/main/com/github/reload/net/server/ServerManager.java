@@ -1,8 +1,8 @@
 package com.github.reload.net.server;
 
-import com.github.reload.Context;
-import com.github.reload.Context.Component;
-import com.github.reload.Context.CtxComponent;
+import com.github.reload.Components;
+import com.github.reload.Components.Component;
+import com.github.reload.Components.CtxComponent;
 import com.github.reload.ReloadConnector;
 
 public class ServerManager implements Component {
@@ -15,17 +15,17 @@ public class ServerManager implements Component {
 	private DiscoveryResponder discoveryResp;
 
 	@Override
-	public void compStart(Context context) {
+	public void compStart(Components context) {
 		startAttachServer(context);
 		startBootstrapServer(context);
 	}
 
-	private void startAttachServer(Context context) {
+	private void startAttachServer(Components context) {
 		attachServer = new ReloadServer(context, connector.getAttachAddress());
 		attachServer.startAsync();
 	}
 
-	private void startBootstrapServer(Context context) {
+	private void startBootstrapServer(Components context) {
 		if (!connector.isBootstrapNode())
 			return;
 		bootServer = new ReloadServer(context, connector.getBootstrapAddress());
@@ -35,7 +35,7 @@ public class ServerManager implements Component {
 			startDiscoveryResponder(context);
 	}
 
-	private void startDiscoveryResponder(Context context) {
+	private void startDiscoveryResponder(Components context) {
 		discoveryResp = new DiscoveryResponder(context, connector.getBootstrapAddress());
 		discoveryResp.startAsync();
 	}

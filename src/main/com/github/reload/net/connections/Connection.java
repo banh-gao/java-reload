@@ -57,6 +57,10 @@ public class Connection {
 		return promise;
 	}
 
+	public ChannelFuture close() {
+		return stack.shutdown();
+	}
+
 	public NodeID getNodeId() {
 		return nodeId;
 	}
@@ -68,6 +72,10 @@ public class Connection {
 	 */
 	protected int getLinkMTU() {
 		return stack.getChannel().config().getOption(ChannelOption.SO_SNDBUF);
+	}
+
+	public ReloadStack getStack() {
+		return stack;
 	}
 
 	@Override

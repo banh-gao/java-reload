@@ -15,10 +15,25 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetAddress;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import com.github.reload.Components.Component;
+import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.Keystore;
+import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.crypto.ReloadCertificateParser;
 import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.routing.RoutingTable;
 
 public class NetworkTest {
 
@@ -133,5 +148,67 @@ public class NetworkTest {
 		public void shutdown() throws InterruptedException {
 			ch.closeFuture();
 		}
+	}
+
+	@Component(RoutingTable.class)
+	public static class TestRouting implements RoutingTable {
+
+		@Override
+		public Set<NodeID> getNextHops(RoutableID destination) {
+			return Collections.singleton(TEST_NODEID);
+		}
+
+		@Override
+		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
+			return Collections.singleton(TEST_NODEID);
+		}
+
+	}
+
+	@Component(CryptoHelper.class)
+	public static class TestCrypto extends CryptoHelper {
+
+		@Override
+		public HashAlgorithm getSignHashAlg() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public SignatureAlgorithm getSignAlg() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public HashAlgorithm getCertHashAlg() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public ReloadCertificateParser getCertificateParser() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public List<? extends Certificate> getTrustRelationship(Certificate peerCert, Certificate trustedIssuer, List<? extends Certificate> availableCerts) throws CertificateException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected Keystore getKeystore() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 	}
 }

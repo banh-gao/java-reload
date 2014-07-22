@@ -17,7 +17,7 @@ import java.security.GeneralSecurityException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Configuration;
-import com.github.reload.Context;
+import com.github.reload.Components;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.PingAnswer;
 import com.github.reload.net.encoders.header.Header;
@@ -32,13 +32,13 @@ public class DiscoveryResponder extends AbstractExecutionThreadService {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private final Context context;
+	private final Components context;
 	private final InetSocketAddress localAddr;
 	private final EventLoopGroup handlersLoopGroup = new NioEventLoopGroup();
 
 	private Channel channel;
 
-	public DiscoveryResponder(Context context, InetSocketAddress localAddr) {
+	public DiscoveryResponder(Components context, InetSocketAddress localAddr) {
 		this.context = context;
 		this.localAddr = localAddr;
 	}

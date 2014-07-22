@@ -17,6 +17,7 @@ import com.github.reload.net.encoders.content.storage.StoreRequest;
  * 
  */
 public enum ContentType {
+	UNKNOWN((short) 0, UpdateRequest.class),
 	PROBE_REQ((short) 0x1, ProbeRequest.class),
 	PROBE_ANS((short) 0x2, ProbeAnswer.class),
 	ATTACH_REQ((short) 0x3, AttachMessage.class),
