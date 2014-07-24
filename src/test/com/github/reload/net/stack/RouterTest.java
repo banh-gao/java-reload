@@ -1,8 +1,6 @@
 package com.github.reload.net.stack;
 
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
@@ -51,7 +49,7 @@ public class RouterTest extends NetworkTest {
 
 		Components.initComponents();
 
-		ListenableFuture<Connection> c = connMgr.connectTo(TEST_NODEID, new InetSocketAddress(InetAddress.getLocalHost(), TEST_PORT), OverlayLinkType.TLS_TCP_FH_NO_ICE);
+		ListenableFuture<Connection> c = connMgr.connectTo(TEST_NODEID, ECHO_SERVER_ADDR, OverlayLinkType.TLS_TCP_FH_NO_ICE);
 
 		Futures.get(c, 50, TimeUnit.MILLISECONDS, Exception.class);
 	}

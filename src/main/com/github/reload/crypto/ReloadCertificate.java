@@ -11,10 +11,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import com.github.reload.net.encoders.header.NodeID;
 
 /**
@@ -23,24 +19,24 @@ import com.github.reload.net.encoders.header.NodeID;
  */
 public class ReloadCertificate extends Certificate {
 
-	final Set<NodeID> nodeIds;
+	final NodeID nodeId;
 	final String username;
 	final Certificate certificate;
 
-	public ReloadCertificate(Certificate certificate, String username, Collection<NodeID> nodeIds) {
+	public ReloadCertificate(Certificate certificate, String username, NodeID nodeId) {
 		super(certificate.getType());
-		if (nodeIds == null)
+		if (nodeId == null)
 			throw new NullPointerException();
 		this.certificate = certificate;
 		this.username = username;
-		this.nodeIds = new LinkedHashSet<NodeID>(nodeIds);
+		this.nodeId = nodeId;
 	}
 
 	/**
-	 * @return The RELOAD node-ids of the certificate
+	 * @return The RELOAD node-id of the certificate
 	 */
-	public Set<NodeID> getNodeIds() {
-		return Collections.unmodifiableSet(nodeIds);
+	public NodeID getNodeId() {
+		return nodeId;
 	}
 
 	/**
@@ -93,7 +89,7 @@ public class ReloadCertificate extends Certificate {
 
 	@Override
 	public String toString() {
-		return "ReloadCertificate [nodeIds=" + nodeIds + ", username=" + username + ", certType=" + certificate.getType() + "]";
+		return "ReloadCertificate [nodeId=" + nodeId + ", username=" + username + ", certType=" + certificate.getType() + "]";
 	}
 
 	@Override

@@ -15,22 +15,10 @@ import com.github.reload.routing.TopologyPlugin;
  */
 public abstract class ReloadConnector {
 
-	private Configuration conf;
-
-	private InetSocketAddress bootstrapAddr;
-	private InetSocketAddress attachAddr;
+	private InetSocketAddress localAddr;
 	private boolean isOverlayInitiator;
 	private boolean isClientMode = false;
 	private NodeID localNodeId;
-
-	public ReloadConnector(Configuration conf, ReloadConnector oldConnector) {
-		this.conf = conf;
-		if (oldConnector != null) {
-			bootstrapAddr = connector.getBootstrapAddress();
-			attachAddr = connector.getAttachAddress();
-			isOverlayInitiator = connector.isOverlayInitiator;
-		}
-	}
 
 	/**
 	 * @return the data to be send in the join request
@@ -43,48 +31,20 @@ public abstract class ReloadConnector {
 
 	protected abstract CryptoHelper getCryptoHelper();
 
-	protected Configuration getConfiguration() {
-		return conf;
-	}
-
-	protected Configuration setConfiguration(Configuration newConf) {
-		Configuration oldConf = conf;
-		conf = newConf;
-		return oldConf;
-	}
-
 	/**
-	 * @return The address where the bootstrap server will be listening to
+	 * @return The address where the server will be listening to
 	 */
-	public InetSocketAddress getBootstrapAddress() {
-		return bootstrapAddr;
+	public InetSocketAddress getLocalAddr() {
+		return localAddr;
 	}
 
 	/**
-	 * @return The address where the attach server will be listening to
-	 */
-	public InetSocketAddress getAttachAddress() {
-		return attachAddr;
-	}
-
-	/**
-	 * Set the address where the bootstrap server will be listening to. If the
-	 * ip is a multicast address then a ping responder will be registered
-	 * through IGMP on that multicast group.
+	 * Set the address where the server will be listening to.
 	 * 
 	 * @param attachAddr
 	 */
-	public void setBootstrapAddress(InetSocketAddress bootstrapAddr) {
-		this.bootstrapAddr = bootstrapAddr;
-	}
-
-	/**
-	 * Set the address where the attach server will be listening to
-	 * 
-	 * @param attachAddr
-	 */
-	public void setAttachAddress(InetSocketAddress attachAddr) {
-		this.attachAddr = attachAddr;
+	public void setLocalAddress(InetSocketAddress localAddr) {
+		this.localAddr = localAddr;
 	}
 
 	/**
@@ -159,10 +119,6 @@ public abstract class ReloadConnector {
 		} catch (Exception e) {
 			throw new InitializationException(e);
 		}
-	}
-
-	public boolean isBootstrapNode() {
-		return bootstrapAddr != null;
 	}
 
 	public boolean isClientMode() {

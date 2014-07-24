@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.net.ssl.SSLEngine;
-import javax.security.auth.login.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
@@ -180,7 +180,7 @@ public abstract class CryptoHelper {
 	 * @throws CertStoreException
 	 *             if the certificate storage fails
 	 */
-	public void addCertificate(Certificate cert) throws CertStoreException {
+	public void addCertificate(ReloadCertificate cert) throws CertStoreException {
 		getKeystore().addCertificate(cert);
 	}
 

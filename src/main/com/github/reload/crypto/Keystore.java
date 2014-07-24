@@ -31,6 +31,12 @@ public interface Keystore {
 	public ReloadCertificate getCertificate(SignerIdentity identity);
 
 	/**
+	 * @return the locally stored certificate that correspond to the specified
+	 *         node-id or null if no matching certificate was found
+	 */
+	public ReloadCertificate getCertificate(NodeID node);
+
+	/**
 	 * Store a new certificate locally, the certificate is validated before it
 	 * is stored
 	 * 
@@ -38,7 +44,7 @@ public interface Keystore {
 	 *             if the certificate storage fails
 	 * @throws CertificateException
 	 */
-	public void addCertificate(Certificate cert) throws CertStoreException;
+	public void addCertificate(ReloadCertificate cert) throws CertStoreException;
 
 	/**
 	 * Remove a locally stored certificate

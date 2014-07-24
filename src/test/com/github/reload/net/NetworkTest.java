@@ -15,6 +15,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -22,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,7 +42,7 @@ import com.github.reload.routing.RoutingTable;
 
 public class NetworkTest {
 
-	public static int TEST_PORT = 6084;
+	public static InetSocketAddress ECHO_SERVER_ADDR;
 	public static NodeID TEST_NODEID = NodeID.valueOf(new byte[]{1, 2, 3, 4, 5,
 																	6, 7, 8, 9,
 																	10, 11, 12,
@@ -51,6 +53,7 @@ public class NetworkTest {
 
 	@BeforeClass
 	public static void runEchoServer() throws Exception {
+		ECHO_SERVER_ADDR = new InetSocketAddress(InetAddress.getLocalHost(), 5000);
 		ServerBootstrap b = new ServerBootstrap();
 		b.group(workerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
 
@@ -75,7 +78,7 @@ public class NetworkTest {
 		}).option(ChannelOption.SO_BACKLOG, 128).childOption(ChannelOption.SO_KEEPALIVE, true);
 
 		// Bind and start to accept incoming connections.
-		b.bind(TEST_PORT).sync();
+		b.bind(ECHO_SERVER_ADDR.getPort()).sync();
 	}
 
 	@AfterClass
@@ -121,7 +124,7 @@ public class NetworkTest {
 			}
 		});
 
-		b.connect(InetAddress.getLocalHost(), TEST_PORT).sync();
+		b.connect(InetAddress.getLocalHost(), ECHO_SERVER_ADDR.getPort()).sync();
 		return tester;
 	}
 
@@ -209,8 +212,7 @@ public class NetworkTest {
 
 		@Override
 		public SSLEngine getSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
-			// TODO Auto-generated method stub
-			return null;
+			return SSLContext.getInstance("TLS").createSSLEngine();
 		}
 
 		@Override

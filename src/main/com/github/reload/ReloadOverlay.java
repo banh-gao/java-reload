@@ -13,6 +13,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.PropertyConfigurator;
+import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.content.errors.UnknownKindException;

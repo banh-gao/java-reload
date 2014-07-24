@@ -80,14 +80,16 @@ public class ReloadStackBuilder {
 				pipeline.addLast(ReloadStack.HANDLER_LINK, linkHandler);
 
 				// Codec for RELOAD forwarding header
-				pipeline.addLast(ReloadStack.CODEC_FORWARD, new ForwardMessageCodec(conf));
+				pipeline.addLast(ReloadStack.CODEC_HEADER, new ForwardMessageCodec(conf));
 
 				// Decides whether an incoming message has to be processed
 				// locally or forwarded to a neighbor node
 				pipeline.addLast(ReloadStack.HANDLER_FORWARD, new ForwardingHandler());
 
 				// Codec for message payload (content + security block)
-				pipeline.addLast(ReloadStack.CODEC_MESSAGE, new MessageCodec(conf));
+				pipeline.addLast(ReloadStack.CODEC_PAYLOAD, new MessageCodec(conf));
+
+				// TODO: insert message authentication layer
 
 				// Dispatch incoming messages on the application message bus
 				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, msgDispatcher);

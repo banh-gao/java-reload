@@ -93,7 +93,11 @@ public class Components {
 			if (f.isAnnotationPresent(Component.class)) {
 				try {
 					f.setAccessible(true);
-					f.set(c, get(f.getType()));
+					Object cmp = get(f.getType());
+					if (cmp != null)
+						f.set(c, cmp);
+					else
+						l.warn(String.format("Missing component %s required by %s", f.getType().getCanonicalName(), c.getClass().getCanonicalName()));
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
