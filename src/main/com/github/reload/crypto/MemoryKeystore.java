@@ -6,7 +6,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 
 /**

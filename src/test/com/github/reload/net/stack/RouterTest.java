@@ -11,9 +11,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.reload.Components;
 import com.github.reload.Components.MessageHandler;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkTest;
+import com.github.reload.net.TestConfiguration;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
@@ -36,8 +37,7 @@ public class RouterTest extends NetworkTest {
 
 	@BeforeClass
 	public static void init() throws Exception {
-		Configuration conf = new Configuration();
-		conf.setOverlayAttribute(Configuration.NODE_ID_LENGTH, 5);
+		Configuration conf = new TestConfiguration();
 
 		ConnectionManager connMgr = new ConnectionManager();
 		msgRouter = new MessageRouter();

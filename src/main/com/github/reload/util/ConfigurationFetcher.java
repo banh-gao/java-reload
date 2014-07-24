@@ -21,7 +21,7 @@ import javax.naming.directory.InitialDirContext;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 
 /**
  * Utility class to fetch, parse and authenticate an overlay configuration from

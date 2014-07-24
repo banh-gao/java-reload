@@ -15,12 +15,14 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetAddress;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import javax.net.ssl.SSLEngine;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.github.reload.Components.Component;
@@ -33,6 +35,7 @@ import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.routing.RoutingTable;
 
 public class NetworkTest {
@@ -200,6 +203,12 @@ public class NetworkTest {
 
 		@Override
 		public List<? extends Certificate> getTrustRelationship(Certificate peerCert, Certificate trustedIssuer, List<? extends Certificate> availableCerts) throws CertificateException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public SSLEngine getSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
 			// TODO Auto-generated method stub
 			return null;
 		}

@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 import java.util.List;
 import org.apache.log4j.Logger;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;

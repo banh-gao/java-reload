@@ -2,7 +2,7 @@ package com.github.reload.net.encoders.header;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.header.RoutableID.DestinationType;
 

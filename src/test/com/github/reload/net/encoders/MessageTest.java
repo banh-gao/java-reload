@@ -9,9 +9,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import com.github.reload.Components;
 import com.github.reload.Components.MessageHandler;
-import com.github.reload.Configuration;
-import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkTest;
+import com.github.reload.net.TestConfiguration;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.content.ContentType;
@@ -22,7 +21,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class MessageTest extends NetworkTest {
 
 	private static Connection conn;
-	private static MessageRouter msgRouter;
 	private static Message echo;
 
 	protected Message sendMessage(Message message) throws Exception {
@@ -54,7 +52,7 @@ public class MessageTest extends NetworkTest {
 		Components.register(new TestListener());
 		Components.register(new TestRouting());
 		Components.register(new TestCrypto());
-		Components.register(new Configuration());
+		Components.register(new TestConfiguration());
 
 		Components.initComponents();
 

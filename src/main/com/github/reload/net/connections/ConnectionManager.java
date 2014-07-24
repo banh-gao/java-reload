@@ -9,9 +9,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Components.Component;
 import com.github.reload.Components.stop;
-import com.github.reload.Configuration;
 import com.github.reload.MessageBuilder;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.AttachMessage;
@@ -143,7 +143,7 @@ public class ConnectionManager {
 		try {
 			ReloadStackBuilder b = new ReloadStackBuilder(conf, msgDispatcher);
 			b.setLinkType(linkType);
-			SSLEngine sslEngine = cryptoHelper.getClientSSLEngine(linkType);
+			SSLEngine sslEngine = cryptoHelper.getSSLEngine(linkType);
 			if (sslEngine != null)
 				b.setSslEngine(sslEngine);
 			stack = b.buildStack();

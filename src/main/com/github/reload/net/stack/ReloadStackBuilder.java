@@ -12,7 +12,7 @@ import io.netty.handler.ssl.SslHandler;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLEngine;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.ForwardMessageCodec;
 import com.github.reload.net.encoders.FramedMessageCodec;
 import com.github.reload.net.encoders.MessageCodec;

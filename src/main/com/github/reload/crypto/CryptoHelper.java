@@ -55,6 +55,8 @@ public abstract class CryptoHelper {
 	 */
 	public abstract ReloadCertificateParser getCertificateParser();
 
+	public abstract SSLEngine getSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException;
+
 	/**
 	 * Tries to create a trust relationship from the peer cert to the trusted
 	 * issuer using the available certs. For X509 the method should return the
@@ -224,15 +226,5 @@ public abstract class CryptoHelper {
 			throw new CertificateException("Self-signed certificates not allowed");
 
 		return reloadCert;
-	}
-
-	public SSLEngine getClientSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public SSLEngine getServerSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

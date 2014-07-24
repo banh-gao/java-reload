@@ -2,8 +2,9 @@ package com.github.reload.net.encoders.secBlock;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.SecurityBlock.SecurityBlockCodec;
@@ -21,6 +22,14 @@ public class SecurityBlock {
 		super();
 		this.certificates = certificates;
 		this.signature = signature;
+	}
+
+	public Collection<GenericCertificate> getCertificates() {
+		return certificates;
+	}
+
+	public Signature getSignature() {
+		return signature;
 	}
 
 	static class SecurityBlockCodec extends Codec<SecurityBlock> {

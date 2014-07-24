@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.Map;
-import com.github.reload.Configuration;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.content.errors.ErrorRespose;
 import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.google.common.collect.Maps;

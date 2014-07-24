@@ -63,8 +63,7 @@ public class Header {
 
 	/**
 	 * @return the sender id of this message (last entry of the via list)
-	 *         (!!!NOT AUTHENTICATED!!!). For authenticated sender id see
-	 *         {@link Message#getSenderId()}
+	 *         (!!!NOT AUTHENTICATED!!!).
 	 */
 	public NodeID getSenderId() {
 		if (viaList.size() == 0 || !(viaList.get(0) instanceof NodeID))
