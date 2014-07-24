@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:ietf:params:xml:ns:p2p:config-chord" xmlns:chord="urn:ietf:params:xml:ns:p2p:config-chord" xmlns:p2pcf="urn:ietf:params:xml:ns:p2p:config-base">
+  <xs:import namespace="urn:ietf:params:xml:ns:p2p:config-base" schemaLocation="reload.xsd"/>
+  <xs:element name="chord-ping-interval" type="xs:int"/>
+  <xs:element name="chord-update-interval" type="xs:int"/>
+  <xs:element name="chord-reactive" type="xs:boolean"/>
+</xs:schema>
