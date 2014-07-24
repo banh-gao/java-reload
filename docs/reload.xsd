@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="urn:ietf:params:xml:ns:p2p:config-base" xmlns:chord="urn:ietf:params:xml:ns:p2p:config-chord" xmlns:p2pcf="urn:ietf:params:xml:ns:p2p:config-base">
+  <xs:import namespace="urn:ietf:params:xml:ns:p2p:config-chord" schemaLocation="chord.xsd"/>
+  <xs:group name="anything">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="anything">
+    <xs:anyAttribute processContents="skip"/>
+  </xs:attributeGroup>
+  <xs:group name="foreign-elements">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="foreign-attributes">
+    <xs:anyAttribute processContents="skip"/>
+  </xs:attributeGroup>
+  <xs:group name="foreign-nodes">
+    <xs:sequence>
+      <xs:group minOccurs="0" maxOccurs="unbounded" ref="p2pcf:foreign-elements"/>
+    </xs:sequence>
+  </xs:group>
+  <xs:attributeGroup name="foreign-nodes">
+    <xs:attributeGroup ref="p2pcf:foreign-attributes"/>
+  </xs:attributeGroup>
+  <xs:element name="overlay" type="p2pcf:overlay-element"/>
+  <xs:complexType name="overlay-element">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="p2pcf:configuration"/>
+      <xs:element ref="p2pcf:signature"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:element name="configuration">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="p2pcf:parameter">
+          <xs:attribute name="instance-name" use="required" type="xs:string"/>
+          <xs:attribute name="expiration" type="xs:dateTime"/>
+          <xs:attribute name="sequence" type="xs:long"/>
+          <xs:attributeGroup ref="p2pcf:foreign-attributes"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="signature">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:base64Binary">
+          <xs:attribute name="algorithm" type="p2pcf:signature-algorithm-type"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="signature-algorithm-type">
+    <xs:union memberTypes="xs:string">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="rsa-sha1"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <!-- signature alg extensions -->
+  <xs:complexType name="parameter">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="p2pcf:topology-plugin"/>
+      <xs:element ref="p2pcf:max-message-size"/>
+      <xs:element ref="p2pcf:initial-ttl"/>
+      <xs:element ref="p2pcf:root-cert"/>
+      <xs:element ref="p2pcf:required-kinds"/>
+      <xs:element ref="p2pcf:enrollment-server"/>
+      <xs:element ref="p2pcf:kind-signer"/>
+      <xs:element ref="p2pcf:configuration-signer"/>
+      <xs:element ref="p2pcf:bad-node"/>
+      <xs:element ref="p2pcf:no-ice"/>
+      <xs:element ref="p2pcf:shared-secret"/>
+      <xs:element ref="p2pcf:overlay-link-protocol"/>
+      <xs:element ref="p2pcf:clients-permitted"/>
+      <xs:element ref="p2pcf:turn-density"/>
+      <xs:element ref="p2pcf:node-id-length"/>
+      <xs:element ref="p2pcf:mandatory-extension"/>
+      <xs:group ref="p2pcf:foreign-elements"/>
+      <xs:element ref="p2pcf:self-signed-permitted"/>
+      <xs:element ref="p2pcf:bootstrap-node"/>
+      <xs:element ref="chord:chord-ping-interval"/>
+      <xs:element ref="chord:chord-update-interval"/>
+      <xs:element ref="chord:chord-reactive"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:element name="topology-plugin" type="p2pcf:topology-plugin-type"/>
+  <xs:element name="max-message-size" type="xs:unsignedInt"/>
+  <xs:element name="initial-ttl" type="xs:int"/>
+  <xs:element name="root-cert" type="xs:base64Binary"/>
+  <xs:element name="required-kinds">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="p2pcf:kind-block"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="enrollment-server" type="xs:anyURI"/>
+  <xs:element name="kind-signer" type="xs:string"/>
+  <xs:element name="configuration-signer" type="xs:string"/>
+  <xs:element name="bad-node" type="xs:string"/>
+  <xs:element name="no-ice" type="xs:boolean"/>
+  <xs:element name="shared-secret" type="xs:string"/>
+  <xs:element name="overlay-link-protocol" type="xs:string"/>
+  <xs:element name="clients-permitted" type="xs:boolean"/>
+  <xs:element name="turn-density" type="xs:unsignedByte"/>
+  <xs:element name="node-id-length" type="xs:int"/>
+  <xs:element name="mandatory-extension" type="xs:string"/>
+  <xs:element name="self-signed-permitted">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:boolean">
+          <xs:attribute name="digest" use="required" type="p2pcf:self-signed-digest-type"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="bootstrap-node">
+    <xs:complexType>
+      <xs:attribute name="address" use="required" type="xs:string"/>
+      <xs:attribute name="port" type="xs:int"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="topology-plugin-type">
+    <xs:union memberTypes="xs:string">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="CHORD-RELOAD"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <!-- topo plugin extensions -->
+  <xs:simpleType name="self-signed-digest-type">
+    <xs:union memberTypes="xs:string">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="sha1"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <!-- signature digest extensions -->
+  <xs:element name="kind-block">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="p2pcf:kind"/>
+        <xs:element minOccurs="0" ref="p2pcf:kind-signature"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kind">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="p2pcf:kind-parameter">
+          <xs:attribute name="name" type="p2pcf:kind-names"/>
+          <xs:attribute name="id" type="xs:unsignedInt"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="kind-signature">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:base64Binary">
+          <xs:attribute name="algorithm" type="p2pcf:signature-algorithm-type"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="kind-parameter">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element ref="p2pcf:max-count"/>
+      <xs:element ref="p2pcf:max-size"/>
+      <xs:element ref="p2pcf:max-node-multiple"/>
+      <xs:element ref="p2pcf:data-model"/>
+      <xs:element ref="p2pcf:access-control"/>
+      <xs:group ref="p2pcf:foreign-elements"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:element name="max-count" type="xs:int"/>
+  <xs:element name="max-size" type="xs:int"/>
+  <xs:element name="max-node-multiple" type="xs:int"/>
+  <xs:element name="data-model" type="p2pcf:data-model-type"/>
+  <xs:element name="access-control" type="p2pcf:access-control-type"/>
+  <xs:simpleType name="data-model-type">
+    <xs:union memberTypes="xs:string">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="SINGLE"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="ARRAY"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="DICTIONARY"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <!-- data model extensions -->
+  <xs:simpleType name="access-control-type">
+    <xs:union memberTypes="xs:string">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="USER-MATCH"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="NODE-MATCH"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="USER-NODE-MATCH"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="NODE-MULTIPLE"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <!-- access control extensions -->
+  <xs:simpleType name="kind-names">
+    <xs:union memberTypes="xs:string">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="TURN-SERVICE"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="CERTIFICATE_BY_NODE"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="CERTIFICATE_BY_USER"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <!-- kind extensions -->
+  <!-- Chord specific parameters -->
+</xs:schema>
