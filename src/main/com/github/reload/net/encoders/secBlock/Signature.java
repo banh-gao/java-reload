@@ -1,7 +1,9 @@
 package com.github.reload.net.encoders.secBlock;
 
 import io.netty.buffer.ByteBuf;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Objects;
 import com.github.reload.conf.Configuration;
@@ -12,15 +14,7 @@ import com.github.reload.net.encoders.secBlock.Signature.SignatureCodec;
 @ReloadCodec(SignatureCodec.class)
 public class Signature {
 
-	public static Signature EMPTY_SIGNATURE;
-
-	static {
-		try {
-			EMPTY_SIGNATURE = new Signature(SignerIdentity.EMPTY_IDENTITY, HashAlgorithm.NONE, SignatureAlgorithm.ANONYMOUS, new byte[0]);
-		} catch (NoSuchAlgorithmException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+	public static Signature EMPTY_SIGNATURE = new Signature(SignerIdentity.EMPTY_IDENTITY, HashAlgorithm.NONE, SignatureAlgorithm.ANONYMOUS, new byte[0]);
 
 	private final SignerIdentity signerIdentity;
 
@@ -29,7 +23,7 @@ public class Signature {
 
 	private final byte[] digest;
 
-	private Signature(byte[] digest, SignerIdentity identity, HashAlgorithm hashAlg, SignatureAlgorithm signAlg) throws NoSuchAlgorithmException {
+	private Signature(byte[] digest, SignerIdentity identity, HashAlgorithm hashAlg, SignatureAlgorithm signAlg) {
 		this.hashAlg = hashAlg;
 		this.signAlg = signAlg;
 		signerIdentity = identity;
@@ -44,7 +38,7 @@ public class Signature {
 	 * @param signAlg
 	 * @throws NoSuchAlgorithmException
 	 */
-	public Signature(SignerIdentity signerIdentity, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, byte[] digest) throws NoSuchAlgorithmException {
+	public Signature(SignerIdentity signerIdentity, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, byte[] digest) {
 		this.signAlg = signAlg;
 		hashAlg = signHashAlg;
 		this.signerIdentity = signerIdentity;
@@ -68,6 +62,12 @@ public class Signature {
 
 	public byte[] getDigest() {
 		return digest;
+	}
+
+	public boolean verify(PublicKey publicKey) throws GeneralSecurityException {
+		java.security.Signature s = java.security.Signature.getInstance(hashAlg.toString() + "with" + signAlg.toString());
+		s.initVerify(publicKey);
+		return s.verify(digest);
 	}
 
 	@Override
@@ -146,11 +146,7 @@ public class Signature {
 			digestData.readBytes(digest);
 			digestData.release();
 
-			try {
-				return new Signature(digest, identity, hashAlg, signAlg);
-			} catch (NoSuchAlgorithmException e) {
-				throw new CodecException(e);
-			}
+			return new Signature(digest, identity, hashAlg, signAlg);
 		}
 	}
 }

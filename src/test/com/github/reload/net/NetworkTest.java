@@ -42,6 +42,7 @@ import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.encoders.MessageBuilderFactory;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -67,27 +68,34 @@ public class NetworkTest {
 
 	@BeforeClass
 	public static void runEchoServer() throws Exception {
-		SERVER_ADDR = new InetSocketAddress(InetAddress.getLocalHost(), 6084);
-		ECHO_SERVER_ADDR = new InetSocketAddress(InetAddress.getLocalHost(), 5000);
+		SERVER_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
+		ECHO_SERVER_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5000);
+
+		Components.register(new MessageBuilderFactory());
 
 		TEST_CRYPTO = new X509CryptoHelper(TEST_HASH, TEST_SIGN, TEST_HASH);
 
 		Components.register(TEST_CRYPTO);
 
 		CA_CERT = (X509Certificate) loadLocalCert("CAcert.der");
-		TEST_CERT = (X509Certificate) loadLocalCert("testCert.crt");
-		TEST_KEY = loadPrivateKey("testKey.key", SignatureAlgorithm.RSA);
+		TEST_CERT = (X509Certificate) loadLocalCert("testCert.der");
+		TEST_KEY = loadPrivateKey("testKey.der", SignatureAlgorithm.RSA);
 
 		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
 
 		TestConfiguration conf = new TestConfiguration();
 		conf.rootCerts = Collections.singletonList(CA_CERT);
+		conf.instanceName = "testOverlay.com";
+		conf.maxMessageSize = 5000;
+		conf.initialTTL = 6;
 		Components.register(conf);
 
 		ConnectionManager connMgr = new ConnectionManager();
 
 		TestConnector testConn = new TestConnector();
 		testConn.setLocalAddress(SERVER_ADDR);
+
+		testConn.setLocalNodeId(TEST_NODEID);
 
 		Components.register(testConn);
 		Components.register(connMgr);

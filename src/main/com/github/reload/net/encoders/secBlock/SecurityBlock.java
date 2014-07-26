@@ -19,7 +19,6 @@ public class SecurityBlock {
 	private final Signature signature;
 
 	public SecurityBlock(List<GenericCertificate> certificates, Signature signature) {
-		super();
 		this.certificates = certificates;
 		this.signature = signature;
 	}

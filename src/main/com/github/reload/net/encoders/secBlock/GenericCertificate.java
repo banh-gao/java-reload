@@ -35,6 +35,13 @@ public class GenericCertificate {
 			return type;
 		}
 
+		public static CertificateType valueOfString(String type) {
+			for (CertificateType t : EnumSet.allOf(CertificateType.class))
+				if (t.getType().equalsIgnoreCase(type))
+					return t;
+			return null;
+		}
+
 		public static CertificateType valueOf(byte code) {
 			for (CertificateType t : EnumSet.allOf(CertificateType.class))
 				if (code == t.getCode())

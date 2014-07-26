@@ -1,10 +1,14 @@
 package com.github.reload.net.encoders.header;
 
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.google.common.base.Objects;
 
 /**
@@ -190,6 +194,22 @@ public class Header {
 
 		int headerLength;
 		int payloadLength;
+
+		public static int overlayNameToHash(String name, HashAlgorithm hashAlg) {
+			MessageDigest md;
+			try {
+				md = MessageDigest.getInstance(hashAlg.toString());
+			} catch (NoSuchAlgorithmException e) {
+				throw new RuntimeException(e);
+			}
+			byte[] hash = md.digest(name.getBytes());
+
+			// Use the lowest 4 bytes of the generated hash
+			ByteBuffer buf = ByteBuffer.allocate(hash.length);
+			buf.put(hash);
+			buf.position(buf.position() - 4);
+			return buf.getInt();
+		}
 
 		public Builder setLastFragment(boolean isLastFragment) {
 			this.isLastFragment = isLastFragment;

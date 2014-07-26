@@ -18,10 +18,10 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Components;
 import com.github.reload.conf.Configuration;
+import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.PingAnswer;
 import com.github.reload.net.encoders.header.Header;
-import com.github.reload.net.encoding.Message;
 import com.google.common.util.concurrent.AbstractExecutionThreadService;
 
 /**

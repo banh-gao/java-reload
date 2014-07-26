@@ -19,9 +19,10 @@ import javax.net.ssl.SSLEngine;
 import com.github.reload.Components;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.net.encoders.ForwardMessageCodec;
+import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.FramedMessageCodec;
-import com.github.reload.net.encoders.MessageCodec;
+import com.github.reload.net.encoders.MessagePayloadDecoder;
+import com.github.reload.net.encoders.MessageEncoder;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 public class ReloadStackBuilder {
@@ -107,8 +108,6 @@ public class ReloadStackBuilder {
 					eng.setUseClientMode(true);
 				}
 
-				eng.setEnabledProtocols(new String[]{"SSLv3"});
-
 				pipeline.addLast(ReloadStack.HANDLER_SSL, new SslHandler(eng));
 
 				// Codec for RELOAD framing message
@@ -118,14 +117,18 @@ public class ReloadStackBuilder {
 				pipeline.addLast(ReloadStack.HANDLER_LINK, LinkHandlerFactory.getInstance(linkType));
 
 				// Codec for RELOAD forwarding header
-				pipeline.addLast(ReloadStack.CODEC_HEADER, new ForwardMessageCodec(conf));
+				pipeline.addLast(ReloadStack.DECODER_HEADER, new MessageHeaderDecoder(conf));
 
 				// Decides whether an incoming message has to be processed
 				// locally or forwarded to a neighbor node
 				pipeline.addLast(ReloadStack.HANDLER_FORWARD, fwdHandler);
 
-				// Codec for message payload (content + security block)
-				pipeline.addLast(ReloadStack.CODEC_PAYLOAD, new MessageCodec(conf));
+				// Decoder for message payload (content + security block)
+				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(conf));
+
+				// Encorder for message entire outgoing message, also
+				// responsible for message signature generation
+				pipeline.addLast(ReloadStack.ENCODER_MESSAGE, new MessageEncoder(conf));
 
 				// TODO: insert message authentication layer
 

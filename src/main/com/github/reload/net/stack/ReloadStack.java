@@ -8,8 +8,9 @@ import com.github.reload.net.encoders.Message;
 public class ReloadStack {
 
 	public static final String CODEC_FRAME = "CODEC_FRAME";
-	public static final String CODEC_HEADER = "CODEC_HEADER";
-	public static final String CODEC_PAYLOAD = "CODEC_PAYLOAD";
+	public static final String DECODER_HEADER = "CODEC_HEADER";
+	public static final String DECODER_PAYLOAD = "DECODER_PAYLOAD";
+	public static final String ENCODER_MESSAGE = "ENCODER_MESSAGE";
 
 	public static final String HANDLER_SSL = "HANDLER_SSL";
 	public static final String HANDLER_LINK = "HANDLER_LINK";

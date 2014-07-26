@@ -2,7 +2,8 @@ package com.github.reload.net.encoders;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageCodec;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.CodecException;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.conf.Configuration;
@@ -11,25 +12,25 @@ import com.github.reload.net.encoders.header.Header;
 /**
  * Codec used to process only the Forwarding Header part of the message
  */
-public class ForwardMessageCodec extends ByteToMessageCodec<ForwardMessage> {
-
-	/**
-	 * Size in bytes of the first part of the header from the beginning to the
-	 * message length field
-	 */
-	public static int HDR_LEADING_LEN = 16;
+public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 	private final Codec<Header> hdrCodec;
 
-	public ForwardMessageCodec(Configuration conf) {
+	public MessageHeaderDecoder(Configuration conf) {
 		hdrCodec = Codec.getCodec(Header.class, conf);
 	}
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 		try {
+
 			ForwardMessage message = new ForwardMessage();
+
 			message.header = hdrCodec.decode(in);
+
+			if (in.readableBytes() != message.header.getPayloadLength())
+				throw new CodecException("Payload length not matching with length specified in header");
+
 			message.payload = in.slice();
 			in.retain();
 			out.add(message);
@@ -40,19 +41,10 @@ public class ForwardMessageCodec extends ByteToMessageCodec<ForwardMessage> {
 	}
 
 	@Override
-	protected void encode(ChannelHandlerContext ctx, ForwardMessage msg, ByteBuf out) throws Exception {
-		int messageStart = out.writerIndex();
-
-		hdrCodec.encode(msg.header, out);
-		Logger.getRootLogger().trace(String.format("Message header %#x encoded", msg.header.getTransactionId()));
-
-		out.writeBytes(msg.payload);
-
-		setMessageLength(out, messageStart);
+	protected void decodeLast(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+		// Ignore last decode since no data has to be on the buffer
+		if (in.readableBytes() > 0)
+			throw new IllegalStateException("Unprocessed input bytes");
 	}
 
-	private void setMessageLength(ByteBuf buf, int messageStart) {
-		int messageLength = buf.writerIndex() - messageStart;
-		buf.setInt(messageStart + HDR_LEADING_LEN, messageLength);
-	}
 }

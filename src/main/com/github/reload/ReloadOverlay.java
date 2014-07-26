@@ -35,10 +35,10 @@ import com.github.reload.storage.StorageClientHelper;
  */
 public class ReloadOverlay {
 
-	static final String LIB_COMPANY = "zdenial";
-	static final String LIB_VERSION = "jReload/0.2";
+	public static final String LIB_COMPANY = "zeroDenial";
+	public static final String LIB_VERSION = "java-reload/0.1";
 
-	static final byte RELOAD_PROTOCOL_VERSION = 0x0a;
+	public static final byte RELOAD_PROTOCOL_VERSION = 0x0a;
 
 	public static final String[] SUPPORTED_EXTENSIONS = new String[]{"urn:ietf:params:xml:ns:p2p:diagnostics"};
 	private static final Logger logger = Logger.getLogger(ReloadOverlay.class);

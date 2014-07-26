@@ -55,7 +55,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 	@start
 	public void init() throws Exception {
-		sslContext = SSLContext.getInstance("TLSv1.2");
+		sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(new KeyManager[]{new X509LocalKeyManager()}, new TrustManager[]{new X509LocalTrustManager()}, new SecureRandom());
 	}
 
@@ -128,7 +128,9 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 	@Override
 	public SSLEngine newSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
-		return sslContext.createSSLEngine();
+		SSLEngine e = sslContext.createSSLEngine();
+		e.setEnabledCipherSuites(new String[]{"TLS_RSA_WITH_AES_256_CBC_SHA"});
+		return e;
 	}
 
 	/**

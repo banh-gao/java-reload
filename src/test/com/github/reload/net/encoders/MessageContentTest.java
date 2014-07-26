@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 import com.github.reload.ApplicationID;
+import com.github.reload.Components;
+import com.github.reload.net.encoders.MessageBuilderFactory.MessageBuilder;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.Content;
@@ -24,6 +26,7 @@ import com.github.reload.net.encoders.content.UpdateAnswer;
 import com.github.reload.net.encoders.content.UpdateRequest;
 import com.github.reload.net.encoders.content.errors.Error;
 import com.github.reload.net.encoders.content.errors.ErrorType;
+import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
@@ -37,7 +40,11 @@ public class MessageContentTest extends MessageTest {
 		Header h = new Header.Builder().build();
 		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
 
-		Message message = new Message(h, content, s);
+		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
+		MessageBuilder b = bf.newBuilder();
+
+		Message message = b.newMessage(content, new DestinationList(TEST_NODEID));
+
 		Message echo = sendMessage(message);
 
 		return (T) echo.getContent();

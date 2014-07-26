@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPromise;
 import com.github.reload.net.encoders.ForwardMessage;
-import com.github.reload.net.encoders.ForwardMessageCodec;
+import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.stack.ReloadStack;
@@ -42,7 +42,7 @@ public class Connection {
 	 */
 	public ChannelFuture forward(ForwardMessage headedMessage) {
 		Channel ch = stack.getChannel();
-		ForwardMessageCodec fwdCodec = (ForwardMessageCodec) ch.pipeline().get(ReloadStack.HANDLER_FORWARD);
+		MessageHeaderDecoder fwdCodec = (MessageHeaderDecoder) ch.pipeline().get(ReloadStack.HANDLER_FORWARD);
 
 		ChannelPromise promise = ch.newPromise();
 
