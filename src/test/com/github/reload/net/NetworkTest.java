@@ -37,15 +37,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.github.reload.Components;
 import com.github.reload.Components.Component;
-import com.github.reload.Components.MessageHandler;
 import com.github.reload.ReloadConnector;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.X509CryptoHelper;
-import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -57,16 +53,9 @@ public class NetworkTest {
 	public static InetSocketAddress ECHO_SERVER_ADDR;
 	public static HashAlgorithm TEST_HASH = HashAlgorithm.SHA1;
 	public static SignatureAlgorithm TEST_SIGN = SignatureAlgorithm.RSA;
-	public static NodeID TEST_NODEID = NodeID.valueOf(new byte[]{1, 2, 3, 4, 5,
-																	6, 7, 8, 9,
-																	10, 11, 12,
-																	13, 14, 15,
-																	16});
+	public static NodeID TEST_NODEID = NodeID.valueOf("f16a536ca4028b661fcb864a075f3871");
 
 	private static EventLoopGroup workerGroup = new NioEventLoopGroup();
-
-	protected static Connection conn;
-	protected static Message echo;
 
 	public static InetSocketAddress SERVER_ADDR;
 
@@ -90,8 +79,6 @@ public class NetworkTest {
 		TEST_KEY = loadPrivateKey("testKey.key", SignatureAlgorithm.RSA);
 
 		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
-
-		Components.registerMessageHandler(new TestListener());
 
 		TestConfiguration conf = new TestConfiguration();
 		conf.rootCerts = Collections.singletonList(CA_CERT);
@@ -204,18 +191,6 @@ public class NetworkTest {
 
 		public void shutdown() throws InterruptedException {
 			ch.closeFuture();
-		}
-	}
-
-	public static class TestListener {
-
-		@MessageHandler(ContentType.UNKNOWN)
-		public void requestReceived(Message message) {
-			echo = message;
-
-			synchronized (conn) {
-				conn.notify();
-			}
 		}
 	}
 

@@ -46,6 +46,8 @@ public class RouterTest extends NetworkTest {
 
 		Components.register(new TestRouting());
 
+		Components.registerMessageHandler(new TestListener());
+
 		Components.initComponents();
 
 		ConnectionManager connMgr = (ConnectionManager) Components.get(ConnectionManager.COMPNAME);
@@ -88,7 +90,7 @@ public class RouterTest extends NetworkTest {
 		Assert.assertEquals(ans.getHeader().getTransactionId(), rcvAns.getHeader().getTransactionId());
 	}
 
-	static class TestListener {
+	private static class TestListener {
 
 		@MessageHandler(ContentType.PING_REQ)
 		public void messageReceived(Message message) {
