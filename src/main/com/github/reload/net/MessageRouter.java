@@ -1,5 +1,7 @@
 package com.github.reload.net;
 
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +15,7 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.errors.ErrorRespose;
 import com.github.reload.net.encoders.content.errors.ErrorType;
+import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
@@ -26,7 +29,10 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Send the outgoing messages to neighbor nodes by using the routing table
  */
+@Component(MessageRouter.COMPNAME)
 public class MessageRouter {
+
+	public static final String COMPNAME = "com.github.reload.net.MessageRouter";
 
 	private final Logger l = Logger.getRootLogger();
 	private static final int REQUEST_TIMEOUT = 3000;
@@ -90,20 +96,38 @@ public class MessageRouter {
 		reqFut.set(message);
 	}
 
-	public void sendMessage(Message message) {
+	public ListenableFuture<NodeID> sendMessage(Message message) {
 		Header header = message.getHeader();
+
+		SettableFuture<NodeID> status = SettableFuture.create();
 
 		Set<NodeID> hops = routingTable.getNextHops(header.getDestinationId());
 
 		for (NodeID nextHop : hops) {
-			forward(message, nextHop);
+			forward(message, nextHop, status);
 		}
+		return status;
 	}
 
-	private void forward(Message message, NodeID nextHop) {
+	private void forward(Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {
 		Connection conn = connManager.getConnection(nextHop);
 
-		conn.write(message);
+		if (conn == null) {
+			status.setException(new NetworkException(String.format("Connection to neighbor node %s not valid", nextHop)));
+			return;
+		}
+
+		ChannelFuture f = conn.write(message);
+		f.addListener(new ChannelFutureListener() {
+
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+				if (future.isSuccess())
+					status.set(nextHop);
+				else
+					status.setException(future.cause());
+			}
+		});
 	}
 
 	public static class ForwardingException extends Exception {

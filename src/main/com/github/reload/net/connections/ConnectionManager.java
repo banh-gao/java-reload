@@ -156,7 +156,9 @@ public class ConnectionManager {
 		ReloadCertificate cert = extractRemoteCert(stack.getChannel());
 		cryptoHelper.addCertificate(cert.getNodeId(), cert.getOriginalCertificate());
 		Connection c = new Connection(cert.getNodeId(), stack);
+
 		connections.put(cert.getNodeId(), c);
+		System.out.println("CONN ADDED" + cert.getNodeId());
 		return c;
 	}
 
