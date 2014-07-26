@@ -1,6 +1,7 @@
 package com.github.reload;
 
 import java.net.InetSocketAddress;
+import com.github.reload.Components.Component;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.NodeID;
@@ -13,8 +14,10 @@ import com.github.reload.routing.TopologyPlugin;
  * peer to operate with a specific overlay instance
  * 
  */
+@Component(ReloadConnector.COMPNAME)
 public abstract class ReloadConnector {
 
+	public static final String COMPNAME = "com.github.reload.ReloadConnector";
 	private InetSocketAddress localAddr;
 	private boolean isOverlayInitiator;
 	private boolean isClientMode = false;

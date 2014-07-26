@@ -14,35 +14,49 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.Collection;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import com.github.reload.Components;
 import com.github.reload.Components.Component;
+import com.github.reload.Components.MessageHandler;
+import com.github.reload.ReloadConnector;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.crypto.Keystore;
-import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.crypto.ReloadCertificateParser;
+import com.github.reload.crypto.MemoryKeystore;
+import com.github.reload.crypto.X509CryptoHelper;
+import com.github.reload.net.connections.Connection;
+import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
-import com.github.reload.routing.RoutingTable;
+import com.github.reload.routing.TopologyPlugin;
 
 public class NetworkTest {
 
 	public static InetSocketAddress ECHO_SERVER_ADDR;
+	public static HashAlgorithm TEST_HASH = HashAlgorithm.SHA1;
+	public static SignatureAlgorithm TEST_SIGN = SignatureAlgorithm.RSA;
 	public static NodeID TEST_NODEID = NodeID.valueOf(new byte[]{1, 2, 3, 4, 5,
 																	6, 7, 8, 9,
 																	10, 11, 12,
@@ -51,9 +65,46 @@ public class NetworkTest {
 
 	private static EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+	protected static Connection conn;
+	protected static Message echo;
+
+	public static InetSocketAddress SERVER_ADDR;
+
+	public static X509Certificate CA_CERT;
+	public static X509Certificate TEST_CERT;
+	public static PrivateKey TEST_KEY;
+
+	public static CryptoHelper<?> TEST_CRYPTO;
+
 	@BeforeClass
 	public static void runEchoServer() throws Exception {
+		SERVER_ADDR = new InetSocketAddress(InetAddress.getLocalHost(), 6084);
 		ECHO_SERVER_ADDR = new InetSocketAddress(InetAddress.getLocalHost(), 5000);
+
+		TEST_CRYPTO = new X509CryptoHelper(TEST_HASH, TEST_SIGN, TEST_HASH);
+
+		Components.register(TEST_CRYPTO);
+
+		CA_CERT = (X509Certificate) loadLocalCert("CAcert.der");
+		TEST_CERT = (X509Certificate) loadLocalCert("testCert.crt");
+		TEST_KEY = loadPrivateKey("testKey.key", SignatureAlgorithm.RSA);
+
+		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
+
+		Components.registerMessageHandler(new TestListener());
+
+		TestConfiguration conf = new TestConfiguration();
+		conf.rootCerts = Collections.singletonList(CA_CERT);
+		Components.register(conf);
+
+		ConnectionManager connMgr = new ConnectionManager();
+
+		TestConnector testConn = new TestConnector();
+		testConn.setLocalAddress(SERVER_ADDR);
+
+		Components.register(testConn);
+		Components.register(connMgr);
+
 		ServerBootstrap b = new ServerBootstrap();
 		b.group(workerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
 
@@ -156,70 +207,81 @@ public class NetworkTest {
 		}
 	}
 
-	@Component(RoutingTable.class)
-	public static class TestRouting implements RoutingTable {
+	public static class TestListener {
 
-		@Override
-		public Set<NodeID> getNextHops(RoutableID destination) {
-			return Collections.singleton(TEST_NODEID);
+		@MessageHandler(ContentType.UNKNOWN)
+		public void requestReceived(Message message) {
+			echo = message;
+
+			synchronized (conn) {
+				conn.notify();
+			}
 		}
-
-		@Override
-		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
-			return Collections.singleton(TEST_NODEID);
-		}
-
 	}
 
-	@Component(CryptoHelper.class)
-	public static class TestCrypto extends CryptoHelper {
+	@Component(ReloadConnector.COMPNAME)
+	public static class TestConnector extends ReloadConnector {
 
 		@Override
-		public HashAlgorithm getSignHashAlg() {
-			// TODO Auto-generated method stub
+		protected byte[] getJoinData() {
+			return new byte[0];
+		}
+
+		@Override
+		protected TopologyPlugin getTopologyPlugin() {
 			return null;
 		}
 
 		@Override
-		public SignatureAlgorithm getSignAlg() {
-			// TODO Auto-generated method stub
+		protected CertificateType getCertificateType() {
+			return CertificateType.X509;
+		}
+
+		@Override
+		protected CryptoHelper<X509Certificate> getCryptoHelper() {
 			return null;
 		}
 
 		@Override
-		public HashAlgorithm getCertHashAlg() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity) {
-			// TODO Auto-generated method stub
+		public boolean equals(Object obj) {
 			return false;
 		}
 
 		@Override
-		public ReloadCertificateParser getCertificateParser() {
-			// TODO Auto-generated method stub
-			return null;
+		public int hashCode() {
+			return 0;
 		}
 
-		@Override
-		public List<? extends Certificate> getTrustRelationship(Certificate peerCert, Certificate trustedIssuer, List<? extends Certificate> availableCerts) throws CertificateException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+	}
 
-		@Override
-		public SSLEngine getSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
-			return SSLContext.getInstance("TLS").createSSLEngine();
-		}
+	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
+		if (localCertPath == null || !new File(localCertPath).exists())
+			throw new FileNotFoundException("Overlay certificate file not found at " + localCertPath);
 
-		@Override
-		protected Keystore getKeystore() {
-			// TODO Auto-generated method stub
-			return null;
+		CertificateFactory certFactory;
+		try {
+			certFactory = CertificateFactory.getInstance("X.509");
+			File overlayCertFile = new File(localCertPath);
+			InputStream certStream = new FileInputStream(overlayCertFile);
+			Certificate cert = certFactory.generateCertificate(certStream);
+			certStream.close();
+			return cert;
+		} catch (CertificateException | IOException e) {
+			throw new CertificateException(e);
 		}
+	}
 
+	private static PrivateKey loadPrivateKey(String privateKeyPath, SignatureAlgorithm keyAlg) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+		if (privateKeyPath == null || !new File(privateKeyPath).exists())
+			throw new FileNotFoundException("Private key file not found at " + privateKeyPath);
+
+		File file = new File(privateKeyPath);
+		byte[] privKeyBytes = new byte[(int) file.length()];
+		InputStream in = new FileInputStream(file);
+		in.read(privKeyBytes);
+		in.close();
+		KeyFactory keyFactory = KeyFactory.getInstance(keyAlg.toString());
+		KeySpec ks = new PKCS8EncodedKeySpec(privKeyBytes);
+		return keyFactory.generatePrivate(ks);
 	}
 }

@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import java.net.URI;
 import java.net.URISyntaxException;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
-import com.github.reload.net.encoders.content.errors.UnknownKindException;
 import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
 import com.github.reload.net.encoders.header.DestinationList;
 
@@ -81,6 +81,10 @@ public class ReloadUri {
 		return new ReloadUri(new DestinationList(destList), overlayName, dataSpecifier);
 	}
 
+	public static ReloadUri create(String uri) throws URISyntaxException {
+		return create(URI.create(uri));
+	}
+
 	/**
 	 * Try to parse the passed URI to a RELOAD URI, the eventually data
 	 * specifier will not be parsed. See {@link #create(URI, Configuration)} for
@@ -94,52 +98,6 @@ public class ReloadUri {
 	 *             if the uri is null
 	 */
 	public static ReloadUri create(URI uri) throws URISyntaxException {
-		try {
-			return create(uri, null);
-		} catch (UnknownKindException e) {
-			throw new AssertionError(e);
-		}
-	}
-
-	/**
-	 * Try to parse the passed string to a RELOAD URI, the eventually data
-	 * specifier will not be parsed. See {@link #create(String, Configuration)}
-	 * for data specifier parsing.
-	 * The RELOAD URI destination list must contain at least one destination-id.
-	 * 
-	 * @param uri
-	 *            a Uniform Resource Identifier in the RELOAD format
-	 * @throws URISyntaxException
-	 *             if the URI is not a valid RELOAD URI
-	 * @throws NullPointerException
-	 *             if the uri is null
-	 */
-	public static ReloadUri create(String uri) throws URISyntaxException {
-		return create(URI.create(uri));
-	}
-
-	/**
-	 * Try to parse the passed URI to a RELOAD URI, the eventually data
-	 * specifier will also be parsed using the data kind defined in the
-	 * specified configuration. If the configuration doesn't contain the kind
-	 * definition for the data specifier of the uri, an UnknownKindException
-	 * will be throwed.
-	 * 
-	 * @param uri
-	 *            a Uniform Resource Identifier in the RELOAD format
-	 * @param conf
-	 *            the configuration to be used to decode the data specifier. If
-	 *            null, the data specifier will not be parsed.
-	 * @throws URISyntaxException
-	 *             if the URI is not a valid RELOAD URI
-	 * @throws UnknownKindException
-	 *             if the configuration doesn't contain a kind definition for
-	 *             the data specifier in the uri
-	 * @throws NullPointerException
-	 *             if the uri is null
-	 * 
-	 */
-	public static ReloadUri create(URI uri, Configuration conf) throws URISyntaxException, UnknownKindException {
 		if (uri == null)
 			throw new NullPointerException();
 
@@ -150,41 +108,16 @@ public class ReloadUri {
 		if (!overlayName.matches(OVERLAY_NAME_PATTEN))
 			throw new URISyntaxException(uri.toString(), "Invalid overlay name");
 
-		DestinationList destList = decodeDestinationList(uri, conf);
+		DestinationList destList = decodeDestinationList(uri);
 		if (destList.isEmpty())
 			throw new IllegalArgumentException("Empty destination list");
 
-		StoredDataSpecifier specifier = (conf != null) ? parseSpecifier(uri, conf) : null;
+		StoredDataSpecifier specifier = parseSpecifier(uri);
 
 		return new ReloadUri(destList, overlayName, specifier);
 	}
 
-	/**
-	 * Try to parse the passed string to a RELOAD URI, the eventually data
-	 * specifier will also be parsed using the data kind defined in the
-	 * specified configuration. If the configuration doesn't contain the kind
-	 * definition for the data specifier of the uri, an UnknownKindException
-	 * will be throwed.
-	 * 
-	 * @param uri
-	 *            a Uniform Resource Identifier in the RELOAD format
-	 * @param conf
-	 *            the configuration to be used to decode the data specifier. If
-	 *            null, the data specifier will not be parsed.
-	 * @throws URISyntaxException
-	 *             if the URI is not a valid RELOAD URI
-	 * @throws UnknownKindException
-	 *             if the configuration doesn't contain a kind definition for
-	 *             the data specifier in the uri
-	 * @throws NullPointerException
-	 *             if the uri is null
-	 * 
-	 */
-	public static ReloadUri create(String uri, Configuration conf) throws URISyntaxException, UnknownKindException {
-		return create(URI.create(uri), conf);
-	}
-
-	private static DestinationList decodeDestinationList(URI uri, Configuration conf) throws URISyntaxException {
+	private static DestinationList decodeDestinationList(URI uri) throws URISyntaxException {
 		String hexDestList = uri.getUserInfo();
 
 		if (hexDestList == null)
@@ -192,9 +125,10 @@ public class ReloadUri {
 
 		try {
 			ByteBuf encList = hexToByte(hexDestList);
-			Codec<DestinationList> codec = Codec.getCodec(DestinationList.class, conf);
+			Codec<DestinationList> codec = Codec.getCodec(DestinationList.class, null);
 			return codec.decode(encList);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new URISyntaxException(uri.toString(), "Invalid destination-id encoding");
 		}
 	}
@@ -209,10 +143,14 @@ public class ReloadUri {
 		return buf;
 	}
 
-	private static StoredDataSpecifier parseSpecifier(URI uri, Configuration conf) throws UnknownKindException {
+	private static StoredDataSpecifier parseSpecifier(URI uri) {
 		String hexSpecifier = uri.getPath();
+		if (hexSpecifier.length() == 0)
+			return null;
+
 		ByteBuf encSpecifier = hexToByte(hexSpecifier);
-		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, conf);
+
+		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, null);
 		try {
 			return codec.decode(encSpecifier);
 		} catch (CodecException e) {
@@ -248,10 +186,14 @@ public class ReloadUri {
 		if (specifier == null)
 			return "";
 
-		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(EncUtils.maxUnsignedInt(DataSpecifier.DATA_SPEC_LENGTH_FIELD));
+		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(DEST_BUF_SIZE);
 
 		Codec<StoredDataSpecifier> codec = Codec.getCodec(StoredDataSpecifier.class, null);
-		codec.encode(specifier, buf);
+		try {
+			codec.encode(specifier, buf);
+		} catch (CodecException e) {
+			e.printStackTrace();
+		}
 
 		return byteToHex(buf);
 	}

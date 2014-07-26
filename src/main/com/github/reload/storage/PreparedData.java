@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.util.Date;
-import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.content.storage.ArrayModel;
 import com.github.reload.net.encoders.content.storage.ArrayValue;
 import com.github.reload.net.encoders.content.storage.SingleValue;
@@ -14,7 +14,6 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
 
 /**
  * Helps to generate a signed data
@@ -125,16 +124,13 @@ public class PreparedData {
 
 		NodeID storerId = context.getLocalId();
 
-		// Use this identity type because it is required by some access policies
-		SignerIdentity localIdentity = SignerIdentity.multipleIdIdentity(certHashAlg, localCert, storerId);
-
-		Signature signature = computeSignature(localIdentity, cryptoHelper, resourceId, value);
+		Signature signature = computeSignature(cryptoHelper, resourceId, value);
 
 		return new StoredData(kind, storageTime, lifeTime, value, signature);
 	}
 
-	private Signature computeSignature(SignerIdentity signerIdentity, CryptoHelper cryptoHelper, ResourceID resourceId, SingleValue value) {
-		Signature dataSigner = cryptoHelper.newSigner(signerIdentity);
+	private Signature computeSignature(CryptoHelper cryptoHelper, ResourceID resourceId, SingleValue value) {
+		Signature dataSigner = cryptoHelper.newSigner();
 
 		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleValue.VALUE_LENGTH_FIELD + value.getSize());
 

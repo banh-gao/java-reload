@@ -6,20 +6,17 @@ import java.net.URISyntaxException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.cert.X509Extension;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.security.auth.x500.X500Principal;
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
-import sun.security.x509.GeneralName;
-import sun.security.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import com.github.reload.ReloadOverlay;
 import com.github.reload.ReloadUri;
 import com.github.reload.net.encoders.header.NodeID;
@@ -27,6 +24,8 @@ import com.github.reload.net.encoders.header.NodeID;
 public class X509CertificateParser implements ReloadCertificateParser {
 
 	private static final Logger logger = Logger.getLogger(ReloadOverlay.class);
+
+	private static final String SDN_OID = "2.5.29.17";
 
 	protected X509CertificateParser() {
 	}
@@ -65,8 +64,8 @@ public class X509CertificateParser implements ReloadCertificateParser {
 	 */
 	public static ReloadCertificate parse(X509Certificate certificate, String overlayName) throws CertificateException {
 		String username = extractUsernameFromCert(certificate);
-		Set<NodeID> ids = extractNodeIdFromUris(certificate, overlayName);
-		ReloadCertificate reloadCert = new ReloadCertificate(certificate, username, ids);
+		NodeID id = extractNodeIdFromUri(certificate, overlayName);
+		ReloadCertificate reloadCert = new ReloadCertificate(certificate, username, id);
 		if (reloadCert.isSelfSigned()) {
 			checkSelfSigned(reloadCert);
 		}
@@ -74,18 +73,17 @@ public class X509CertificateParser implements ReloadCertificateParser {
 		return reloadCert;
 	}
 
-	private static String extractUsernameFromCert(X509Certificate cert) {
-		byte[] encGenNames = cert.getExtensionValue(X509Extension.subjectAlternativeName.getId());
+	private static String extractUsernameFromCert(X509Certificate cert) throws CertificateException {
+		byte[] encGenNames = cert.getExtensionValue(SDN_OID);
 
 		if (encGenNames == null)
 			return "";
 
-		ASN1Primitive derObject = toDERObject(encGenNames);
-
-		if (derObject instanceof DEROctetString) {
-			DEROctetString derOctetString = (DEROctetString) derObject;
-
-			derObject = toDERObject(derOctetString.getOctets());
+		DERObject derObject;
+		try {
+			derObject = toDERObject(encGenNames);
+		} catch (IOException e) {
+			throw new CertificateException(e);
 		}
 
 		for (GeneralName name : GeneralNames.getInstance(derObject).getNames()) {
@@ -105,7 +103,7 @@ public class X509CertificateParser implements ReloadCertificateParser {
 				if (isDNmatching(cert.getSubjectX500Principal(), principal))
 					return cert;
 			} catch (InvalidNameException e) {
-				logger.log(Priority.WARN, e);
+				logger.warn(e.getMessage());
 			}
 		}
 		return null;
@@ -134,83 +132,61 @@ public class X509CertificateParser implements ReloadCertificateParser {
 	 * @throws CertificateException
 	 */
 	private static void checkSelfSigned(ReloadCertificate reloadCert) throws CertificateException {
-		int i = 1;
-		for (NodeID certId : reloadCert.getNodeIds()) {
-			NodeID computedId = X509Utils.getKeyBasedNodeId(i, reloadCert.getPublicKey().getEncoded(), certId.getData().length);
-			if (!computedId.equals(certId))
-				throw new CertificateException("Illegal node-id at index " + i + " for self-signed certificate");
-			i++;
-		}
+		NodeID certId = reloadCert.getNodeId();
+		NodeID computedId = X509Utils.getKeyBasedNodeId(1, reloadCert.getPublicKey().getEncoded(), certId.getData().length);
+
+		if (!computedId.equals(certId))
+			throw new CertificateException("Illegal node-id at index " + 1 + " for self-signed certificate");
 	}
 
-	private static Set<NodeID> extractNodeIdFromUris(X509Certificate cert, String overlayName) throws CertificateException {
-		Set<NodeID> ids = new LinkedHashSet<NodeID>();
-		for (ReloadUri uri : extractUris(cert)) {
-			if (overlayName == null || uri.getOverlayName().equalsIgnoreCase(overlayName)) {
-				ids.add(uri.getDestinationList().getNodeDestination());
-			}
+	private static NodeID extractNodeIdFromUri(X509Certificate cert, String overlayName) throws CertificateException {
+		ReloadUri uri = extractUri(cert);
+		if (overlayName == null || uri.getOverlayName().equalsIgnoreCase(overlayName)) {
+			return uri.getDestinationList().getNodeDestination();
 		}
 
-		if (ids.size() == 0)
-			throw new CertificateException("No nodeid found");
-
-		return ids;
+		throw new CertificateException("No nodeid found");
 	}
 
-	private static Set<ReloadUri> extractUris(X509Certificate cert) throws CertificateException {
-		byte[] encGenNames = cert.getExtensionValue(X509Extension.subjectAlternativeName.getId());
+	private static ReloadUri extractUri(X509Certificate cert) throws CertificateException {
+		byte[] encGenNames = cert.getExtensionValue(SDN_OID);
 		if (encGenNames == null)
 			throw new CertificateException("Invalid reload certificate: no node-id found");
 
-		ASN1Primitive derObject = toDERObject(encGenNames);
-
-		if (derObject instanceof DEROctetString) {
-			DEROctetString derOctetString = (DEROctetString) derObject;
-
-			derObject = toDERObject(derOctetString.getOctets());
+		DERObject derObject;
+		try {
+			derObject = toDERObject(encGenNames);
+		} catch (IOException e) {
+			throw new CertificateException(e);
 		}
-
-		Set<ReloadUri> out = new LinkedHashSet<ReloadUri>();
 
 		for (GeneralName name : GeneralNames.getInstance(derObject).getNames()) {
 			if (name.getTagNo() == GeneralName.uniformResourceIdentifier) {
 				try {
-					out.add(ReloadUri.create(name.getName().toString()));
+					return ReloadUri.create(name.getName().toString());
 				} catch (URISyntaxException e) {
-					logger.log(Priority.DEBUG, "Invalid RELOAD URI: " + name.getName().toString());
+					logger.warn("Invalid RELOAD URI: " + name.getName().toString(), e);
 				}
 			}
 		}
 
-		if (out.isEmpty())
-			throw new CertificateException("No valid RELOAD URI found");
-
-		return out;
+		throw new CertificateException("No valid RELOAD URI found");
 	}
 
-	private static ASN1Primitive toDERObject(byte[] data) {
+	private static DERObject toDERObject(byte[] data) throws IOException {
 		ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-		ASN1InputStream asnInputStream = new ASN1InputStream(inStream);
-		ASN1Primitive p;
+		ASN1InputStream DIS = new ASN1InputStream(inStream);
 		try {
-			p = asnInputStream.readObject();
-		} catch (IOException e) {
-			try {
-				asnInputStream.close();
-				inStream.close();
-			} catch (IOException _) {
-				// Ignored
+			DERObject out = DIS.readObject();
+
+			if (out instanceof DEROctetString) {
+				DEROctetString derOctetString = (DEROctetString) out;
+				out = toDERObject(derOctetString.getOctets());
 			}
-			throw new RuntimeException(e);
-		}
-
-		try {
-			asnInputStream.close();
+			return out;
+		} finally {
+			DIS.close();
 			inStream.close();
-		} catch (IOException _) {
-			// Ignored
 		}
-
-		return p;
 	}
 }

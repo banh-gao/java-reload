@@ -2,17 +2,19 @@ package com.github.reload.net.stack;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.github.reload.Components;
+import com.github.reload.Components.Component;
 import com.github.reload.Components.MessageHandler;
-import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkTest;
-import com.github.reload.net.TestConfiguration;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
@@ -21,10 +23,13 @@ import com.github.reload.net.encoders.content.PingAnswer;
 import com.github.reload.net.encoders.content.PingRequest;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.Header;
+import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.routing.RoutingTable;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -35,23 +40,19 @@ public class RouterTest extends NetworkTest {
 
 	@BeforeClass
 	public static void init() throws Exception {
-		Configuration conf = new TestConfiguration();
 
-		ConnectionManager connMgr = new ConnectionManager();
 		msgRouter = new MessageRouter();
-
-		Components.register(new TestListener());
-		Components.register(new TestRouting());
-		Components.register(new TestCrypto());
 		Components.register(msgRouter);
-		Components.register(conf);
-		Components.register(connMgr);
+
+		Components.register(new TestRouting());
 
 		Components.initComponents();
 
-		ListenableFuture<Connection> c = connMgr.connectTo(TEST_NODEID, ECHO_SERVER_ADDR, OverlayLinkType.TLS_TCP_FH_NO_ICE);
+		ConnectionManager connMgr = (ConnectionManager) Components.get(ConnectionManager.COMPNAME);
 
-		Futures.get(c, 50, TimeUnit.MILLISECONDS, Exception.class);
+		ListenableFuture<Connection> c = connMgr.connectTo(TEST_NODEID, SERVER_ADDR, OverlayLinkType.TLS_TCP_FH_NO_ICE);
+
+		Futures.get(c, 500, TimeUnit.MILLISECONDS, Exception.class);
 	}
 
 	@AfterClass
@@ -96,5 +97,20 @@ public class RouterTest extends NetworkTest {
 				msgRouter.notify();
 			}
 		}
+	}
+
+	@Component(RoutingTable.COMPNAME)
+	public static class TestRouting implements RoutingTable {
+
+		@Override
+		public Set<NodeID> getNextHops(RoutableID destination) {
+			return Collections.singleton(TEST_NODEID);
+		}
+
+		@Override
+		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
+			return Collections.singleton(TEST_NODEID);
+		}
+
 	}
 }

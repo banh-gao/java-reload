@@ -78,8 +78,6 @@ public abstract class Codec<T> {
 	 * @param conf
 	 */
 	public Codec(Configuration conf) {
-		if (conf == null)
-			throw new NullPointerException();
 		this.conf = conf;
 	}
 

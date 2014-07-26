@@ -5,10 +5,6 @@ import java.security.cert.CertificateException;
 
 /**
  * Parses a certificate to a reload certificate
- * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
- * @param <T>
  */
 public interface ReloadCertificateParser {
 

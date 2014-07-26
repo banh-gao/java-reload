@@ -4,22 +4,22 @@ import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
-import java.security.cert.Certificate;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509KeyManager;
+import javax.net.ssl.X509ExtendedKeyManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 import com.github.reload.Components.Component;
 import com.github.reload.Components.start;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.CertHashNodeIdSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
@@ -30,20 +30,23 @@ import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
  * Crypto helper for X.509 certificates
  * 
  */
-@Component(CryptoHelper.class)
-public class X509CryptoHelper extends CryptoHelper {
+@Component(CryptoHelper.COMPNAME)
+public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
-	@Component
+	@Component(Configuration.COMPNAME)
 	private Configuration conf;
 
-	private final Keystore keystore;
+	@Component(Keystore.COMPNAME)
+	private Keystore<X509Certificate> keystore;
+
+	private SSLContext sslContext;
+
 	private final X509CertificateParser certParser;
 	private final HashAlgorithm signHashAlg;
 	private final SignatureAlgorithm signAlg;
 	private final HashAlgorithm certHashAlg;
 
-	public X509CryptoHelper(Keystore keystore, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
-		this.keystore = keystore;
+	public X509CryptoHelper(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
 		certParser = new X509CertificateParser();
 		this.signHashAlg = signHashAlg;
 		this.signAlg = signAlg;
@@ -51,8 +54,9 @@ public class X509CryptoHelper extends CryptoHelper {
 	}
 
 	@start
-	public void init() {
-		keystore.init(conf);
+	public void init() throws Exception {
+		sslContext = SSLContext.getInstance("TLSv1.2");
+		sslContext.init(new KeyManager[]{new X509LocalKeyManager()}, new TrustManager[]{new X509LocalTrustManager()}, new SecureRandom());
 	}
 
 	@Override
@@ -71,16 +75,10 @@ public class X509CryptoHelper extends CryptoHelper {
 	}
 
 	@Override
-	public List<X509Certificate> getTrustRelationship(Certificate peerCert, Certificate trustedIssuer, List<? extends Certificate> availableCerts) throws CertificateException {
-		if (!(peerCert instanceof X509Certificate))
-			throw new IllegalArgumentException("Invalid X509 certificate");
-
-		if (!(trustedIssuer instanceof X509Certificate))
-			throw new IllegalArgumentException("Invalid X509 certificate");
-
+	public List<X509Certificate> getTrustRelationship(X509Certificate peerCert, X509Certificate trustedIssuer, List<? extends X509Certificate> availableCerts) throws CertificateException {
 		List<X509Certificate> out = new ArrayList<X509Certificate>();
 
-		X509Certificate certToAuthenticate = (X509Certificate) peerCert;
+		X509Certificate certToAuthenticate = peerCert;
 
 		while (true) {
 			X500Principal issuer = certToAuthenticate.getIssuerX500Principal();
@@ -103,7 +101,7 @@ public class X509CryptoHelper extends CryptoHelper {
 	}
 
 	@Override
-	protected Keystore getKeystore() {
+	protected Keystore<X509Certificate> getKeystore() {
 		return keystore;
 	}
 
@@ -116,13 +114,7 @@ public class X509CryptoHelper extends CryptoHelper {
 	public boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity) {
 		HashAlgorithm certHashAlg = identity.getSignerIdentityValue().getHashAlgorithm();
 		SignerIdentity computedIdentity = null;
-		if (identity.getSignerIdentityValue() instanceof CertHashNodeIdSignerIdentityValue) {
-			for (NodeID nodeId : certificate.getNodeIds()) {
-				computedIdentity = SignerIdentity.multipleIdIdentity(certHashAlg, certificate.getOriginalCertificate(), nodeId);
-				if (computedIdentity.equals(identity))
-					return true;
-			}
-		} else if (identity.getSignerIdentityValue() instanceof CertHashSignerIdentityValue) {
+		if (identity.getSignerIdentityValue() instanceof CertHashSignerIdentityValue) {
 			computedIdentity = SignerIdentity.singleIdIdentity(certHashAlg, certificate.getOriginalCertificate());
 			return computedIdentity.equals(identity);
 		}
@@ -135,88 +127,105 @@ public class X509CryptoHelper extends CryptoHelper {
 	}
 
 	@Override
-	public SSLEngine getSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
-		SSLContext ctx = SSLContext.getDefault();
-		ctx.init(new KeyManager[]{new X509KeyManager() {
-			
-			@Override
-			public String[] getServerAliases(String keyType, Principal[] issuers) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public PrivateKey getPrivateKey(String alias) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public String[] getClientAliases(String keyType, Principal[] issuers) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public X509Certificate[] getCertificateChain(String alias) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
-			public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-		};
-		getKeyManager()}, new TrustManager[]{getTrustManager()}, null);
-		sslEngine = ctx.createSSLEngine();
-		return sslEngine;
-		return null;
+	public SSLEngine newSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
+		return sslContext.createSSLEngine();
 	}
 
-	private class LocalKeyManager implements X509KeyManager {
+	/**
+	 * Key manager that uses the cryptographic material related to the local
+	 * node
+	 * 
+	 */
+	public class X509LocalKeyManager extends X509ExtendedKeyManager {
+
+		private static final String LOCAL_ALIAS = "LOCAL_ALIAS";
 
 		@Override
 		public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
-			// TODO Auto-generated method stub
-			return null;
+			return LOCAL_ALIAS;
 		}
 
 		@Override
 		public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
-			// TODO Auto-generated method stub
-			return null;
+			return LOCAL_ALIAS;
+		}
+
+		@Override
+		public String chooseEngineServerAlias(String keyType, Principal[] issuers, SSLEngine engine) {
+			return chooseServerAlias(keyType, issuers, null);
+		}
+
+		@Override
+		public String chooseEngineClientAlias(String[] keyType, Principal[] issuers, SSLEngine engine) {
+			return chooseClientAlias(keyType, issuers, null);
 		}
 
 		@Override
 		public X509Certificate[] getCertificateChain(String alias) {
-			return getLocalTrustRelationship().toArray(new X509Certificate[]{});
+			return getLocalTrustRelationship().toArray(new X509Certificate[0]);
 		}
 
 		@Override
 		public String[] getClientAliases(String keyType, Principal[] issuers) {
-			// TODO Auto-generated method stub
-			return null;
+			return new String[]{LOCAL_ALIAS};
 		}
 
 		@Override
 		public PrivateKey getPrivateKey(String alias) {
-			// TODO Auto-generated method stub
-			return null;
+			return X509CryptoHelper.this.getPrivateKey();
 		}
 
 		@Override
 		public String[] getServerAliases(String keyType, Principal[] issuers) {
-			// TODO Auto-generated method stub
-			return null;
+			System.out.println("OK");
+			return new String[]{LOCAL_ALIAS};
+		}
+	}
+
+	/**
+	 * Trust manager that uses the cryptographic material related to the local
+	 * node
+	 * 
+	 */
+	public class X509LocalTrustManager extends X509ExtendedTrustManager {
+
+		@Override
+		public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+			X509Certificate remoteCert = chain[0];
+			// Authenticate client certificate using overlay CA
+			authenticateTrustRelationship(remoteCert, Arrays.asList(chain));
 		}
 
+		@Override
+		public X509Certificate[] getAcceptedIssuers() {
+			return X509CryptoHelper.this.getAcceptedIssuers().toArray(new X509Certificate[0]);
+		}
+
+		@Override
+		public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+			X509Certificate remoteCert = chain[0];
+			// Authenticate server certificate using overlay CA
+			authenticateTrustRelationship(remoteCert, Arrays.asList(chain));
+		}
+
+		@Override
+		public void checkClientTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+			checkClientTrusted(chain, authType);
+		}
+
+		@Override
+		public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
+			checkServerTrusted(chain, authType);
+		}
+
+		@Override
+		public void checkClientTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+			checkClientTrusted(chain, authType);
+		}
+
+		@Override
+		public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
+			checkServerTrusted(chain, authType);
+		}
 	}
 }

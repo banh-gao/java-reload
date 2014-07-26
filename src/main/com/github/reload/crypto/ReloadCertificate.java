@@ -1,13 +1,6 @@
 package com.github.reload.crypto;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
-import java.security.SignatureException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
@@ -17,14 +10,13 @@ import com.github.reload.net.encoders.header.NodeID;
  * A wrapper class that provides access to RELOAD values in certificates
  * 
  */
-public class ReloadCertificate extends Certificate {
+public class ReloadCertificate {
 
 	final NodeID nodeId;
 	final String username;
 	final Certificate certificate;
 
 	public ReloadCertificate(Certificate certificate, String username, NodeID nodeId) {
-		super(certificate.getType());
 		if (nodeId == null)
 			throw new NullPointerException();
 		this.certificate = certificate;
@@ -90,26 +82,6 @@ public class ReloadCertificate extends Certificate {
 	@Override
 	public String toString() {
 		return "ReloadCertificate [nodeId=" + nodeId + ", username=" + username + ", certType=" + certificate.getType() + "]";
-	}
-
-	@Override
-	public byte[] getEncoded() throws CertificateEncodingException {
-		return certificate.getEncoded();
-	}
-
-	@Override
-	public PublicKey getPublicKey() {
-		return certificate.getPublicKey();
-	}
-
-	@Override
-	public void verify(PublicKey key) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
-		certificate.verify(key);
-	}
-
-	@Override
-	public void verify(PublicKey key, String sigProvider) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
-		certificate.verify(key, sigProvider);
 	}
 
 	/**

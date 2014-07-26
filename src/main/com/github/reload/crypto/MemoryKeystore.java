@@ -3,59 +3,50 @@ package com.github.reload.crypto;
 import java.security.PrivateKey;
 import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import com.github.reload.Components.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 
 /**
  * Keystore that stored initialization values and running crypto material into
  * memory
- * 
- * @param <T>
  */
-public abstract class MemoryKeystore implements Keystore {
+@Component(Keystore.COMPNAME)
+public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 
-	protected Configuration conf;
+	@Component(Configuration.COMPNAME)
+	private Configuration conf;
+
+	@Component(CryptoHelper.COMPNAME)
+	protected CryptoHelper<T> cryptoHelper;
+
 	private final PrivateKey privateKey;
 
-	private final ReloadCertificate localCert;
-	private final Set<ReloadCertificate> storedCerts;
+	private final T localCert;
+	private final Map<NodeID, T> storedCerts;
 
-	public MemoryKeystore(ReloadCertificate localCert, PrivateKey privateKey, Set<ReloadCertificate> storedCerts) {
+	public MemoryKeystore(T localCert, PrivateKey privateKey, Map<NodeID, T> storedCerts) {
 		this.privateKey = privateKey;
 		this.localCert = localCert;
-		this.storedCerts = storedCerts;
+		this.storedCerts = new HashMap<NodeID, T>(storedCerts);
 	}
 
 	@Override
-	public void init(Configuration conf) throws InitializationException {
-		context = context;
-	}
-
-	@Override
-	public boolean isBadNode(NodeID nodeId) {
-		return (context.getConfiguration().getBadNodes().contains(nodeId));
-	}
-
-	@Override
-	public ReloadCertificate getLocalCertificate() {
+	public T getLocalCertificate() {
 		return localCert;
 	}
 
 	@Override
-	public void addCertificate(Certificate cert) throws CertStoreException {
-		try {
-			ReloadCertificate reloadCert = context.getCryptoHelper().parseCertificate(cert, context.getConfiguration());
-			storedCerts.add(reloadCert);
-		} catch (CertificateException e) {
-			throw new CertStoreException(e);
-		}
+	public void addCertificate(NodeID nodeId, T cert) throws CertStoreException {
+		storedCerts.put(nodeId, cert);
 	}
 
 	@Override
-	public void removeCertificate(ReloadCertificate cert) {
+	public void removeCertificate(T cert) {
 		if (localCert.equals(cert))
 			return;
 
@@ -63,17 +54,28 @@ public abstract class MemoryKeystore implements Keystore {
 	}
 
 	@Override
-	public Set<ReloadCertificate> getStoredCertificates() {
-		return storedCerts;
+	public Map<NodeID, T> getStoredCertificates() {
+		return Collections.unmodifiableMap(storedCerts);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<? extends Certificate> getAcceptedIssuers() {
-		return context.getConfiguration().getRootCerts();
+	public List<? extends T> getAcceptedIssuers() {
+		return (List<? extends T>) conf.getRootCerts();
 	}
 
 	@Override
 	public PrivateKey getPrivateKey() {
 		return privateKey;
+	}
+
+	@Override
+	public T getCertificate(NodeID node) {
+		return storedCerts.get(node);
+	}
+
+	@Override
+	public boolean isBadNode(NodeID nodeId) {
+		return (conf.getBadNodes().contains(nodeId));
 	}
 }

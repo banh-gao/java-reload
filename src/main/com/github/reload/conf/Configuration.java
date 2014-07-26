@@ -6,6 +6,7 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import com.github.reload.Components.Component;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.content.errors.UnknownKindException;
 import com.github.reload.net.encoders.header.NodeID;
@@ -14,7 +15,10 @@ import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.storage.DataKind;
 
+@Component(Configuration.COMPNAME)
 public interface Configuration {
+
+	public static final String COMPNAME = "com.github.reload.conf.Configuration";
 
 	/**
 	 * @return The overlay name
@@ -59,7 +63,7 @@ public interface Configuration {
 
 	public abstract List<URL> getEnrollmentServers();
 
-	public abstract List<Certificate> getRootCerts();
+	public abstract List<? extends Certificate> getRootCerts();
 
 	public abstract boolean admitSelfSigned();
 

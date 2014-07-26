@@ -1,6 +1,7 @@
 package com.github.reload;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.AnnotationFormatError;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,7 +9,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -16,8 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.ContentType;
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.MutableClassToInstanceMap;
+import com.google.common.collect.Maps;
 
 /**
  * Application context where all application components are registered.
@@ -26,9 +25,9 @@ public class Components {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private static final ClassToInstanceMap<Object> components = MutableClassToInstanceMap.create();
+	private static final Map<String, Object> components = Maps.newLinkedHashMap();
 
-	private static final Map<ContentType, MessageHandlerMethod> messageHandlers = new HashMap<ContentType, MessageHandlerMethod>(ContentType.values().length);
+	private static final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private static MessageHandlerMethod answerHandler;
 
 	private static Executor handlerExecutor = Executors.newSingleThreadExecutor();
@@ -51,12 +50,11 @@ public class Components {
 
 	public static void register(Object c) {
 		Component cmpAnn = c.getClass().getAnnotation(Component.class);
-		Class<? extends Object> clazz = (cmpAnn != null && !cmpAnn.value().equals(Object.class)) ? cmpAnn.value() : c.getClass();
 
-		if (!clazz.isAssignableFrom(c.getClass()))
-			throw new IllegalArgumentException(String.format("The specified component class %s has to be a super-type of class %s", clazz, c.getClass()));
+		if (cmpAnn == null)
+			throw new IllegalArgumentException(String.format("Component annotation for object %s not found", c.getClass().getCanonicalName()));
 
-		Object oldComp = components.put(clazz, c);
+		Object oldComp = components.put(cmpAnn.value(), c);
 		if (oldComp != null)
 			callStatusMethod(oldComp, unregistered.class);
 
@@ -90,14 +88,27 @@ public class Components {
 
 	private static void injectComponents(Object c) {
 		for (Field f : c.getClass().getDeclaredFields()) {
-			if (f.isAnnotationPresent(Component.class)) {
+			Component cmp = f.getAnnotation(Component.class);
+			if (cmp != null) {
 				try {
 					f.setAccessible(true);
-					Object cmp = get(f.getType());
-					if (cmp != null)
-						f.set(c, cmp);
+
+					String name = cmp.value();
+
+					if (name.isEmpty()) {
+						Component fldTypeAnn = f.getType().getAnnotation(Component.class);
+						if (fldTypeAnn != null)
+							name = fldTypeAnn.value();
+					}
+
+					if (name.isEmpty())
+						throw new AnnotationFormatError(String.format("Component for injection in field %s of %s not found", f.getName(), f.getDeclaringClass().getCanonicalName()));
+
+					Object obj = get(name);
+					if (obj != null)
+						f.set(c, obj);
 					else
-						l.warn(String.format("Missing component %s required by %s", f.getType().getCanonicalName(), c.getClass().getCanonicalName()));
+						l.warn(String.format("Missing component %s required by %s", name, c.getClass().getCanonicalName()));
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
@@ -119,8 +130,8 @@ public class Components {
 		}
 	}
 
-	public static <T> T get(Class<T> key) {
-		return components.getInstance(key);
+	public static Object get(String component) {
+		return components.get(component);
 	}
 
 	/**
@@ -170,21 +181,21 @@ public class Components {
 	}
 
 	/**
-	 * Applied on a type, the annotation can be used to specify the class the
-	 * annotated type has to registered instead of using the component effective
-	 * class (it must be a super-type of the annotated type)
+	 * Applied on a type, the annotation is used to specify the component name
+	 * the
+	 * annotated type has to registered
 	 * Applied on a field of a registered component it indicates that the
-	 * component corresponding to the field type has to be injected.
+	 * component corresponding to the given component name has to be injected.
 	 * 
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	public @interface Component {
 
-		Class<?> value() default Object.class;
+		String value() default "";
 	}
 
-	private static void registerMessageHandler(Object obj) {
+	public static void registerMessageHandler(Object obj) {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
 			MessageHandler ann = m.getAnnotation(MessageHandler.class);
 

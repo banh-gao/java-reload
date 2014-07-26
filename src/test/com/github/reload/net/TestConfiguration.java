@@ -3,7 +3,6 @@ package com.github.reload.net;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -23,7 +22,7 @@ import com.github.reload.storage.DataKind;
 /**
  * Representation of a RELOAD configuration document
  */
-@Component(Configuration.class)
+@Component(Configuration.COMPNAME)
 public class TestConfiguration implements Configuration {
 
 	String instanceName;
@@ -33,7 +32,7 @@ public class TestConfiguration implements Configuration {
 	String topologyPlugin;
 	long maxMessageSize;
 	short initialTTL;
-	ArrayList<Certificate> rootCerts;
+	List<? extends Certificate> rootCerts;
 	Map<Long, DataKind> requiredKinds;
 	List<URL> enrollmentServers;
 	List<NodeID> kindSigners;
