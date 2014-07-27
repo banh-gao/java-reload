@@ -18,11 +18,12 @@ import com.github.reload.net.NetworkTest;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.MessageBuilderFactory;
+import com.github.reload.net.encoders.MessageBuilderFactory.MessageBuilder;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.PingAnswer;
 import com.github.reload.net.encoders.content.PingRequest;
 import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
@@ -64,7 +65,12 @@ public class RouterTest extends NetworkTest {
 
 	@Test
 	public void testSendMessage() throws Exception {
-		Message m = new Message(new Header.Builder().setDestinationList(new DestinationList(TEST_NODEID)).build(), new PingRequest(), new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE));
+
+		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
+		MessageBuilder b = bf.newBuilder();
+
+		Message m = b.newMessage(new PingRequest(), new DestinationList(TEST_NODEID));
+
 		msgRouter.sendMessage(m);
 
 		synchronized (msgRouter) {
@@ -77,11 +83,14 @@ public class RouterTest extends NetworkTest {
 
 	@Test
 	public void testRequestAnswer() throws Exception {
-		Header header = new Header.Builder().setDestinationList(new DestinationList(TEST_NODEID)).build();
-		Message req = new Message(header, new PingRequest(), new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE));
+		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
+		MessageBuilder b = bf.newBuilder();
+
+		Message req = b.newMessage(new PingRequest(), new DestinationList(TEST_NODEID));
+
 		ListenableFuture<Message> ansFut = msgRouter.sendRequestMessage(req);
 
-		Message ans = new Message(header, new PingAnswer(2, BigInteger.ONE), new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE));
+		Message ans = new Message(req.getHeader(), new PingAnswer(2, BigInteger.ONE), new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE));
 		msgRouter.sendMessage(ans);
 
 		Message rcvAns = Futures.get(ansFut, 100, TimeUnit.MILLISECONDS, Exception.class);

@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Test;
 import com.github.reload.Components;
 import com.github.reload.net.MessageRouter;
+import com.github.reload.net.encoders.MessageBuilderFactory.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.storage.ArrayModel;
 import com.github.reload.net.encoders.content.storage.ArrayModel.ArrayModelSpecifier;
@@ -29,11 +30,9 @@ import com.github.reload.net.encoders.content.storage.StoreRequest;
 import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
 import com.github.reload.net.encoders.content.storage.StoredMetadata;
-import com.github.reload.net.encoders.header.Header;
+import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.storage.AccessPolicy;
 import com.github.reload.storage.DataKind;
@@ -65,10 +64,12 @@ public class MessageStorageTest extends MessageTest {
 
 	@SuppressWarnings("unchecked")
 	protected <T extends Content> T sendContent(T content) throws Exception {
-		Header h = new Header.Builder().build();
-		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
 
-		Message message = new Message(h, content, s);
+		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
+		MessageBuilder b = bf.newBuilder();
+
+		Message message = b.newMessage(content, new DestinationList(TEST_NODEID));
+
 		Message echo = sendMessage(message);
 
 		return (T) echo.getContent();

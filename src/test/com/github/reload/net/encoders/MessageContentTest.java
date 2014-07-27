@@ -27,19 +27,12 @@ import com.github.reload.net.encoders.content.UpdateRequest;
 import com.github.reload.net.encoders.content.errors.Error;
 import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.secBlock.GenericCertificate;
-import com.github.reload.net.encoders.secBlock.SecurityBlock;
-import com.github.reload.net.encoders.secBlock.Signature;
 
 public class MessageContentTest extends MessageTest {
 
 	@SuppressWarnings("unchecked")
 	protected <T extends Content> T sendContent(T content) throws Exception {
-		Header h = new Header.Builder().build();
-		SecurityBlock s = new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE);
-
 		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
 		MessageBuilder b = bf.newBuilder();
 

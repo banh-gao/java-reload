@@ -40,6 +40,7 @@ import com.github.reload.Components.Component;
 import com.github.reload.ReloadConnector;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.MemoryKeystore;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.MessageBuilderFactory;
@@ -61,7 +62,7 @@ public class NetworkTest {
 	public static InetSocketAddress SERVER_ADDR;
 
 	public static X509Certificate CA_CERT;
-	public static X509Certificate TEST_CERT;
+	public static ReloadCertificate TEST_CERT;
 	public static PrivateKey TEST_KEY;
 
 	public static CryptoHelper<?> TEST_CRYPTO;
@@ -78,7 +79,7 @@ public class NetworkTest {
 		Components.register(TEST_CRYPTO);
 
 		CA_CERT = (X509Certificate) loadLocalCert("CAcert.der");
-		TEST_CERT = (X509Certificate) loadLocalCert("testCert.der");
+		TEST_CERT = TEST_CRYPTO.getCertificateParser().parse(loadLocalCert("testCert.der"));
 		TEST_KEY = loadPrivateKey("testKey.der", SignatureAlgorithm.RSA);
 
 		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
