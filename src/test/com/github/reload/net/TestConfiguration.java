@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.cert.Certificate;
@@ -66,6 +67,9 @@ public class TestConfiguration implements Configuration {
 		instanceName = "testOverlay.com";
 		maxMessageSize = 5000;
 		initialTTL = 6;
+		noICE = true;
+		linkProtocols = Collections.singletonList("TLS");
+		bootstrapNodes = Collections.singleton(new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084));
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {

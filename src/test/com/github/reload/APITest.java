@@ -15,9 +15,10 @@ public class APITest {
 	public void testAPI() throws Exception {
 		BootstrapFactory.register(new TestFactory());
 		Bootstrap b = BootstrapFactory.createBootstrap(new TestConfiguration());
-		b.setOverlayInitiator(true);
+
 		b.setLocalAddress(new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084));
 		b.setLocalNodeId(TEST_NODEID);
+		b.setClientMode(true);
 
 		ListenableFuture<Overlay> ovrFut = b.connect();
 		Overlay overlay = ovrFut.get();

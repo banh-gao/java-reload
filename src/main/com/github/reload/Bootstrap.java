@@ -2,11 +2,14 @@ package com.github.reload;
 
 import java.net.InetSocketAddress;
 import com.github.reload.Components.Component;
+import com.github.reload.net.MessageRouter;
+import com.github.reload.net.connections.AttachConnector;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
+import com.github.reload.net.ice.ICEHelper;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -107,9 +110,12 @@ public abstract class Bootstrap {
 		Components.register(this);
 		Components.register(new MessageBuilder());
 		Components.register(new ConnectionManager());
+		Components.register(new AttachConnector());
+		Components.register(new ICEHelper());
+		Components.register(new MessageRouter());
 		registerComponents();
 
-		ListenableFuture<Overlay> overlayConnFut = OverlayConnector.connectToOverlay();
+		ListenableFuture<Overlay> overlayConnFut = OverlayConnector.connectToOverlay(isClientMode);
 
 		return overlayConnFut;
 	}

@@ -10,8 +10,7 @@ public class LinkHandlerFactory {
 			case TLS_TCP_FH_NO_ICE :
 				return new SRLinkHandler();
 			default :
-				throw new NoSuchAlgorithmException("No valid link protocol implementation available");
+				throw new NoSuchAlgorithmException(String.format("No valid link protocol implementation for %s available", linkType));
 		}
 	}
-
 }

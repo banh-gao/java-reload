@@ -5,8 +5,11 @@ import io.netty.channel.ChannelFutureListener;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import com.github.reload.Components;
 import com.github.reload.Components.Component;
 import com.github.reload.Components.MessageHandler;
 import com.github.reload.Components.start;
@@ -20,10 +23,7 @@ import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -37,18 +37,8 @@ public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
 	private static final int REQUEST_TIMEOUT = 3000;
-	private static final RemovalListener<Long, SettableFuture<Message>> EXP_REQ_LISTERNER = new RemovalListener<Long, SettableFuture<Message>>() {
 
-		@Override
-		public void onRemoval(RemovalNotification<Long, SettableFuture<Message>> notification) {
-			// Set failure only if request times out
-			if (!notification.wasEvicted())
-				return;
-
-			SettableFuture<Message> future = notification.getValue();
-			future.setException(new RequestTimeoutException());
-		}
-	};
+	private final ScheduledExecutorService expiredRequestsRemover = Executors.newScheduledThreadPool(1);
 
 	@Component
 	private ConnectionManager connManager;
@@ -56,25 +46,29 @@ public class MessageRouter {
 	@Component
 	private RoutingTable routingTable;
 
-	private Cache<Long, SettableFuture<Message>> pendingRequests;
+	private Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
 
 	@start
 	public void compStart() {
-		pendingRequests = CacheBuilder.newBuilder().expireAfterWrite(REQUEST_TIMEOUT, TimeUnit.MILLISECONDS).removalListener(EXP_REQ_LISTERNER).build();
+
 	}
 
 	/**
 	 * Send the given request message to the destination node into the overlay.
 	 * Since the action is performed asyncronously, this method returns
-	 * immediately and the returned object can be used to control the delivery
-	 * of the message and to receive the answer.
+	 * immediately and the returned future will be notified once the answer is
+	 * available or the request goes in error
 	 * 
 	 */
 	public ListenableFuture<Message> sendRequestMessage(Message request) {
 
 		final SettableFuture<Message> reqFut = SettableFuture.create();
 
-		pendingRequests.put(request.getHeader().getTransactionId(), reqFut);
+		long reqId = request.getHeader().getTransactionId();
+
+		pendingRequests.put(reqId, reqFut);
+
+		expiredRequestsRemover.schedule(new ExiredRequestsRemover(reqId), REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
 
 		sendMessage(request);
 
@@ -85,14 +79,15 @@ public class MessageRouter {
 	void handleAnswer(Message message) {
 		Long transactionId = message.getHeader().getTransactionId();
 
-		SettableFuture<Message> reqFut = pendingRequests.getIfPresent(transactionId);
+		SettableFuture<Message> reqFut = pendingRequests.get(transactionId);
 
 		if (reqFut == null) {
 			l.debug(String.format("Unattended answer message %#x dropped", message.getHeader().getTransactionId()));
 			return;
 		}
 
-		pendingRequests.invalidate(transactionId);
+		pendingRequests.remove(transactionId);
+
 		l.debug(String.format("Received answer message %#x", message.getHeader().getTransactionId()));
 		reqFut.set(message);
 	}
@@ -127,11 +122,19 @@ public class MessageRouter {
 		f.addListener(new ChannelFutureListener() {
 
 			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				if (future.isSuccess())
-					status.set(nextHop);
-				else
-					status.setException(future.cause());
+			public void operationComplete(final ChannelFuture future) throws Exception {
+				Components.getComponentsExecutor().execute(new Runnable() {
+
+					@Override
+					public void run() {
+						if (future.isSuccess())
+							status.set(nextHop);
+						else
+							status.setException(future.cause());
+					}
+
+				});
+
 			}
 		});
 	}
@@ -148,6 +151,21 @@ public class MessageRouter {
 			return failures;
 		}
 
+	}
+
+	private class ExiredRequestsRemover implements Runnable {
+
+		private final long transactionId;
+
+		public ExiredRequestsRemover(long transactionId) {
+			this.transactionId = transactionId;
+		}
+
+		@Override
+		public void run() {
+			SettableFuture<Message> future = pendingRequests.remove(transactionId);
+			future.setException(new RequestTimeoutException());
+		}
 	}
 
 	public static class RequestTimeoutException extends Exception implements ErrorRespose {

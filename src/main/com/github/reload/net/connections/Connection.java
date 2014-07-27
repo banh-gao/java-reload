@@ -6,8 +6,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPromise;
 import com.github.reload.net.encoders.ForwardMessage;
-import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.stack.ReloadStack;
 

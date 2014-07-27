@@ -65,12 +65,12 @@ public class AttachConnector {
 
 		Message req = msgBuilder.newMessage(attachRequest, destList);
 
-		l.log(Level.DEBUG, "Attach to " + destinationID + " in progress...");
+		if (nextHop != null)
+			req.setAttribute(Message.NEXT_HOP, nextHop);
 
 		pendingConnections.put(destinationID, fut);
 
-		if (nextHop != null)
-			req.setAttribute(Message.NEXT_HOP, nextHop);
+		l.log(Level.DEBUG, "Attach to " + destinationID + " in progress...");
 
 		ListenableFuture<Message> attachAnsFut = msgRouter.sendRequestMessage(req);
 

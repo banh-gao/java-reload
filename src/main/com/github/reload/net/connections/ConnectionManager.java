@@ -8,15 +8,15 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import java.net.InetSocketAddress;
-import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import com.github.reload.Bootstrap;
+import com.github.reload.Components;
 import com.github.reload.Components.Component;
 import com.github.reload.Components.start;
 import com.github.reload.Components.stop;
-import com.github.reload.Bootstrap;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -67,7 +67,7 @@ public class ConnectionManager {
 		b.setLocalAddress(connector.getLocalAddr());
 		b.setLinkType(SERVER_PROTO);
 		attachServer = b.buildStack();
-		System.out.println(attachServer.getChannel().localAddress());
+		l.info(String.format("Server started at %s", attachServer.getChannel().localAddress()));
 	}
 
 	@stop
@@ -96,7 +96,7 @@ public class ConnectionManager {
 		cf.addListener(new ChannelFutureListener() {
 
 			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
+			public void operationComplete(final ChannelFuture future) throws Exception {
 
 				if (future.isSuccess()) {
 					ChannelPipeline pipeline = future.channel().pipeline();
@@ -105,17 +105,24 @@ public class ConnectionManager {
 					handshakeFuture.addListener(new FutureListener<Channel>() {
 
 						public void operationComplete(Future<Channel> future) throws Exception {
-							Connection c;
-							try {
-								c = addConnection(stack);
-							} catch (CertificateException e) {
-								l.debug("Connection to " + remoteAddr + " terminated: Invalid RELOAD certificate", e);
-								outcome.setException(e);
-								return;
-							}
 
-							l.debug("Connection to " + c.getNodeId() + " at " + remoteAddr + " completed");
-							outcome.set(c);
+							Components.getComponentsExecutor().execute(new Runnable() {
+
+								@Override
+								public void run() {
+									Connection c;
+									try {
+										c = addConnection(stack);
+									} catch (CertificateException e) {
+										l.debug("Connection to " + remoteAddr + " terminated: Invalid RELOAD certificate", e);
+										outcome.setException(e);
+										return;
+									}
+
+									l.debug("Connection to " + c.getNodeId() + " at " + remoteAddr + " completed");
+									outcome.set(c);
+								}
+							});
 						};
 					});
 				} else {
@@ -129,36 +136,38 @@ public class ConnectionManager {
 		return outcome;
 	}
 
-	void clientConnected(Channel channel) {
-		Logger.getRootLogger().debug("Client connected");
-		final ReloadStack stack = new ReloadStack(channel);
-		final SslHandler sslHandler = (SslHandler) channel.pipeline().get(ReloadStack.HANDLER_SSL);
+	void clientConnected(final Channel channel) {
+		SslHandler sslHandler = (SslHandler) channel.pipeline().get(ReloadStack.HANDLER_SSL);
 		Future<Channel> handshakeFuture = sslHandler.handshakeFuture();
+
 		handshakeFuture.addListener(new FutureListener<Channel>() {
 
-			public void operationComplete(Future<Channel> future) throws Exception {
+			public void operationComplete(final Future<Channel> future) throws Exception {
+				Components.getComponentsExecutor().execute(new Runnable() {
 
-				if (!future.isSuccess())
-					future.cause().printStackTrace();
-				try {
-					addConnection(stack);
-				} catch (CertificateException e) {
-					l.debug("Connection to client terminated: Invalid RELOAD certificate", e);
-					return;
-				}
-
-				l.debug("Connection to client completed");
+					@Override
+					public void run() {
+						if (!future.isSuccess())
+							future.cause().printStackTrace();
+						try {
+							Connection c = addConnection(new ReloadStack(channel));
+							l.debug(String.format("Connection from node %s at %s accepted", c.getNodeId(), channel.remoteAddress()));
+						} catch (CertificateException e) {
+							l.debug(String.format("Connection from %s rejected: Invalid RELOAD certificate", channel.remoteAddress()), e);
+							return;
+						}
+					}
+				});
 			};
 		});
 	}
 
-	private Connection addConnection(ReloadStack stack) throws CertificateException, CertStoreException {
+	private Connection addConnection(ReloadStack stack) throws CertificateException {
 		ReloadCertificate cert = extractRemoteCert(stack.getChannel());
 		cryptoHelper.addCertificate(cert);
 		Connection c = new Connection(cert.getNodeId(), stack);
 
 		connections.put(cert.getNodeId(), c);
-		System.out.println("CONN ADDED" + cert.getNodeId());
 		return c;
 	}
 

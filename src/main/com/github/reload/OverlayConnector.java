@@ -39,7 +39,7 @@ class OverlayConnector {
 	 * @throws InitializationException
 	 * @throws NetworkException
 	 */
-	static final SettableFuture<Overlay> connectToOverlay() {
+	static final SettableFuture<Overlay> connectToOverlay(final boolean joinNeeded) {
 		Components.initComponents();
 
 		final SettableFuture<Overlay> overlayConnFut = SettableFuture.create();
@@ -58,7 +58,7 @@ class OverlayConnector {
 		Futures.addCallback(bootConnFut, new FutureCallback<Connection>() {
 
 			public void onSuccess(Connection neighbor) {
-				attachToAP(neighbor.getNodeId(), overlayConnFut);
+				attachToAP(neighbor.getNodeId(), overlayConnFut, joinNeeded);
 			}
 
 			@Override
@@ -82,8 +82,7 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection result) {
-				boolean alreadySet = bootConnFut.set(result);
-				if (alreadySet)
+				if (!bootConnFut.set(result))
 					result.close();
 			}
 
@@ -103,11 +102,11 @@ class OverlayConnector {
 		return bootConnFut;
 	}
 
-	private static void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut) {
+	private static void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut, final boolean joinNeeded) {
 
 		Bootstrap bootstrap = (Bootstrap) Components.get(Bootstrap.COMPNAME);
 
-		DestinationList dest = new DestinationList(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
+		final DestinationList dest = new DestinationList(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
 
 		AttachConnector attachConnector = (AttachConnector) Components.get(AttachConnector.COMPNAME);
 
@@ -117,12 +116,18 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection result) {
-				overlayConnFut.set(new Overlay());
+				l.info(String.format("Attach to admitting peer %s succeed", result.getNodeId()));
+
+				if (joinNeeded)
+					join(overlayConnFut);
+				else
+					overlayConnFut.set(new Overlay());
 			}
 
 			@Override
 			public void onFailure(Throwable t) {
 				overlayConnFut.setException(t);
+				l.info(String.format("Attach to admitting peer for %s failed", dest.getDestination()));
 			}
 		});
 
@@ -134,7 +139,9 @@ class OverlayConnector {
 	 * 
 	 * @return the join answer
 	 */
-	static final ListenableFuture<Message> join() {
+	private static final void join(final SettableFuture<Overlay> overlayConnFut) {
+		l.info("Joining to RELOAD overlay in progress...");
+
 		Bootstrap connector = (Bootstrap) Components.get(Bootstrap.COMPNAME);
 		MessageBuilder msgBuilder = (MessageBuilder) Components.get(MessageBuilder.COMPNAME);
 		MessageRouter router = (MessageRouter) Components.get(MessageRouter.COMPNAME);
@@ -145,6 +152,21 @@ class OverlayConnector {
 
 		Message request = msgBuilder.newMessage(req, dest);
 
-		return router.sendRequestMessage(request);
+		ListenableFuture<Message> joinAnsFut = router.sendRequestMessage(request);
+
+		Futures.addCallback(joinAnsFut, new FutureCallback<Message>() {
+
+			public void onSuccess(Message joinAns) {
+				// TODO: check join answer with topology plugin
+				l.info("Joining to RELOAD overlay completed.");
+				overlayConnFut.set(new Overlay());
+			};
+
+			@Override
+			public void onFailure(Throwable t) {
+				overlayConnFut.setException(t);
+				l.info("Joining to RELOAD overlay failed.");
+			}
+		});
 	}
 }

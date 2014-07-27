@@ -30,7 +30,7 @@ public class Components {
 	private static final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private static MessageHandlerMethod answerHandler;
 
-	private static Executor handlerExecutor = Executors.newSingleThreadExecutor();
+	private static Executor componentsExecutor = Executors.newSingleThreadExecutor();
 
 	static {
 		// Handler used to process messages not catched by other handlers
@@ -44,8 +44,12 @@ public class Components {
 		});
 	}
 
-	public static void setHandlerExecutor(Executor handlerExecutor) {
-		Components.handlerExecutor = handlerExecutor;
+	public static void setComponentsExecutor(Executor componentsExecutor) {
+		Components.componentsExecutor = componentsExecutor;
+	}
+
+	public static Executor getComponentsExecutor() {
+		return componentsExecutor;
 	}
 
 	public static void register(Object c) {
@@ -309,7 +313,7 @@ public class Components {
 	}
 
 	public static void callMessageHandler(Message message) {
-		handlerExecutor.execute(new HandlerTask(message));
+		componentsExecutor.execute(new HandlerTask(message));
 	}
 
 	/**
@@ -335,7 +339,7 @@ public class Components {
 				else
 					handler = messageHandlers.get(ContentType.UNKNOWN);
 			} else {
-				l.log(Level.DEBUG, String.format("Handling incoming message %#x of type %s using %s", message.getHeader().getTransactionId(), type, handler));
+				l.log(Level.DEBUG, String.format("Handling incoming message %#x of type %s using %s", message.getHeader().getTransactionId(), type, handler.obj));
 			}
 
 			try {

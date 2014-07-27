@@ -182,7 +182,6 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 		@Override
 		public String[] getServerAliases(String keyType, Principal[] issuers) {
-			System.out.println("OK");
 			return new String[]{LOCAL_ALIAS};
 		}
 	}

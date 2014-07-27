@@ -7,15 +7,18 @@ import java.net.InetSocketAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import com.github.reload.Components.Component;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
+@Component(ICEHelper.COMPNAME)
 public class ICEHelper {
+
+	public static final String COMPNAME = "com.github.reload.net.ice.ICEHelper";
 
 	/**
 	 * @return the ICE candidates to be used to reach this peer
@@ -44,11 +47,7 @@ public class ICEHelper {
 	public List<InetAddress> getInterfaceAddresses() {
 		// FIXME: TEST return loopback only for test
 		if (true) {
-			try {
-				return Collections.singletonList(InetAddress.getByName("127.0.0.1"));
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-			}
+			return Collections.singletonList(InetAddress.getLoopbackAddress());
 		}
 
 		// END TEST BLOCK
