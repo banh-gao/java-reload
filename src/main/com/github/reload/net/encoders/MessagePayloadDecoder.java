@@ -28,9 +28,18 @@ public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessag
 		Header header = msg.getHeader();
 		ByteBuf payload = msg.getPayload();
 		try {
+			int contentStart = payload.readerIndex();
 			Content content = contentCodec.decode(payload);
+
+			ByteBuf rawContent = payload.copy(contentStart, payload.readerIndex() - contentStart);
+
 			SecurityBlock secBlock = secBlockCodec.decode(payload);
-			out.add(new Message(header, content, secBlock));
+
+			Message outMsg = new Message(header, content, secBlock);
+
+			outMsg.rawContent = rawContent;
+
+			out.add(outMsg);
 			Logger.getRootLogger().trace(String.format("Message payload %#x decoded", header.getTransactionId()));
 		} finally {
 			payload.release();

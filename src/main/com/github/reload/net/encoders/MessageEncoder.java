@@ -1,6 +1,7 @@
 package com.github.reload.net.encoders;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import java.security.cert.Certificate;
@@ -47,9 +48,13 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 		int messageStart = out.writerIndex();
 
 		hdrCodec.encode(msg.header, out);
+
+		int contentStart = out.writerIndex();
 		contentCodec.encode(msg.content, out);
 
-		SecurityBlock secBlock = computeSecBlock(out);
+		ByteBuf rawContent = out.slice(contentStart, out.writerIndex() - contentStart);
+
+		SecurityBlock secBlock = computeSecBlock(msg.header, rawContent, ctx.alloc());
 		secBlockCodec.encode(secBlock, out);
 
 		setMessageLength(out, messageStart);
@@ -62,16 +67,19 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 		buf.setInt(messageStart + HDR_LEADING_LEN, messageLength);
 	}
 
-	private SecurityBlock computeSecBlock(ByteBuf messageBuf) throws Exception {
+	private SecurityBlock computeSecBlock(Header header, ByteBuf rawContent, ByteBufAllocator bufAlloc) throws Exception {
 		// FIXME: compute correct security block
 		CryptoHelper<?> cryptoHelper = (CryptoHelper<?>) Components.get(CryptoHelper.COMPNAME);
 		Signer signer = cryptoHelper.newSigner();
 
 		signer.initSign(cryptoHelper.getPrivateKey());
 
-		messageBuf.markReaderIndex();
-		signer.update(messageBuf);
-		messageBuf.resetReaderIndex();
+		ByteBuf signedDataBuf = bufAlloc.buffer();
+		signedDataBuf.writeInt(header.getOverlayHash());
+		signedDataBuf.writeLong(header.getTransactionId());
+		signedDataBuf.writeBytes(rawContent);
+
+		signer.update(signedDataBuf);
 
 		Signature signature = signer.sign();
 

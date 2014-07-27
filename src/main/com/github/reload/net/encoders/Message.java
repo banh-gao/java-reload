@@ -1,5 +1,6 @@
 package com.github.reload.net.encoders;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.util.AttributeKey;
 import java.util.Map;
 import com.github.reload.net.encoders.content.Content;
@@ -18,6 +19,8 @@ public class Message {
 
 	public static final AttributeKey<NodeID> PREVIOUS_HOP = AttributeKey.valueOf("PREV_HOP");
 
+	// Used for signature validation
+	ByteBuf rawContent;
 	Header header;
 	Content content;
 	SecurityBlock secBlock;

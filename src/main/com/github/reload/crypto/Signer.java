@@ -1,10 +1,13 @@
 package com.github.reload.crypto;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
+import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
@@ -45,8 +48,22 @@ public class Signer {
 	}
 
 	public Signature sign() throws SignatureException {
+		addSignerIdentity(signer);
 		byte[] digest = signer.sign();
 		return new Signature(identity, hashAlg, signAlg, digest);
+	}
+
+	private void addSignerIdentity(java.security.Signature signer) throws SignatureException {
+		ByteBuf b = UnpooledByteBufAllocator.DEFAULT.buffer();
+		Codec<SignerIdentity> signIdentityCodec = Codec.getCodec(SignerIdentity.class, null);
+		try {
+			signIdentityCodec.encode(identity, b);
+		} catch (CodecException e) {
+			throw new RuntimeException(e);
+		}
+
+		signer.update(b.nioBuffer());
+		b.release();
 	}
 
 	public SignerIdentity getIdentity() {

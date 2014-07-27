@@ -63,6 +63,10 @@ public class GenericCertificate {
 		this.certificate = certificate;
 	}
 
+	public Certificate getCertificate() {
+		return certificate;
+	}
+
 	static class GenericCertificateCodec extends Codec<GenericCertificate> {
 
 		private static final int CERT_LENGTH_FIELD = U_INT16;
@@ -113,6 +117,10 @@ public class GenericCertificate {
 				throw new CodecException(e);
 			}
 		}
+	}
+
+	public CertificateType getType() {
+		return type;
 	}
 
 	@Override

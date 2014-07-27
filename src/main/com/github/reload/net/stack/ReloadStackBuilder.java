@@ -15,14 +15,16 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.Components;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.FramedMessageCodec;
-import com.github.reload.net.encoders.MessagePayloadDecoder;
+import com.github.reload.net.encoders.MessageAuthenticator;
 import com.github.reload.net.encoders.MessageEncoder;
+import com.github.reload.net.encoders.MessageHeaderDecoder;
+import com.github.reload.net.encoders.MessagePayloadDecoder;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 
 public class ReloadStackBuilder {
@@ -95,6 +97,7 @@ public class ReloadStackBuilder {
 	protected ChannelInitializer<Channel> newInitializer(final ChannelHandler... extraHandlers) {
 		return new ChannelInitializer<Channel>() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			protected void initChannel(Channel ch) throws Exception {
 				ChannelPipeline pipeline = ch.pipeline();
@@ -125,6 +128,8 @@ public class ReloadStackBuilder {
 
 				// Decoder for message payload (content + security block)
 				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(conf));
+
+				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator((CryptoHelper<Certificate>) cryptoHelper));
 
 				// Encorder for message entire outgoing message, also
 				// responsible for message signature generation

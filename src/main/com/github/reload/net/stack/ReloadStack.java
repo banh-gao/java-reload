@@ -15,6 +15,7 @@ public class ReloadStack {
 	public static final String HANDLER_SSL = "HANDLER_SSL";
 	public static final String HANDLER_LINK = "HANDLER_LINK";
 	public static final String HANDLER_FORWARD = "HANDLER_FORWARD";
+	public static final String HANDLER_MESSAGE = "HANDLER_MESSAGE";
 	public static final String HANDLER_DISPATCHER = "HANDLER_DISPATCHER";
 
 	private final Channel channel;

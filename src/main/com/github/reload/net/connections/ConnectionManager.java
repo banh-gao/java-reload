@@ -154,7 +154,7 @@ public class ConnectionManager {
 
 	private Connection addConnection(ReloadStack stack) throws CertificateException, CertStoreException {
 		ReloadCertificate cert = extractRemoteCert(stack.getChannel());
-		cryptoHelper.addCertificate(cert.getNodeId(), cert.getOriginalCertificate());
+		cryptoHelper.addCertificate(cert);
 		Connection c = new Connection(cert.getNodeId(), stack);
 
 		connections.put(cert.getNodeId(), c);

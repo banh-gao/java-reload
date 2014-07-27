@@ -1,11 +1,11 @@
 package com.github.reload.net.encoders;
 
-import java.security.cert.Certificate;
 import com.github.reload.Components.Component;
 import com.github.reload.ReloadConnector;
 import com.github.reload.ReloadOverlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.errors.IncompatibleOverlayException;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -71,8 +71,8 @@ public class MessageBuilderFactory {
 
 		private Message getSingleNodeIdMessage(Header header, Content content) {
 			HashAlgorithm certHashAlg = cryptoHelper.getCertHashAlg();
-			Certificate localCertificate = cryptoHelper.getLocalCertificate();
-			SignerIdentity localIdentity = SignerIdentity.singleIdIdentity(certHashAlg, localCertificate);
+			ReloadCertificate localCertificate = cryptoHelper.getLocalCertificate();
+			SignerIdentity localIdentity = SignerIdentity.singleIdIdentity(certHashAlg, localCertificate.getOriginalCertificate());
 
 			return buildMessage(localIdentity, header, content);
 		}

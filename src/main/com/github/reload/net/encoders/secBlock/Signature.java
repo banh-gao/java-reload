@@ -1,13 +1,16 @@
 package com.github.reload.net.encoders.secBlock;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Objects;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.Signature.SignatureCodec;
 
@@ -64,10 +67,37 @@ public class Signature {
 		return digest;
 	}
 
-	public boolean verify(PublicKey publicKey) throws GeneralSecurityException {
+	/**
+	 * Verify this signature over the passed data. Note that the signer identity
+	 * will be automatically added to the given data before signature
+	 * verification
+	 * 
+	 * @param data
+	 * @param publicKey
+	 * @return
+	 * @throws GeneralSecurityException
+	 */
+	public boolean verify(ByteBuf data, PublicKey publicKey) throws GeneralSecurityException {
 		java.security.Signature s = java.security.Signature.getInstance(hashAlg.toString() + "with" + signAlg.toString());
 		s.initVerify(publicKey);
+		s.update(data.nioBuffer());
+
+		addSignerIdentity(s);
+
 		return s.verify(digest);
+	}
+
+	private void addSignerIdentity(java.security.Signature signer) throws SignatureException {
+		ByteBuf b = UnpooledByteBufAllocator.DEFAULT.buffer();
+		Codec<SignerIdentity> signIdentityCodec = Codec.getCodec(SignerIdentity.class, null);
+		try {
+			signIdentityCodec.encode(signerIdentity, b);
+		} catch (CodecException e) {
+			throw new RuntimeException(e);
+		}
+
+		signer.update(b.nioBuffer());
+		b.release();
 	}
 
 	@Override

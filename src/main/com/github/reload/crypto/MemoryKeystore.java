@@ -1,7 +1,6 @@
 package com.github.reload.crypto;
 
 import java.security.PrivateKey;
-import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,35 +25,35 @@ public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 
 	private final PrivateKey privateKey;
 
-	private final T localCert;
-	private final Map<NodeID, T> storedCerts;
+	private final ReloadCertificate localCert;
+	private final Map<NodeID, ReloadCertificate> storedCerts;
 
-	public MemoryKeystore(T localCert, PrivateKey privateKey, Map<NodeID, T> storedCerts) {
+	public MemoryKeystore(ReloadCertificate localCert, PrivateKey privateKey, Map<NodeID, ReloadCertificate> storedCerts) {
 		this.privateKey = privateKey;
 		this.localCert = localCert;
-		this.storedCerts = new HashMap<NodeID, T>(storedCerts);
+		this.storedCerts = new HashMap<NodeID, ReloadCertificate>(storedCerts);
 	}
 
 	@Override
-	public T getLocalCertificate() {
+	public ReloadCertificate getLocalCertificate() {
 		return localCert;
 	}
 
 	@Override
-	public void addCertificate(NodeID nodeId, T cert) throws CertStoreException {
-		storedCerts.put(nodeId, cert);
+	public void addCertificate(ReloadCertificate cert) {
+		storedCerts.put(cert.getNodeId(), cert);
 	}
 
 	@Override
-	public void removeCertificate(T cert) {
-		if (localCert.equals(cert))
+	public void removeCertificate(NodeID certOwner) {
+		if (localCert.getNodeId().equals(certOwner))
 			return;
 
-		storedCerts.remove(cert);
+		storedCerts.remove(certOwner);
 	}
 
 	@Override
-	public Map<NodeID, T> getStoredCertificates() {
+	public Map<NodeID, ReloadCertificate> getStoredCertificates() {
 		return Collections.unmodifiableMap(storedCerts);
 	}
 
@@ -70,8 +69,8 @@ public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 	}
 
 	@Override
-	public T getCertificate(NodeID node) {
-		return storedCerts.get(node);
+	public ReloadCertificate getCertificate(NodeID certOwner) {
+		return storedCerts.get(certOwner);
 	}
 
 	@Override

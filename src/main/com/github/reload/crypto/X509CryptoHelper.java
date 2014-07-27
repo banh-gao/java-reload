@@ -1,6 +1,7 @@
 package com.github.reload.crypto;
 
 import java.net.Socket;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
@@ -75,7 +76,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 	}
 
 	@Override
-	public List<X509Certificate> getTrustRelationship(X509Certificate peerCert, X509Certificate trustedIssuer, List<? extends X509Certificate> availableCerts) throws CertificateException {
+	public List<X509Certificate> getTrustRelationship(X509Certificate peerCert, X509Certificate trustedIssuer, List<? extends X509Certificate> availableCerts) throws GeneralSecurityException {
 		List<X509Certificate> out = new ArrayList<X509Certificate>();
 
 		X509Certificate certToAuthenticate = peerCert;
@@ -86,6 +87,8 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 			if (issuerCert == null)
 				throw new CertificateException("Certificate not found for issuer: [" + issuer + "]");
+
+			peerCert.verify(issuerCert.getPublicKey());
 
 			out.add(certToAuthenticate);
 

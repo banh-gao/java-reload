@@ -1,9 +1,9 @@
 package com.github.reload.crypto;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -75,10 +75,9 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * @return A list of certificates needed create a trust relation from the
 	 *         peerCert to the trustedIssuer, the first element will be the
 	 *         peerCert and the last the trustedIssuer
-	 * @throws CertificateException
-	 *             if the relationship cannot be created
+	 * @throws GeneralSecurityException
 	 */
-	public abstract List<? extends T> getTrustRelationship(T peerCert, T trustedIssuer, List<? extends T> availableCerts) throws CertificateException;
+	public abstract List<? extends T> getTrustRelationship(T peerCert, T trustedIssuer, List<? extends T> availableCerts) throws GeneralSecurityException;
 
 	/**
 	 * @return the keystore used by the helper implementation to store
@@ -92,7 +91,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         signing algorithms.
 	 */
 	public Signer newSigner() {
-		SignerIdentity identity = SignerIdentity.singleIdIdentity(getCertHashAlg(), getLocalCertificate());
+		SignerIdentity identity = SignerIdentity.singleIdIdentity(getCertHashAlg(), getLocalCertificate().getOriginalCertificate());
 		Signer signer;
 		try {
 			signer = new Signer(identity, getSignHashAlg(), getSignAlg());
@@ -117,7 +116,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * @throws CertificateException
 	 *             if the trusted relation cannot be built
 	 */
-	public void authenticateTrustRelationship(T peerCert, List<T> availableCerts) throws CertificateException {
+	public void authenticateTrustRelationship(T peerCert, List<? extends T> availableCerts) throws CertificateException {
 		List<? extends T> trustedRelation = null;
 		List<T> available = new ArrayList<T>(availableCerts);
 
@@ -128,7 +127,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 				trustedRelation = getTrustRelationship(peerCert, issuerCert, available);
 				if (trustedRelation != null)
 					return;
-			} catch (CertificateException e) {
+			} catch (GeneralSecurityException e) {
 				// Checked later
 			}
 		}
@@ -143,18 +142,19 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         certificate is not included since it is known by all nodes in the
 	 *         overlay.
 	 */
+	@SuppressWarnings("unchecked")
 	public List<? extends T> getLocalTrustRelationship() {
 		List<? extends T> issuers = getKeystore().getAcceptedIssuers();
 
 		List<? extends T> relations = null;
 		for (T issuer : issuers) {
 			try {
-				relations = getTrustRelationship(getKeystore().getLocalCertificate(), issuer, issuers);
+				relations = getTrustRelationship((T) getKeystore().getLocalCertificate().getOriginalCertificate(), issuer, issuers);
 				if (relations != null) {
 					relations.remove(issuer);
 					return relations;
 				}
-			} catch (CertificateException e) {
+			} catch (GeneralSecurityException e) {
 				// Checked later
 			}
 		}
@@ -166,29 +166,26 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * @return the local certificate used by the local node for overlay
 	 *         operations
 	 */
-	public T getLocalCertificate() {
+	public ReloadCertificate getLocalCertificate() {
 		return getKeystore().getLocalCertificate();
 	}
 
 	/**
 	 * Store a new certificate locally, the certificate is validated before it
 	 * is stored
-	 * 
-	 * @throws CertStoreException
-	 *             if the certificate storage fails
 	 */
-	public void addCertificate(NodeID nodeId, T cert) throws CertStoreException {
-		getKeystore().addCertificate(nodeId, cert);
+	public void addCertificate(ReloadCertificate cert) {
+		getKeystore().addCertificate(cert);
 	}
 
-	public T getCertificate(NodeID nodeId) {
+	public ReloadCertificate getCertificate(NodeID nodeId) {
 		return getKeystore().getCertificate(nodeId);
 	}
 
 	/**
 	 * @return all the stored certificates
 	 */
-	public Map<NodeID, T> getStoredCertificates() {
+	public Map<NodeID, ReloadCertificate> getStoredCertificates() {
 		return getKeystore().getStoredCertificates();
 	}
 
