@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -170,6 +171,22 @@ public class Header {
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this).add("transactionId", transactionId).add("isLastFragment", isLastFragment).add("fragmentOffset", fragmentOffset).add("maxResponseLength", maxResponseLength).add("configurationSequence", configurationSequence).add("overlayHash", overlayHash).add("version", version).add("ttl", ttl).add("viaList", viaList).add("destinationList", destinationList).add("forwardingOptions", forwardingOptions).add("headerLength", headerLength).add("payloadLength", payloadLength).toString();
+	}
+
+	public void toResponse() {
+		// use the reversed via list as the destination list
+		destinationList = viaList;
+		Collections.reverse(destinationList);
+
+		viaList.clear();
+	}
+
+	public void toForward() {
+		ttl -= 1;
+
+		// Move last destination-id from the destination list to the via list
+		RoutableID lastDest = destinationList.remove(destinationList.size() - 1);
+		viaList.add(lastDest);
 	}
 
 	public static class Builder {

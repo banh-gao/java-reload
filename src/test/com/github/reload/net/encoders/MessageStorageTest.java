@@ -8,7 +8,6 @@ import java.util.List;
 import org.junit.Test;
 import com.github.reload.Components;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.encoders.MessageBuilderFactory.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.storage.ArrayModel;
 import com.github.reload.net.encoders.content.storage.ArrayModel.ArrayModelSpecifier;
@@ -65,8 +64,7 @@ public class MessageStorageTest extends MessageTest {
 	@SuppressWarnings("unchecked")
 	protected <T extends Content> T sendContent(T content) throws Exception {
 
-		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
-		MessageBuilder b = bf.newBuilder();
+		MessageBuilder b = (MessageBuilder) Components.get(MessageBuilder.COMPNAME);
 
 		Message message = b.newMessage(content, new DestinationList(TEST_NODEID));
 

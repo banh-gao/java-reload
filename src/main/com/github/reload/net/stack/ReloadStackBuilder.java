@@ -135,8 +135,6 @@ public class ReloadStackBuilder {
 				// responsible for message signature generation
 				pipeline.addLast(ReloadStack.ENCODER_MESSAGE, new MessageEncoder(conf));
 
-				// TODO: insert message authentication layer
-
 				// Dispatch incoming messages on the application message bus
 				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, msgDispatcher);
 

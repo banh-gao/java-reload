@@ -7,7 +7,7 @@ import com.github.reload.Components.Component;
 import com.github.reload.Components.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder;
+import com.github.reload.net.encoders.MessageBuilder.MessageBuilder;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -23,9 +23,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
- * Handles connection related request messages
+ * Establish direct connections to other peers using attach messages
  */
-public class ConnectionMessageHandler {
+@Component(PeerConnector.COMPNAME)
+public class PeerConnector {
+
+	public static final String COMPNAME = "com.github.reload.net.connections.PeerConnector";
 
 	private static final Logger l = Logger.getRootLogger();
 
@@ -72,7 +75,7 @@ public class ConnectionMessageHandler {
 
 			@Override
 			public void onSuccess(Message result) {
-				attachAnswerReceived(result);
+				processAttachAnswer(result);
 			}
 
 			@Override
@@ -86,7 +89,7 @@ public class ConnectionMessageHandler {
 		return fut;
 	}
 
-	private void attachAnswerReceived(Message msg) {
+	private void processAttachAnswer(Message msg) {
 
 		AttachMessage answer = (AttachMessage) msg.getContent();
 

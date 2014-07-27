@@ -86,6 +86,11 @@ public class DestinationList extends AbstractList<RoutableID> {
 		return list.size();
 	}
 
+	@Override
+	public RoutableID remove(int index) {
+		return list.remove(index);
+	}
+
 	static class DestinationListCodec extends Codec<DestinationList> {
 
 		private final Codec<RoutableID> rouIdCodec;

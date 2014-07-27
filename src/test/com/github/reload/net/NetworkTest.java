@@ -43,7 +43,7 @@ import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.MessageBuilderFactory;
+import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -72,7 +72,7 @@ public class NetworkTest {
 		SERVER_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
 		ECHO_SERVER_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5000);
 
-		Components.register(new MessageBuilderFactory());
+		Components.register(new MessageBuilder());
 
 		TEST_CRYPTO = new X509CryptoHelper(TEST_HASH, TEST_SIGN, TEST_HASH);
 

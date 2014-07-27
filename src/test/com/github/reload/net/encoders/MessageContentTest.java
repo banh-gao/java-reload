@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.github.reload.ApplicationID;
 import com.github.reload.Components;
-import com.github.reload.net.encoders.MessageBuilderFactory.MessageBuilder;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.Content;
@@ -33,8 +32,7 @@ public class MessageContentTest extends MessageTest {
 
 	@SuppressWarnings("unchecked")
 	protected <T extends Content> T sendContent(T content) throws Exception {
-		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
-		MessageBuilder b = bf.newBuilder();
+		MessageBuilder b = (MessageBuilder) Components.get(MessageBuilder.COMPNAME);
 
 		Message message = b.newMessage(content, new DestinationList(TEST_NODEID));
 

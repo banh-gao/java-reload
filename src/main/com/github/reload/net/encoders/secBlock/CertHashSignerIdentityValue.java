@@ -53,7 +53,6 @@ public class CertHashSignerIdentityValue extends SignerIdentityValue {
 
 		public CertHashSignerIdentityValueCodec(Configuration conf) {
 			super(conf);
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override

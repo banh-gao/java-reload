@@ -33,8 +33,7 @@ public class SingleModel extends DataModel<SingleValue> {
 
 	@Override
 	public Class<? extends Metadata<SingleValue>> getMetadataClass() {
-		// TODO Auto-generated method stub
-		return null;
+		return SingleMetadata.class;
 	}
 
 	@Override

@@ -68,7 +68,6 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	}
 
 	private SecurityBlock computeSecBlock(Header header, ByteBuf rawContent, ByteBufAllocator bufAlloc) throws Exception {
-		// FIXME: compute correct security block
 		CryptoHelper<?> cryptoHelper = (CryptoHelper<?>) Components.get(CryptoHelper.COMPNAME);
 		Signer signer = cryptoHelper.newSigner();
 

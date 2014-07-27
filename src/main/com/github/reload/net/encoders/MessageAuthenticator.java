@@ -74,7 +74,6 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 	}
 
 	private void authenticateSignature(Message msg, ReloadCertificate peerCert, ByteBufAllocator alloc) throws GeneralSecurityException {
-		// TODO
 		ByteBuf signedData = alloc.buffer();
 		Header h = msg.getHeader();
 

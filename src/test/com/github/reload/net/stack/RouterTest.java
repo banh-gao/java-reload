@@ -1,7 +1,6 @@
 package com.github.reload.net.stack;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -18,17 +17,13 @@ import com.github.reload.net.NetworkTest;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilderFactory;
-import com.github.reload.net.encoders.MessageBuilderFactory.MessageBuilder;
+import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.PingAnswer;
 import com.github.reload.net.encoders.content.PingRequest;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
-import com.github.reload.net.encoders.secBlock.GenericCertificate;
-import com.github.reload.net.encoders.secBlock.SecurityBlock;
-import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
 import com.github.reload.routing.RoutingTable;
 import com.google.common.util.concurrent.Futures;
@@ -66,8 +61,7 @@ public class RouterTest extends NetworkTest {
 	@Test
 	public void testSendMessage() throws Exception {
 
-		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
-		MessageBuilder b = bf.newBuilder();
+		MessageBuilder b = (MessageBuilder) Components.get(MessageBuilder.COMPNAME);
 
 		Message m = b.newMessage(new PingRequest(), new DestinationList(TEST_NODEID));
 
@@ -83,14 +77,13 @@ public class RouterTest extends NetworkTest {
 
 	@Test
 	public void testRequestAnswer() throws Exception {
-		MessageBuilderFactory bf = (MessageBuilderFactory) Components.get(MessageBuilderFactory.COMPNAME);
-		MessageBuilder b = bf.newBuilder();
+		MessageBuilder b = (MessageBuilder) Components.get(MessageBuilder.COMPNAME);
 
 		Message req = b.newMessage(new PingRequest(), new DestinationList(TEST_NODEID));
 
 		ListenableFuture<Message> ansFut = msgRouter.sendRequestMessage(req);
 
-		Message ans = new Message(req.getHeader(), new PingAnswer(2, BigInteger.ONE), new SecurityBlock(new ArrayList<GenericCertificate>(), Signature.EMPTY_SIGNATURE));
+		Message ans = b.newResponseMessage(req.getHeader(), new PingAnswer(2, BigInteger.ONE));
 		msgRouter.sendMessage(ans);
 
 		Message rcvAns = Futures.get(ansFut, 100, TimeUnit.MILLISECONDS, Exception.class);
