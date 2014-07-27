@@ -37,7 +37,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.github.reload.Components;
 import com.github.reload.Components.Component;
-import com.github.reload.ReloadConnector;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -48,7 +47,6 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.routing.TopologyPlugin;
 
 public class NetworkTest {
 
@@ -78,17 +76,13 @@ public class NetworkTest {
 
 		Components.register(TEST_CRYPTO);
 
-		CA_CERT = (X509Certificate) loadLocalCert("CAcert.der");
 		TEST_CERT = TEST_CRYPTO.getCertificateParser().parse(loadLocalCert("testCert.der"));
 		TEST_KEY = loadPrivateKey("testKey.der", SignatureAlgorithm.RSA);
 
 		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
 
 		TestConfiguration conf = new TestConfiguration();
-		conf.rootCerts = Collections.singletonList(CA_CERT);
-		conf.instanceName = "testOverlay.com";
-		conf.maxMessageSize = 5000;
-		conf.initialTTL = 6;
+
 		Components.register(conf);
 
 		ConnectionManager connMgr = new ConnectionManager();
@@ -203,8 +197,8 @@ public class NetworkTest {
 		}
 	}
 
-	@Component(ReloadConnector.COMPNAME)
-	public static class TestConnector extends ReloadConnector {
+	@Component(com.github.reload.Bootstrap.COMPNAME)
+	public static class TestConnector extends com.github.reload.Bootstrap {
 
 		@Override
 		protected byte[] getJoinData() {
@@ -212,18 +206,8 @@ public class NetworkTest {
 		}
 
 		@Override
-		protected TopologyPlugin getTopologyPlugin() {
-			return null;
-		}
-
-		@Override
 		protected CertificateType getCertificateType() {
 			return CertificateType.X509;
-		}
-
-		@Override
-		protected CryptoHelper<X509Certificate> getCryptoHelper() {
-			return null;
 		}
 
 		@Override

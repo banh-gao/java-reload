@@ -6,7 +6,7 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Set;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Overlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.conf.Configuration;
@@ -84,7 +84,7 @@ public class NodeMatch extends AccessPolicy {
 	 */
 	public static class NodeParamsGenerator extends AccessPolicyParamsGenerator {
 
-		public NodeParamsGenerator(ReloadOverlay conn) {
+		public NodeParamsGenerator(Overlay conn) {
 			super(conn);
 		}
 
@@ -95,7 +95,7 @@ public class NodeMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(ReloadOverlay overlay) {
+	public AccessPolicyParamsGenerator getParamsGenerator(Overlay overlay) {
 		return new NodeParamsGenerator(overlay);
 	}
 }

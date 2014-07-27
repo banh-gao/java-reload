@@ -2,6 +2,7 @@ package com.github.reload.net;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -101,7 +102,12 @@ public class MessageRouter {
 
 		SettableFuture<NodeID> status = SettableFuture.create();
 
-		Set<NodeID> hops = routingTable.getNextHops(header.getDestinationId());
+		Set<NodeID> hops;
+
+		if (message.getAttribute(Message.NEXT_HOP) == null)
+			hops = routingTable.getNextHops(header.getDestinationId());
+		else
+			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
 
 		for (NodeID nextHop : hops) {
 			forward(message, nextHop, status);

@@ -2,22 +2,22 @@ package com.github.reload;
 
 import java.net.InetSocketAddress;
 import com.github.reload.Components.Component;
-import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
-import com.github.reload.routing.TopologyPlugin;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
- * Connector to be used for a specific overlay configuration, configure the
- * local
- * peer to operate with a specific overlay instance
+ * Connector used for a specific overlay configuration, it configures the
+ * local peer to operate with a specific overlay instance
  * 
  */
-@Component(ReloadConnector.COMPNAME)
-public abstract class ReloadConnector {
+@Component(Bootstrap.COMPNAME)
+public abstract class Bootstrap {
 
-	public static final String COMPNAME = "com.github.reload.ReloadConnector";
+	public static final String COMPNAME = "com.github.reload.Bootstrap";
 	private InetSocketAddress localAddr;
 	private boolean isOverlayInitiator;
 	private boolean isClientMode = false;
@@ -28,11 +28,7 @@ public abstract class ReloadConnector {
 	 */
 	protected abstract byte[] getJoinData();
 
-	protected abstract TopologyPlugin getTopologyPlugin();
-
 	protected abstract CertificateType getCertificateType();
-
-	protected abstract CryptoHelper getCryptoHelper();
 
 	/**
 	 * @return The address where the server will be listening to
@@ -104,24 +100,18 @@ public abstract class ReloadConnector {
 	 * @throws NetworkException
 	 *             if some network error occurs
 	 */
-	public final ReloadOverlay connect() throws InitializationException, NetworkException {
+	public final ListenableFuture<Overlay> connect() {
+		// TODO: enable when the instance raw xml extraction works
+		// conf.verify(getCryptoHelper());
 
-		try {
-			// TODO: enable when the instance raw xml extraction works
-			// conf.verify(getCryptoHelper());
-			ReloadOverlay conn = ReloadOverlay.getInstance(this);
+		Components.register(this);
+		Components.register(new MessageBuilder());
+		Components.register(new ConnectionManager());
+		registerComponents();
 
-			conn.connect();
+		ListenableFuture<Overlay> overlayConnFut = OverlayConnector.connectToOverlay();
 
-			if (!isOverlayInitiator && !isClientMode())
-				conn.join();
-
-			return conn;
-		} catch (NetworkException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new InitializationException(e);
-		}
+		return overlayConnFut;
 	}
 
 	public boolean isClientMode() {
@@ -142,5 +132,9 @@ public abstract class ReloadConnector {
 
 	public NodeID getLocalNodeId() {
 		return localNodeId;
+	}
+
+	protected void registerComponents() {
+
 	}
 }

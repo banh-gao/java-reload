@@ -134,6 +134,45 @@ public class Components {
 		return components.get(component);
 	}
 
+	public static <T> T getService(ServiceIdentifier<T> serviceId) {
+		return serviceId.loadService();
+	}
+
+	public static class ServiceIdentifier<T> {
+
+		private final String compName;
+
+		public ServiceIdentifier(String compName) {
+			this.compName = compName;
+		}
+
+		@SuppressWarnings("unchecked")
+		T loadService() {
+			Object cmp = get(compName);
+			for (Method m : cmp.getClass().getDeclaredMethods()) {
+				if (!m.isAnnotationPresent(Service.class))
+					continue;
+
+				try {
+					return (T) m.invoke(cmp);
+				} catch (IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * The annotated method will be used to expose a service provided by the
+	 * component to the library client
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public @interface Service {
+	}
+
 	/**
 	 * The annotated method will be called when the component has been
 	 * registered.

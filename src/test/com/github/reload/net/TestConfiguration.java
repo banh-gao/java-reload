@@ -1,8 +1,16 @@
 package com.github.reload.net;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -52,7 +60,29 @@ public class TestConfiguration implements Configuration {
 	Signature signature;
 	private ReloadCertificate rootCert;
 
-	public TestConfiguration() {
+	public TestConfiguration() throws Exception {
+		Certificate CA_CERT = (X509Certificate) loadLocalCert("CAcert.der");
+		rootCerts = Collections.singletonList(CA_CERT);
+		instanceName = "testOverlay.com";
+		maxMessageSize = 5000;
+		initialTTL = 6;
+	}
+
+	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
+		if (localCertPath == null || !new File(localCertPath).exists())
+			throw new FileNotFoundException("Overlay certificate file not found at " + localCertPath);
+
+		CertificateFactory certFactory;
+		try {
+			certFactory = CertificateFactory.getInstance("X.509");
+			File overlayCertFile = new File(localCertPath);
+			InputStream certStream = new FileInputStream(overlayCertFile);
+			Certificate cert = certFactory.generateCertificate(certStream);
+			certStream.close();
+			return cert;
+		} catch (CertificateException | IOException e) {
+			throw new CertificateException(e);
+		}
 	}
 
 	/**

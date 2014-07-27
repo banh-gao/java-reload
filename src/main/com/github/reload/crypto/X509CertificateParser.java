@@ -17,13 +17,13 @@ import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Overlay;
 import com.github.reload.ReloadUri;
 import com.github.reload.net.encoders.header.NodeID;
 
 public class X509CertificateParser implements ReloadCertificateParser {
 
-	private static final Logger logger = Logger.getLogger(ReloadOverlay.class);
+	private static final Logger logger = Logger.getLogger(Overlay.class);
 
 	private static final String SDN_OID = "2.5.29.17";
 

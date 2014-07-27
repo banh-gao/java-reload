@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -72,7 +72,7 @@ public class DataKind {
 	 *            the data model specifier used to query for a specific data
 	 *            value
 	 * @return the specifier for this kind
-	 * @see ReloadOverlay#fetchData(net.sf.jReload.overlay.ResourceID,
+	 * @see Overlay#fetchData(net.sf.jReload.overlay.ResourceID,
 	 *      StoredDataSpecifier...)
 	 */
 	public StoredDataSpecifier newDataSpecifier(ModelSpecifier<? extends DataValue> modelSpecifier) {
@@ -90,7 +90,7 @@ public class DataKind {
 	 * Get a parameter generator for the associated access control policy to be
 	 * used with the specified overlay
 	 */
-	public AccessPolicyParamsGenerator getPolicyParamsGenerator(ReloadOverlay overlay) {
+	public AccessPolicyParamsGenerator getPolicyParamsGenerator(Overlay overlay) {
 		return accessPolicy.getParamsGenerator(overlay.getConfiguration());
 	}
 

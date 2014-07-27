@@ -7,7 +7,7 @@ import com.github.reload.Components.Component;
 import com.github.reload.Components.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder.MessageBuilder;
+import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -25,10 +25,10 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish direct connections to other peers using attach messages
  */
-@Component(PeerConnector.COMPNAME)
-public class PeerConnector {
+@Component(AttachConnector.COMPNAME)
+public class AttachConnector {
 
-	public static final String COMPNAME = "com.github.reload.net.connections.PeerConnector";
+	public static final String COMPNAME = "com.github.reload.net.connections.AttachConnector";
 
 	private static final Logger l = Logger.getRootLogger();
 
@@ -46,7 +46,7 @@ public class PeerConnector {
 
 	private final Map<RoutableID, SettableFuture<Connection>> pendingConnections = Maps.newHashMap();
 
-	public ListenableFuture<Connection> attachTo(DestinationList destList, boolean requestUpdate) {
+	public ListenableFuture<Connection> attachTo(DestinationList destList, NodeID nextHop, boolean requestUpdate) {
 		final SettableFuture<Connection> fut = SettableFuture.create();
 		final RoutableID destinationID = destList.getDestination();
 
@@ -68,6 +68,9 @@ public class PeerConnector {
 		l.log(Level.DEBUG, "Attach to " + destinationID + " in progress...");
 
 		pendingConnections.put(destinationID, fut);
+
+		if (nextHop != null)
+			req.setAttribute(Message.NEXT_HOP, nextHop);
 
 		ListenableFuture<Message> attachAnsFut = msgRouter.sendRequestMessage(req);
 
@@ -104,7 +107,7 @@ public class PeerConnector {
 
 		try {
 			remoteCandidate = iceHelper.testAndSelectCandidate(answer.getCandidates());
-			ListenableFuture<Connection> connFut = connMgr.connectTo(remoteNode, remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
+			ListenableFuture<Connection> connFut = connMgr.connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
 
 			Futures.addCallback(connFut, new FutureCallback<Connection>() {
 

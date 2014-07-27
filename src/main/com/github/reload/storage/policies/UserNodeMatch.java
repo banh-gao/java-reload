@@ -5,7 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.util.Arrays;
 import java.util.Set;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Overlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.conf.Configuration;
@@ -99,7 +99,7 @@ public class UserNodeMatch extends AccessPolicy {
 	 */
 	public static class UserNodeParamsGenerator extends AccessPolicyParamsGenerator {
 
-		public UserNodeParamsGenerator(ReloadOverlay conn) {
+		public UserNodeParamsGenerator(Overlay conn) {
 			super(conn);
 		}
 
@@ -114,7 +114,7 @@ public class UserNodeMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(ReloadOverlay conn) {
+	public AccessPolicyParamsGenerator getParamsGenerator(Overlay conn) {
 		return new UserNodeParamsGenerator(conn);
 	}
 }

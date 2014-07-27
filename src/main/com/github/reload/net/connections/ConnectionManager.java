@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import com.github.reload.Components.Component;
 import com.github.reload.Components.start;
 import com.github.reload.Components.stop;
-import com.github.reload.ReloadConnector;
+import com.github.reload.Bootstrap;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -47,7 +47,7 @@ public class ConnectionManager {
 	private Configuration conf;
 
 	@Component
-	private ReloadConnector connector;
+	private Bootstrap connector;
 
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
@@ -77,7 +77,7 @@ public class ConnectionManager {
 			c.close();
 	}
 
-	public ListenableFuture<Connection> connectTo(final NodeID remoteId, final InetSocketAddress remoteAddr, OverlayLinkType linkType) {
+	public ListenableFuture<Connection> connectTo(final InetSocketAddress remoteAddr, OverlayLinkType linkType) {
 		final ReloadStack stack;
 
 		final SettableFuture<Connection> outcome = SettableFuture.create();
@@ -109,17 +109,17 @@ public class ConnectionManager {
 							try {
 								c = addConnection(stack);
 							} catch (CertificateException e) {
-								l.debug("Connection to remote peer " + remoteId + " at " + remoteAddr + " terminated: Invalid RELOAD certificate", e);
+								l.debug("Connection to " + remoteAddr + " terminated: Invalid RELOAD certificate", e);
 								outcome.setException(e);
 								return;
 							}
 
-							l.debug("Connection to " + remoteId + " at " + remoteAddr + " completed");
+							l.debug("Connection to " + c.getNodeId() + " at " + remoteAddr + " completed");
 							outcome.set(c);
 						};
 					});
 				} else {
-					l.warn("Connection to " + remoteId + " at " + remoteAddr + " failed", future.cause());
+					l.warn("Connection to " + remoteAddr + " failed", future.cause());
 					outcome.setException(future.cause());
 				}
 

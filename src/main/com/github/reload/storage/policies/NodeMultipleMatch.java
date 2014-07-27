@@ -8,7 +8,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Set;
 import javax.naming.ConfigurationException;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Overlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.conf.Configuration;
@@ -100,7 +100,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 	 */
 	public static class NodeMultipleParamsGenerator extends AccessPolicyParamsGenerator {
 
-		public NodeMultipleParamsGenerator(ReloadOverlay conn) {
+		public NodeMultipleParamsGenerator(Overlay conn) {
 			super(conn);
 		}
 
@@ -111,7 +111,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(ReloadOverlay conn) {
+	public AccessPolicyParamsGenerator getParamsGenerator(Overlay conn) {
 		return new NodeMultipleParamsGenerator(conn);
 	}
 }

@@ -1,8 +1,8 @@
 package com.github.reload.net.encoders;
 
 import com.github.reload.Components.Component;
-import com.github.reload.ReloadConnector;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Bootstrap;
+import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.content.Content;
@@ -19,7 +19,7 @@ public class MessageBuilder {
 	@Component
 	private Configuration conf;
 	@Component
-	private ReloadConnector connector;
+	private Bootstrap connector;
 	@Component
 	private CryptoHelper<?> cryptoHelper;
 
@@ -39,7 +39,7 @@ public class MessageBuilder {
 		b.setOverlayHash(Builder.overlayNameToHash(conf.getOverlayName(), CryptoHelper.OVERLAY_HASHALG));
 		b.setTtl(conf.getInitialTTL());
 		b.setMaxResponseLength(conf.getMaxMessageSize());
-		b.setVersion(ReloadOverlay.RELOAD_PROTOCOL_VERSION);
+		b.setVersion(Overlay.RELOAD_PROTOCOL_VERSION);
 		Header header = b.build();
 
 		return newMessage(header, content);

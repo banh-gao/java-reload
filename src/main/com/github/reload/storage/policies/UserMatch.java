@@ -3,7 +3,7 @@ package com.github.reload.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import com.github.reload.ReloadOverlay;
+import com.github.reload.Overlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.conf.Configuration;
@@ -57,7 +57,7 @@ public class UserMatch extends AccessPolicy {
 	 */
 	public static class UserParamsGenerator extends AccessPolicyParamsGenerator {
 
-		public UserParamsGenerator(ReloadOverlay conn) {
+		public UserParamsGenerator(Overlay conn) {
 			super(conn);
 		}
 
@@ -67,7 +67,7 @@ public class UserMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(ReloadOverlay conn) {
+	public AccessPolicyParamsGenerator getParamsGenerator(Overlay conn) {
 		return new UserParamsGenerator(conn);
 	}
 }
