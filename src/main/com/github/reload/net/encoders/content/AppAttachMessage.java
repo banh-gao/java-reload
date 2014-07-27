@@ -10,7 +10,7 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.AppAttachMessage.AppAttachMessageCodec;
-import com.github.reload.net.ice.IceCandidate;
+import com.github.reload.net.ice.HostCandidate;
 
 @ReloadCodec(AppAttachMessageCodec.class)
 public class AppAttachMessage extends Content {
@@ -19,7 +19,7 @@ public class AppAttachMessage extends Content {
 	private byte[] password;
 	private ApplicationID applicationID;
 	private boolean isActive;
-	private List<IceCandidate> candidates;
+	private List<HostCandidate> candidates;
 
 	AppAttachMessage() {
 	}
@@ -35,7 +35,7 @@ public class AppAttachMessage extends Content {
 	/**
 	 * @return The ICE candidiates proposed by the sender
 	 */
-	public List<IceCandidate> getCandidates() {
+	public List<HostCandidate> getCandidates() {
 		return candidates;
 	}
 
@@ -76,7 +76,7 @@ public class AppAttachMessage extends Content {
 
 		byte[] userFragment = new byte[0];
 		byte[] password = new byte[0];
-		List<IceCandidate> candidates = new ArrayList<IceCandidate>();
+		List<HostCandidate> candidates = new ArrayList<HostCandidate>();
 		boolean sendUpdate = false;
 		boolean isActive;
 		ApplicationID applicationID;
@@ -95,7 +95,7 @@ public class AppAttachMessage extends Content {
 			return new AppAttachMessage(this);
 		}
 
-		public Builder candidates(List<IceCandidate> candidates) {
+		public Builder candidates(List<HostCandidate> candidates) {
 			this.candidates = candidates;
 			return this;
 		}
@@ -134,11 +134,11 @@ public class AppAttachMessage extends Content {
 		private final static byte[] ROLE_ACTIVE = "active".getBytes(Charset.forName("US-ASCII"));
 		private final static byte[] ROLE_PASSIVE = "passive".getBytes(Charset.forName("US-ASCII"));
 
-		private final Codec<IceCandidate> iceCodec;
+		private final Codec<HostCandidate> iceCodec;
 
 		public AppAttachMessageCodec(Configuration conf) {
 			super(conf);
-			iceCodec = getCodec(IceCandidate.class);
+			iceCodec = getCodec(HostCandidate.class);
 		}
 
 		@Override
@@ -167,7 +167,7 @@ public class AppAttachMessage extends Content {
 		private void encodeCandidates(AppAttachMessage obj, ByteBuf buf) throws CodecException {
 			Field lenFld = allocateField(buf, CANDIDATES_LENGTH_FIELD);
 
-			for (IceCandidate c : obj.candidates) {
+			for (HostCandidate c : obj.candidates) {
 				iceCodec.encode(c, buf);
 			}
 
@@ -197,11 +197,11 @@ public class AppAttachMessage extends Content {
 
 			obj.isActive = Arrays.equals(role, ROLE_ACTIVE);
 
-			obj.candidates = new ArrayList<IceCandidate>();
+			obj.candidates = new ArrayList<HostCandidate>();
 			ByteBuf candData = readField(buf, CANDIDATES_LENGTH_FIELD);
 
 			while (candData.readableBytes() > 0) {
-				IceCandidate candidate = iceCodec.decode(buf);
+				HostCandidate candidate = iceCodec.decode(buf);
 				obj.candidates.add(candidate);
 			}
 			return obj;

@@ -1,7 +1,7 @@
 package com.github.reload.net.encoders;
 
-import com.github.reload.Components.Component;
 import com.github.reload.Bootstrap;
+import com.github.reload.Components.Component;
 import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;

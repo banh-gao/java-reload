@@ -339,7 +339,7 @@ public class Components {
 				else
 					handler = messageHandlers.get(ContentType.UNKNOWN);
 			} else {
-				l.log(Level.DEBUG, String.format("Handling incoming message %#x of type %s using %s", message.getHeader().getTransactionId(), type, handler.obj));
+				l.log(Level.DEBUG, String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 			}
 
 			try {

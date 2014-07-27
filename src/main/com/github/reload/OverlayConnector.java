@@ -15,7 +15,7 @@ import com.github.reload.net.encoders.content.errors.NetworkException;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;

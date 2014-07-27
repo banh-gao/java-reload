@@ -1,7 +1,7 @@
 package com.github.reload.net.stack;
 
 import java.security.NoSuchAlgorithmException;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 public class LinkHandlerFactory {
 

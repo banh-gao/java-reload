@@ -25,7 +25,7 @@ import com.github.reload.net.encoders.MessageAuthenticator;
 import com.github.reload.net.encoders.MessageEncoder;
 import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.MessagePayloadDecoder;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 public class ReloadStackBuilder {
 

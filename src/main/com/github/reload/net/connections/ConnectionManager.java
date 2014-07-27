@@ -21,7 +21,7 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.net.stack.MessageDispatcher;
 import com.github.reload.net.stack.ReloadStack;
 import com.github.reload.net.stack.ReloadStackBuilder;
@@ -90,6 +90,8 @@ public class ConnectionManager {
 			outcome.setException(e);
 			return outcome;
 		}
+
+		l.debug("Connecting to " + remoteAddr + " ...");
 
 		ChannelFuture cf = stack.connect(remoteAddr);
 

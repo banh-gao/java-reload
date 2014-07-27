@@ -16,7 +16,9 @@ import com.github.reload.Components.start;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.errors.Error;
 import com.github.reload.net.encoders.content.errors.ErrorRespose;
 import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.content.errors.NetworkException;
@@ -88,8 +90,15 @@ public class MessageRouter {
 
 		pendingRequests.remove(transactionId);
 
-		l.debug(String.format("Received answer message %#x", message.getHeader().getTransactionId()));
-		reqFut.set(message);
+		Content content = message.getContent();
+
+		if (content.getType() == ContentType.ERROR) {
+			l.debug(String.format("Received error message %s for %#x: %s", ((Error) content).getErrorType(), message.getHeader().getTransactionId(), ((Error) content).toException().getMessage()));
+			reqFut.setException(((Error) content).toException());
+		} else {
+			l.debug(String.format("Received answer message %s for %#x", content.getType(), message.getHeader().getTransactionId()));
+			reqFut.set(message);
+		}
 	}
 
 	public ListenableFuture<NodeID> sendMessage(Message message) {

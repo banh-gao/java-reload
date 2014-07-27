@@ -16,16 +16,20 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import com.github.reload.Components.Component;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.routing.RoutingTable;
 
 @Component(Bootstrap.COMPNAME)
 public class TestBootstrap extends Bootstrap {
@@ -70,6 +74,7 @@ public class TestBootstrap extends Bootstrap {
 
 	@Override
 	protected void registerComponents() {
+		Components.register(new TestRouting());
 		Components.register(TEST_CRYPTO);
 		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
 	}
@@ -103,5 +108,20 @@ public class TestBootstrap extends Bootstrap {
 		KeyFactory keyFactory = KeyFactory.getInstance(keyAlg.toString());
 		KeySpec ks = new PKCS8EncodedKeySpec(privKeyBytes);
 		return keyFactory.generatePrivate(ks);
+	}
+
+	@Component(RoutingTable.COMPNAME)
+	public static class TestRouting implements RoutingTable {
+
+		@Override
+		public Set<NodeID> getNextHops(RoutableID destination) {
+			return Collections.singleton(TEST_NODEID);
+		}
+
+		@Override
+		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
+			return Collections.singleton(TEST_NODEID);
+		}
+
 	}
 }

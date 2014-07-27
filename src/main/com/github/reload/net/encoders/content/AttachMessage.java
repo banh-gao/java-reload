@@ -9,7 +9,7 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.AttachMessage.AttachMessageCodec;
-import com.github.reload.net.ice.IceCandidate;
+import com.github.reload.net.ice.HostCandidate;
 
 /**
  * Common representation of attach requests and answers
@@ -21,7 +21,7 @@ public class AttachMessage extends Content {
 	private final byte[] userFragment;
 	private final byte[] password;
 	private final ContentType type;
-	private final List<IceCandidate> candidates;
+	private final List<HostCandidate> candidates;
 	private final boolean sendUpdate;
 
 	private AttachMessage(Builder builder) {
@@ -35,7 +35,7 @@ public class AttachMessage extends Content {
 	/**
 	 * @return The ICE candidiates proposed by the sender
 	 */
-	public List<IceCandidate> getCandidates() {
+	public List<HostCandidate> getCandidates() {
 		return candidates;
 	}
 
@@ -69,14 +69,14 @@ public class AttachMessage extends Content {
 
 		byte[] userFragment = new byte[0];
 		byte[] password = new byte[0];
-		List<IceCandidate> candidates = new ArrayList<IceCandidate>();
+		List<HostCandidate> candidates = new ArrayList<HostCandidate>();
 		boolean sendUpdate = false;
 		ContentType contentType;
 
 		public Builder() {
 		}
 
-		public Builder candidates(List<IceCandidate> candidates) {
+		public Builder candidates(List<HostCandidate> candidates) {
 			this.candidates = candidates;
 			return this;
 		}
@@ -146,12 +146,12 @@ public class AttachMessage extends Content {
 			buf.writeByte(obj.sendUpdate ? 1 : 0);
 		}
 
-		private void encodeCandidates(AttachMessage obj, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+		private void encodeCandidates(AttachMessage obj, ByteBuf buf) throws CodecException {
 			Field lenFld = allocateField(buf, CANDIDATES_LENGTH_FIELD);
 
-			for (IceCandidate c : obj.candidates) {
+			for (HostCandidate c : obj.candidates) {
 				@SuppressWarnings("unchecked")
-				Codec<IceCandidate> iceCodec = (Codec<IceCandidate>) getCodec(c.getClass());
+				Codec<HostCandidate> iceCodec = (Codec<HostCandidate>) getCodec(c.getClass());
 				iceCodec.encode(c, buf);
 			}
 
@@ -163,12 +163,12 @@ public class AttachMessage extends Content {
 			AttachMessage.Builder b = new AttachMessage.Builder();
 			ByteBuf usrFrag = readField(buf, UFRAG_LENGTH_FIELD);
 			b.userFragment = new byte[usrFrag.readableBytes()];
-			buf.readBytes(b.userFragment);
+			usrFrag.readBytes(b.userFragment);
 
 			ByteBuf password = readField(buf, PASS_LENGTH_FIELD);
 
 			b.password = new byte[password.readableBytes()];
-			buf.readBytes(b.password);
+			password.readBytes(b.password);
 
 			ByteBuf role = readField(buf, ROLE_LENGTH_FIELD);
 			byte[] roleData = new byte[role.readableBytes()];
@@ -184,13 +184,13 @@ public class AttachMessage extends Content {
 				return b.buildAnswer();
 		}
 
-		private List<IceCandidate> decodeCandidates(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
-			List<IceCandidate> cands = new ArrayList<IceCandidate>();
+		private List<HostCandidate> decodeCandidates(ByteBuf buf) throws CodecException {
+			List<HostCandidate> cands = new ArrayList<HostCandidate>();
 			ByteBuf candidates = readField(buf, CANDIDATES_LENGTH_FIELD);
 
 			while (candidates.readableBytes() > 0) {
-				Codec<IceCandidate> codec = getCodec(IceCandidate.class);
-				cands.add(codec.decode(buf));
+				Codec<HostCandidate> codec = getCodec(HostCandidate.class);
+				cands.add(codec.decode(candidates));
 			}
 			return cands;
 		}

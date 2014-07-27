@@ -11,7 +11,7 @@ import com.github.reload.net.NetworkTest;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 

@@ -8,11 +8,12 @@ import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.ice.RelayCandidate.RelayCandidateCodec;
 
 @ReloadCodec(RelayCandidateCodec.class)
-public class RelayCandidate extends IceCandidate {
+public class RelayCandidate extends HostCandidate {
 
 	private IPAddressPort relayAddrPort;
 
 	public RelayCandidate(IPAddressPort addrPort) {
+		super(addrPort);
 		relayAddrPort = addrPort;
 	}
 

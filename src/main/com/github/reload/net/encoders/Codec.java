@@ -130,6 +130,7 @@ public abstract class Codec<T> {
 			codecConstr.setAccessible(true);
 			return (Codec<T>) codecConstr.newInstance(conf);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);
 		}
 	}

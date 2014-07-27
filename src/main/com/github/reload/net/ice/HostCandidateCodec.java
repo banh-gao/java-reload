@@ -5,10 +5,10 @@ import io.netty.handler.codec.DecoderException;
 import java.util.ArrayList;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.ice.IceCandidate.CandidateType;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.CandidateType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
-class IceCandidateCodec extends Codec<IceCandidate> {
+class HostCandidateCodec extends Codec<HostCandidate> {
 
 	private static final int FOUNDATION_LENGTH_FIELD = U_INT8;
 	private static final int EXTENSIONS_LENGTH_FIELD = U_INT16;
@@ -16,23 +16,21 @@ class IceCandidateCodec extends Codec<IceCandidate> {
 	private final Codec<IPAddressPort> socketAddrCodec;
 	private final Codec<IceExtension> iceExtCodec;
 
-	private final Codec<HostCandidate> hostCandCodec;
 	private final Codec<PeerReflexiveCandidate> peerRefCodec;
 	private final Codec<RelayCandidate> relayCodec;
 	private final Codec<ServerReflexiveCandidate> serverRefCodec;
 
-	public IceCandidateCodec(Configuration conf) {
+	public HostCandidateCodec(Configuration conf) {
 		super(conf);
 		socketAddrCodec = getCodec(IPAddressPort.class);
 		iceExtCodec = getCodec(IceExtension.class);
-		hostCandCodec = getCodec(HostCandidate.class);
 		peerRefCodec = getCodec(PeerReflexiveCandidate.class);
 		relayCodec = getCodec(RelayCandidate.class);
 		serverRefCodec = getCodec(ServerReflexiveCandidate.class);
 	}
 
 	@Override
-	public void encode(IceCandidate obj, ByteBuf buf, Object... params) throws CodecException {
+	public void encode(HostCandidate obj, ByteBuf buf, Object... params) throws CodecException {
 		socketAddrCodec.encode(obj.addrPort, buf);
 		buf.writeByte(obj.overlayLink.code);
 
@@ -45,7 +43,7 @@ class IceCandidateCodec extends Codec<IceCandidate> {
 
 		switch (obj.getCandType()) {
 			case HOST :
-				hostCandCodec.encode((HostCandidate) obj, buf);
+				// Already encoded
 				break;
 			case PEER_REFLEXIVE :
 				peerRefCodec.encode((PeerReflexiveCandidate) obj, buf);
@@ -61,7 +59,7 @@ class IceCandidateCodec extends Codec<IceCandidate> {
 		encodeExtensions(obj, buf);
 	}
 
-	private void encodeExtensions(IceCandidate obj, ByteBuf buf) throws CodecException {
+	private void encodeExtensions(HostCandidate obj, ByteBuf buf) throws CodecException {
 		Field lenFld = allocateField(buf, EXTENSIONS_LENGTH_FIELD);
 
 		for (IceExtension ex : obj.extensions) {
@@ -72,7 +70,7 @@ class IceCandidateCodec extends Codec<IceCandidate> {
 	}
 
 	@Override
-	public IceCandidate decode(ByteBuf buf, Object... params) throws CodecException {
+	public HostCandidate decode(ByteBuf buf, Object... params) throws CodecException {
 		IPAddressPort addrPort = socketAddrCodec.decode(buf);
 
 		OverlayLinkType overlayLink = OverlayLinkType.valueOf(buf.readByte());
@@ -90,11 +88,12 @@ class IceCandidateCodec extends Codec<IceCandidate> {
 		if (candType == null)
 			throw new DecoderException("Unknown ICE candidate type");
 
-		IceCandidate candidate = null;
+		HostCandidate candidate = null;
 
 		switch (candType) {
 			case HOST :
-				candidate = hostCandCodec.decode(buf);
+				candidate = new HostCandidate(addrPort);
+				// Already decoded
 				break;
 			case PEER_REFLEXIVE :
 				candidate = peerRefCodec.decode(buf);
@@ -109,7 +108,6 @@ class IceCandidateCodec extends Codec<IceCandidate> {
 
 		assert (candidate != null);
 
-		candidate.addrPort = addrPort;
 		candidate.overlayLink = overlayLink;
 		candidate.foundation = foundation;
 		candidate.priority = priority;

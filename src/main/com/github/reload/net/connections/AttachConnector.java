@@ -1,8 +1,11 @@
 package com.github.reload.net.connections;
 
+import java.math.BigInteger;
 import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import com.github.reload.Bootstrap;
 import com.github.reload.Components.Component;
 import com.github.reload.Components.MessageHandler;
 import com.github.reload.net.MessageRouter;
@@ -10,13 +13,16 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.errors.Error;
+import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.ice.HostCandidate;
 import com.github.reload.net.ice.ICEHelper;
-import com.github.reload.net.ice.IceCandidate;
 import com.github.reload.net.ice.NoSuitableCandidateException;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -33,6 +39,9 @@ public class AttachConnector {
 	private static final Logger l = Logger.getRootLogger();
 
 	@Component
+	private Bootstrap bootstrap;
+
+	@Component
 	private MessageBuilder msgBuilder;
 
 	@Component
@@ -44,7 +53,8 @@ public class AttachConnector {
 	@Component
 	private ICEHelper iceHelper;
 
-	private final Map<RoutableID, SettableFuture<Connection>> pendingConnections = Maps.newHashMap();
+	private final Map<Long, SettableFuture<Connection>> pendingRequests = Maps.newConcurrentMap();
+	private final Set<NodeID> answeredRequests = Sets.newConcurrentHashSet();
 
 	public ListenableFuture<Connection> attachTo(DestinationList destList, NodeID nextHop, boolean requestUpdate) {
 		final SettableFuture<Connection> fut = SettableFuture.create();
@@ -63,12 +73,12 @@ public class AttachConnector {
 		b.sendUpdate(requestUpdate);
 		AttachMessage attachRequest = b.buildRequest();
 
-		Message req = msgBuilder.newMessage(attachRequest, destList);
+		final Message req = msgBuilder.newMessage(attachRequest, destList);
 
 		if (nextHop != null)
 			req.setAttribute(Message.NEXT_HOP, nextHop);
 
-		pendingConnections.put(destinationID, fut);
+		pendingRequests.put(req.getHeader().getTransactionId(), fut);
 
 		l.log(Level.DEBUG, "Attach to " + destinationID + " in progress...");
 
@@ -83,7 +93,8 @@ public class AttachConnector {
 
 			@Override
 			public void onFailure(Throwable t) {
-				pendingConnections.remove(destinationID);
+				pendingRequests.remove(req.getHeader().getTransactionId());
+				answeredRequests.remove(destinationID);
 
 				fut.setException(t);
 			}
@@ -98,23 +109,28 @@ public class AttachConnector {
 
 		final NodeID remoteNode = msg.getHeader().getSenderId();
 
-		if (!pendingConnections.containsKey(remoteNode)) {
+		if (!pendingRequests.containsKey(msg.getHeader().getTransactionId())) {
 			l.log(Level.DEBUG, String.format("Unattended attach answer %#x ignored", msg.getHeader().getTransactionId()));
 			return;
 		}
 
-		final IceCandidate remoteCandidate;
+		answeredRequests.add(remoteNode);
+
+		final HostCandidate remoteCandidate;
 
 		try {
 			remoteCandidate = iceHelper.testAndSelectCandidate(answer.getCandidates());
+
+			l.debug(String.format("Attach to " + remoteNode + " completed, remote candidate selected: %s", remoteCandidate.getSocketAddress()));
+
 			ListenableFuture<Connection> connFut = connMgr.connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
 
 			Futures.addCallback(connFut, new FutureCallback<Connection>() {
 
 				@Override
 				public void onSuccess(Connection result) {
-					SettableFuture<Connection> pendingAttach = pendingConnections.remove(remoteNode);
-
+					SettableFuture<Connection> pendingAttach = pendingRequests.remove(remoteNode);
+					answeredRequests.remove(remoteNode);
 					if (pendingAttach != null) {
 						pendingAttach.set(result);
 					}
@@ -122,7 +138,8 @@ public class AttachConnector {
 
 				@Override
 				public void onFailure(Throwable t) {
-					SettableFuture<Connection> pendingAttach = pendingConnections.remove(remoteNode);
+					SettableFuture<Connection> pendingAttach = pendingRequests.remove(remoteNode);
+					answeredRequests.remove(remoteNode);
 					if (pendingAttach != null) {
 						pendingAttach.setException(t);
 					}
@@ -130,15 +147,46 @@ public class AttachConnector {
 			});
 
 		} catch (NoSuitableCandidateException e) {
-			// TODO: send error message
-			e.printStackTrace();
+			l.info(e.getMessage());
 		}
 
 	}
 
 	@MessageHandler(ContentType.ATTACH_REQ)
 	public void handleAttachRequest(Message req) {
-		// TODO
+		NodeID sender = req.getHeader().getSenderId();
+
+		// No pending request, just send the answer
+		if (!pendingRequests.containsKey(req.getHeader().getTransactionId())) {
+			sendAnswer(req);
+			return;
+		}
+
+		// Pending request and already answered
+		if (answeredRequests.contains(sender)) {
+			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach already in progress")));
+			return;
+		}
+
+		// Pending request not answered
+		if (isLocalNodeSmaller(sender))
+			sendAnswer(req);
+		else
+			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach request already sent")));
+	}
+
+	private boolean isLocalNodeSmaller(NodeID senderId) {
+		BigInteger localNum = new BigInteger(1, bootstrap.getLocalNodeId().getData());
+		BigInteger senderNum = new BigInteger(1, senderId.getData());
+		return (localNum.compareTo(senderNum) <= 0);
+	}
+
+	private void sendAnswer(Message req) {
+		AttachMessage.Builder b = new AttachMessage.Builder();
+		b.candidates(iceHelper.getCandidates(connMgr.getServerAddress()));
+		AttachMessage attachAnswer = b.buildAnswer();
+
+		msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), attachAnswer));
 	}
 
 	@MessageHandler(ContentType.LEAVE_REQ)

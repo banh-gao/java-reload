@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import com.github.reload.Components.Component;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
 @Component(ICEHelper.COMPNAME)
@@ -23,8 +23,8 @@ public class ICEHelper {
 	/**
 	 * @return the ICE candidates to be used to reach this peer
 	 */
-	public List<IceCandidate> getCandidates(InetSocketAddress listeningAddress) {
-		List<IceCandidate> candidates = new ArrayList<IceCandidate>();
+	public List<HostCandidate> getCandidates(InetSocketAddress listeningAddress) {
+		List<HostCandidate> candidates = new ArrayList<HostCandidate>();
 		for (InetAddress addr : getInterfaceAddresses()) {
 			candidates.add(createHostCandidate(addr, listeningAddress.getPort()));
 		}
@@ -80,7 +80,7 @@ public class ICEHelper {
 	 * @throws NoSuitableCandidateException
 	 *             if no valid candidate has been found
 	 */
-	public IceCandidate testAndSelectCandidate(List<IceCandidate> candidates) throws NoSuitableCandidateException {
+	public HostCandidate testAndSelectCandidate(List<HostCandidate> candidates) throws NoSuitableCandidateException {
 		if (candidates.size() == 0)
 			throw new NoSuitableCandidateException("Empty candidates list");
 		return candidates.get(0);

@@ -25,7 +25,7 @@ import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 /**
  * Crypto helper for X.509 certificates

@@ -16,7 +16,7 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.net.ice.IceCandidate.OverlayLinkType;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 /**
  * Helper class that provides the cryptographic functionalities for the local
