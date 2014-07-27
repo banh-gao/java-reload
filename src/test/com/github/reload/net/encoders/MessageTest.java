@@ -62,7 +62,7 @@ public class MessageTest extends NetworkTest {
 
 		ConnectionManager connMgr = (ConnectionManager) Components.get(ConnectionManager.COMPNAME);
 
-		ListenableFuture<Connection> c = connMgr.connectTo(TEST_NODEID, SERVER_ADDR, OverlayLinkType.TLS_TCP_FH_NO_ICE);
+		ListenableFuture<Connection> c = connMgr.connectTo(SERVER_ADDR, OverlayLinkType.TLS_TCP_FH_NO_ICE);
 
 		conn = Futures.get(c, 500, TimeUnit.MILLISECONDS, Exception.class);
 	}
