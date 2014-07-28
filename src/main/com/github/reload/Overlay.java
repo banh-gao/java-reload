@@ -2,6 +2,7 @@ package com.github.reload;
 
 import org.apache.log4j.PropertyConfigurator;
 import com.github.reload.Components.Component;
+import com.github.reload.Components.ServiceIdentifier;
 import com.github.reload.conf.Configuration;
 
 /**
@@ -27,6 +28,10 @@ public class Overlay {
 
 	@Component
 	private Bootstrap bootstrap;
+
+	public <T> T getService(ServiceIdentifier<T> serviceId) {
+		return Components.getService(serviceId);
+	}
 
 	/**
 	 * Leave this overlay and release all the resources. This method returns

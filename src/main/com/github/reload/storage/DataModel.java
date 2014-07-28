@@ -72,6 +72,8 @@ public abstract class DataModel<T extends DataValue> {
 	 */
 	public interface DataValue {
 
+		long getSize();
+
 	}
 
 	/**
@@ -85,7 +87,7 @@ public abstract class DataModel<T extends DataValue> {
 	 * A builder used to create {@link DataValue}
 	 * 
 	 */
-	public interface DataValueBuilder<T> {
+	public interface DataValueBuilder<T extends DataValue> {
 
 		public T build();
 
@@ -94,7 +96,9 @@ public abstract class DataModel<T extends DataValue> {
 	/**
 	 * A model specifier used to query for a {@link DataValue}
 	 */
-	public interface ModelSpecifier<T> {
+	public interface ModelSpecifier<T extends DataValue> {
+
+		boolean isMatching(T value);
 
 	}
 

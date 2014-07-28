@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
@@ -71,13 +70,13 @@ public abstract class AccessPolicy {
 	 * @throws ForbittenException
 	 *             if the policy check fails
 	 */
-	public abstract void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException;
+	public abstract void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException;
 
 	/**
 	 * Get a parameter generator for this access policy to be used with the
 	 * specified overlay
 	 */
-	public abstract AccessPolicyParamsGenerator getParamsGenerator(Configuration conf);
+	public abstract AccessPolicyParamsGenerator getParamsGenerator();
 
 	/**
 	 * Throw an exception if the given datakind builder doesn't
@@ -110,13 +109,8 @@ public abstract class AccessPolicy {
 	 * Generate the parameters in conformity to an access control policy
 	 * 
 	 */
-	public abstract class AccessPolicyParamsGenerator {
+	public interface AccessPolicyParamsGenerator {
 
-		protected final Configuration conf;
-
-		public AccessPolicyParamsGenerator(Configuration conf) {
-			this.conf = conf;
-		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

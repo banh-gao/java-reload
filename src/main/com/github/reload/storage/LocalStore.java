@@ -1,26 +1,16 @@
 package com.github.reload.storage;
 
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import org.bouncycastle.asn1.ocsp.ResponseData;
-import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.content.storage.FetchKindResponse;
-import com.github.reload.net.encoders.content.storage.FindAnswer;
-import com.github.reload.net.encoders.content.storage.FindKindData;
-import com.github.reload.net.encoders.content.storage.FindRequest;
 import com.github.reload.net.encoders.content.storage.StatKindResponse;
+import com.github.reload.net.encoders.content.storage.StoreAnswer;
 import com.github.reload.net.encoders.content.storage.StoreKindData;
 import com.github.reload.net.encoders.content.storage.StoreKindResponse;
 import com.github.reload.net.encoders.content.storage.StoredData;
@@ -28,76 +18,76 @@ import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
 import com.github.reload.net.encoders.content.storage.StoredMetadata;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.storage.StorageController.QueryType;
+import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.storage.errors.GenerationTooLowException;
-import com.github.reload.storage.errors.NotFoundException;
+import com.google.common.collect.Maps;
 
 /**
  * The map of the data stored locally. It stores the data which the peer is
  * responsible.
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
 public class LocalStore {
 
-	private final Configuration conf;
+	private final TopologyPlugin plugin;
 
-	private final ConcurrentMap<ResourceID, LocalKinds> storedResources = new ConcurrentHashMap<ResourceID, LocalKinds>();
+	private final Map<KindKey, StoreKindData> storedResources = Maps.newConcurrentMap();
 
-	private final ScheduledExecutorService dataRemoverExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(r, "Expired data remover for " + context.getLocalId());
-			t.setDaemon(true);
-			return t;
-		}
-	});
-
-	public LocalStore(Configuration conf) {
-		context = context;
+	public LocalStore(TopologyPlugin plugin) {
+		this.plugin = plugin;
 	}
 
 	/**
 	 * Perform controls on data and stores it
 	 * 
+	 * @throws GenerationTooLowException
+	 * 
 	 * @throws StorageException
 	 * 
 	 */
-	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data) throws StorageException {
-		LocalKinds storedKinds = storedResources.get(resourceId);
-
-		if (storedKinds == null) {
-			storedKinds = new LocalKinds(resourceId, context, this);
-			context.registerConfigUpdateListener(storedKinds);
-		}
-
+	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data, PublicKey storerKey) throws GeneralSecurityException, GenerationTooLowException {
 		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
 		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
 		for (StoreKindData receivedData : data) {
-			try {
-				BigInteger newGeneration = storedKinds.add(receivedData);
-				List<NodeID> replicaIds = context.getTopologyPlugin().onReplicateData(resourceId, receivedData);
-				response.add(new StoreKindResponse(receivedData.getKind(), newGeneration, replicaIds));
-			} catch (GenerationTooLowException e) {
-				// Rollback
-				storedKinds.remove(receivedData);
-				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), e.getGeneration(), new ArrayList<NodeID>()));
+
+			// Verify data signature
+			for (StoredData d : receivedData.getValues())
+				d.verify(storerKey, resourceId, receivedData.getKind());
+
+			KindKey key = new KindKey(resourceId, receivedData.getKind().getKindId());
+
+			StoreKindData oldStoredKind = storedResources.put(key, receivedData);
+
+			BigInteger oldGeneration;
+
+			if (oldStoredKind == null)
+				oldGeneration = BigInteger.ZERO;
+			else
+				oldGeneration = oldStoredKind.getGeneration();
+
+			if (receivedData.getGeneration().compareTo(oldGeneration) <= 0) {
+				// Restore old value
+				storedResources.put(key, oldStoredKind);
+
+				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldGeneration, new ArrayList<NodeID>()));
 			}
+
+			List<NodeID> replicaIds = plugin.onReplicateData(resourceId, receivedData);
+
+			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicaIds));
 		}
 
 		if (generTooLowResponses.size() > 0)
-			throw new GenerationTooLowException(generTooLowResponses);
+			throw new GenerationTooLowException(new StoreAnswer(generTooLowResponses));
 
-		storedResources.put(resourceId, storedKinds);
+		// TODO: store cleanup
 
 		return response;
 	}
 
-	public Map<ResourceID, LocalKinds> getStoredResources() {
-		return new HashMap<ResourceID, LocalKinds>(storedResources);
+	public Map<KindKey, StoreKindData> getStoredResources() {
+		return Collections.unmodifiableMap(storedResources);
 	}
 
 	public void removeResource(ResourceID resourceId) {
@@ -109,105 +99,104 @@ public class LocalStore {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends KindResponse<?>> List<T> query(ResourceID resourceId, List<StoredDataSpecifier> specifiers, QueryType queryType) throws NotFoundException {
-		LocalKinds storedKinds = getStoredKinds(resourceId);
-
-		List<KindResponse<? extends ResponseData>> out = new ArrayList<KindResponse<? extends ResponseData>>();
+	public List<FetchKindResponse> fetch(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {
+		List<FetchKindResponse> out = new ArrayList<FetchKindResponse>();
 
 		for (StoredDataSpecifier spec : specifiers) {
-			LocalKindData data = storedKinds.get(spec.getDataKind().getKindId());
+			KindKey key = new KindKey(resourceId, spec.getKind().getKindId());
 
-			if (data != null && data.size() > 0) {
-				DataKind kind = data.getKind();
-				BigInteger genCounter = data.getGeneration();
+			StoreKindData kindData = storedResources.get(key);
 
-				if (queryType == QueryType.FETCH) {
-					List<StoredData> values = data.getMatchingValues(spec, queryType);
-					out.add(new FetchKindResponse(kind, genCounter, values));
-				} else {
-					List<StoredMetadata> values = data.getMatchingValues(spec, queryType);
-					out.add(new StatKindResponse(kind, genCounter, values));
-				}
-			} else {
-				if (queryType == QueryType.FETCH) {
-					List<StoredData> values = new ArrayList<StoredData>();
-					values.add(StoredData.getNonExistentData(spec.getDataKind()));
-					out.add(new FetchKindResponse(spec.getDataKind(), BigInteger.ZERO, values));
-				}
-			}
-		}
+			if (kindData == null)
+				continue;
 
-		return (List<T>) out;
-	}
+			// If the generation in the request corresponds to the last
+			// value we don't need to resend the same content
+			if (kindData.getGeneration().equals(spec.getGeneration()))
+				continue;
 
-	private LocalKinds getStoredKinds(ResourceID resourceId) throws NotFoundException {
-		LocalKinds storedKinds = storedResources.get(resourceId);
+			List<StoredData> matchingData = new ArrayList<StoredData>();
 
-		if (storedKinds == null)
-			throw new NotFoundException("Requested resource not found");
-
-		if (storedKinds.size() == 0) {
-			storedResources.remove(resourceId);
-			throw new NotFoundException("Requested resource not found");
-		}
-		return storedKinds;
-	}
-
-	public FindAnswer find(FindRequest req) throws NotFoundException {
-		ResourceID requestedId = req.getResourceId();
-
-		if (!context.getTopologyPlugin().isThisPeerResponsible(requestedId))
-			throw new NotFoundException("Node not responsible for requested resource");
-
-		Set<KindId> requestedKinds = new LinkedHashSet<KindId>(req.getKinds());
-		requestedKinds.retainAll(context.getConfiguration().getDataKindIds());
-
-		Map<KindId, ResourceID> results = new LinkedHashMap<KindId, ResourceID>();
-
-		for (Entry<ResourceID, LocalKinds> e : storedResources.entrySet()) {
-			ResourceID curResId = e.getKey();
-			LocalKinds kinds = e.getValue();
-
-			for (KindId requestedKind : requestedKinds) {
-				LocalKindData skd = kinds.get(requestedKind);
-
-				ResourceID lastCloserId = results.get(requestedKind);
-
-				if (lastCloserId == null) {
-					results.put(requestedKind, skd.resourceId);
-				} else {
-					List<ResourceID> ids = new ArrayList<ResourceID>();
-					ids.add(skd.resourceId);
-					ids.add(curResId);
-
-					results.put(requestedKind, context.getTopologyPlugin().getCloserId(requestedId, ids));
-				}
+			for (StoredData d : kindData.getValues()) {
+				if (spec.getModelSpecifier().isMatching(d.getValue()))
+					matchingData.add(d);
 			}
 
+			if (matchingData.isEmpty())
+				matchingData.add(DataUtils.getNonExistentData(spec.getKind()));
+
+			out.add(new FetchKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));
 		}
 
-		List<FindKindData> answers = new ArrayList<FindKindData>();
-		for (Entry<KindId, ResourceID> e : results.entrySet()) {
-			answers.add(new FindKindData(e.getKey(), e.getValue()));
-		}
-
-		return new FindAnswer(answers);
+		return out;
 	}
 
-	ScheduledExecutorService getDataRemoverExecutor() {
-		return dataRemoverExecutor;
-	}
+	@SuppressWarnings("unchecked")
+	public List<StatKindResponse> stat(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {
+		List<StatKindResponse> out = new ArrayList<StatKindResponse>();
 
-	public BigInteger getUsedMemory() {
-		BigInteger usedMemory = BigInteger.ZERO;
-		for (LocalKinds k : storedResources.values()) {
-			for (LocalKindData data : k.getAll()) {
-				for (StoredData d : data.getDataValues()) {
-					usedMemory = usedMemory.add(BigInteger.valueOf(d.getValue().getSize()));
-				}
+		for (StoredDataSpecifier spec : specifiers) {
+			KindKey key = new KindKey(resourceId, spec.getKind().getKindId());
+
+			StoreKindData kindData = storedResources.get(key);
+
+			if (kindData == null)
+				continue;
+
+			// If the generation in the request corresponds to the last
+			// value we don't need to resend the same content
+			if (kindData.getGeneration().equals(spec.getGeneration()))
+				continue;
+
+			List<StoredMetadata> matchingData = new ArrayList<StoredMetadata>();
+
+			for (StoredData d : kindData.getValues()) {
+				if (spec.getModelSpecifier().isMatching(d.getValue()))
+					matchingData.add(d.getMetadata(spec.getKind(), CryptoHelper.OVERLAY_HASHALG));
 			}
+
+			out.add(new StatKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));
 		}
 
-		return usedMemory;
+		return out;
+	}
+
+	public static class KindKey {
+
+		public final ResourceID resId;
+		public final long kindId;
+
+		public KindKey(ResourceID resId, long kindId) {
+			this.resId = resId;
+			this.kindId = kindId;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (int) (kindId ^ (kindId >>> 32));
+			result = prime * result + ((resId == null) ? 0 : resId.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			KindKey other = (KindKey) obj;
+			if (kindId != other.kindId)
+				return false;
+			if (resId == null) {
+				if (other.resId != null)
+					return false;
+			} else if (!resId.equals(other.resId))
+				return false;
+			return true;
+		}
 	}
 }

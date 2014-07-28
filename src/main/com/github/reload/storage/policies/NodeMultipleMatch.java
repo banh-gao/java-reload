@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.Set;
 import javax.naming.ConfigurationException;
 import com.github.reload.Overlay;
+import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -33,7 +33,7 @@ import com.github.reload.storage.DataKind;
 public class NodeMultipleMatch extends AccessPolicy {
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
 		long maxIndex = data.getKind().getLongAttribute(DataKind.ATTR_MAX_NODE_MULTIPLE);

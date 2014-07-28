@@ -70,6 +70,11 @@ public class SingleModel extends DataModel<SingleValue> {
 	@ReloadCodec(SingleModelSpecifierCodec.class)
 	public static class SingleModelSpecifier implements ModelSpecifier<SingleValue> {
 
+		@Override
+		public boolean isMatching(SingleValue value) {
+			return true;
+		}
+
 	}
 
 	static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {

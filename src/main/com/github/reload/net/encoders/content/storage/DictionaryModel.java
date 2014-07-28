@@ -119,6 +119,16 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 			return Objects.hash(super.hashCode(), keys);
 		}
 
+		@Override
+		public boolean isMatching(DictionaryValue value) {
+			for (Key k : getKeys()) {
+				if (k.equals(value.getKey()))
+					return true;
+			}
+
+			return false;
+		}
+
 	}
 
 	static class DictionaryModelSpecifierCodec extends Codec<DictionaryModelSpecifier> {

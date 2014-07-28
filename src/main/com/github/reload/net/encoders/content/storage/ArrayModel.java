@@ -199,6 +199,15 @@ public class ArrayModel extends DataModel<ArrayValue> {
 				return Objects.hash(super.hashCode(), startIndex, endIndex);
 			}
 		}
+
+		@Override
+		public boolean isMatching(ArrayValue value) {
+			for (ArrayRange r : getRanges()) {
+				if (r.contains(value.getIndex()))
+					return true;
+			}
+			return false;
+		}
 	}
 
 	static class ArrayModelSpecifierCodec extends Codec<ArrayModelSpecifier> {

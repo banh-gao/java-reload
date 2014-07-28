@@ -182,6 +182,11 @@ public abstract class CryptoHelper<T extends Certificate> {
 		return getKeystore().getCertificate(nodeId);
 	}
 
+	public ReloadCertificate getCertificate(SignerIdentity identity) {
+		// TODO: get certificate by signer identity
+		return null;
+	}
+
 	/**
 	 * @return all the stored certificates
 	 */

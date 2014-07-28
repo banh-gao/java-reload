@@ -5,11 +5,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Set;
-import com.github.reload.Overlay;
+import com.github.reload.Components;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -18,6 +16,7 @@ import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
+import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.storage.AccessPolicy;
 import com.github.reload.storage.AccessPolicy.PolicyName;
 
@@ -29,38 +28,37 @@ import com.github.reload.storage.AccessPolicy.PolicyName;
 public class NodeMatch extends AccessPolicy {
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
 
-		validate(resourceId, signerIdentity, conf);
+		validate(resourceId, signerIdentity);
 	}
 
-	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, Configuration conf) throws AccessPolicyException {
-
-		ReloadCertificate storerReloadCert = context.getCryptoHelper().getCertificate(storerIdentity);
+	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity) throws AccessPolicyException {
+		CryptoHelper<?> crypto = (CryptoHelper<?>) Components.get(CryptoHelper.COMPNAME);
+		ReloadCertificate storerReloadCert = crypto.getCertificate(storerIdentity);
 		if (storerReloadCert == null)
 			throw new AccessPolicyException("Unknown signer identity");
 
-		Set<NodeID> storerNodeIds = storerReloadCert.getNodeIds();
+		NodeID storerNodeId = storerReloadCert.getNodeId();
 
 		byte[] resourceIdHash = resourceId.getData();
 
 		X509Certificate storerCert = (X509Certificate) storerReloadCert.getOriginalCertificate();
 
-		for (NodeID storerNodeId : storerNodeIds) {
-			byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId, context);
-			if (Arrays.equals(nodeIdHash, resourceIdHash)) {
-				checkIdentityHash(storerCert, storerNodeId, storerIdentity);
-				return;
-			}
+		byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId);
+		if (Arrays.equals(nodeIdHash, resourceIdHash)) {
+			checkIdentityHash(storerCert, storerNodeId, storerIdentity);
+			return;
 		}
 
 		throw new AccessPolicyException("Matching node-id not found in signer certificate");
 	}
 
-	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, Configuration conf) {
-		int length = context.getTopologyPlugin().getResourceIdLength();
+	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId) {
+		TopologyPlugin plugin = (TopologyPlugin) Components.get(TopologyPlugin.COMPNAME);
+		int length = plugin.getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
 			return Arrays.copyOfRange(d.digest(storerId.getData()), 0, length);
@@ -82,20 +80,16 @@ public class NodeMatch extends AccessPolicy {
 	 * Parameters generator for NODE-MATCH policy
 	 * 
 	 */
-	public static class NodeParamsGenerator extends AccessPolicyParamsGenerator {
-
-		public NodeParamsGenerator(Overlay conn) {
-			super(conn);
-		}
+	public static class NodeParamsGenerator implements AccessPolicyParamsGenerator {
 
 		public ResourceID getResourceId(NodeID storerId) {
-			HashAlgorithm overlayHashAlg = CryptoHelper.OVERLAY_HASHALG;
-			return context.getTopologyPlugin().getResourceId(hashNodeId(overlayHashAlg, storerId, context));
+			TopologyPlugin plugin = (TopologyPlugin) Components.get(TopologyPlugin.COMPNAME);
+			return plugin.getResourceId(hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerId));
 		}
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(Overlay overlay) {
-		return new NodeParamsGenerator(overlay);
+	public AccessPolicyParamsGenerator getParamsGenerator() {
+		return new NodeParamsGenerator();
 	}
 }

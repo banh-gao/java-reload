@@ -1,6 +1,7 @@
 package com.github.reload.storage;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.AttributeKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,12 +27,13 @@ public class DataKind {
 
 	private static final Map<Long, DataKind> REGISTERED_KINDS = new HashMap<Long, DataKind>();
 
+	public static final AttributeKey<Long> MAX_SIZE = AttributeKey.valueOf("maxSize");
+	public static final AttributeKey<Integer> MAX_COUNT = AttributeKey.valueOf("maxCount");
+
 	private final long kindId;
-	private final int maxCount;
-	private final int maxSize;
 	private final DataModel<? extends DataValue> dataModel;
 	private final AccessPolicy accessPolicy;
-	private final Map<String, String> attributes;
+	private final Map<AttributeKey<?>, Object> attributes;
 
 	public static DataKind getInstance(long kindId) {
 		return REGISTERED_KINDS.get(kindId);
@@ -45,9 +47,7 @@ public class DataKind {
 		kindId = builder.kindId;
 		accessPolicy = builder.accessPolicy;
 		dataModel = builder.dataModel;
-		attributes = new HashMap<String, String>(builder.attributes);
-		maxCount = builder.maxCount;
-		maxSize = builder.maxSize;
+		attributes = new HashMap<AttributeKey<?>, Object>(builder.attributes);
 	}
 
 	/**
@@ -55,14 +55,6 @@ public class DataKind {
 	 */
 	public long getKindId() {
 		return kindId;
-	}
-
-	public int getMaxCount() {
-		return maxCount;
-	}
-
-	public int getMaxSize() {
-		return maxSize;
 	}
 
 	/**
@@ -75,7 +67,7 @@ public class DataKind {
 	 * @see Overlay#fetchData(net.sf.jReload.overlay.ResourceID,
 	 *      StoredDataSpecifier...)
 	 */
-	public StoredDataSpecifier newDataSpecifier(ModelSpecifier<? extends DataValue> modelSpecifier) {
+	public StoredDataSpecifier newDataSpecifier(ModelSpecifier<?> modelSpecifier) {
 		return new StoredDataSpecifier(this, modelSpecifier);
 	}
 
@@ -90,25 +82,17 @@ public class DataKind {
 	 * Get a parameter generator for the associated access control policy to be
 	 * used with the specified overlay
 	 */
-	public AccessPolicyParamsGenerator getPolicyParamsGenerator(Overlay overlay) {
-		return accessPolicy.getParamsGenerator(overlay.getConfiguration());
+	public AccessPolicyParamsGenerator getPolicyParamsGenerator() {
+		return accessPolicy.getParamsGenerator();
 	}
 
-	public Map<String, String> getAttributes() {
+	public Map<AttributeKey<?>, Object> getAttributes() {
 		return Collections.unmodifiableMap(attributes);
 	}
 
-	public String getAttribute(String key) {
-		String v = attributes.get(key.toLowerCase());
-
-		if (v != null)
-			return v;
-
-		return "";
-	}
-
-	public boolean hasAttribute(String key) {
-		return attributes.containsKey(key.toLowerCase());
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(AttributeKey<T> key) {
+		return (T) attributes.get(key);
 	}
 
 	/**
@@ -130,11 +114,9 @@ public class DataKind {
 		public static final Class<DictionaryValue> TYPE_DICTIONARY = DictionaryValue.class;
 
 		private final long kindId;
-		public int maxCount;
-		public int maxSize;
 		private DataModel<? extends DataValue> dataModel;
 		private AccessPolicy accessPolicy;
-		private final Map<String, String> attributes = new HashMap<String, String>();
+		private Map<AttributeKey<?>, Object> attributes = new HashMap<AttributeKey<?>, Object>();
 
 		public Builder(long kindId) {
 			this.kindId = kindId;
@@ -145,23 +127,13 @@ public class DataKind {
 			return this;
 		}
 
-		public Builder maxCount(int maxCount) {
-			this.maxCount = maxCount;
-			return this;
-		}
-
-		public Builder maxSize(int maxSize) {
-			this.maxSize = maxSize;
+		public <T> Builder attribute(AttributeKey<T> key, T value) {
+			this.attributes.put(key, value);
 			return this;
 		}
 
 		public Builder accessPolicy(AccessPolicy accessPolicy) {
 			this.accessPolicy = accessPolicy;
-			return this;
-		}
-
-		public Builder attribute(String key, String value) {
-			attributes.put(key.toLowerCase(), value);
 			return this;
 		}
 
@@ -171,7 +143,7 @@ public class DataKind {
 		}
 
 		private void checkParams() {
-			if (maxCount <= 0 || maxSize <= 0 || dataModel == null || accessPolicy == null)
+			if (dataModel == null || accessPolicy == null)
 				throw new IllegalStateException();
 
 			accessPolicy.checkKindParams(this);

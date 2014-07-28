@@ -1,9 +1,8 @@
 package com.github.reload.storage.errors;
 
-import java.math.BigInteger;
-import com.github.reload.net.encoders.content.errors.Error;
 import com.github.reload.net.encoders.content.errors.ErrorRespose;
 import com.github.reload.net.encoders.content.errors.ErrorType;
+import com.github.reload.net.encoders.content.storage.StoreAnswer;
 
 /**
  * Indicates that a store request has the generation value lower than the stored
@@ -12,19 +11,14 @@ import com.github.reload.net.encoders.content.errors.ErrorType;
  */
 public class GenerationTooLowException extends Exception implements ErrorRespose {
 
-	private final BigInteger generation;
+	private StoreAnswer answer;
 
-	public GenerationTooLowException(String info) {
-		generation = new BigInteger(1, info.getBytes(Error.MSG_CHARSET));
+	public GenerationTooLowException(StoreAnswer answer) {
+		this.answer = answer;
 	}
 
-	public GenerationTooLowException(BigInteger generation) {
-		super("Request generation counter lower than stored data counter");
-		this.generation = generation;
-	}
-
-	public BigInteger getGeneration() {
-		return generation;
+	public StoreAnswer getAnswer() {
+		return answer;
 	}
 
 	@Override

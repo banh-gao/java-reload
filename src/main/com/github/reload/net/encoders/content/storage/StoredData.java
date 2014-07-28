@@ -1,13 +1,22 @@
 package com.github.reload.net.encoders.content.storage;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.Objects;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.StoredData.StoredDataCodec;
+import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
+import com.github.reload.storage.DataKind;
 import com.github.reload.storage.DataModel;
 import com.github.reload.storage.DataModel.DataValue;
 
@@ -26,6 +35,10 @@ public class StoredData {
 		this.signature = signature;
 	}
 
+	public StoredData(BigInteger storageTime, long lifeTime, DataValue value, Signer s, ResourceID resId, DataKind kind) throws SignatureException {
+		this(storageTime, lifeTime, value, generateSignature(storageTime, lifeTime, value, s, resId, kind));
+	}
+
 	public BigInteger getStorageTime() {
 		return storageTime;
 	}
@@ -38,8 +51,51 @@ public class StoredData {
 		return value;
 	}
 
-	Signature getSignature() {
+	public StoredMetadata getMetadata(DataKind kind, HashAlgorithm hashAlg) {
+		@SuppressWarnings("unchecked")
+		DataModel<DataValue> m = (DataModel<DataValue>) kind.getDataModel();
+		return new StoredMetadata(storageTime, lifeTime, m.newMetadata(value, hashAlg));
+	}
+
+	public Signature getSignature() {
 		return signature;
+	}
+
+	private static Signature generateSignature(BigInteger storageTime, long lifeTime, DataValue value, Signer s, ResourceID resId, DataKind kind) throws SignatureException {
+		ByteBuf b = UnpooledByteBufAllocator.DEFAULT.buffer();
+		b.writeBytes(resId.getData());
+		b.writeLong(kind.getKindId());
+		b.writeBytes(storageTime.toByteArray());
+
+		@SuppressWarnings("unchecked")
+		Codec<DataValue> valueCodec = (Codec<DataValue>) Codec.getCodec(value.getClass(), null);
+		try {
+			valueCodec.encode(value, b);
+			s.update(b);
+		} catch (CodecException e) {
+			throw new RuntimeException(e);
+		} finally {
+			b.release();
+		}
+
+		return s.sign();
+	}
+
+	public boolean verify(PublicKey publicKey, ResourceID resId, DataKind kind) throws GeneralSecurityException {
+		ByteBuf b = UnpooledByteBufAllocator.DEFAULT.buffer();
+		b.writeBytes(resId.getData());
+		b.writeLong(kind.getKindId());
+		b.writeBytes(storageTime.toByteArray());
+
+		@SuppressWarnings("unchecked")
+		Codec<DataValue> valueCodec = (Codec<DataValue>) Codec.getCodec(value.getClass(), null);
+		try {
+			valueCodec.encode(value, b);
+		} catch (CodecException e) {
+			throw new RuntimeException(e);
+		}
+
+		return signature.verify(b, publicKey);
 	}
 
 	@Override

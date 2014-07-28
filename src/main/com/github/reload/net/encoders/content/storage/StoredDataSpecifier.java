@@ -8,7 +8,6 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.storage.StoredDataSpecifier.StoredDataSpecifierCodec;
 import com.github.reload.storage.DataKind;
-import com.github.reload.storage.DataModel.DataValue;
 import com.github.reload.storage.DataModel.ModelSpecifier;
 
 @ReloadCodec(StoredDataSpecifierCodec.class)
@@ -16,9 +15,9 @@ public class StoredDataSpecifier {
 
 	private final DataKind kind;
 	private BigInteger generation = BigInteger.ZERO;
-	private final ModelSpecifier<? extends DataValue> modelSpecifier;
+	private final ModelSpecifier modelSpecifier;
 
-	public StoredDataSpecifier(DataKind kind, ModelSpecifier<? extends DataValue> spec) {
+	public StoredDataSpecifier(DataKind kind, ModelSpecifier spec) {
 		this.kind = kind;
 		modelSpecifier = spec;
 	}
@@ -27,7 +26,7 @@ public class StoredDataSpecifier {
 		return kind;
 	}
 
-	public ModelSpecifier<? extends DataValue> getModelSpecifier() {
+	public ModelSpecifier getModelSpecifier() {
 		return modelSpecifier;
 	}
 
@@ -102,7 +101,7 @@ public class StoredDataSpecifier {
 			Field lenFld = allocateField(buf, MODEL_SPEC_LENGTH_FIELD);
 
 			@SuppressWarnings("unchecked")
-			Codec<ModelSpecifier<? extends DataValue>> modelSpecCodec = (Codec<ModelSpecifier<? extends DataValue>>) getCodec(obj.modelSpecifier.getClass());
+			Codec<ModelSpecifier> modelSpecCodec = (Codec<ModelSpecifier>) getCodec(obj.modelSpecifier.getClass());
 			modelSpecCodec.encode(obj.modelSpecifier, buf);
 
 			lenFld.updateDataLength();
@@ -119,9 +118,9 @@ public class StoredDataSpecifier {
 			ByteBuf modelSpecFld = readField(buf, MODEL_SPEC_LENGTH_FIELD);
 
 			@SuppressWarnings("unchecked")
-			Codec<ModelSpecifier<? extends DataValue>> modelSpecCodec = (Codec<ModelSpecifier<? extends DataValue>>) getCodec(kind.getDataModel().getSpecifierClass());
+			Codec<ModelSpecifier> modelSpecCodec = (Codec<ModelSpecifier>) getCodec(kind.getDataModel().getSpecifierClass());
 
-			ModelSpecifier<? extends DataValue> modelSpec = modelSpecCodec.decode(modelSpecFld);
+			ModelSpecifier modelSpec = modelSpecCodec.decode(modelSpecFld);
 
 			StoredDataSpecifier spec = new StoredDataSpecifier(kind, modelSpec);
 			spec.setGeneration(generation);

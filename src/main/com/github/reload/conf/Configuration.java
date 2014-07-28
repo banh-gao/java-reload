@@ -55,7 +55,7 @@ public interface Configuration {
 
 	public abstract DataKind getDataKind(long kindId) throws UnknownKindException;
 
-	public abstract Set<Long> getDataKindIds();
+	public abstract Set<DataKind> getDataKinds();
 
 	public abstract List<NodeID> getKindSigners();
 

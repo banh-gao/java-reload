@@ -62,7 +62,7 @@ public class StorageService {
 	private MessageBuilder msgBuilder;
 
 	@Service
-	public StorageService exportService() {
+	private StorageService exportService() {
 		return this;
 	}
 
@@ -76,10 +76,10 @@ public class StorageService {
 	}
 
 	/**
-	 * @return the available data kinds ids
+	 * @return the available data kinds
 	 */
-	public Set<Long> getDataKindIds() {
-		return conf.getDataKindIds();
+	public Set<DataKind> getDataKinds() {
+		return conf.getDataKinds();
 	}
 
 	/**
