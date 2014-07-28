@@ -16,6 +16,7 @@ import com.github.reload.Components.start;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.errors.Error;
@@ -44,6 +45,9 @@ public class MessageRouter {
 
 	@Component
 	private ConnectionManager connManager;
+
+	@Component
+	private MessageBuilder msgBuilder;
 
 	@Component
 	private RoutingTable routingTable;
@@ -117,6 +121,10 @@ public class MessageRouter {
 			forward(message, nextHop, status);
 		}
 		return status;
+	}
+
+	public ListenableFuture<NodeID> sendAnswer(Header requestHdr, Content answer) {
+		return sendMessage(msgBuilder.newResponseMessage(requestHdr, answer));
 	}
 
 	private void forward(Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {

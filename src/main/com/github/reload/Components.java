@@ -158,6 +158,7 @@ public class Components {
 					continue;
 
 				try {
+					m.setAccessible(true);
 					return (T) m.invoke(cmp);
 				} catch (IllegalAccessException | IllegalArgumentException
 						| InvocationTargetException e) {
@@ -336,13 +337,13 @@ public class Components {
 			if (handler == null) {
 				if (type.isAnswer() && answerHandler != null) {
 					handler = answerHandler;
-					l.log(Level.DEBUG, String.format("Processing %s message %#x with answer handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+					l.log(Level.TRACE, String.format("Processing %s message %#x with answer handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 				} else {
 					handler = messageHandlers.get(ContentType.UNKNOWN);
-					l.log(Level.DEBUG, String.format("Processing %s message %#x with default handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+					l.log(Level.TRACE, String.format("Processing %s message %#x with default handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 				}
 			} else {
-				l.log(Level.DEBUG, String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+				l.log(Level.TRACE, String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 			}
 
 			try {

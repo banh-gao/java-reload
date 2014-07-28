@@ -27,7 +27,7 @@ public class Signer {
 		signer = java.security.Signature.getInstance(hashAlg.toString() + "with" + signAlg.toString());
 	}
 
-	void initSign(PrivateKey privateKey) throws InvalidKeyException {
+	public void initSign(PrivateKey privateKey) throws InvalidKeyException {
 		if (identity != SignerIdentity.EMPTY_IDENTITY) {
 			signer.initSign(privateKey);
 		}

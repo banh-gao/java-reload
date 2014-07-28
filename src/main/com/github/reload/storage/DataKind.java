@@ -27,7 +27,7 @@ public class DataKind {
 
 	private static final Map<Long, DataKind> REGISTERED_KINDS = new HashMap<Long, DataKind>();
 
-	public static final AttributeKey<Long> MAX_SIZE = AttributeKey.valueOf("maxSize");
+	public static final AttributeKey<Integer> MAX_SIZE = AttributeKey.valueOf("maxSize");
 	public static final AttributeKey<Integer> MAX_COUNT = AttributeKey.valueOf("maxCount");
 
 	private final long kindId;

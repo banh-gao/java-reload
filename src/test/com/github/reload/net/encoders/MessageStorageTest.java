@@ -53,7 +53,7 @@ public class MessageStorageTest extends MessageTest {
 		Builder b = new DataKind.Builder(TEST_KINDID);
 		b.accessPolicy(AccessPolicy.getInstance(NodeMatch.class));
 		b.dataModel(DataModel.getInstance(DataModel.ARRAY));
-		b.maxCount(10).maxSize(100);
+		b.attribute(DataKind.MAX_COUNT, 10).attribute(DataKind.MAX_SIZE, 100);
 		DataKind.registerDataKind(b.build());
 	}
 

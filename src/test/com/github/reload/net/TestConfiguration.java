@@ -145,8 +145,9 @@ public class TestConfiguration implements Configuration {
 		return k;
 	}
 
-	public Set<Long> getDataKindIds() {
-		return Collections.unmodifiableSet(requiredKinds.keySet());
+	@Override
+	public Set<DataKind> getDataKinds() {
+		return new HashSet<DataKind>(requiredKinds.values());
 	}
 
 	public List<NodeID> getKindSigners() {

@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.github.reload.ApplicationID;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -17,7 +16,7 @@ public class AppAttachMessage extends Content {
 
 	private byte[] userFragment;
 	private byte[] password;
-	private ApplicationID applicationID;
+	private int servicePort;
 	private boolean isActive;
 	private List<HostCandidate> candidates;
 
@@ -27,9 +26,9 @@ public class AppAttachMessage extends Content {
 	private AppAttachMessage(Builder builder) {
 		userFragment = builder.userFragment;
 		password = builder.password;
-		applicationID = builder.applicationID;
+		servicePort = builder.servicePort;
 		isActive = builder.isActive;
-		candidates = builder.candidates;
+		candidates = new ArrayList<HostCandidate>(builder.candidates);
 	}
 
 	/**
@@ -64,8 +63,8 @@ public class AppAttachMessage extends Content {
 	 * @return The identifier of the application that will use the established
 	 *         connection
 	 */
-	public ApplicationID getApplicationID() {
-		return applicationID;
+	public int getServicePort() {
+		return servicePort;
 	}
 
 	/**
@@ -76,13 +75,13 @@ public class AppAttachMessage extends Content {
 
 		byte[] userFragment = new byte[0];
 		byte[] password = new byte[0];
-		List<HostCandidate> candidates = new ArrayList<HostCandidate>();
+		List<? extends HostCandidate> candidates = new ArrayList<HostCandidate>();
 		boolean sendUpdate = false;
 		boolean isActive;
-		ApplicationID applicationID;
+		int servicePort;
 
-		public Builder(ApplicationID applicationID) {
-			this.applicationID = applicationID;
+		public Builder(int servicePort) {
+			this.servicePort = servicePort;
 		}
 
 		public AppAttachMessage buildRequest() {
@@ -95,7 +94,7 @@ public class AppAttachMessage extends Content {
 			return new AppAttachMessage(this);
 		}
 
-		public Builder candidates(List<HostCandidate> candidates) {
+		public Builder candidates(List<? extends HostCandidate> candidates) {
 			this.candidates = candidates;
 			return this;
 		}
@@ -151,7 +150,7 @@ public class AppAttachMessage extends Content {
 			buf.writeBytes(obj.password);
 			passLenFld.updateDataLength();
 
-			buf.writeShort(obj.applicationID.getId());
+			buf.writeShort(obj.servicePort);
 			Field roleLenFld = allocateField(buf, ROLE_LENGTH_FIELD);
 
 			if (obj.isActive) {
@@ -180,20 +179,19 @@ public class AppAttachMessage extends Content {
 			ByteBuf fragFld = readField(buf, UFRAG_LENGTH_FIELD);
 			obj.userFragment = new byte[fragFld.readableBytes()];
 			fragFld.readBytes(obj.userFragment);
+			fragFld.release();
 
 			ByteBuf pswData = readField(buf, PASS_LENGTH_FIELD);
 			obj.password = new byte[pswData.readableBytes()];
 			pswData.readBytes(obj.password);
+			pswData.release();
 
-			int appId = buf.readShort();
-			obj.applicationID = ApplicationID.valueOf(appId);
-			if (obj.applicationID == null)
-				throw new CodecException("Unknown application ID " + appId);
+			obj.servicePort = buf.readShort();
 
 			ByteBuf roleData = readField(buf, ROLE_LENGTH_FIELD);
-
 			byte[] role = new byte[roleData.readableBytes()];
 			roleData.readBytes(role);
+			roleData.release();
 
 			obj.isActive = Arrays.equals(role, ROLE_ACTIVE);
 
@@ -201,9 +199,11 @@ public class AppAttachMessage extends Content {
 			ByteBuf candData = readField(buf, CANDIDATES_LENGTH_FIELD);
 
 			while (candData.readableBytes() > 0) {
-				HostCandidate candidate = iceCodec.decode(buf);
+				HostCandidate candidate = iceCodec.decode(candData);
 				obj.candidates.add(candidate);
 			}
+			candData.release();
+
 			return obj;
 		}
 	}
