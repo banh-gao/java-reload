@@ -63,6 +63,7 @@ class OverlayConnector {
 
 			@Override
 			public void onFailure(Throwable t) {
+				t.printStackTrace();
 				// TODO Detect failure to connect to bootstrap nodes
 			}
 		});

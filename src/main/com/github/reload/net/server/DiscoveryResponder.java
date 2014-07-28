@@ -1,134 +1,57 @@
 package com.github.reload.net.server;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import java.io.IOException;
-import java.net.DatagramPacket;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.Components;
-import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.content.Content;
+import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.PingAnswer;
-import com.github.reload.net.encoders.header.Header;
-import com.google.common.util.concurrent.AbstractExecutionThreadService;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
+import com.github.reload.net.stack.ReloadStack;
 
 /**
  * Responder server that send a ping answer to peers searching for a
  * bootstrap server in a multicast group
  */
-public class DiscoveryResponder extends AbstractExecutionThreadService {
+public class DiscoveryResponder {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private final Components context;
-	private final InetSocketAddress localAddr;
-	private final EventLoopGroup handlersLoopGroup = new NioEventLoopGroup();
+	private final ReloadStack stack;
+	private final MessageBuilder builder;
 
-	private Channel channel;
-
-	public DiscoveryResponder(Components context, InetSocketAddress localAddr) {
-		this.context = context;
-		this.localAddr = localAddr;
+	public DiscoveryResponder(OverlayLinkType linkType, InetSocketAddress localAddr, MessageBuilder builder) throws NoSuchAlgorithmException, InterruptedException {
+		UDPReloadStackBuilder b = UDPReloadStackBuilder.newServerBuilder(new MessageHandler());
+		b.setLinkType(linkType);
+		b.setLocalAddress(localAddr);
+		stack = b.buildStack();
+		this.builder = builder;
 	}
 
-	@Override
-	protected void startUp() throws Exception {
-		ServerBootstrap sb = new ServerBootstrap();
-		// TODO: initialize multicast server
-		// ChannelHandler chHandler = new ChannelInitializerImpl(context,
-		// linkType);
-		sb.group(handlersLoopGroup).channel(NioServerSocketChannel.class);
-		sb.childHandler(new ResponderChannelInit());
-		sb.childOption(ChannelOption.SO_KEEPALIVE, true);
-		ChannelFuture f = sb.bind(localAddr).await();
-		this.channel = f.channel();
-	}
-
-	@Override
 	protected void shutDown() throws Exception {
-		handlersLoopGroup.shutdownGracefully().await();
+		stack.shutdown().sync();
 		l.log(Level.DEBUG, "Multicast discovery responder stopped.");
 	}
 
-	private void sendAnswer(DatagramPacket packet) throws Exception {
-		UnsignedByteBuffer buf = UnsignedByteBuffer.wrap(packet.getData(), 0, packet.getLength());
-		Header header = new Header(buf, null);
-
-		buf.limit(header.getMessageLength());
-
-		Message requestMessage = Message.getDecoded(context, header, buf);
-
-		if (!isValidRequest(requestMessage, packet.getSocketAddress()))
-			throw new Exception("Invalid discovery request from " + requestMessage.getSenderId() + " at " + packet.getSocketAddress());
-
-		Content answerContent;
-
-		answerContent = new PingAnswer();
-
-		sendMessage((InetSocketAddress) packet.getSocketAddress(), header, answerContent);
-		l.log(Level.DEBUG, "Sent discovery answer to " + requestMessage.getSenderId() + " at " + packet.getSocketAddress());
-	}
-
-	private void sendMessage(InetSocketAddress sourceAddress, ForwardingHeader requestHeader, Content answerContent) {
-		Message response = context.getMessageBuilder().newResponseMessage(requestHeader, answerContent);
-		txMessageBuf.clear();
-		response.writeTo(txMessageBuf, context);
-
-		channel.write(response);
-		try {
-			udpSocket.send(new DatagramPacket(txMessageBuf.array(), txMessageBuf.position(), sourceAddress));
-		} catch (IOException e) {
-			l.log(Level.WARN, e.getMessage(), e);
-			return;
-		}
-	}
-
-	private boolean isValidRequest(Message request, SocketAddress addr) {
-		String hash = context.getComponent(Configuration.class).getOverlayHash();
-		if (!hash.equals(request.getHeader().getOverlayHash()))
-			return false;
-
-		try {
-			request.verify();
-			return true;
-		} catch (GeneralSecurityException e) {
-			l.log(Level.DEBUG, "Authentication failed for discovery request from untrusted sender " + request.getHeader().getSenderId() + " at " + addr, e);
-			return false;
-		}
-	}
-
 	public InetSocketAddress getLocalSocketAddress() {
-		return localAddr;
+		return (InetSocketAddress) stack.getChannel().localAddress();
 	}
 
-	@Override
-	protected String serviceName() {
-		return "Bootstrap Discovery Responder";
-	}
-
-	private class ResponderChannelInit extends ChannelInitializer<Channel> {
+	private class MessageHandler extends ChannelInboundHandlerAdapter {
 
 		@Override
-		protected void initChannel(Channel ch) throws Exception {
-			// TODO Auto-generated method stub
+		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+			Message req = (Message) msg;
 
+			Message response = builder.newResponseMessage(req.getHeader(), new PingAnswer(0, BigInteger.valueOf(System.currentTimeMillis())));
+
+			ctx.channel().write(response);
+
+			l.debug("Sent discovery answer to " + req.getHeader().getSenderId() + " at " + ctx.channel().remoteAddress());
 		}
-
-	}
-
-	private class MessageHandler extends ChannelDuplexHandler {
-
 	}
 }

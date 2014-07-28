@@ -66,9 +66,6 @@ public class X509CertificateParser implements ReloadCertificateParser {
 		String username = extractUsernameFromCert(certificate);
 		NodeID id = extractNodeIdFromUri(certificate, overlayName);
 		ReloadCertificate reloadCert = new ReloadCertificate(certificate, username, id);
-		if (reloadCert.isSelfSigned()) {
-			checkSelfSigned(reloadCert);
-		}
 
 		return reloadCert;
 	}
@@ -121,22 +118,6 @@ public class X509CertificateParser implements ReloadCertificateParser {
 			return false;
 
 		return rdn1.containsAll(rdn2);
-	}
-
-	/**
-	 * Check whether the node-ids in the certificate are derived from the
-	 * certificate public key, if some id doesn't match, a CertificateException
-	 * will be thrown
-	 * 
-	 * @param reloadCert
-	 * @throws CertificateException
-	 */
-	private static void checkSelfSigned(ReloadCertificate reloadCert) throws CertificateException {
-		NodeID certId = reloadCert.getNodeId();
-		NodeID computedId = X509Utils.getKeyBasedNodeId(1, reloadCert.getPublicKey().getEncoded(), certId.getData().length);
-
-		if (!computedId.equals(certId))
-			throw new CertificateException("Illegal node-id at index " + 1 + " for self-signed certificate");
 	}
 
 	private static NodeID extractNodeIdFromUri(X509Certificate cert, String overlayName) throws CertificateException {

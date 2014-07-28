@@ -115,7 +115,7 @@ public abstract class Bootstrap {
 		Components.register(new MessageRouter());
 		registerComponents();
 
-		ListenableFuture<Overlay> overlayConnFut = OverlayConnector.connectToOverlay(isClientMode);
+		ListenableFuture<Overlay> overlayConnFut = OverlayConnector.connectToOverlay(!isClientMode);
 
 		return overlayConnFut;
 	}

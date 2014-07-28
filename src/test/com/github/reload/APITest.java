@@ -23,10 +23,6 @@ public class APITest {
 		ListenableFuture<Overlay> ovrFut = b.connect();
 		Overlay overlay = ovrFut.get();
 
-		synchronized (this) {
-			wait();
-		}
-
 		// TODO Auto-generated constructor stub
 	}
 }

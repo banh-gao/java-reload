@@ -1,14 +1,17 @@
 package com.github.reload.net.connections;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPromise;
+import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.ForwardMessage;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageHeaderDecoder;
+import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.stack.LinkHandler;
 import com.github.reload.net.stack.ReloadStack;
 
 /**
@@ -16,10 +19,12 @@ import com.github.reload.net.stack.ReloadStack;
  */
 public class Connection {
 
+	private final Codec<Header> hdrCodec;
 	private final NodeID nodeId;
 	private final ReloadStack stack;
 
 	public Connection(NodeID nodeId, ReloadStack stack) {
+		hdrCodec = Codec.getCodec(Header.class, null);
 		this.nodeId = nodeId;
 		this.stack = stack;
 	}
@@ -42,14 +47,18 @@ public class Connection {
 	 */
 	public ChannelFuture forward(ForwardMessage headedMessage) {
 		Channel ch = stack.getChannel();
-		MessageHeaderDecoder fwdCodec = (MessageHeaderDecoder) ch.pipeline().get(ReloadStack.HANDLER_FORWARD);
+		LinkHandler lnkHandler = (LinkHandler) ch.pipeline().get(ReloadStack.HANDLER_LINK);
 
 		ChannelPromise promise = ch.newPromise();
 
 		ChannelHandlerContext context = ch.pipeline().context(ReloadStack.HANDLER_FORWARD);
 
+		ByteBuf buf = ch.alloc().buffer();
+
 		try {
-			fwdCodec.write(context, headedMessage, promise);
+			hdrCodec.encode(headedMessage.getHeader(), buf);
+			buf.writeBytes(headedMessage.getPayload());
+			lnkHandler.write(context, buf, promise);
 		} catch (Exception e) {
 			promise.setFailure(e);
 		}

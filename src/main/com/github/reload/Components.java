@@ -334,10 +334,13 @@ public class Components {
 			MessageHandlerMethod handler = messageHandlers.get(type);
 
 			if (handler == null) {
-				if (type.isAnswer() && answerHandler != null)
+				if (type.isAnswer() && answerHandler != null) {
 					handler = answerHandler;
-				else
+					l.log(Level.DEBUG, String.format("Processing %s message %#x with answer handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+				} else {
 					handler = messageHandlers.get(ContentType.UNKNOWN);
+					l.log(Level.DEBUG, String.format("Processing %s message %#x with default handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+				}
 			} else {
 				l.log(Level.DEBUG, String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 			}

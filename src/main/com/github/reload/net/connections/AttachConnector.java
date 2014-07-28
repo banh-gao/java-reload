@@ -109,7 +109,9 @@ public class AttachConnector {
 
 		final NodeID remoteNode = msg.getHeader().getSenderId();
 
-		if (!pendingRequests.containsKey(msg.getHeader().getTransactionId())) {
+		final long transactionId = msg.getHeader().getTransactionId();
+
+		if (!pendingRequests.containsKey(transactionId)) {
 			l.log(Level.DEBUG, String.format("Unattended attach answer %#x ignored", msg.getHeader().getTransactionId()));
 			return;
 		}
@@ -129,7 +131,7 @@ public class AttachConnector {
 
 				@Override
 				public void onSuccess(Connection result) {
-					SettableFuture<Connection> pendingAttach = pendingRequests.remove(remoteNode);
+					SettableFuture<Connection> pendingAttach = pendingRequests.remove(transactionId);
 					answeredRequests.remove(remoteNode);
 					if (pendingAttach != null) {
 						pendingAttach.set(result);
@@ -138,7 +140,7 @@ public class AttachConnector {
 
 				@Override
 				public void onFailure(Throwable t) {
-					SettableFuture<Connection> pendingAttach = pendingRequests.remove(remoteNode);
+					SettableFuture<Connection> pendingAttach = pendingRequests.remove(transactionId);
 					answeredRequests.remove(remoteNode);
 					if (pendingAttach != null) {
 						pendingAttach.setException(t);

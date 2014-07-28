@@ -94,7 +94,7 @@ public class RouterTest extends NetworkTest {
 
 	private static class TestListener {
 
-		@MessageHandler(ContentType.PING_REQ)
+		@MessageHandler(ContentType.UNKNOWN)
 		public void messageReceived(Message message) {
 			answer = message;
 			synchronized (msgRouter) {
