@@ -37,6 +37,8 @@ public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessag
 
 			Message outMsg = new Message(header, content, secBlock);
 
+			outMsg.attributes.putAll(msg.attributes);
+
 			outMsg.rawContent = rawContent;
 
 			out.add(outMsg);

@@ -1,6 +1,5 @@
 package com.github.reload.net.connections;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Level;
@@ -13,6 +12,7 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.LeaveRequest;
 import com.github.reload.net.encoders.content.errors.Error;
 import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -171,16 +171,10 @@ public class AttachConnector {
 		}
 
 		// Pending request not answered
-		if (isLocalNodeSmaller(sender))
+		if (bootstrap.getLocalNodeId().compareTo(sender) <= 0)
 			sendAnswer(req);
 		else
 			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach request already sent")));
-	}
-
-	private boolean isLocalNodeSmaller(NodeID senderId) {
-		BigInteger localNum = new BigInteger(1, bootstrap.getLocalNodeId().getData());
-		BigInteger senderNum = new BigInteger(1, senderId.getData());
-		return (localNum.compareTo(senderNum) <= 0);
 	}
 
 	private void sendAnswer(Message req) {
@@ -193,6 +187,24 @@ public class AttachConnector {
 
 	@MessageHandler(ContentType.LEAVE_REQ)
 	public void handleLeaveRequest(Message req) {
-		// TODO
+		LeaveRequest leave = (LeaveRequest) req.getContent();
+		NodeID leavingNode = leave.getLeavingNode();
+
+		// Check sender id matches with the leaving node
+		if (!req.getHeader().getSenderId().equals(leavingNode)) {
+			msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node doesn't match with sender ID"));
+			return;
+		}
+
+		// Check neighbor id matches with the leaving node
+		if (!req.getAttribute(Message.PREVIOUS_HOP).equals(leavingNode)) {
+			msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node is not a neighbor node"));
+			return;
+		}
+
+		// TODO: inform topology plugin
+
+		l.debug(String.format("Neighbor node %s is leaving the overlay", leavingNode));
+
 	}
 }

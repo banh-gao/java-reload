@@ -15,7 +15,7 @@ import com.google.common.collect.Maps;
  */
 public class Message {
 
-	private final Map<AttributeKey<?>, Object> attributes = Maps.newHashMap();
+	final Map<AttributeKey<?>, Object> attributes = Maps.newHashMap();
 
 	public static final AttributeKey<NodeID> PREVIOUS_HOP = AttributeKey.valueOf("PREV_HOP");
 	public static final AttributeKey<NodeID> NEXT_HOP = AttributeKey.valueOf("NEXT_HOP");

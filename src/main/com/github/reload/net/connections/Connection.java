@@ -27,6 +27,7 @@ public class Connection {
 		hdrCodec = Codec.getCodec(Header.class, null);
 		this.nodeId = nodeId;
 		this.stack = stack;
+		stack.getChannel().attr(Message.PREVIOUS_HOP).set(nodeId);
 	}
 
 	/**

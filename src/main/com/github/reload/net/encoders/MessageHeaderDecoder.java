@@ -26,6 +26,8 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 			ForwardMessage message = new ForwardMessage();
 
+			message.setAttribute(Message.PREVIOUS_HOP, ctx.channel().attr(Message.PREVIOUS_HOP).get());
+
 			message.header = hdrCodec.decode(in);
 
 			if (in.readableBytes() != message.header.getPayloadLength())

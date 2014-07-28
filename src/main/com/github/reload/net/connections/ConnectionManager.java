@@ -20,6 +20,10 @@ import com.github.reload.Components.stop;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.MessageBuilder;
+import com.github.reload.net.encoders.content.LeaveRequest;
+import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.net.stack.MessageDispatcher;
@@ -49,6 +53,9 @@ public class ConnectionManager {
 	@Component
 	private Bootstrap connector;
 
+	@Component
+	private MessageBuilder msgBuilder;
+
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
 	private final MessageDispatcher msgDispatcher;
@@ -73,8 +80,22 @@ public class ConnectionManager {
 	@stop
 	private void shutdown() {
 		attachServer.shutdown();
-		for (Connection c : connections.values())
-			c.close();
+		for (Connection c : connections.values()) {
+			sendLeaveAndClose(c);
+		}
+	}
+
+	private void sendLeaveAndClose(final Connection c) {
+		// TODO: get leaving data from topology plugin
+		Message m = msgBuilder.newMessage(new LeaveRequest(connector.getLocalNodeId(), new byte[0]), new DestinationList(c.getNodeId()));
+		ChannelFuture cf = c.write(m);
+		cf.addListener(new ChannelFutureListener() {
+
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+				c.close();
+			}
+		});
 	}
 
 	public ListenableFuture<Connection> connectTo(final InetSocketAddress remoteAddr, OverlayLinkType linkType) {
