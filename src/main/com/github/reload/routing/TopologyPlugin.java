@@ -6,11 +6,11 @@ import com.github.reload.Components.Component;
 import com.github.reload.InitializationException;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.content.storage.StoreKindData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.storage.encoders.StoreKindData;
 
 /**
  * The algorithm that performs the resource based routing and controls the

@@ -4,11 +4,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
-import com.github.reload.ApplicationID;
 import com.github.reload.Components;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.Content;
+import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.content.JoinAnswer;
 import com.github.reload.net.encoders.content.JoinRequest;
 import com.github.reload.net.encoders.content.LeaveAnswer;
@@ -23,8 +24,6 @@ import com.github.reload.net.encoders.content.RouteQueryAnswer;
 import com.github.reload.net.encoders.content.RouteQueryRequest;
 import com.github.reload.net.encoders.content.UpdateAnswer;
 import com.github.reload.net.encoders.content.UpdateRequest;
-import com.github.reload.net.encoders.content.errors.Error;
-import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
 
@@ -69,7 +68,7 @@ public class MessageContentTest extends MessageTest {
 
 	@Test
 	public void testAppAttachRequest() throws Exception {
-		AppAttachMessage.Builder b = new AppAttachMessage.Builder(ApplicationID.SIP_5060);
+		AppAttachMessage.Builder b = new AppAttachMessage.Builder(5060);
 		AppAttachMessage content = b.buildRequest();
 		AppAttachMessage echo = sendContent(content);
 
@@ -83,7 +82,7 @@ public class MessageContentTest extends MessageTest {
 
 	@Test
 	public void testAppAttachAnswer() throws Exception {
-		AppAttachMessage.Builder b = new AppAttachMessage.Builder(ApplicationID.SIP_5060);
+		AppAttachMessage.Builder b = new AppAttachMessage.Builder(5060);
 		AppAttachMessage content = b.buildAnswer();
 		AppAttachMessage echo = sendContent(content);
 

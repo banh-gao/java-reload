@@ -9,8 +9,6 @@ import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.Map;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.content.errors.ErrorRespose;
-import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.google.common.collect.Maps;
 
 /**
@@ -291,7 +289,7 @@ public abstract class Codec<T> {
 	 * This exception can be thrown to indicate an error in the en/decoding
 	 * process
 	 */
-	public static class CodecException extends Exception implements ErrorRespose {
+	public static class CodecException extends Exception {
 
 		public CodecException(String message, Throwable cause) {
 			super(message, cause);
@@ -303,11 +301,6 @@ public abstract class Codec<T> {
 
 		public CodecException(Throwable cause) {
 			super(cause);
-		}
-
-		@Override
-		public ErrorType getErrorType() {
-			return ErrorType.INVALID_MESSAGE;
 		}
 
 	}

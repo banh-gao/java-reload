@@ -19,10 +19,9 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.errors.Error;
-import com.github.reload.net.encoders.content.errors.ErrorRespose;
-import com.github.reload.net.encoders.content.errors.ErrorType;
-import com.github.reload.net.encoders.content.errors.NetworkException;
+import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorMessageException;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
@@ -181,15 +180,14 @@ public class MessageRouter {
 		@Override
 		public void run() {
 			SettableFuture<Message> future = pendingRequests.remove(transactionId);
-			future.setException(new RequestTimeoutException());
+			future.setException(new RequestTimeoutException(String.format("Request %s times out")));
 		}
 	}
 
-	public static class RequestTimeoutException extends Exception implements ErrorRespose {
+	public static class RequestTimeoutException extends ErrorMessageException {
 
-		@Override
-		public ErrorType getErrorType() {
-			return ErrorType.REQUEST_TIMEOUT;
+		public RequestTimeoutException(String message) {
+			super(new Error(ErrorType.REQUEST_TIMEOUT, message));
 		}
 	}
 }

@@ -9,14 +9,14 @@ import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.content.storage.ArrayValue;
-import com.github.reload.net.encoders.content.storage.DictionaryValue;
-import com.github.reload.net.encoders.content.storage.SingleValue;
-import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
 import com.github.reload.storage.AccessPolicy.AccessPolicyParamsGenerator;
 import com.github.reload.storage.DataKind.DataKindCodec;
 import com.github.reload.storage.DataModel.DataValue;
 import com.github.reload.storage.DataModel.ModelSpecifier;
+import com.github.reload.storage.encoders.ArrayValue;
+import com.github.reload.storage.encoders.DictionaryValue;
+import com.github.reload.storage.encoders.SingleValue;
+import com.github.reload.storage.encoders.StoredDataSpecifier;
 
 /**
  * The description of the data kind that a peer can handle

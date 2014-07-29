@@ -6,11 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.net.encoders.content.storage.ArrayModel;
-import com.github.reload.net.encoders.content.storage.DictionaryModel;
-import com.github.reload.net.encoders.content.storage.SingleModel;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.storage.DataModel.DataValue;
+import com.github.reload.storage.encoders.ArrayModel;
+import com.github.reload.storage.encoders.DictionaryModel;
+import com.github.reload.storage.encoders.SingleModel;
 
 public abstract class DataModel<T extends DataValue> {
 

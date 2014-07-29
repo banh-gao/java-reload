@@ -9,8 +9,6 @@ import com.github.reload.Overlay;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.content.storage.DictionaryValue;
-import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.CertHashNodeIdSignerIdentityValue;
@@ -19,6 +17,8 @@ import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.storage.AccessPolicy;
 import com.github.reload.storage.AccessPolicy.PolicyName;
+import com.github.reload.storage.encoders.DictionaryValue;
+import com.github.reload.storage.encoders.StoredData;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id

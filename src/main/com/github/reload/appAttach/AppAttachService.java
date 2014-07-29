@@ -16,8 +16,8 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.errors.Error;
-import com.github.reload.net.encoders.content.errors.ErrorType;
+import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.ice.HostCandidate;
 import com.github.reload.net.ice.ICEHelper;
@@ -150,16 +150,16 @@ public class AppAttachService {
 	private void handleAppAttachRequest(Message requestMessage) {
 		AppAttachMessage request = (AppAttachMessage) requestMessage.getContent();
 
-		InetSocketAddress addr = registeredServers.get(request.getServicePort());
+		InetSocketAddress addr = registeredServers.get(request.getApplicationID());
 
 		if (addr == null) {
-			router.sendAnswer(requestMessage.getHeader(), new Error(ErrorType.NOT_FOUND, "Application " + request.getServicePort() + " not registered"));
+			router.sendAnswer(requestMessage.getHeader(), new Error(ErrorType.NOT_FOUND, "Application " + request.getApplicationID() + " not registered"));
 			return;
 		}
 
 		List<? extends HostCandidate> candidates = iceHelper.getCandidates(addr);
 
-		router.sendAnswer(requestMessage.getHeader(), new AppAttachMessage.Builder(request.getServicePort()).candidates(candidates).buildAnswer());
+		router.sendAnswer(requestMessage.getHeader(), new AppAttachMessage.Builder(request.getApplicationID()).candidates(candidates).buildAnswer());
 
 	}
 }

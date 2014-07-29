@@ -4,10 +4,8 @@ import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.MessageExtension.MessageExtensionCodec;
-import com.github.reload.net.encoders.content.errors.ErrorType;
 
 /**
  * Message extension contained in the message content
@@ -39,22 +37,6 @@ public abstract class MessageExtension {
 
 	public boolean isCritical() {
 		return isCritical;
-	}
-
-	/**
-	 * Indicates an unknown message extension critical for message processing
-	 * 
-	 */
-	public static class UnknownExtensionException extends CodecException {
-
-		public UnknownExtensionException(String message) {
-			super(message);
-		}
-
-		@Override
-		public ErrorType getErrorType() {
-			return ErrorType.UNKNOWN_EXTENSION;
-		}
 	}
 
 	static class MessageExtensionCodec extends Codec<MessageExtension> {
@@ -91,7 +73,7 @@ public abstract class MessageExtension {
 			buf = readField(buf, EXTENSION_CONTENT_LENGTH_FIELD);
 
 			if (type == MessageExtensionType.UNKNOWN && isCritical)
-				throw new UnknownExtensionException("Unsupported message extension");
+				throw new CodecException("Unsupported message extension");
 
 			switch (type) {
 				case UNKNOWN :

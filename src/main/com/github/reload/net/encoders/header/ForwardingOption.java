@@ -4,9 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.content.errors.ErrorType;
 import com.github.reload.net.encoders.header.ForwardingOption.ForwardingOptionCodec;
 
 /**
@@ -127,23 +125,6 @@ public abstract class ForwardingOption {
 			option.isResponseCopy = isRspCopy;
 
 			return option;
-		}
-	}
-
-	/**
-	 * Indicates an unsupported forwarding option critical for header
-	 * processing
-	 * 
-	 */
-	public static class UnsupportedFwdOptionException extends CodecException {
-
-		public UnsupportedFwdOptionException(String message) {
-			super(message);
-		}
-
-		@Override
-		public ErrorType getErrorType() {
-			return ErrorType.UNSUPPORTED_FWD_OPTION;
 		}
 	}
 }

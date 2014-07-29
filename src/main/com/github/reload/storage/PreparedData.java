@@ -6,14 +6,14 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.net.encoders.content.storage.ArrayModel;
-import com.github.reload.net.encoders.content.storage.ArrayValue;
-import com.github.reload.net.encoders.content.storage.SingleValue;
-import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
+import com.github.reload.storage.encoders.ArrayModel;
+import com.github.reload.storage.encoders.ArrayValue;
+import com.github.reload.storage.encoders.SingleValue;
+import com.github.reload.storage.encoders.StoredData;
 
 /**
  * Helps to generate a signed data

@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Set;
 import com.github.reload.Components.Component;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.encoders.content.errors.UnknownKindException;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.storage.DataKind;
+import com.github.reload.storage.UnknownKindException;
 
 @Component(Configuration.COMPNAME)
 public interface Configuration {

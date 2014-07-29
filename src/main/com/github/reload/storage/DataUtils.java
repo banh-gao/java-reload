@@ -2,13 +2,15 @@ package com.github.reload.storage;
 
 import java.math.BigInteger;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.content.storage.StoredData;
+import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorMessageException;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.storage.AccessPolicy.AccessPolicyException;
 import com.github.reload.storage.DataModel.DataValueBuilder;
 import com.github.reload.storage.PreparedData.DataBuildingException;
-import com.github.reload.storage.errors.DataTooLargeException;
+import com.github.reload.storage.encoders.StoredData;
 
 public class DataUtils {
 
@@ -18,11 +20,11 @@ public class DataUtils {
 	 * @throws AccessPolicyException
 	 * @throws DataTooLargeException
 	 */
-	static void performKindChecks(ResourceID resourceId, StoredData requestData, DataKind kind, Configuration conf) throws AccessPolicyException, DataTooLargeException {
+	static void performKindChecks(ResourceID resourceId, StoredData requestData, DataKind kind, Configuration conf) throws ErrorMessageException {
 		kind.getAccessPolicy().accept(resourceId, requestData, requestData.getSignature().getIdentity());
 
 		if (requestData.getValue().getSize() > kind.getAttribute(DataKind.MAX_SIZE))
-			throw new DataTooLargeException("Size of the data exceeds the maximum allowed size");
+			throw new ErrorMessageException(new Error(ErrorType.DATA_TOO_LARGE, "Size of the data exceeds the maximum allowed size"));
 	}
 
 	/**

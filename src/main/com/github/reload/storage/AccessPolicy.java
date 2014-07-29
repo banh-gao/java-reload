@@ -7,10 +7,12 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.net.encoders.content.storage.StoredData;
+import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorMessageException;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.storage.errors.ForbittenException;
+import com.github.reload.storage.encoders.StoredData;
 import com.github.reload.storage.policies.NodeMatch;
 import com.github.reload.storage.policies.NodeMultipleMatch;
 import com.github.reload.storage.policies.UserMatch;
@@ -97,10 +99,10 @@ public abstract class AccessPolicy {
 	 * Indicates that the access control policy check fails
 	 * 
 	 */
-	public static class AccessPolicyException extends ForbittenException {
+	public static class AccessPolicyException extends ErrorMessageException {
 
 		public AccessPolicyException(String message) {
-			super("Access Policy check failed: " + message);
+			super(new Error(ErrorType.FORBITTEN, "Access Policy check failed: " + message));
 		}
 
 	}

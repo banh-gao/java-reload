@@ -12,7 +12,6 @@ import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.encoders.content.storage.StoredData;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.CertHashNodeIdSignerIdentityValue;
@@ -22,6 +21,7 @@ import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.storage.AccessPolicy;
 import com.github.reload.storage.AccessPolicy.PolicyName;
+import com.github.reload.storage.encoders.StoredData;
 import com.github.reload.storage.DataKind;
 
 /**

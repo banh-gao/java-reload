@@ -14,21 +14,20 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.errors.Error;
-import com.github.reload.net.encoders.content.errors.ErrorType;
-import com.github.reload.net.encoders.content.storage.FetchAnswer;
-import com.github.reload.net.encoders.content.storage.FetchRequest;
-import com.github.reload.net.encoders.content.storage.StatAnswer;
-import com.github.reload.net.encoders.content.storage.StatRequest;
-import com.github.reload.net.encoders.content.storage.StoreAnswer;
-import com.github.reload.net.encoders.content.storage.StoreKindData;
-import com.github.reload.net.encoders.content.storage.StoreKindResponse;
-import com.github.reload.net.encoders.content.storage.StoreRequest;
+import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.storage.LocalStore.KindKey;
-import com.github.reload.storage.errors.GenerationTooLowException;
+import com.github.reload.storage.encoders.FetchAnswer;
+import com.github.reload.storage.encoders.FetchRequest;
+import com.github.reload.storage.encoders.StatAnswer;
+import com.github.reload.storage.encoders.StatRequest;
+import com.github.reload.storage.encoders.StoreAnswer;
+import com.github.reload.storage.encoders.StoreKindData;
+import com.github.reload.storage.encoders.StoreKindResponse;
+import com.github.reload.storage.encoders.StoreRequest;
 
 /**
  * Elaborate the storage messages and is responsible for local storage

@@ -8,18 +8,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.net.encoders.content.storage.FetchKindResponse;
-import com.github.reload.net.encoders.content.storage.StatKindResponse;
-import com.github.reload.net.encoders.content.storage.StoreAnswer;
-import com.github.reload.net.encoders.content.storage.StoreKindData;
-import com.github.reload.net.encoders.content.storage.StoreKindResponse;
-import com.github.reload.net.encoders.content.storage.StoredData;
-import com.github.reload.net.encoders.content.storage.StoredDataSpecifier;
-import com.github.reload.net.encoders.content.storage.StoredMetadata;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.storage.errors.GenerationTooLowException;
+import com.github.reload.storage.encoders.FetchKindResponse;
+import com.github.reload.storage.encoders.StatKindResponse;
+import com.github.reload.storage.encoders.StoreAnswer;
+import com.github.reload.storage.encoders.StoreKindData;
+import com.github.reload.storage.encoders.StoreKindResponse;
+import com.github.reload.storage.encoders.StoredData;
+import com.github.reload.storage.encoders.StoredDataSpecifier;
+import com.github.reload.storage.encoders.StoredMetadata;
 import com.google.common.collect.Maps;
 
 /**

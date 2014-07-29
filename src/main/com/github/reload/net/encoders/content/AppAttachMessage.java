@@ -16,7 +16,7 @@ public class AppAttachMessage extends Content {
 
 	private byte[] userFragment;
 	private byte[] password;
-	private int servicePort;
+	private int applicationId;
 	private boolean isActive;
 	private List<HostCandidate> candidates;
 
@@ -26,7 +26,7 @@ public class AppAttachMessage extends Content {
 	private AppAttachMessage(Builder builder) {
 		userFragment = builder.userFragment;
 		password = builder.password;
-		servicePort = builder.servicePort;
+		applicationId = builder.applicationId;
 		isActive = builder.isActive;
 		candidates = new ArrayList<HostCandidate>(builder.candidates);
 	}
@@ -63,8 +63,8 @@ public class AppAttachMessage extends Content {
 	 * @return The identifier of the application that will use the established
 	 *         connection
 	 */
-	public int getServicePort() {
-		return servicePort;
+	public int getApplicationID() {
+		return applicationId;
 	}
 
 	/**
@@ -78,10 +78,10 @@ public class AppAttachMessage extends Content {
 		List<? extends HostCandidate> candidates = new ArrayList<HostCandidate>();
 		boolean sendUpdate = false;
 		boolean isActive;
-		int servicePort;
+		int applicationId;
 
-		public Builder(int servicePort) {
-			this.servicePort = servicePort;
+		public Builder(int applicationId) {
+			this.applicationId = applicationId;
 		}
 
 		public AppAttachMessage buildRequest() {
@@ -150,7 +150,7 @@ public class AppAttachMessage extends Content {
 			buf.writeBytes(obj.password);
 			passLenFld.updateDataLength();
 
-			buf.writeShort(obj.servicePort);
+			buf.writeShort(obj.applicationId);
 			Field roleLenFld = allocateField(buf, ROLE_LENGTH_FIELD);
 
 			if (obj.isActive) {
@@ -186,7 +186,7 @@ public class AppAttachMessage extends Content {
 			pswData.readBytes(obj.password);
 			pswData.release();
 
-			obj.servicePort = buf.readShort();
+			obj.applicationId = buf.readShort();
 
 			ByteBuf roleData = readField(buf, ROLE_LENGTH_FIELD);
 			byte[] role = new byte[roleData.readableBytes()];
