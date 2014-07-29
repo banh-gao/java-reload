@@ -27,7 +27,7 @@ public class X509CertificateParser implements ReloadCertificateParser {
 
 	private static final String SDN_OID = "2.5.29.17";
 
-	protected X509CertificateParser() {
+	public X509CertificateParser() {
 	}
 
 	@Override

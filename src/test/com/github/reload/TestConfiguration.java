@@ -1,11 +1,10 @@
-package com.github.reload.net;
+package com.github.reload;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.cert.Certificate;
@@ -18,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.github.reload.Components.Component;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.NodeID;
@@ -31,7 +30,7 @@ import com.github.reload.storage.UnknownKindException;
 /**
  * Representation of a RELOAD configuration document
  */
-@Component(Configuration.COMPNAME)
+@Component(Configuration.class)
 public class TestConfiguration implements Configuration {
 
 	String instanceName;
@@ -56,7 +55,7 @@ public class TestConfiguration implements Configuration {
 	List<String> mandatoryExtensions;
 	boolean selfSignedPermitted;
 	HashAlgorithm selfSignedDigestType;
-	Set<InetSocketAddress> bootstrapNodes;
+	public Set<InetSocketAddress> bootstrapNodes;
 	byte[] rawXml;
 	Signature signature;
 	private ReloadCertificate rootCert;
@@ -69,7 +68,7 @@ public class TestConfiguration implements Configuration {
 		initialTTL = 6;
 		noICE = true;
 		linkProtocols = Collections.singletonList("TLS");
-		bootstrapNodes = Collections.singleton(new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084));
+		bootstrapNodes = Collections.singleton(TestBootstrap.SERVER_ADDR);
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {

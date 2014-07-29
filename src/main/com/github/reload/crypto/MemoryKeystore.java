@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.github.reload.Components.Component;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 
@@ -14,24 +14,25 @@ import com.github.reload.net.encoders.header.NodeID;
  * Keystore that stored initialization values and running crypto material into
  * memory
  */
-@Component(Keystore.COMPNAME)
+@Component(Keystore.class)
 public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 
-	@Component(Configuration.COMPNAME)
+	@Component
 	private Configuration conf;
 
-	@Component(CryptoHelper.COMPNAME)
+	@Component
 	protected CryptoHelper<T> cryptoHelper;
 
-	private final PrivateKey privateKey;
+	private static PrivateKey privateKey;
 
-	private final ReloadCertificate localCert;
-	private final Map<NodeID, ReloadCertificate> storedCerts;
+	private static ReloadCertificate localCert;
+	private static Map<NodeID, ReloadCertificate> storedCerts;
 
-	public MemoryKeystore(ReloadCertificate localCert, PrivateKey privateKey, Map<NodeID, ReloadCertificate> storedCerts) {
-		this.privateKey = privateKey;
-		this.localCert = localCert;
-		this.storedCerts = new HashMap<NodeID, ReloadCertificate>(storedCerts);
+	public static void init(ReloadCertificate localCert, PrivateKey privateKey, Map<NodeID, ReloadCertificate> storedCerts) {
+		// FIXME: derive from context
+		MemoryKeystore.privateKey = privateKey;
+		MemoryKeystore.localCert = localCert;
+		MemoryKeystore.storedCerts = new HashMap<NodeID, ReloadCertificate>(storedCerts);
 	}
 
 	@Override

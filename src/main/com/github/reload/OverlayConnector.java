@@ -3,6 +3,7 @@ package com.github.reload;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkException;
@@ -28,7 +29,12 @@ class OverlayConnector {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private OverlayConnector() {
+	private final ComponentsContext ctx;
+	private final Overlay overlay;
+
+	public OverlayConnector(ComponentsContext ctx) {
+		this.ctx = ctx;
+		overlay = new Overlay();
 	}
 
 	/**
@@ -39,19 +45,19 @@ class OverlayConnector {
 	 * @throws InitializationException
 	 * @throws NetworkException
 	 */
-	static final SettableFuture<Overlay> connectToOverlay(final boolean joinNeeded) {
-		Components.initComponents();
+	final SettableFuture<Overlay> connectToOverlay(final boolean joinNeeded) {
 
 		final SettableFuture<Overlay> overlayConnFut = SettableFuture.create();
 
-		Bootstrap bootstrap = (Bootstrap) Components.get(Bootstrap.COMPNAME);
+		Bootstrap bootstrap = ctx.get(Bootstrap.class);
 
 		if (bootstrap.isOverlayInitiator()) {
-			overlayConnFut.set(new Overlay());
+			ctx.set(Overlay.class, overlay);
+			overlayConnFut.set(overlay);
 			return overlayConnFut;
 		}
 
-		Configuration conf = (Configuration) Components.get(Configuration.COMPNAME);
+		Configuration conf = ctx.get(Configuration.class);
 
 		ListenableFuture<Connection> bootConnFut = connectToBootstrap(conf.getBootstrapNodes(), conf.getOverlayLinkTypes());
 
@@ -71,9 +77,9 @@ class OverlayConnector {
 		return overlayConnFut;
 	}
 
-	private static ListenableFuture<Connection> connectToBootstrap(Set<InetSocketAddress> bootstrapNodes, Set<OverlayLinkType> linkTypes) {
+	private ListenableFuture<Connection> connectToBootstrap(Set<InetSocketAddress> bootstrapNodes, Set<OverlayLinkType> linkTypes) {
 
-		ConnectionManager connMgr = (ConnectionManager) Components.get(ConnectionManager.COMPNAME);
+		ConnectionManager connMgr = ctx.get(ConnectionManager.class);
 
 		final SettableFuture<Connection> bootConnFut = SettableFuture.create();
 
@@ -103,13 +109,13 @@ class OverlayConnector {
 		return bootConnFut;
 	}
 
-	private static void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut, final boolean joinNeeded) {
+	private void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut, final boolean joinNeeded) {
 
-		Bootstrap bootstrap = (Bootstrap) Components.get(Bootstrap.COMPNAME);
+		Bootstrap bootstrap = ctx.get(Bootstrap.class);
 
 		final DestinationList dest = new DestinationList(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
 
-		AttachConnector attachConnector = (AttachConnector) Components.get(AttachConnector.COMPNAME);
+		AttachConnector attachConnector = (AttachConnector) ctx.get(AttachConnector.class);
 
 		ListenableFuture<Connection> apConnFut = attachConnector.attachTo(dest, bootstrapServer, true);
 
@@ -121,8 +127,10 @@ class OverlayConnector {
 
 				if (joinNeeded)
 					join(overlayConnFut);
-				else
-					overlayConnFut.set(new Overlay());
+				else {
+					ctx.set(Overlay.class, overlay);
+					overlayConnFut.set(overlay);
+				}
 			}
 
 			@Override
@@ -140,12 +148,12 @@ class OverlayConnector {
 	 * 
 	 * @return the join answer
 	 */
-	private static final void join(final SettableFuture<Overlay> overlayConnFut) {
+	private final void join(final SettableFuture<Overlay> overlayConnFut) {
 		l.info("Joining to RELOAD overlay in progress...");
 
-		Bootstrap connector = (Bootstrap) Components.get(Bootstrap.COMPNAME);
-		MessageBuilder msgBuilder = (MessageBuilder) Components.get(MessageBuilder.COMPNAME);
-		MessageRouter router = (MessageRouter) Components.get(MessageRouter.COMPNAME);
+		Bootstrap connector = ctx.get(Bootstrap.class);
+		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
+		MessageRouter router = ctx.get(MessageRouter.class);
 
 		JoinRequest req = new JoinRequest(connector.getLocalNodeId(), connector.getJoinData());
 
@@ -160,7 +168,8 @@ class OverlayConnector {
 			public void onSuccess(Message joinAns) {
 				// TODO: check join answer with topology plugin
 				l.info("Joining to RELOAD overlay completed.");
-				overlayConnFut.set(new Overlay());
+				ctx.set(Overlay.class, overlay);
+				overlayConnFut.set(overlay);
 			};
 
 			@Override

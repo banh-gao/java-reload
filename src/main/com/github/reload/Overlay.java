@@ -1,18 +1,17 @@
 package com.github.reload;
 
 import org.apache.log4j.PropertyConfigurator;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.ServiceIdentifier;
+import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.ComponentsContext.ServiceIdentifier;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 
 /**
  * Represents the RELOAD overlay where the local node is connected to
  * 
  */
-@Component(Overlay.COMPNAME)
+@Component(Overlay.class)
 public class Overlay {
-
-	public static final String COMPNAME = "com.github.reload.Overlay";
 
 	public static final String LIB_COMPANY = "zeroDenial";
 	public static final String LIB_VERSION = "java-reload/0.1";
@@ -29,8 +28,14 @@ public class Overlay {
 	@Component
 	private Bootstrap bootstrap;
 
+	@Component
+	ComponentsContext ctx;
+
+	Overlay() {
+	}
+
 	public <T> T getService(ServiceIdentifier<T> serviceId) {
-		return Components.getService(serviceId);
+		return ctx.getService(serviceId);
 	}
 
 	/**
@@ -39,7 +44,7 @@ public class Overlay {
 	 * instance will fail.
 	 */
 	public void leave() {
-		Components.deinitComponents();
+		ctx.stopComponents();
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -19,10 +20,12 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
-import com.github.reload.Components.Component;
-import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.components.ComponentsRepository;
+import com.github.reload.components.ComponentsRepository.Component;
+import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.crypto.X509CertificateParser;
 import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
@@ -31,24 +34,26 @@ import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.routing.RoutingTable;
 
-@Component(Bootstrap.COMPNAME)
+@Component(Bootstrap.class)
 public class TestBootstrap extends Bootstrap {
+
+	public static InetSocketAddress SERVER_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
 
 	public static HashAlgorithm TEST_HASH = HashAlgorithm.SHA1;
 	public static SignatureAlgorithm TEST_SIGN = SignatureAlgorithm.RSA;
 	public static NodeID TEST_NODEID = NodeID.valueOf("f16a536ca4028b661fcb864a075f3871");
 
-	public static InetSocketAddress SERVER_ADDR;
-
 	public static X509Certificate CA_CERT;
 	public static ReloadCertificate TEST_CERT;
 	public static PrivateKey TEST_KEY;
 
-	public static CryptoHelper<X509Certificate> TEST_CRYPTO;
+	public static Class<X509CryptoHelper> TEST_CRYPTO;
 
-	public TestBootstrap() throws Exception {
-		TEST_CRYPTO = new X509CryptoHelper(TEST_HASH, TEST_SIGN, TEST_HASH);
-		TEST_CERT = TEST_CRYPTO.getCertificateParser().parse(loadLocalCert("testCert.der"));
+	public TestBootstrap(Configuration conf) throws Exception {
+		super(conf);
+		X509CryptoHelper.init(TEST_HASH, TEST_SIGN, TEST_HASH);
+		TEST_CRYPTO = X509CryptoHelper.class;
+		TEST_CERT = new X509CertificateParser().parse(loadLocalCert("testCert.der"));
 		TEST_KEY = loadPrivateKey("testKey.der", SignatureAlgorithm.RSA);
 	}
 
@@ -74,9 +79,10 @@ public class TestBootstrap extends Bootstrap {
 
 	@Override
 	protected void registerComponents() {
-		Components.register(new TestRouting());
-		Components.register(TEST_CRYPTO);
-		Components.register(new MemoryKeystore<X509Certificate>(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT)));
+		ComponentsRepository.register(TestRouting.class);
+		ComponentsRepository.register(TEST_CRYPTO);
+		ComponentsRepository.register(MemoryKeystore.class);
+		MemoryKeystore.init(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT));
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
@@ -110,7 +116,7 @@ public class TestBootstrap extends Bootstrap {
 		return keyFactory.generatePrivate(ks);
 	}
 
-	@Component(RoutingTable.COMPNAME)
+	@Component(RoutingTable.class)
 	public static class TestRouting implements RoutingTable {
 
 		@Override

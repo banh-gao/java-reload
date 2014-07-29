@@ -2,7 +2,6 @@ package com.github.reload.routing;
 
 import java.util.Collection;
 import java.util.List;
-import com.github.reload.Components.Component;
 import com.github.reload.InitializationException;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Message;
@@ -18,10 +17,7 @@ import com.github.reload.storage.encoders.StoreKindData;
  * the local peer
  * 
  */
-@Component(TopologyPlugin.COMPNAME)
 public interface TopologyPlugin {
-
-	public static final String COMPNAME = "com.github.reload.routing.TopologyPlugin";
 
 	/**
 	 * @return the length in bytes of resource identifiers used by this plugin

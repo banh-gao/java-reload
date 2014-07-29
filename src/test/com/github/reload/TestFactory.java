@@ -12,7 +12,7 @@ public class TestFactory extends BootstrapFactory {
 	@Override
 	protected Bootstrap implCreateBootstrap(Configuration conf) {
 		try {
-			return new TestBootstrap();
+			return new TestBootstrap(conf);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

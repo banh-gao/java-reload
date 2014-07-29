@@ -17,7 +17,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashSet;
 import java.util.Set;
 import javax.naming.ConfigurationException;
-import com.github.reload.Components.Component;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;

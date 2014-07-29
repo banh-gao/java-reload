@@ -5,8 +5,8 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.MessageHandler;
+import com.github.reload.components.ComponentsRepository.Component;
+import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
@@ -31,10 +31,8 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish direct connections to other peers using attach messages
  */
-@Component(AttachConnector.COMPNAME)
+@Component(AttachConnector.class)
 public class AttachConnector {
-
-	public static final String COMPNAME = "com.github.reload.net.connections.AttachConnector";
 
 	private static final Logger l = Logger.getRootLogger();
 

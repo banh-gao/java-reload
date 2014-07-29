@@ -1,8 +1,8 @@
 package com.github.reload.net.encoders;
 
 import com.github.reload.Bootstrap;
-import com.github.reload.Components.Component;
 import com.github.reload.Overlay;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.content.Content;
@@ -11,10 +11,8 @@ import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.Header.Builder;
 import com.github.reload.net.encoders.header.NodeID;
 
-@Component(MessageBuilder.COMPNAME)
+@Component(MessageBuilder.class)
 public class MessageBuilder {
-
-	public static final String COMPNAME = "com.github.reload.net.encoders.MessageBuilder";
 
 	@Component
 	private Configuration conf;

@@ -13,8 +13,7 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import com.github.reload.Components;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.FramedMessageCodec;
@@ -27,30 +26,28 @@ import com.github.reload.net.stack.ReloadStack;
 
 public class UDPReloadStackBuilder {
 
-	private final Configuration conf;
 	private final ChannelHandler msgHandler;
 
 	private final AbstractBootstrap<?, ?> bootstrap;
-	private final CryptoHelper<?> cryptoHelper;
+	private final ComponentsContext ctx;
 	private InetSocketAddress localAddress;
 	private OverlayLinkType linkType;
 
-	public static UDPReloadStackBuilder newClientBuilder(ChannelHandler msgHandler) {
+	public static UDPReloadStackBuilder newClientBuilder(ComponentsContext ctx, ChannelHandler msgHandler) {
 		Bootstrap b = new Bootstrap();
 		b.channel(NioDatagramChannel.class);
-		return new UDPReloadStackBuilder(msgHandler, b, false);
+		return new UDPReloadStackBuilder(ctx, msgHandler, b, false);
 	}
 
-	public static UDPReloadStackBuilder newServerBuilder(ChannelHandler msgHandler) {
+	public static UDPReloadStackBuilder newServerBuilder(ComponentsContext ctx, ChannelHandler msgHandler) {
 		final Bootstrap b = new Bootstrap();
 		b.channel(NioDatagramChannel.class);
-		return new UDPReloadStackBuilder(msgHandler, b, true);
+		return new UDPReloadStackBuilder(ctx, msgHandler, b, true);
 	}
 
-	protected <T extends AbstractBootstrap<T, ? extends Channel>> UDPReloadStackBuilder(ChannelHandler msgHandler, T bootstrap, boolean isServer) {
+	protected <T extends AbstractBootstrap<T, ? extends Channel>> UDPReloadStackBuilder(ComponentsContext ctx, ChannelHandler msgHandler, T bootstrap, boolean isServer) {
 		this.bootstrap = bootstrap;
-		this.conf = (Configuration) Components.get(Configuration.COMPNAME);
-		this.cryptoHelper = (CryptoHelper<?>) Components.get(CryptoHelper.COMPNAME);
+		this.ctx = ctx;
 		this.msgHandler = msgHandler;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		bootstrap.group(workerGroup);
@@ -98,16 +95,16 @@ public class UDPReloadStackBuilder {
 				pipeline.addLast(ReloadStack.CODEC_FRAME, new FramedMessageCodec());
 
 				// Codec for RELOAD forwarding header
-				pipeline.addLast(ReloadStack.DECODER_HEADER, new MessageHeaderDecoder(conf));
+				pipeline.addLast(ReloadStack.DECODER_HEADER, new MessageHeaderDecoder(ctx.get(Configuration.class)));
 
 				// Decoder for message payload (content + security block)
-				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(conf));
+				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(ctx.get(Configuration.class)));
 
-				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator((CryptoHelper<Certificate>) cryptoHelper));
+				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator(ctx.get(CryptoHelper.class)));
 
 				// Encorder for message entire outgoing message, also
 				// responsible for message signature generation
-				pipeline.addLast(ReloadStack.ENCODER_MESSAGE, new MessageEncoder(conf));
+				pipeline.addLast(ReloadStack.ENCODER_MESSAGE, new MessageEncoder(ctx));
 
 				// Dispatch incoming messages on the application message bus
 				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, msgHandler);

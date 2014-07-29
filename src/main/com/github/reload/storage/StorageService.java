@@ -10,19 +10,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.Service;
-import com.github.reload.Components.ServiceIdentifier;
+import com.github.reload.components.ComponentsContext.Service;
+import com.github.reload.components.ComponentsContext.ServiceIdentifier;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkException;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.storage.encoders.ArrayModel.ArrayModelSpecifier;
+import com.github.reload.storage.encoders.DictionaryModel.DictionaryModelSpecifier;
+import com.github.reload.storage.encoders.DictionaryValue.Key;
 import com.github.reload.storage.encoders.FetchAnswer;
 import com.github.reload.storage.encoders.FetchKindResponse;
 import com.github.reload.storage.encoders.FetchRequest;
@@ -32,19 +36,14 @@ import com.github.reload.storage.encoders.StoreKindResponse;
 import com.github.reload.storage.encoders.StoreRequest;
 import com.github.reload.storage.encoders.StoredData;
 import com.github.reload.storage.encoders.StoredDataSpecifier;
-import com.github.reload.storage.encoders.ArrayModel.ArrayModelSpecifier;
-import com.github.reload.storage.encoders.DictionaryModel.DictionaryModelSpecifier;
-import com.github.reload.storage.encoders.DictionaryValue.Key;
 
 /**
  * Helps a peer to send storage requests into the overlay
  * 
  */
-@Component(StorageService.COMPNAME)
 public class StorageService {
 
-	public static final String COMPNAME = "com.github.reload.storage.StorageService";
-	public static final ServiceIdentifier<StorageService> SERVICE_ID = new ServiceIdentifier<>(COMPNAME);
+	public static final ServiceIdentifier<StorageService> SERVICE_ID = new ServiceIdentifier<StorageService>(StorageService.class);
 
 	private static final short REPLICA_NUMBER = 0;
 

@@ -9,10 +9,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
-import com.github.reload.Components;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.MessageHandler;
-import com.github.reload.Components.start;
+import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.ComponentsRepository.Component;
+import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.Message;
@@ -32,10 +31,8 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Send the outgoing messages to neighbor nodes by using the routing table
  */
-@Component(MessageRouter.COMPNAME)
+@Component(MessageRouter.class)
 public class MessageRouter {
-
-	public static final String COMPNAME = "com.github.reload.net.MessageRouter";
 
 	private final Logger l = Logger.getRootLogger();
 	private static final int REQUEST_TIMEOUT = 3000;
@@ -53,10 +50,8 @@ public class MessageRouter {
 
 	private Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
 
-	@start
-	public void compStart() {
-
-	}
+	@Component
+	private ComponentsContext ctx;
 
 	/**
 	 * Send the given request message to the destination node into the overlay.
@@ -117,6 +112,7 @@ public class MessageRouter {
 			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
 
 		for (NodeID nextHop : hops) {
+			l.debug(String.format("Sent message %s for %#x to %s through %s", message.getContent().getType(), message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop));
 			forward(message, nextHop, status);
 		}
 		return status;
@@ -139,7 +135,7 @@ public class MessageRouter {
 
 			@Override
 			public void operationComplete(final ChannelFuture future) throws Exception {
-				Components.getComponentsExecutor().execute(new Runnable() {
+				ctx.execute(new Runnable() {
 
 					@Override
 					public void run() {
@@ -180,7 +176,9 @@ public class MessageRouter {
 		@Override
 		public void run() {
 			SettableFuture<Message> future = pendingRequests.remove(transactionId);
-			future.setException(new RequestTimeoutException(String.format("Request %s times out")));
+			if (future != null) {
+				future.setException(new RequestTimeoutException(String.format("Request %#x times out", transactionId)));
+			}
 		}
 	}
 

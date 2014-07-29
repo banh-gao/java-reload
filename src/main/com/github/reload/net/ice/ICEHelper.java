@@ -11,14 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import com.github.reload.Components.Component;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
-@Component(ICEHelper.COMPNAME)
+@Component(ICEHelper.class)
 public class ICEHelper {
-
-	public static final String COMPNAME = "com.github.reload.net.ice.ICEHelper";
 
 	/**
 	 * @return the ICE candidates to be used to reach this peer

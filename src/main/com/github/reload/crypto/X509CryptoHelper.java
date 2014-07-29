@@ -18,8 +18,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.start;
+import com.github.reload.components.ComponentsContext.CompInit;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -31,30 +31,30 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * Crypto helper for X.509 certificates
  * 
  */
-@Component(CryptoHelper.COMPNAME)
+@Component(CryptoHelper.class)
 public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
-	@Component(Configuration.COMPNAME)
+	@Component
 	private Configuration conf;
 
-	@Component(Keystore.COMPNAME)
+	@Component
 	private Keystore<X509Certificate> keystore;
 
 	private SSLContext sslContext;
 
-	private final X509CertificateParser certParser;
-	private final HashAlgorithm signHashAlg;
-	private final SignatureAlgorithm signAlg;
-	private final HashAlgorithm certHashAlg;
+	private X509CertificateParser certParser = new X509CertificateParser();
+	private static HashAlgorithm signHashAlg;
+	private static SignatureAlgorithm signAlg;
+	private static HashAlgorithm certHashAlg;
 
-	public X509CryptoHelper(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
-		certParser = new X509CertificateParser();
-		this.signHashAlg = signHashAlg;
-		this.signAlg = signAlg;
-		this.certHashAlg = certHashAlg;
+	public static void init(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
+		// FIXME: set from context
+		X509CryptoHelper.signHashAlg = signHashAlg;
+		X509CryptoHelper.signAlg = signAlg;
+		X509CryptoHelper.certHashAlg = certHashAlg;
 	}
 
-	@start
+	@CompInit
 	public void init() throws Exception {
 		sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(new KeyManager[]{new X509LocalKeyManager()}, new TrustManager[]{new X509LocalTrustManager()}, new SecureRandom());

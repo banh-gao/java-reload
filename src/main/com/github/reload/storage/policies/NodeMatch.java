@@ -5,7 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import com.github.reload.Components;
+import com.github.reload.components.ComponentsRepository;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.NodeID;
@@ -36,7 +36,7 @@ public class NodeMatch extends AccessPolicy {
 	}
 
 	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity) throws AccessPolicyException {
-		CryptoHelper<?> crypto = (CryptoHelper<?>) Components.get(CryptoHelper.COMPNAME);
+		CryptoHelper<?> crypto = (CryptoHelper<?>) ComponentsRepository.get(CryptoHelper.COMPNAME);
 		ReloadCertificate storerReloadCert = crypto.getCertificate(storerIdentity);
 		if (storerReloadCert == null)
 			throw new AccessPolicyException("Unknown signer identity");
@@ -57,7 +57,7 @@ public class NodeMatch extends AccessPolicy {
 	}
 
 	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId) {
-		TopologyPlugin plugin = (TopologyPlugin) Components.get(TopologyPlugin.COMPNAME);
+		TopologyPlugin plugin = (TopologyPlugin) ComponentsRepository.get(TopologyPlugin.COMPNAME);
 		int length = plugin.getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
@@ -83,7 +83,7 @@ public class NodeMatch extends AccessPolicy {
 	public static class NodeParamsGenerator implements AccessPolicyParamsGenerator {
 
 		public ResourceID getResourceId(NodeID storerId) {
-			TopologyPlugin plugin = (TopologyPlugin) Components.get(TopologyPlugin.COMPNAME);
+			TopologyPlugin plugin = (TopologyPlugin) ComponentsRepository.get(TopologyPlugin.COMPNAME);
 			return plugin.getResourceId(hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerId));
 		}
 	}

@@ -13,8 +13,6 @@ import com.github.reload.net.encoders.header.NodeID;
  */
 public interface Keystore<T extends Certificate> {
 
-	public static final String COMPNAME = "com.github.reload.crypto.Keystore";
-
 	/**
 	 * @return the local certificate used by the local node for overlay
 	 *         operations

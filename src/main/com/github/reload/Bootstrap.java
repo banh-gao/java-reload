@@ -1,7 +1,9 @@
 package com.github.reload;
 
 import java.net.InetSocketAddress;
-import com.github.reload.Components.Component;
+import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.ComponentsRepository;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.AttachConnector;
@@ -17,14 +19,17 @@ import com.google.common.util.concurrent.ListenableFuture;
  * local peer to operate with a specific overlay instance
  * 
  */
-@Component(Bootstrap.COMPNAME)
 public abstract class Bootstrap {
 
-	public static final String COMPNAME = "com.github.reload.Bootstrap";
+	private final Configuration conf;
 	private InetSocketAddress localAddr;
 	private boolean isOverlayInitiator;
 	private boolean isClientMode = false;
 	private NodeID localNodeId;
+
+	public Bootstrap(Configuration conf) {
+		this.conf = conf;
+	}
 
 	/**
 	 * @return the data to be send in the join request
@@ -104,18 +109,22 @@ public abstract class Bootstrap {
 	 *             if some network error occurs
 	 */
 	public final ListenableFuture<Overlay> connect() {
-		// TODO: enable when the instance raw xml extraction works
-		// conf.verify(getCryptoHelper());
-
-		Components.register(this);
-		Components.register(new MessageBuilder());
-		Components.register(new ConnectionManager());
-		Components.register(new AttachConnector());
-		Components.register(new ICEHelper());
-		Components.register(new MessageRouter());
+		ComponentsRepository.register(MessageBuilder.class);
+		ComponentsRepository.register(ConnectionManager.class);
+		ComponentsRepository.register(AttachConnector.class);
+		ComponentsRepository.register(ICEHelper.class);
+		ComponentsRepository.register(MessageRouter.class);
 		registerComponents();
 
-		ListenableFuture<Overlay> overlayConnFut = OverlayConnector.connectToOverlay(!isClientMode);
+		ComponentsContext ctx = ComponentsContext.getDefault();
+		ctx.set(Configuration.class, conf);
+		ctx.set(Bootstrap.class, this);
+		ctx.set(ConnectionManager.class, new ConnectionManager());
+		ctx.set(AttachConnector.class, new AttachConnector());
+
+		ctx.startComponents();
+
+		ListenableFuture<Overlay> overlayConnFut = new OverlayConnector(ctx).connectToOverlay(!isClientMode);
 
 		return overlayConnFut;
 	}

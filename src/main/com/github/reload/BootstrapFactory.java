@@ -64,7 +64,6 @@ public abstract class BootstrapFactory {
 	 */
 	public static Bootstrap createBootstrap(Configuration conf) throws NoSuchFactoryException {
 		BootstrapFactory f = getInstance(conf);
-		Components.register(conf);
 		return f.implCreateBootstrap(conf);
 	}
 

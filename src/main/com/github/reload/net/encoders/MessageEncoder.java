@@ -8,7 +8,7 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import com.github.reload.Components;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
@@ -36,7 +36,11 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	private final Codec<Content> contentCodec;
 	private final Codec<SecurityBlock> secBlockCodec;
 
-	public MessageEncoder(Configuration conf) {
+	private final ComponentsContext ctx;
+
+	public MessageEncoder(ComponentsContext ctx) {
+		this.ctx = ctx;
+		Configuration conf = ctx.get(Configuration.class);
 		hdrCodec = Codec.getCodec(Header.class, conf);
 		contentCodec = Codec.getCodec(Content.class, conf);
 		secBlockCodec = Codec.getCodec(SecurityBlock.class, conf);
@@ -68,7 +72,7 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	}
 
 	private SecurityBlock computeSecBlock(Header header, ByteBuf rawContent, ByteBufAllocator bufAlloc) throws Exception {
-		CryptoHelper<?> cryptoHelper = (CryptoHelper<?>) Components.get(CryptoHelper.COMPNAME);
+		CryptoHelper<?> cryptoHelper = ctx.get(CryptoHelper.class);
 		Signer signer = cryptoHelper.newSigner();
 
 		signer.initSign(cryptoHelper.getPrivateKey());

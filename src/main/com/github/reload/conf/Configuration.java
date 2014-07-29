@@ -6,7 +6,6 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.Components.Component;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -15,10 +14,7 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.storage.DataKind;
 import com.github.reload.storage.UnknownKindException;
 
-@Component(Configuration.COMPNAME)
 public interface Configuration {
-
-	public static final String COMPNAME = "com.github.reload.conf.Configuration";
 
 	/**
 	 * @return The overlay name

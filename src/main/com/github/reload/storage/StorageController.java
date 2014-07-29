@@ -3,9 +3,9 @@ package com.github.reload.storage;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.MessageHandler;
-import com.github.reload.Components.start;
+import com.github.reload.components.ComponentsContext.CompStart;
+import com.github.reload.components.ComponentsRepository.Component;
+import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -34,10 +34,7 @@ import com.github.reload.storage.encoders.StoreRequest;
  * management
  * 
  */
-@Component(StorageController.COMPNAME)
 class StorageController {
-
-	public static final String COMPNAME = "com.github.reload.storage.StorageController";
 
 	@Component
 	private Configuration conf;
@@ -56,7 +53,7 @@ class StorageController {
 
 	private LocalStore localStore;
 
-	@start
+	@CompStart
 	public void start() {
 		localStore = new LocalStore(plugin);
 	}

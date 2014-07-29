@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLEngine;
-import com.github.reload.Components.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -23,10 +22,7 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * node
  * 
  */
-@Component(CryptoHelper.COMPNAME)
 public abstract class CryptoHelper<T extends Certificate> {
-
-	public static final String COMPNAME = "com.github.reload.crypto.CryptoHelper";
 
 	/**
 	 * The hashing algorithm of the overlay

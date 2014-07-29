@@ -13,10 +13,11 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
-import com.github.reload.Components;
-import com.github.reload.Components.Component;
-import com.github.reload.Components.start;
-import com.github.reload.Components.stop;
+import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.ComponentsContext.CompInit;
+import com.github.reload.components.ComponentsContext.CompStop;
+import com.github.reload.components.ComponentsContext.CompStart;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -36,10 +37,8 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish and manage connections for all neighbor nodes
  */
-@Component(ConnectionManager.COMPNAME)
+@Component(ConnectionManager.class)
 public class ConnectionManager {
-
-	public static final String COMPNAME = "com.github.reload.net.connections.ConnectionManager";
 
 	private static final Logger l = Logger.getRootLogger();
 	private static final OverlayLinkType SERVER_PROTO = OverlayLinkType.TLS_TCP_FH_NO_ICE;
@@ -56,28 +55,32 @@ public class ConnectionManager {
 	@Component
 	private MessageBuilder msgBuilder;
 
+	@Component
+	private ComponentsContext ctx;
+
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
-	private final MessageDispatcher msgDispatcher;
-	private final ServerStatusHandler serverStatusHandler;
+	private MessageDispatcher msgDispatcher;
+	private ServerStatusHandler serverStatusHandler;
 
 	private ReloadStack attachServer;
 
-	public ConnectionManager() {
-		msgDispatcher = new MessageDispatcher();
+	@CompInit
+	private void init() {
+		msgDispatcher = new MessageDispatcher(ctx);
 		serverStatusHandler = new ServerStatusHandler(this);
 	}
 
-	@start
+	@CompStart
 	private void startServer() throws Exception {
-		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(msgDispatcher, serverStatusHandler);
+		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
 		b.setLocalAddress(connector.getLocalAddr());
 		b.setLinkType(SERVER_PROTO);
 		attachServer = b.buildStack();
 		l.info(String.format("Server started at %s", attachServer.getChannel().localAddress()));
 	}
 
-	@stop
+	@CompStop
 	private void shutdown() {
 		attachServer.shutdown();
 		for (Connection c : connections.values()) {
@@ -104,7 +107,7 @@ public class ConnectionManager {
 		final SettableFuture<Connection> outcome = SettableFuture.create();
 
 		try {
-			ReloadStackBuilder b = ReloadStackBuilder.newClientBuilder(msgDispatcher);
+			ReloadStackBuilder b = ReloadStackBuilder.newClientBuilder(ctx, msgDispatcher);
 			b.setLinkType(linkType);
 			stack = b.buildStack();
 		} catch (Exception e) {
@@ -129,7 +132,7 @@ public class ConnectionManager {
 
 						public void operationComplete(Future<Channel> future) throws Exception {
 
-							Components.getComponentsExecutor().execute(new Runnable() {
+							ctx.execute(new Runnable() {
 
 								@Override
 								public void run() {
@@ -166,7 +169,7 @@ public class ConnectionManager {
 		handshakeFuture.addListener(new FutureListener<Channel>() {
 
 			public void operationComplete(final Future<Channel> future) throws Exception {
-				Components.getComponentsExecutor().execute(new Runnable() {
+				ctx.execute(new Runnable() {
 
 					@Override
 					public void run() {
