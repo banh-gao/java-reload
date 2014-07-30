@@ -2,7 +2,6 @@ package com.github.reload;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import com.github.reload.components.ComponentsRepository;
 import com.github.reload.net.encoders.header.NodeID;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -15,8 +14,6 @@ public abstract class APITest {
 	@BeforeClass
 	public static void init() throws Exception {
 		BootstrapFactory.register(new TestFactory());
-
-		ComponentsRepository.register(TestConfiguration.class);
 
 		Bootstrap b = BootstrapFactory.createBootstrap(new TestConfiguration());
 

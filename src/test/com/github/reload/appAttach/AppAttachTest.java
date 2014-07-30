@@ -20,6 +20,9 @@ public class AppAttachTest extends APITest {
 
 		srv.registerApplicativeServer(TEST_PORT);
 
+		for (int i = 0; i < 100; i++)
+			srv.requestApplicationAddress(new DestinationList(TEST_NODEID), TEST_PORT);
+
 		ListenableFuture<InetSocketAddress> addrFut = srv.requestApplicationAddress(new DestinationList(TEST_NODEID), TEST_PORT);
 
 		Assert.assertEquals(TEST_PORT, addrFut.get().getPort());
