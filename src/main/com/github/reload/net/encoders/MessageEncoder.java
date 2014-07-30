@@ -84,6 +84,8 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 
 		signer.update(signedDataBuf);
 
+		signedDataBuf.release();
+
 		Signature signature = signer.sign();
 
 		List<GenericCertificate> gCerts = new ArrayList<GenericCertificate>();

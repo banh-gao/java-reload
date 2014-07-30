@@ -85,7 +85,11 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 		Signature sign = msg.getSecBlock().getSignature();
 
-		if (!sign.verify(signedData, peerCert.getOriginalCertificate().getPublicKey()))
+		if (!sign.verify(signedData, peerCert.getOriginalCertificate().getPublicKey())) {
+			signedData.release();
 			throw new SignatureException("Invalid message signature");
+		}
+
+		signedData.release();
 	}
 }
