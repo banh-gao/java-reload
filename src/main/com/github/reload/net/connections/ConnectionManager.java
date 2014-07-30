@@ -14,7 +14,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompInit;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
 import com.github.reload.components.ComponentsRepository.Component;
@@ -65,14 +64,10 @@ public class ConnectionManager {
 
 	private ReloadStack attachServer;
 
-	@CompInit
-	private void init() {
+	@CompStart
+	private void start() throws Exception {
 		msgDispatcher = new MessageDispatcher(ctx);
 		serverStatusHandler = new ServerStatusHandler(this);
-	}
-
-	@CompStart
-	private void startServer() throws Exception {
 		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
 		b.setLocalAddress(connector.getLocalAddr());
 		b.setLinkType(SERVER_PROTO);

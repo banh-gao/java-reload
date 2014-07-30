@@ -79,7 +79,7 @@ public class TestBootstrap extends Bootstrap {
 
 	@Override
 	protected void registerComponents() {
-		ComponentsRepository.register(TestRouting.class);
+		ComponentsRepository.register(TestPlugin.class);
 		ComponentsRepository.register(X509CryptoHelper.class);
 		ComponentsRepository.register(MemoryKeystore.class);
 		MemoryKeystore.init(localCert, localKey);

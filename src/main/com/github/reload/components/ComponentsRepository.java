@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import com.google.common.collect.Maps;
 
 /**
@@ -13,7 +14,7 @@ import com.google.common.collect.Maps;
  */
 public class ComponentsRepository {
 
-	private static final Map<Class<?>, Class<?>> components = Maps.newLinkedHashMap();
+	private static final Map<Class<?>, Class<?>> components = Maps.newConcurrentMap();
 
 	private static ComponentsRepository instance;
 
@@ -68,6 +69,8 @@ public class ComponentsRepository {
 	public <T> T newComponent(Class<T> compBaseClazz) {
 		@SuppressWarnings("unchecked")
 		Class<? extends T> compClazz = (Class<? extends T>) components.get(compBaseClazz);
+		if (compClazz == null)
+			throw new NoSuchElementException(String.format("No registered component provides %s", compBaseClazz.getCanonicalName()));
 		try {
 			@SuppressWarnings("unchecked")
 			Constructor<T> constructor = (Constructor<T>) compClazz.getDeclaredConstructor();

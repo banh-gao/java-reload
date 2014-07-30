@@ -18,7 +18,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
-import com.github.reload.components.ComponentsContext.CompInit;
+import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
@@ -54,8 +54,8 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 		X509CryptoHelper.certHashAlg = certHashAlg;
 	}
 
-	@CompInit
-	public void init() throws Exception {
+	@CompStart
+	public void start() throws Exception {
 		sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(new KeyManager[]{new X509LocalKeyManager()}, new TrustManager[]{new X509LocalTrustManager()}, new SecureRandom());
 	}

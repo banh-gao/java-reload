@@ -9,11 +9,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class MultiNodeTest {
 
-	public static final int NUM_NODES = 5;
+	public static final int NUM_NODES = 3;
 
 	public static Overlay[] overlays;
-
-	public static Overlay overlay;
 
 	@Test
 	public void init() throws Exception {

@@ -9,9 +9,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.encoders.Message;
 import com.google.common.collect.ClassToInstanceMap;
@@ -20,20 +20,38 @@ import com.google.common.collect.MutableClassToInstanceMap;
 
 public class ComponentsContext {
 
-	private static final Logger l = Logger.getRootLogger();
-
 	private final ComponentsRepository repo;
 
-	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create();
+	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(Maps.<Class<? extends Object>, Object>newConcurrentMap());
 
-	private final Map<Class<?>, CompStatus> componentsStatus = Maps.newHashMap();
+	private final Map<Class<?>, Integer> componentsStatus = Maps.newConcurrentMap();
 
 	private final MessageHandlersManager msgHandlerMgr;
 
 	private Executor defaultExecutor = Executors.newSingleThreadExecutor();
 
+	private static final int STATUS_LOADED = 1;
+	private static final int STATUS_STARTED = 2;
+	private static final int STATUS_STOPPED = 3;
+	private static final int STATUS_UNLOADED = 4;
+
 	public static ComponentsContext newInstance() {
 		return new ComponentsContext();
+	}
+
+	private Class<? extends Annotation> toAnnotation(int status) {
+		switch (status) {
+			case STATUS_LOADED :
+				return CompLoaded.class;
+			case STATUS_STARTED :
+				return CompStart.class;
+			case STATUS_STOPPED :
+				return CompStop.class;
+			case STATUS_UNLOADED :
+				return CompUnloaded.class;
+		}
+
+		throw new IllegalStateException();
 	}
 
 	private ComponentsContext() {
@@ -43,15 +61,15 @@ public class ComponentsContext {
 
 	public <T> void set(Class<T> compBaseClazz, T comp) {
 		loadedComponents.put(compBaseClazz, comp);
-		componentsStatus.put(compBaseClazz, CompStatus.LOADED);
+		componentsStatus.put(compBaseClazz, STATUS_LOADED);
+		setComponentStatus(compBaseClazz, STATUS_LOADED);
 
 		injectComponents(comp);
-		setComponentStatus(compBaseClazz, CompStatus.INITIALIZED);
 	}
 
-	private void setComponentStatus(Class<?> compBaseClazz, CompStatus status) {
+	private void setComponentStatus(Class<?> compBaseClazz, int status) {
 
-		Class<? extends Annotation> annotation = status.statusAnnotation;
+		Class<? extends Annotation> annotation = toAnnotation(status);
 
 		Object c = get(compBaseClazz);
 
@@ -60,6 +78,7 @@ public class ComponentsContext {
 				try {
 					m.setAccessible(true);
 					m.invoke(c);
+					componentsStatus.put(compBaseClazz, status);
 				} catch (IllegalArgumentException | IllegalAccessException
 						| InvocationTargetException e) {
 					e.printStackTrace();
@@ -68,7 +87,7 @@ public class ComponentsContext {
 		}
 	}
 
-	private CompStatus getComponentStatus(Class<?> compBaseClazz) {
+	private int getComponentStatus(Class<?> compBaseClazz) {
 		return componentsStatus.get(compBaseClazz);
 	}
 
@@ -84,10 +103,10 @@ public class ComponentsContext {
 	public boolean startComponent(Class<?> compBaseClazz) {
 		Object cmp = get(compBaseClazz);
 
-		if (getComponentStatus(compBaseClazz) != CompStatus.LOADED)
+		if (getComponentStatus(compBaseClazz) >= STATUS_STARTED)
 			return false;
 
-		setComponentStatus(compBaseClazz, CompStatus.STARTED);
+		setComponentStatus(compBaseClazz, STATUS_STARTED);
 		msgHandlerMgr.registerMessageHandler(cmp);
 		return true;
 	}
@@ -99,11 +118,11 @@ public class ComponentsContext {
 	}
 
 	public boolean stopComponent(Class<?> compBaseClazz) {
-		if (getComponentStatus(compBaseClazz) != CompStatus.STARTED)
+		if (getComponentStatus(compBaseClazz) >= STATUS_STOPPED)
 			return false;
 
 		Object cmp = get(compBaseClazz);
-		setComponentStatus(compBaseClazz, CompStatus.STOPPED);
+		setComponentStatus(compBaseClazz, STATUS_STOPPED);
 		msgHandlerMgr.unregisterMessageHandler(cmp);
 		return true;
 	}
@@ -117,7 +136,7 @@ public class ComponentsContext {
 		stopComponent(compBaseClazz);
 		loadedComponents.remove(compBaseClazz);
 		componentsStatus.remove(compBaseClazz);
-		setComponentStatus(compBaseClazz, CompStatus.UNLOADED);
+		setComponentStatus(compBaseClazz, STATUS_UNLOADED);
 	}
 
 	public void execute(Runnable command) {
@@ -138,20 +157,30 @@ public class ComponentsContext {
 		for (Field f : c.getClass().getDeclaredFields()) {
 			Component cmp = f.getAnnotation(Component.class);
 			if (cmp != null) {
+
+				f.setAccessible(true);
+
+				Class<?> compBaseClazz = f.getType();
+
+				Object obj = null;
+
 				try {
-					f.setAccessible(true);
-
-					Class<?> compBaseClazz = f.getType();
-
-					Object obj = (compBaseClazz.equals(this.getClass())) ? this : get(compBaseClazz);
-
-					if (obj != null)
-						f.set(c, obj);
-					else
-						l.warn(String.format("Missing component %s required by %s", compBaseClazz.getCanonicalName(), c.getClass().getCanonicalName()));
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
+					obj = (compBaseClazz.equals(this.getClass())) ? this : get(compBaseClazz);
+				} catch (NoSuchElementException e) {
+					// Checked later
 				}
+
+				if (obj != null)
+					try {
+						f.set(c, obj);
+						if (!compBaseClazz.equals(this.getClass()))
+							startComponent(compBaseClazz);
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+				else
+					throw new IllegalStateException(String.format("Missing component %s required by %s", compBaseClazz.getCanonicalName(), c.getClass().getCanonicalName()));
+
 			}
 		}
 	}
@@ -163,20 +192,6 @@ public class ComponentsContext {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	public @interface CompLoaded {
-
-	}
-
-	/**
-	 * The annotated method will be called when initialization has to take
-	 * place.
-	 * Also at this point all the component fields annotated with
-	 * {@link Component} have been injected.
-	 * Note than at this point some injected components may yet still not have
-	 * been initialized.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface CompInit {
 
 	}
 
@@ -236,8 +251,6 @@ public class ComponentsContext {
 		T getService(ComponentsContext ctx) {
 			Object cmp = ctx.get(compBaseClazz);
 
-			ctx.startComponent(compBaseClazz);
-
 			for (Method m : cmp.getClass().getDeclaredMethods()) {
 				if (!m.isAnnotationPresent(Service.class))
 					continue;
@@ -286,19 +299,5 @@ public class ComponentsContext {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	public @interface Service {
-	}
-
-	private enum CompStatus {
-		LOADED(CompLoaded.class),
-		INITIALIZED(CompInit.class),
-		STARTED(CompStart.class),
-		STOPPED(CompStop.class),
-		UNLOADED(CompUnloaded.class);
-
-		final Class<? extends Annotation> statusAnnotation;
-
-		private CompStatus(Class<? extends Annotation> statusAnnotation) {
-			this.statusAnnotation = statusAnnotation;
-		}
 	}
 }

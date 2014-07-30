@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
@@ -24,6 +25,7 @@ import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
+import com.github.reload.routing.TopologyPlugin;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -45,13 +47,17 @@ public class MessageRouter {
 	@Component
 	private MessageBuilder msgBuilder;
 
-	@Component
 	private RoutingTable routingTable;
 
 	private Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
 
 	@Component
 	private ComponentsContext ctx;
+
+	@CompStart
+	private void start() {
+		routingTable = ctx.get(TopologyPlugin.class).getRoutingTable();
+	}
 
 	/**
 	 * Send the given request message to the destination node into the overlay.

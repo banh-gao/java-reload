@@ -182,7 +182,6 @@ public class AttachConnector {
 		AttachMessage.Builder b = new AttachMessage.Builder();
 		b.candidates(iceHelper.getCandidates(connMgr.getServerAddress()));
 		AttachMessage attachAnswer = b.buildAnswer();
-
 		msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), attachAnswer));
 	}
 

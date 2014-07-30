@@ -1,15 +1,10 @@
 package com.github.reload.routing;
 
 import java.util.Collection;
-import java.util.List;
-import com.github.reload.InitializationException;
-import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.storage.encoders.StoreKindData;
 
 /**
  * The algorithm that performs the resource based routing and controls the
@@ -38,22 +33,6 @@ public interface TopologyPlugin {
 	 * @return the resource id used by the topology algorithm in the overlay
 	 */
 	public ResourceID getResourceId(byte[] resourceIdentifier);
-
-	/**
-	 * Init the topology plugin with the given context
-	 * 
-	 * @param context
-	 * 
-	 * @throws InitializationException
-	 */
-	public void init(Configuration conf) throws InitializationException;
-
-	/**
-	 * Stop the topology plugin agent, this may be used to disconnect neighbors
-	 * and deallocate system resources. This call must return only when the
-	 * topology plugin has been completely stopped and deallocated.
-	 */
-	public void stop();
 
 	/**
 	 * @param destination
@@ -96,21 +75,6 @@ public interface TopologyPlugin {
 	public void onTransmissionFailed(NodeID node);
 
 	/**
-	 * Called when new data are stored, the implementation may replicate the
-	 * given data to other nodes that must be returned.
-	 * The effective data replication should be executed in a separate thread
-	 * since the returned node list needs to be reported back in the store
-	 * answer.
-	 * 
-	 * @param data
-	 *            the resourceId of the data
-	 * @param data
-	 *            the data to be replicated
-	 * @return the id of the nodes where the data will be replicated
-	 */
-	public List<NodeID> onReplicateData(ResourceID resourceId, StoreKindData data);
-
-	/**
 	 * 
 	 * @return The routing table associated to the given local peer node-id
 	 */
@@ -135,5 +99,5 @@ public interface TopologyPlugin {
 	 */
 	public PathCompressor getPathCompressor();
 
-	public boolean isThisNodeValidReplicaFor(Message requestMessage);
+	int getDistance(RoutableID source, RoutableID dest);
 }
