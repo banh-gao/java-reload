@@ -35,7 +35,7 @@ import com.google.common.util.concurrent.SettableFuture;
 public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
-	private static final int REQUEST_TIMEOUT = 3000;
+	private static final int REQUEST_TIMEOUT = 5000;
 
 	private final ScheduledExecutorService expiredRequestsRemover = Executors.newScheduledThreadPool(1);
 
