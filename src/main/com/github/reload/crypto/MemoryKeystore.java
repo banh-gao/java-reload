@@ -28,11 +28,11 @@ public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 	private static ReloadCertificate localCert;
 	private static Map<NodeID, ReloadCertificate> storedCerts;
 
-	public static void init(ReloadCertificate localCert, PrivateKey privateKey, Map<NodeID, ReloadCertificate> storedCerts) {
+	public static void init(ReloadCertificate localCert, PrivateKey privateKey) {
 		// FIXME: derive from context
 		MemoryKeystore.privateKey = privateKey;
 		MemoryKeystore.localCert = localCert;
-		MemoryKeystore.storedCerts = new HashMap<NodeID, ReloadCertificate>(storedCerts);
+		MemoryKeystore.storedCerts = new HashMap<NodeID, ReloadCertificate>();
 	}
 
 	@Override

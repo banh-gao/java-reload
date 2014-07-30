@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.cert.Certificate;
@@ -32,6 +33,8 @@ import com.github.reload.storage.UnknownKindException;
  */
 @Component(Configuration.class)
 public class TestConfiguration implements Configuration {
+
+	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
 
 	String instanceName;
 	int sequence;
@@ -61,14 +64,13 @@ public class TestConfiguration implements Configuration {
 	private ReloadCertificate rootCert;
 
 	public TestConfiguration() throws Exception {
-		Certificate CA_CERT = (X509Certificate) loadLocalCert("CAcert.der");
-		rootCerts = Collections.singletonList(CA_CERT);
+		rootCerts = Collections.singletonList((X509Certificate) loadLocalCert("CAcert.der"));
 		instanceName = "testOverlay.com";
 		maxMessageSize = 5000;
 		initialTTL = 6;
 		noICE = true;
 		linkProtocols = Collections.singletonList("TLS");
-		bootstrapNodes = Collections.singleton(TestBootstrap.SERVER_ADDR);
+		bootstrapNodes = Collections.singleton(BOOTSTRAP_ADDR);
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {

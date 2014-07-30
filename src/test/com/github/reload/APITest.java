@@ -15,11 +15,13 @@ public abstract class APITest {
 	public static void init() throws Exception {
 		BootstrapFactory.register(new TestFactory());
 
-		Bootstrap b = BootstrapFactory.createBootstrap(new TestConfiguration());
+		TestBootstrap b = (TestBootstrap) BootstrapFactory.createBootstrap(new TestConfiguration());
 
-		b.setLocalAddress(TestBootstrap.SERVER_ADDR);
+		b.setLocalAddress(TestConfiguration.BOOTSTRAP_ADDR);
 		b.setLocalNodeId(TEST_NODEID);
 		b.setClientMode(true);
+		b.setLocalCert("testCert.der");
+		b.setLocalKey("testKey.der");
 
 		ListenableFuture<Overlay> ovrFut = b.connect();
 		overlay = ovrFut.get();

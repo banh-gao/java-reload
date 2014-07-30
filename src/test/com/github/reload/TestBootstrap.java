@@ -5,15 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -37,24 +34,23 @@ import com.github.reload.routing.RoutingTable;
 @Component(Bootstrap.class)
 public class TestBootstrap extends Bootstrap {
 
-	public static InetSocketAddress SERVER_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
-
 	public static HashAlgorithm TEST_HASH = HashAlgorithm.SHA1;
 	public static SignatureAlgorithm TEST_SIGN = SignatureAlgorithm.RSA;
-	public static NodeID TEST_NODEID = NodeID.valueOf("f16a536ca4028b661fcb864a075f3871");
 
-	public static X509Certificate CA_CERT;
-	public static ReloadCertificate TEST_CERT;
-	public static PrivateKey TEST_KEY;
-
-	public static Class<X509CryptoHelper> TEST_CRYPTO;
+	private ReloadCertificate localCert;
+	public PrivateKey localKey;
 
 	public TestBootstrap(Configuration conf) throws Exception {
 		super(conf);
 		X509CryptoHelper.init(TEST_HASH, TEST_SIGN, TEST_HASH);
-		TEST_CRYPTO = X509CryptoHelper.class;
-		TEST_CERT = new X509CertificateParser().parse(loadLocalCert("testCert.der"));
-		TEST_KEY = loadPrivateKey("testKey.der", SignatureAlgorithm.RSA);
+	}
+
+	public void setLocalCert(String certPath) throws CertificateException, FileNotFoundException {
+		localCert = new X509CertificateParser().parse(loadLocalCert(certPath));
+	}
+
+	public void setLocalKey(String keyPath) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+		localKey = loadPrivateKey(keyPath, SignatureAlgorithm.RSA);
 	}
 
 	@Override
@@ -80,9 +76,9 @@ public class TestBootstrap extends Bootstrap {
 	@Override
 	protected void registerComponents() {
 		ComponentsRepository.register(TestRouting.class);
-		ComponentsRepository.register(TEST_CRYPTO);
+		ComponentsRepository.register(X509CryptoHelper.class);
 		ComponentsRepository.register(MemoryKeystore.class);
-		MemoryKeystore.init(TEST_CERT, TEST_KEY, Collections.singletonMap(TEST_NODEID, TEST_CERT));
+		MemoryKeystore.init(localCert, localKey);
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
@@ -118,6 +114,8 @@ public class TestBootstrap extends Bootstrap {
 
 	@Component(RoutingTable.class)
 	public static class TestRouting implements RoutingTable {
+
+		public static NodeID TEST_NODEID = NodeID.valueOf("f16a536ca4028b661fcb864a075f3871");
 
 		@Override
 		public Set<NodeID> getNextHops(RoutableID destination) {
