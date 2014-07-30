@@ -73,6 +73,10 @@ public class TestConfiguration implements Configuration {
 		bootstrapNodes = Collections.singleton(BOOTSTRAP_ADDR);
 	}
 
+	public void setBootstrap(InetSocketAddress bootAddr) {
+		this.bootstrapNodes = Collections.singleton(bootAddr);
+	}
+
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
 		if (localCertPath == null || !new File(localCertPath).exists())
 			throw new FileNotFoundException("Overlay certificate file not found at " + localCertPath);

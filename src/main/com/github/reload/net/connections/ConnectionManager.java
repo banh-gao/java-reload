@@ -15,8 +15,8 @@ import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompInit;
-import com.github.reload.components.ComponentsContext.CompStop;
 import com.github.reload.components.ComponentsContext.CompStart;
+import com.github.reload.components.ComponentsContext.CompStop;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
@@ -177,7 +177,7 @@ public class ConnectionManager {
 							future.cause().printStackTrace();
 						try {
 							Connection c = addConnection(new ReloadStack(channel));
-							l.debug(String.format("Connection from node %s at %s accepted", c.getNodeId(), channel.remoteAddress()));
+							l.debug(String.format("Connection from %s at %s accepted", c.getNodeId(), channel.remoteAddress()));
 						} catch (CertificateException e) {
 							l.debug(String.format("Connection from %s rejected: Invalid RELOAD certificate", channel.remoteAddress()), e);
 							return;

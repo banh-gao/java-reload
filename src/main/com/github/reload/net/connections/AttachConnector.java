@@ -61,6 +61,7 @@ public class AttachConnector {
 		if (destinationID instanceof NodeID) {
 			Connection c = connMgr.getConnection((NodeID) destinationID);
 			if (c != null) {
+				l.info(String.format("Attach to %s not performed, already connected", c.getNodeId()));
 				fut.set(c);
 				return fut;
 			}
@@ -94,6 +95,7 @@ public class AttachConnector {
 				pendingRequests.remove(req.getHeader().getTransactionId());
 				answeredRequests.remove(destinationID);
 
+				l.info(String.format("Attach to %s failed", destinationID));
 				fut.setException(t);
 			}
 		});
@@ -121,7 +123,7 @@ public class AttachConnector {
 		try {
 			remoteCandidate = iceHelper.testAndSelectCandidate(answer.getCandidates());
 
-			l.debug(String.format("Attach to " + remoteNode + " completed, remote candidate selected: %s", remoteCandidate.getSocketAddress()));
+			l.debug(String.format("Attach negotiation with " + remoteNode + " completed, selected remote candidate: %s...", remoteCandidate.getSocketAddress()));
 
 			ListenableFuture<Connection> connFut = connMgr.connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
 
@@ -158,6 +160,7 @@ public class AttachConnector {
 
 		// No pending request, just send the answer
 		if (!pendingRequests.containsKey(req.getHeader().getTransactionId())) {
+			l.debug("Attach request from " + sender + " received, sending local candidates list...");
 			sendAnswer(req);
 			return;
 		}

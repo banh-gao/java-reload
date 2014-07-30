@@ -45,8 +45,8 @@ public class TestBootstrap extends Bootstrap {
 		X509CryptoHelper.init(TEST_HASH, TEST_SIGN, TEST_HASH);
 	}
 
-	public void setLocalCert(String certPath) throws CertificateException, FileNotFoundException {
-		localCert = new X509CertificateParser().parse(loadLocalCert(certPath));
+	public void setLocalCert(ReloadCertificate localCert) {
+		this.localCert = localCert;
 	}
 
 	public void setLocalKey(String keyPath) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
@@ -71,6 +71,10 @@ public class TestBootstrap extends Bootstrap {
 	@Override
 	public int hashCode() {
 		return 0;
+	}
+
+	public static ReloadCertificate loadCert(String certPath) throws CertificateException, FileNotFoundException {
+		return new X509CertificateParser().parse(loadLocalCert(certPath));
 	}
 
 	@Override
@@ -115,16 +119,17 @@ public class TestBootstrap extends Bootstrap {
 	@Component(RoutingTable.class)
 	public static class TestRouting implements RoutingTable {
 
-		public static NodeID TEST_NODEID = NodeID.valueOf("f16a536ca4028b661fcb864a075f3871");
+		@Component
+		private Bootstrap boot;
 
 		@Override
 		public Set<NodeID> getNextHops(RoutableID destination) {
-			return Collections.singleton(TEST_NODEID);
+			return Collections.singleton(boot.getLocalNodeId());
 		}
 
 		@Override
 		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
-			return Collections.singleton(TEST_NODEID);
+			return Collections.singleton(boot.getLocalNodeId());
 		}
 
 	}

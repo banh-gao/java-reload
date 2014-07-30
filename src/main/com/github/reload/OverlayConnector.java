@@ -123,8 +123,6 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection result) {
-				l.info(String.format("Attach to admitting peer %s succeed", result.getNodeId()));
-
 				if (joinNeeded)
 					join(overlayConnFut);
 				else {
@@ -136,7 +134,6 @@ class OverlayConnector {
 			@Override
 			public void onFailure(Throwable t) {
 				overlayConnFut.setException(t);
-				l.info(String.format("Attach to admitting peer for %s failed", dest.getDestination()));
 			}
 		});
 

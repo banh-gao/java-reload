@@ -22,8 +22,6 @@ public class ComponentsContext {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private static ComponentsContext instance;
-
 	private final ComponentsRepository repo;
 
 	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create();
@@ -34,11 +32,8 @@ public class ComponentsContext {
 
 	private Executor defaultExecutor = Executors.newSingleThreadExecutor();
 
-	public static ComponentsContext getDefault() {
-		if (instance == null) {
-			instance = new ComponentsContext();
-		}
-		return instance;
+	public static ComponentsContext newInstance() {
+		return new ComponentsContext();
 	}
 
 	private ComponentsContext() {

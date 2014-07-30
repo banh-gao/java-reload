@@ -116,7 +116,7 @@ public abstract class Bootstrap {
 		ComponentsRepository.register(MessageRouter.class);
 		registerComponents();
 
-		ComponentsContext ctx = ComponentsContext.getDefault();
+		ComponentsContext ctx = ComponentsContext.newInstance();
 		ctx.set(Configuration.class, conf);
 		ctx.set(Bootstrap.class, this);
 		ctx.set(ConnectionManager.class, new ConnectionManager());
