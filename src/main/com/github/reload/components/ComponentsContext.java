@@ -63,7 +63,6 @@ public class ComponentsContext {
 
 	public <T> void set(Class<T> compBaseClazz, T comp) {
 		loadedComponents.put(compBaseClazz, comp);
-		componentsStatus.put(compBaseClazz, STATUS_LOADED);
 		setComponentStatus(compBaseClazz, STATUS_LOADED);
 
 		injectComponents(comp);
@@ -75,12 +74,13 @@ public class ComponentsContext {
 
 		Object c = get(compBaseClazz);
 
+		componentsStatus.put(compBaseClazz, status);
+
 		for (Method m : c.getClass().getDeclaredMethods()) {
 			if (m.isAnnotationPresent(annotation)) {
 				try {
 					m.setAccessible(true);
 					m.invoke(c);
-					componentsStatus.put(compBaseClazz, status);
 				} catch (IllegalArgumentException | IllegalAccessException
 						| InvocationTargetException e) {
 					e.printStackTrace();
@@ -252,6 +252,8 @@ public class ComponentsContext {
 		@SuppressWarnings("unchecked")
 		T getService(ComponentsContext ctx) {
 			Object cmp = ctx.get(compBaseClazz);
+
+			ctx.startComponent(compBaseClazz);
 
 			for (Method m : cmp.getClass().getDeclaredMethods()) {
 				if (!m.isAnnotationPresent(Service.class))
