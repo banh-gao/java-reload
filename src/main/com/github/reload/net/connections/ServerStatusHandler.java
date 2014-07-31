@@ -7,18 +7,14 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 @Sharable
 public class ServerStatusHandler extends ChannelInboundHandlerAdapter {
 
-	private ConnectionManager connMgr;
+	private final ConnectionManager mgr;
 
-	public ServerStatusHandler(ConnectionManager connectionManager) {
-		this.connMgr = connectionManager;
+	public ServerStatusHandler(ConnectionManager mgr) {
+		this.mgr = mgr;
 	}
 
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		connMgr.clientConnected(ctx.channel());
+		mgr.remoteNodeAccepted(ctx.channel());
 		super.channelRegistered(ctx);
-	}
-
-	public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-		connMgr.clientDisonnected(ctx.channel());
 	}
 }

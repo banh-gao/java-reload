@@ -90,9 +90,9 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 		signedData.writeInt(h.getOverlayHash());
 		signedData.writeLong(h.getTransactionId());
-		signedData.writeBytes(msg.rawContent);
-		msg.rawContent.release();
-		msg.rawContent = null;
+		ByteBuf rawContent = msg.getAttribute(Message.RAW_CONTENT);
+		signedData.writeBytes(rawContent);
+		rawContent.release();
 
 		Signature sign = msg.getSecBlock().getSignature();
 

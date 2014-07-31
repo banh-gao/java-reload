@@ -14,11 +14,15 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.encoders.Message;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.MutableClassToInstanceMap;
+import com.google.common.eventbus.DeadEvent;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 public class ComponentsContext {
 
@@ -29,6 +33,8 @@ public class ComponentsContext {
 	private final Map<Class<?>, Integer> componentsStatus = Maps.newLinkedHashMap();
 
 	private final MessageHandlersManager msgHandlerMgr;
+
+	private final EventBus eventBus;
 
 	private Executor defaultExecutor = Executors.newSingleThreadExecutor();
 
@@ -59,6 +65,13 @@ public class ComponentsContext {
 	private ComponentsContext() {
 		repo = ComponentsRepository.getInstance();
 		msgHandlerMgr = new MessageHandlersManager();
+		eventBus = new EventBus();
+		eventBus.register(this);
+	}
+
+	@Subscribe
+	public void handleDeadEvents(DeadEvent ev) {
+		Logger.getRootLogger().debug("Ignored event " + ev.getEvent());
 	}
 
 	public <T> void set(Class<T> compBaseClazz, T comp) {
@@ -109,6 +122,7 @@ public class ComponentsContext {
 			return false;
 
 		setComponentStatus(compBaseClazz, STATUS_STARTED);
+		eventBus.register(cmp);
 		msgHandlerMgr.registerMessageHandler(cmp);
 		return true;
 	}
@@ -131,6 +145,7 @@ public class ComponentsContext {
 		Object cmp = get(compBaseClazz);
 		setComponentStatus(compBaseClazz, STATUS_STOPPED);
 		msgHandlerMgr.unregisterMessageHandler(cmp);
+		eventBus.unregister(cmp);
 		return true;
 	}
 
@@ -153,6 +168,10 @@ public class ComponentsContext {
 				msgHandlerMgr.handle(msg);
 			}
 		});
+	}
+
+	public void postEvent(Object event) {
+		eventBus.post(event);
 	}
 
 	private void injectComponents(Object c) {

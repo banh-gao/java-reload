@@ -39,7 +39,7 @@ public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessag
 
 			outMsg.attributes.putAll(msg.attributes);
 
-			outMsg.rawContent = rawContent;
+			outMsg.setAttribute(Message.RAW_CONTENT, rawContent);
 
 			out.add(outMsg);
 			Logger.getRootLogger().trace(String.format("Message payload %#x decoded", header.getTransactionId()));

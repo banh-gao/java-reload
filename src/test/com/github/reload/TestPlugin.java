@@ -1,6 +1,5 @@
 package com.github.reload;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -8,13 +7,15 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
+import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
+import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.routing.PathCompressor;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
+import com.google.common.eventbus.Subscribe;
 
 @Component(TopologyPlugin.class)
 public class TestPlugin implements TopologyPlugin {
@@ -26,7 +27,15 @@ public class TestPlugin implements TopologyPlugin {
 
 	@CompStart
 	private void start() {
-		r.addNeighbor(boot.getLocalNodeId());
+		r.neighbors.add(boot.getLocalNodeId());
+	}
+
+	@Subscribe
+	private void handleConnectionEvent(ConnectionStatusEvent e) {
+		if (e.type == Type.ACCEPTED || e.type == Type.ESTABLISHED)
+			r.neighbors.add(e.connection.getNodeId());
+		else if (e.type == Type.CLOSED)
+			r.neighbors.remove(e.connection.getNodeId());
 	}
 
 	@Override
@@ -59,25 +68,6 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	@Override
-	public void onNeighborConnected(NodeID newNode, boolean updateRequested) {
-		r.addNeighbor(newNode);
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void onNeighborDisconnected(NodeID node) {
-		r.removeNeighbor(node);
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onTransmissionFailed(NodeID node) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public RoutingTable getRoutingTable() {
 		return r;
 	}
@@ -94,27 +84,13 @@ public class TestPlugin implements TopologyPlugin {
 		return false;
 	}
 
-	@Override
-	public PathCompressor getPathCompressor() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	private class TestRouting implements RoutingTable {
 
 		private final SortedSet<NodeID> neighbors = new TreeSet<NodeID>();
 
-		public void addNeighbor(NodeID nodeId) {
-			neighbors.add(nodeId);
-		}
-
-		public void removeNeighbor(NodeID node) {
-			neighbors.remove(node);
-		}
-
 		@Override
 		public Set<NodeID> getNextHops(RoutableID destination) {
-			return getNextHops(destination, new ArrayList<NodeID>());
+			return getNextHops(destination, Collections.<NodeID>emptyList());
 		}
 
 		@Override

@@ -7,6 +7,7 @@ import io.netty.handler.codec.CodecException;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.conf.Configuration;
+import com.github.reload.net.connections.Connection;
 import com.github.reload.net.encoders.header.Header;
 
 /**
@@ -26,7 +27,7 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 			ForwardMessage message = new ForwardMessage();
 
-			message.setAttribute(Message.PREVIOUS_HOP, ctx.channel().attr(Message.PREVIOUS_HOP).get());
+			message.setAttribute(Message.PREVIOUS_HOP, ctx.channel().attr(Connection.CONNECTION).get().getNodeId());
 
 			message.header = hdrCodec.decode(in);
 

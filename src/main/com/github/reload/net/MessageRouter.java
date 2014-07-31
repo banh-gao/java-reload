@@ -81,7 +81,7 @@ public class MessageRouter {
 		return reqFut;
 	}
 
-	@MessageHandler(value = ContentType.UNKNOWN, handleAnswers = true)
+	@MessageHandler(handleAnswers = true, value = ContentType.ERROR)
 	void handleAnswer(Message message) {
 		Long transactionId = message.getHeader().getTransactionId();
 

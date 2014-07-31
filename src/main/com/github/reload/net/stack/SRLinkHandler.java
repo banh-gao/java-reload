@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.FramedMessage;
 import com.github.reload.net.encoders.FramedMessage.FramedAck;
 import com.github.reload.net.encoders.FramedMessage.FramedData;
@@ -40,7 +41,8 @@ public class SRLinkHandler extends LinkHandler {
 	// Receiver side vars
 	private final Queue<Long> lastReceivedSeqNums;
 
-	public SRLinkHandler() {
+	public SRLinkHandler(ComponentsContext ctx) {
+		super(ctx);
 		lastReceivedSeqNums = new LinkedBlockingQueue<Long>(LAST_RCV_PACKETS_BUF_SIZE) {
 
 			@Override

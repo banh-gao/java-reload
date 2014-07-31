@@ -114,7 +114,7 @@ public class ReloadStackBuilder {
 				pipeline.addLast(ReloadStack.CODEC_FRAME, new FramedMessageCodec());
 
 				// Link handler to manage link reliability
-				pipeline.addLast(ReloadStack.HANDLER_LINK, LinkHandlerFactory.getInstance(linkType));
+				pipeline.addLast(ReloadStack.HANDLER_LINK, LinkHandlerFactory.getInstance(ctx, linkType));
 
 				// Codec for RELOAD forwarding header
 				pipeline.addLast(ReloadStack.DECODER_HEADER, new MessageHeaderDecoder(ctx.get(Configuration.class)));

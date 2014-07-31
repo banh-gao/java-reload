@@ -2,11 +2,14 @@ package com.github.reload.net.stack;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.FramedMessage;
 import com.github.reload.net.encoders.FramedMessage.FramedAck;
 import com.github.reload.net.encoders.FramedMessage.FramedData;
@@ -22,7 +25,11 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 
 	private final Map<Long, Transmission> transmissions = new LinkedHashMap<Long, Transmission>();
 
-	// TODO: handle link reliability notications to the caller
+	private final ComponentsContext compCtx;
+
+	public LinkHandler(ComponentsContext compCtx) {
+		this.compCtx = compCtx;
+	}
 
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -58,14 +65,21 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 	}
 
 	@Override
-	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+	public void write(final ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 		FramedData data = getDataFrame((ByteBuf) msg);
 		Transmission t = new Transmission();
 		t.promise = promise;
 		transmissions.put(data.getSequence(), t);
 		l.trace("Passing DATA frame " + data.getSequence() + " to lower layer...");
-		ctx.write(data);
-		// TODO: detect transmission timeout
+		ChannelFuture f = ctx.write(data);
+		f.addListener(new ChannelFutureListener() {
+
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+				// TODO: notify write error event
+			}
+		});
+		// TODO: detect transmission timeout for unacked data
 	}
 
 	/**

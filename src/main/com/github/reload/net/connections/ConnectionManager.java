@@ -20,6 +20,7 @@ import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.LeaveRequest;
@@ -30,6 +31,7 @@ import com.github.reload.net.stack.MessageDispatcher;
 import com.github.reload.net.stack.ReloadStack;
 import com.github.reload.net.stack.ReloadStackBuilder;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -139,8 +141,7 @@ public class ConnectionManager {
 										outcome.setException(e);
 										return;
 									}
-
-									l.debug("Connection to " + c.getNodeId() + " at " + remoteAddr + " completed");
+									ctx.postEvent(new ConnectionStatusEvent(Type.ESTABLISHED, c));
 									outcome.set(c);
 								}
 							});
@@ -157,7 +158,7 @@ public class ConnectionManager {
 		return outcome;
 	}
 
-	void clientConnected(final Channel channel) {
+	void remoteNodeAccepted(final Channel channel) {
 		SslHandler sslHandler = (SslHandler) channel.pipeline().get(ReloadStack.HANDLER_SSL);
 		Future<Channel> handshakeFuture = sslHandler.handshakeFuture();
 
@@ -172,7 +173,7 @@ public class ConnectionManager {
 							future.cause().printStackTrace();
 						try {
 							Connection c = addConnection(new ReloadStack(channel));
-							l.debug(String.format("Connection from %s at %s accepted", c.getNodeId(), channel.remoteAddress()));
+							ctx.postEvent(new ConnectionManager.ConnectionStatusEvent(Type.ACCEPTED, c));
 						} catch (CertificateException e) {
 							l.debug(String.format("Connection from %s rejected: Invalid RELOAD certificate", channel.remoteAddress()), e);
 							return;
@@ -203,8 +204,19 @@ public class ConnectionManager {
 		}
 	}
 
-	void clientDisonnected(Channel channel) {
-		Logger.getRootLogger().debug("Client disconnected");
+	@Subscribe
+	public void handlerConnectionEvent(ConnectionStatusEvent event) {
+		switch (event.type) {
+			case ACCEPTED :
+				l.debug(String.format("Connection from %s at %s accepted", event.connection.getNodeId(), event.connection.getStack().getChannel().remoteAddress()));
+				break;
+			case CLOSED :
+				l.debug(String.format("Connection with %s closed", event.connection.getNodeId()));
+				break;
+			case ESTABLISHED :
+				l.debug("Connection to " + event.connection.getNodeId() + " at " + event.connection.getStack().getChannel().remoteAddress() + " completed");
+				break;
+		}
 		// TODO
 	}
 
@@ -218,5 +230,21 @@ public class ConnectionManager {
 
 	public InetSocketAddress getServerAddress() {
 		return (InetSocketAddress) attachServer.getChannel().localAddress();
+	}
+
+	public static class ConnectionStatusEvent {
+
+		public enum Type {
+			ACCEPTED, ESTABLISHED, CLOSED
+		}
+
+		public final Type type;
+		public final Connection connection;
+
+		public ConnectionStatusEvent(Type type, Connection connection) {
+			this.type = type;
+			this.connection = connection;
+		}
+
 	}
 }

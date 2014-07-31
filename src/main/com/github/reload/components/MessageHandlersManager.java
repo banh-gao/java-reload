@@ -16,22 +16,8 @@ public class MessageHandlersManager {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private static final Object DEFAULT_HANDLER = new Object() {
-
-		@MessageHandler(ContentType.UNKNOWN)
-		void handlerUnknown(Message msg) {
-			if (msg.getContent().isRequest())
-				l.debug(String.format("No handler registered for message %#x of type %s", msg.getHeader().getTransactionId(), msg.getContent().getType()));
-		}
-	};
-
 	private final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private MessageHandlerMethod answerHandler;
-
-	public MessageHandlersManager() {
-		// Handler used to process messages not catched by other handlers
-		registerMessageHandler(DEFAULT_HANDLER);
-	}
 
 	public void registerMessageHandler(Object obj) {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
@@ -117,13 +103,8 @@ public class MessageHandlersManager {
 				handler = answerHandler;
 				l.debug(String.format("Processing %s message %#x with answer handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 			} else {
-				handler = messageHandlers.get(ContentType.UNKNOWN);
-				if (handler == null) {
-					l.debug(String.format("Swallowed %s message %#x", type, message.getHeader().getTransactionId()));
-					return;
-				} else {
-					l.debug(String.format("Processing %s message %#x with default handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
-				}
+				l.debug(String.format("Swallowed %s message %#x (No registered message handler)", type, message.getHeader().getTransactionId()));
+				return;
 			}
 		} else {
 			l.debug(String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));

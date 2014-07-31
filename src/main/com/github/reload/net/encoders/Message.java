@@ -19,9 +19,8 @@ public class Message {
 
 	public static final AttributeKey<NodeID> PREVIOUS_HOP = AttributeKey.valueOf("PREV_HOP");
 	public static final AttributeKey<NodeID> NEXT_HOP = AttributeKey.valueOf("NEXT_HOP");
+	public static final AttributeKey<ByteBuf> RAW_CONTENT = AttributeKey.valueOf("RAW_CONTENT");
 
-	// Used for signature validation
-	ByteBuf rawContent;
 	Header header;
 	Content content;
 	SecurityBlock secBlock;

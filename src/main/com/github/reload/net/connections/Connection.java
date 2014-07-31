@@ -6,6 +6,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.AttributeKey;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.ForwardMessage;
 import com.github.reload.net.encoders.Message;
@@ -19,6 +20,8 @@ import com.github.reload.net.stack.ReloadStack;
  */
 public class Connection {
 
+	public static final AttributeKey<Connection> CONNECTION = AttributeKey.valueOf("reloadConnection");
+
 	private final Codec<Header> hdrCodec;
 	private final NodeID nodeId;
 	private final ReloadStack stack;
@@ -27,7 +30,7 @@ public class Connection {
 		hdrCodec = Codec.getCodec(Header.class, null);
 		this.nodeId = nodeId;
 		this.stack = stack;
-		stack.getChannel().attr(Message.PREVIOUS_HOP).set(nodeId);
+		stack.getChannel().attr(CONNECTION).set(this);
 	}
 
 	/**
