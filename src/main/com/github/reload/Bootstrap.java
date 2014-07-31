@@ -1,9 +1,11 @@
 package com.github.reload;
 
 import java.net.InetSocketAddress;
+import java.security.PrivateKey;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.AttachConnector;
@@ -27,6 +29,9 @@ public abstract class Bootstrap {
 	private boolean isClientMode = false;
 	private NodeID localNodeId;
 
+	private ReloadCertificate localCert;
+	private PrivateKey localKey;
+
 	public Bootstrap(Configuration conf) {
 		this.conf = conf;
 	}
@@ -38,10 +43,26 @@ public abstract class Bootstrap {
 
 	protected abstract CertificateType getCertificateType();
 
+	public void setLocalCert(ReloadCertificate localCert) {
+		this.localCert = localCert;
+	}
+
+	public void setLocalKey(PrivateKey localKey) {
+		this.localKey = localKey;
+	}
+
+	public ReloadCertificate getLocalCert() {
+		return localCert;
+	}
+
+	public PrivateKey getLocalKey() {
+		return localKey;
+	}
+
 	/**
 	 * @return The address where the server will be listening to
 	 */
-	public InetSocketAddress getLocalAddr() {
+	public InetSocketAddress getLocalAddress() {
 		return localAddr;
 	}
 

@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.github.reload.Bootstrap;
+import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
@@ -21,18 +23,20 @@ public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 	private Configuration conf;
 
 	@Component
+	private Bootstrap bootstrap;
+
+	@Component
 	protected CryptoHelper<T> cryptoHelper;
 
-	private static PrivateKey privateKey;
+	private final Map<NodeID, ReloadCertificate> storedCerts = new HashMap<NodeID, ReloadCertificate>();
 
-	private static ReloadCertificate localCert;
-	private static Map<NodeID, ReloadCertificate> storedCerts;
+	private PrivateKey privateKey;
+	private ReloadCertificate localCert;
 
-	public static void init(ReloadCertificate localCert, PrivateKey privateKey) {
-		// FIXME: derive from context
-		MemoryKeystore.privateKey = privateKey;
-		MemoryKeystore.localCert = localCert;
-		MemoryKeystore.storedCerts = new HashMap<NodeID, ReloadCertificate>();
+	@CompStart
+	public void start() {
+		privateKey = bootstrap.getLocalKey();
+		localCert = bootstrap.getLocalCert();
 	}
 
 	@Override

@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
@@ -22,9 +24,9 @@ public class ComponentsContext {
 
 	private final ComponentsRepository repo;
 
-	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(Maps.<Class<? extends Object>, Object>newConcurrentMap());
+	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(Collections.<Class<? extends Object>, Object>synchronizedMap(new LinkedHashMap<Class<? extends Object>, Object>()));
 
-	private final Map<Class<?>, Integer> componentsStatus = Maps.newConcurrentMap();
+	private final Map<Class<?>, Integer> componentsStatus = Maps.newLinkedHashMap();
 
 	private final MessageHandlersManager msgHandlerMgr;
 
@@ -117,6 +119,11 @@ public class ComponentsContext {
 		}
 	}
 
+	public void stopComponents() {
+		for (Class<?> compBaseClazz : loadedComponents.keySet())
+			stopComponent(compBaseClazz);
+	}
+
 	public boolean stopComponent(Class<?> compBaseClazz) {
 		if (getComponentStatus(compBaseClazz) >= STATUS_STOPPED)
 			return false;
@@ -125,11 +132,6 @@ public class ComponentsContext {
 		setComponentStatus(compBaseClazz, STATUS_STOPPED);
 		msgHandlerMgr.unregisterMessageHandler(cmp);
 		return true;
-	}
-
-	public void stopComponents() {
-		for (Class<?> compBaseClazz : loadedComponents.keySet())
-			stopComponent(compBaseClazz);
 	}
 
 	public void unloadComponent(Class<?> compBaseClazz) {

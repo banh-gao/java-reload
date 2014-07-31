@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.content.ContentType;
@@ -17,19 +16,21 @@ public class MessageHandlersManager {
 
 	private static final Logger l = Logger.getRootLogger();
 
+	private static final Object DEFAULT_HANDLER = new Object() {
+
+		@MessageHandler(ContentType.UNKNOWN)
+		void handlerUnknown(Message msg) {
+			if (msg.getContent().isRequest())
+				l.debug(String.format("No handler registered for message %#x of type %s", msg.getHeader().getTransactionId(), msg.getContent().getType()));
+		}
+	};
+
 	private final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private MessageHandlerMethod answerHandler;
 
 	public MessageHandlersManager() {
 		// Handler used to process messages not catched by other handlers
-		registerMessageHandler(new Object() {
-
-			@MessageHandler(ContentType.UNKNOWN)
-			void handlerUnknown(Message msg) {
-				if (msg.getContent().isRequest())
-					l.warn(String.format("No handler registered for message %#x of type %s", msg.getHeader().getTransactionId(), msg.getContent().getType()));
-			}
-		});
+		registerMessageHandler(DEFAULT_HANDLER);
 	}
 
 	public void registerMessageHandler(Object obj) {
@@ -114,13 +115,18 @@ public class MessageHandlersManager {
 		if (handler == null) {
 			if (type.isAnswer() && answerHandler != null) {
 				handler = answerHandler;
-				l.log(Level.TRACE, String.format("Processing %s message %#x with answer handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+				l.debug(String.format("Processing %s message %#x with answer handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 			} else {
 				handler = messageHandlers.get(ContentType.UNKNOWN);
-				l.log(Level.TRACE, String.format("Processing %s message %#x with default handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+				if (handler == null) {
+					l.debug(String.format("Swallowed %s message %#x", type, message.getHeader().getTransactionId()));
+					return;
+				} else {
+					l.debug(String.format("Processing %s message %#x with default handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+				}
 			}
 		} else {
-			l.log(Level.TRACE, String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
+			l.debug(String.format("Processing %s message %#x with handler %s.%s()", type, message.getHeader().getTransactionId(), handler.obj.getClass().getCanonicalName(), handler.handler.getName()));
 		}
 
 		try {

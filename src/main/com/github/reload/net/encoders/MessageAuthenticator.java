@@ -10,6 +10,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.log4j.Logger;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.Header;
@@ -19,6 +20,8 @@ import com.github.reload.net.encoders.secBlock.Signature;
 
 public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
+	private static final Logger l = Logger.getRootLogger();
+
 	private final CryptoHelper<Certificate> cryptoHelper;
 
 	public MessageAuthenticator(CryptoHelper<Certificate> cryptoHelper) {
@@ -26,15 +29,23 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
 
-		Certificate trustedPeerCert = authenticateCertificates(msg);
+		Certificate trustedPeerCert;
+		try {
+			trustedPeerCert = authenticateCertificates(msg);
 
-		ReloadCertificate cert = authenticateSender(msg, trustedPeerCert);
+			ReloadCertificate cert = authenticateSender(msg, trustedPeerCert);
 
-		cryptoHelper.addCertificate(cert);
+			cryptoHelper.addCertificate(cert);
 
-		authenticateSignature(msg, cert, ctx.alloc());
+			authenticateSignature(msg, cert, ctx.alloc());
+
+		} catch (GeneralSecurityException e) {
+			// TODO: react to authentication failure
+			l.info(e.getMessage());
+			return;
+		}
 
 		// Authentication succeed, pass to upper layer
 		ctx.fireChannelRead(msg);
@@ -45,7 +56,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 		ReloadCertificate reloadCert = cryptoHelper.getCertificateParser().parse(trustedPeerCert);
 
 		if (!reloadCert.getNodeId().equals(untrustedSender))
-			throw new CertificateException("Untrusted sender node: Sender node-id not matching certificate node-id");
+			throw new CertificateException(String.format("Untrusted sender %s for message %#x: Sender node-id not matching certificate node-id %s", untrustedSender, msg.getHeader().getTransactionId(), reloadCert.getNodeId()));
 
 		return reloadCert;
 	}

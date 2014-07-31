@@ -69,7 +69,7 @@ public class ConnectionManager {
 		msgDispatcher = new MessageDispatcher(ctx);
 		serverStatusHandler = new ServerStatusHandler(this);
 		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
-		b.setLocalAddress(connector.getLocalAddr());
+		b.setLocalAddress(connector.getLocalAddress());
 		b.setLinkType(SERVER_PROTO);
 		attachServer = b.buildStack();
 		l.info(String.format("Server started at %s", attachServer.getChannel().localAddress()));

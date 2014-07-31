@@ -37,20 +37,9 @@ public class TestBootstrap extends Bootstrap {
 	public static HashAlgorithm TEST_HASH = HashAlgorithm.SHA1;
 	public static SignatureAlgorithm TEST_SIGN = SignatureAlgorithm.RSA;
 
-	private ReloadCertificate localCert;
-	public PrivateKey localKey;
-
 	public TestBootstrap(Configuration conf) throws Exception {
 		super(conf);
 		X509CryptoHelper.init(TEST_HASH, TEST_SIGN, TEST_HASH);
-	}
-
-	public void setLocalCert(ReloadCertificate localCert) {
-		this.localCert = localCert;
-	}
-
-	public void setLocalKey(String keyPath) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-		localKey = loadPrivateKey(keyPath, SignatureAlgorithm.RSA);
 	}
 
 	@Override
@@ -82,7 +71,6 @@ public class TestBootstrap extends Bootstrap {
 		ComponentsRepository.register(TestPlugin.class);
 		ComponentsRepository.register(X509CryptoHelper.class);
 		ComponentsRepository.register(MemoryKeystore.class);
-		MemoryKeystore.init(localCert, localKey);
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
@@ -102,7 +90,7 @@ public class TestBootstrap extends Bootstrap {
 		}
 	}
 
-	private static PrivateKey loadPrivateKey(String privateKeyPath, SignatureAlgorithm keyAlg) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+	static PrivateKey loadPrivateKey(String privateKeyPath, SignatureAlgorithm keyAlg) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		if (privateKeyPath == null || !new File(privateKeyPath).exists())
 			throw new FileNotFoundException("Private key file not found at " + privateKeyPath);
 
@@ -117,7 +105,7 @@ public class TestBootstrap extends Bootstrap {
 	}
 
 	@Component(RoutingTable.class)
-	public static class TestRouting implements RoutingTable {
+	public static class SelfRouting implements RoutingTable {
 
 		@Component
 		private Bootstrap boot;

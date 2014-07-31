@@ -5,11 +5,12 @@ import java.net.InetSocketAddress;
 import org.junit.AfterClass;
 import org.junit.Test;
 import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class MultiNodeTest {
 
-	public static final int NUM_NODES = 3;
+	public static final int NUM_NODES = 5;
 
 	public static Overlay[] overlays;
 
@@ -37,7 +38,7 @@ public class MultiNodeTest {
 		b.setLocalNodeId(cert.getNodeId());
 		b.setClientMode(true);
 		b.setLocalCert(cert);
-		b.setLocalKey("privKeys/peer" + i + "_key.der");
+		b.setLocalKey(TestBootstrap.loadPrivateKey("privKeys/peer" + i + "_key.der", SignatureAlgorithm.RSA));
 
 		ListenableFuture<Overlay> ovrFut = b.connect();
 		return ovrFut.get();
