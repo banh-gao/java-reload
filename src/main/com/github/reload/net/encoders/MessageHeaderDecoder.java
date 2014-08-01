@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.connections.Connection;
-import com.github.reload.net.encoders.header.Header;
+import com.github.reload.net.encoders.header.NodeID;
 
 /**
  * Codec used to process only the Forwarding Header part of the message
@@ -17,17 +17,27 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 	private final Codec<Header> hdrCodec;
 
+	private NodeID neighborId;
+
 	public MessageHeaderDecoder(Configuration conf) {
 		hdrCodec = Codec.getCodec(Header.class, conf);
 	}
 
 	@Override
+	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+		super.handlerAdded(ctx);
+	}
+
+	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+		if (neighborId == null)
+			this.neighborId = ctx.channel().attr(Connection.CONNECTION).get().getNodeId();
+
 		try {
 
 			ForwardMessage message = new ForwardMessage();
 
-			message.setAttribute(Message.PREVIOUS_HOP, ctx.channel().attr(Connection.CONNECTION).get().getNodeId());
+			message.setAttribute(Message.PREV_HOP, neighborId);
 
 			message.header = hdrCodec.decode(in);
 

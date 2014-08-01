@@ -5,18 +5,14 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.MessageRouter;
-import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.AttachConnector;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder;
-import com.github.reload.net.encoders.content.JoinRequest;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
+import com.github.reload.routing.TopologyPlugin;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -42,8 +38,6 @@ class OverlayConnector {
 	 * admitting peer
 	 * 
 	 * @return the amount of local nodeids successful joined
-	 * @throws InitializationException
-	 * @throws NetworkException
 	 */
 	final SettableFuture<Overlay> connectToOverlay(final boolean joinNeeded) {
 
@@ -123,9 +117,22 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection result) {
-				if (joinNeeded)
-					join(overlayConnFut);
-				else {
+				if (joinNeeded) {
+					ListenableFuture<NodeID> joinCB = ctx.get(TopologyPlugin.class).requestJoin();
+					Futures.addCallback(joinCB, new FutureCallback<NodeID>() {
+
+						@Override
+						public void onSuccess(NodeID result) {
+							ctx.set(Overlay.class, overlay);
+							overlayConnFut.set(overlay);
+						}
+
+						@Override
+						public void onFailure(Throwable t) {
+							overlayConnFut.setException(t);
+						}
+					});
+				} else {
 					ctx.set(Overlay.class, overlay);
 					overlayConnFut.set(overlay);
 				}
@@ -137,43 +144,5 @@ class OverlayConnector {
 			}
 		});
 
-	}
-
-	/**
-	 * Join to the overlay through the admitting peer, return the
-	 * join answer from the admitting peer
-	 * 
-	 * @return the join answer
-	 */
-	private final void join(final SettableFuture<Overlay> overlayConnFut) {
-		l.info("Joining to RELOAD overlay in progress...");
-
-		Bootstrap connector = ctx.get(Bootstrap.class);
-		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
-		MessageRouter router = ctx.get(MessageRouter.class);
-
-		JoinRequest req = new JoinRequest(connector.getLocalNodeId(), connector.getJoinData());
-
-		DestinationList dest = new DestinationList(ResourceID.valueOf(connector.getLocalNodeId().getData()));
-
-		Message request = msgBuilder.newMessage(req, dest);
-
-		ListenableFuture<Message> joinAnsFut = router.sendRequestMessage(request);
-
-		Futures.addCallback(joinAnsFut, new FutureCallback<Message>() {
-
-			public void onSuccess(Message joinAns) {
-				// TODO: check join answer with topology plugin
-				l.info("Joining to RELOAD overlay completed.");
-				ctx.set(Overlay.class, overlay);
-				overlayConnFut.set(overlay);
-			};
-
-			@Override
-			public void onFailure(Throwable t) {
-				overlayConnFut.setException(t);
-				l.info("Joining to RELOAD overlay failed.");
-			}
-		});
 	}
 }

@@ -1,10 +1,11 @@
-package com.github.reload.net.encoders.header;
+package com.github.reload.net.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.header.DestinationList;
+import com.github.reload.net.encoders.header.ForwardingOption;
 
 /**
  * RELOAD Header codec

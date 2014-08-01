@@ -59,7 +59,7 @@ public class ReloadStackBuilder {
 	protected <T extends AbstractBootstrap<T, ? extends Channel>> ReloadStackBuilder(ComponentsContext ctx, MessageDispatcher msgDispatcher, T bootstrap, boolean isServer) {
 		this.ctx = ctx;
 		this.isServer = isServer;
-		this.fwdHandler = new ForwardingHandler();
+		this.fwdHandler = new ForwardingHandler(ctx);
 		this.bootstrap = bootstrap;
 		this.msgDispatcher = msgDispatcher;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();

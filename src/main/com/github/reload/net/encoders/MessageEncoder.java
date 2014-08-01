@@ -13,7 +13,6 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;

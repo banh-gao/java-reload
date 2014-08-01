@@ -13,7 +13,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.Signature;

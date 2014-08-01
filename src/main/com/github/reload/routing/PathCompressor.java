@@ -1,6 +1,6 @@
 package com.github.reload.routing;
 
-import com.github.reload.net.encoders.header.Header;
+import com.github.reload.net.encoders.Header;
 import com.github.reload.net.encoders.header.OpaqueID;
 
 /**

@@ -5,6 +5,7 @@ import java.util.Set;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
@@ -14,7 +15,6 @@ import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.content.LeaveRequest;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
@@ -50,6 +50,9 @@ public class AttachConnector {
 
 	@Component
 	private ICEHelper iceHelper;
+
+	@Component
+	private ComponentsContext ctx;
 
 	private final Map<Long, SettableFuture<Connection>> pendingRequests = Maps.newConcurrentMap();
 	private final Set<NodeID> answeredRequests = Sets.newConcurrentHashSet();
@@ -182,29 +185,12 @@ public class AttachConnector {
 		AttachMessage.Builder b = new AttachMessage.Builder();
 		b.candidates(iceHelper.getCandidates(connMgr.getServerAddress()));
 		AttachMessage attachAnswer = b.buildAnswer();
-		msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), attachAnswer));
-	}
 
-	@MessageHandler(ContentType.LEAVE_REQ)
-	public void handleLeaveRequest(Message req) {
-		LeaveRequest leave = (LeaveRequest) req.getContent();
-		NodeID leavingNode = leave.getLeavingNode();
+		Message ans = msgBuilder.newResponseMessage(req.getHeader(), attachAnswer);
 
-		// Check sender id matches with the leaving node
-		if (!req.getHeader().getSenderId().equals(leavingNode)) {
-			msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node doesn't match with sender ID"));
-			return;
-		}
+		// Send attach answer through the same neighbor
+		ans.setAttribute(Message.NEXT_HOP, req.getAttribute(Message.PREV_HOP));
 
-		// Check neighbor id matches with the leaving node
-		if (!req.getAttribute(Message.PREVIOUS_HOP).equals(leavingNode)) {
-			msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node is not a neighbor node"));
-			return;
-		}
-
-		// TODO: inform topology plugin
-
-		l.debug(String.format("Neighbor node %s is leaving the overlay", leavingNode));
-
+		msgRouter.sendMessage(ans);
 	}
 }

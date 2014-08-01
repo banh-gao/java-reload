@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.util.AttributeKey;
 import java.util.Map;
 import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.google.common.base.Objects;
@@ -17,7 +16,7 @@ public class Message {
 
 	final Map<AttributeKey<?>, Object> attributes = Maps.newHashMap();
 
-	public static final AttributeKey<NodeID> PREVIOUS_HOP = AttributeKey.valueOf("PREV_HOP");
+	public static final AttributeKey<NodeID> PREV_HOP = AttributeKey.valueOf("PREV_HOP");
 	public static final AttributeKey<NodeID> NEXT_HOP = AttributeKey.valueOf("NEXT_HOP");
 	public static final AttributeKey<ByteBuf> RAW_CONTENT = AttributeKey.valueOf("RAW_CONTENT");
 

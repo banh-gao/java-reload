@@ -15,6 +15,8 @@ import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.encoders.ForwardMessage;
+import com.github.reload.net.encoders.Header;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
@@ -22,7 +24,6 @@ import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.header.Header;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
@@ -81,30 +82,6 @@ public class MessageRouter {
 		return reqFut;
 	}
 
-	@MessageHandler(handleAnswers = true, value = ContentType.ERROR)
-	void handleAnswer(Message message) {
-		Long transactionId = message.getHeader().getTransactionId();
-
-		SettableFuture<Message> reqFut = pendingRequests.get(transactionId);
-
-		if (reqFut == null) {
-			l.debug(String.format("Unattended answer message %#x dropped", message.getHeader().getTransactionId()));
-			return;
-		}
-
-		pendingRequests.remove(transactionId);
-
-		Content content = message.getContent();
-
-		if (content.getType() == ContentType.ERROR) {
-			l.debug(String.format("Received error message %s for %#x: %s", ((Error) content).getErrorType(), message.getHeader().getTransactionId(), ((Error) content).toException().getMessage()));
-			reqFut.setException(((Error) content).toException());
-		} else {
-			l.debug(String.format("Received answer message %s for %#x", content.getType(), message.getHeader().getTransactionId()));
-			reqFut.set(message);
-		}
-	}
-
 	public ListenableFuture<NodeID> sendMessage(Message message) {
 		Header header = message.getHeader();
 
@@ -117,18 +94,20 @@ public class MessageRouter {
 		else
 			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
 
+		if (hops.isEmpty()) {
+			String err = String.format("No route to %s for message %#x", header.getDestinationId(), header.getTransactionId());
+			l.warn(err);
+			status.setException(new NetworkException(err));
+		}
+
 		for (NodeID nextHop : hops) {
 			l.debug(String.format("Sent message %s for %#x to %s through %s", message.getContent().getType(), message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop));
-			forward(message, nextHop, status);
+			transmit(message, nextHop, status);
 		}
 		return status;
 	}
 
-	public ListenableFuture<NodeID> sendAnswer(Header requestHdr, Content answer) {
-		return sendMessage(msgBuilder.newResponseMessage(requestHdr, answer));
-	}
-
-	private void forward(Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {
+	private void transmit(Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {
 		Connection conn = connManager.getConnection(nextHop);
 
 		if (conn == null) {
@@ -155,6 +134,44 @@ public class MessageRouter {
 
 			}
 		});
+	}
+
+	public void forwardMessage(ForwardMessage msg) {
+		// Change message header to be forwarded
+		msg.getHeader().toForward();
+		for (NodeID nextHop : routingTable.getNextHops(msg.getHeader().getDestinationId())) {
+			Connection c = connManager.getConnection(nextHop);
+			// Forward message and ignore delivery status
+			c.forward(msg);
+		}
+	}
+
+	public ListenableFuture<NodeID> sendAnswer(Header requestHdr, Content answer) {
+		return sendMessage(msgBuilder.newResponseMessage(requestHdr, answer));
+	}
+
+	@MessageHandler(handleAnswers = true, value = ContentType.ERROR)
+	private void handleAnswer(Message message) {
+		Long transactionId = message.getHeader().getTransactionId();
+
+		SettableFuture<Message> reqFut = pendingRequests.get(transactionId);
+
+		if (reqFut == null) {
+			l.debug(String.format("Unattended answer message %#x dropped", message.getHeader().getTransactionId()));
+			return;
+		}
+
+		pendingRequests.remove(transactionId);
+
+		Content content = message.getContent();
+
+		if (content.getType() == ContentType.ERROR) {
+			l.debug(String.format("Received error message %s for %#x: %s", ((Error) content).getErrorType(), message.getHeader().getTransactionId(), ((Error) content).toException().getMessage()));
+			reqFut.setException(((Error) content).toException());
+		} else {
+			l.debug(String.format("Received answer message %s for %#x", content.getType(), message.getHeader().getTransactionId()));
+			reqFut.set(message);
+		}
 	}
 
 	public static class ForwardingException extends Exception {

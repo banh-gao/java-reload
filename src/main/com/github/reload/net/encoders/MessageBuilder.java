@@ -1,14 +1,14 @@
 package com.github.reload.net.encoders;
 
+import java.util.Collections;
 import com.github.reload.Bootstrap;
 import com.github.reload.Overlay;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.net.encoders.Header.Builder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.Header;
-import com.github.reload.net.encoders.header.Header.Builder;
 import com.github.reload.net.encoders.header.NodeID;
 
 @Component(MessageBuilder.class)
@@ -52,13 +52,29 @@ public class MessageBuilder {
 
 	/**
 	 * Build a response message to a request message. The given header
-	 * object is modified to be used in the response message
+	 * object is recycled and be used in the response message
 	 * 
 	 * @return the response message ready to be send
 	 */
 	public Message newResponseMessage(Header requestHeader, Content responseContent) {
-		requestHeader.toResponse();
-		return newMessage(requestHeader, responseContent);
 
+		Message msg = new Message(requestHeader, responseContent, null);
+
+		DestinationList viaList = requestHeader.getViaList();
+
+		// Set destination list as the reverse of the via list
+		DestinationList destList = requestHeader.getDestinationList();
+		destList.clear();
+		destList.addAll(viaList);
+		Collections.reverse(destList);
+
+		// Clear via list and add local node as first node
+		viaList.clear();
+		viaList.add(connector.getLocalNodeId());
+
+		// Reset TTL
+		requestHeader.ttl = conf.getInitialTTL();
+
+		return msg;
 	}
 }

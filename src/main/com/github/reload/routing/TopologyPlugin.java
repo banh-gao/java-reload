@@ -4,7 +4,7 @@ import java.util.Collection;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * The algorithm that performs the resource based routing and controls the
@@ -15,14 +15,16 @@ import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 public interface TopologyPlugin {
 
 	/**
+	 * Requests to join into the overlay
+	 * 
+	 * @return the node-id of the peer who answers to the join
+	 */
+	public ListenableFuture<NodeID> requestJoin();
+
+	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
 	 */
 	public int getResourceIdLength();
-
-	/**
-	 * @return the hash algorithm used in the overlay
-	 */
-	public HashAlgorithm getHashAlgorithm();
 
 	/**
 	 * Compute the resource id, the resulting id length must be equals to the
@@ -47,18 +49,8 @@ public interface TopologyPlugin {
 	 */
 	public RoutingTable getRoutingTable();
 
-	/**
-	 * @return true if the local peer is the responsible for the given
-	 *         destination
-	 */
-	public boolean isThisPeerResponsible(RoutableID destinationId);
+	public int getDistance(RoutableID source, RoutableID dest);
 
-	/**
-	 * @return true if the local peer is the responsible for the given
-	 *         destination, the specified neighbors are excluded from the
-	 *         decision
-	 */
-	public boolean isThisPeerResponsible(RoutableID destinationId, Collection<? extends NodeID> excludedNeighbors);
+	public boolean isLocalPeerResponsible(RoutableID destination);
 
-	int getDistance(RoutableID source, RoutableID dest);
 }

@@ -31,7 +31,7 @@ public abstract class RoutableID implements Comparable<RoutableID> {
 		}
 	}
 
-	protected abstract byte[] getData();
+	public abstract byte[] getData();
 
 	public abstract DestinationType getType();
 

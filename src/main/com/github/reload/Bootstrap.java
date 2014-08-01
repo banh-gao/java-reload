@@ -7,7 +7,6 @@ import com.github.reload.components.ComponentsRepository;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.AttachConnector;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.MessageBuilder;
@@ -124,10 +123,7 @@ public abstract class Bootstrap {
 	 * connector
 	 * 
 	 * @return The connection handler
-	 * @throws InitializationException
-	 *             if the initialization of the local peer fails
-	 * @throws NetworkException
-	 *             if some network error occurs
+	 *         if the initialization of the local peer fails
 	 */
 	public final ListenableFuture<Overlay> connect() {
 		ComponentsRepository.register(MessageBuilder.class);

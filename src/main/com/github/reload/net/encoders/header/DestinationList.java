@@ -77,6 +77,11 @@ public class DestinationList extends AbstractList<RoutableID> {
 	}
 
 	@Override
+	public RoutableID set(int index, RoutableID element) {
+		return list.set(index, element);
+	}
+
+	@Override
 	public RoutableID get(int index) {
 		return list.get(index);
 	}

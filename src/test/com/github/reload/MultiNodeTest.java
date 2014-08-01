@@ -30,9 +30,12 @@ public class MultiNodeTest {
 		ReloadCertificate cert = TestBootstrap.loadCert("certs/peer" + i + "_cert.der");
 
 		TestConfiguration c = new TestConfiguration();
-		c.setBootstrap(addr);
+		// c.setBootstrap(addr);
 
 		TestBootstrap b = (TestBootstrap) BootstrapFactory.createBootstrap(c);
+
+		if (addr.equals(TestConfiguration.BOOTSTRAP_ADDR))
+			b.setOverlayInitiator(true);
 
 		b.setLocalAddress(addr);
 		b.setLocalNodeId(cert.getNodeId());

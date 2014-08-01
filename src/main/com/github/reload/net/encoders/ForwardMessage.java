@@ -3,7 +3,6 @@ package com.github.reload.net.encoders;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.AttributeKey;
 import java.util.Map;
-import com.github.reload.net.encoders.header.Header;
 import com.google.common.collect.Maps;
 
 /**
