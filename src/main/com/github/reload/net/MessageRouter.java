@@ -107,6 +107,7 @@ public class MessageRouter {
 		}
 
 		ChannelFuture f = conn.write(message);
+
 		f.addListener(new ChannelFutureListener() {
 
 			@Override
@@ -129,7 +130,8 @@ public class MessageRouter {
 
 	public void forwardMessage(ForwardMessage msg) {
 		// Change message header to be forwarded
-		msg.getHeader().toForward();
+		msg.getHeader().toForward(msg.getAttribute(Message.PREV_HOP));
+
 		for (NodeID nextHop : ctx.get(RoutingTable.class).getNextHops(msg.getHeader().getDestinationId())) {
 			Connection c = connManager.getConnection(nextHop);
 			// Forward message and ignore delivery status

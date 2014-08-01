@@ -5,7 +5,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.connections.AttachConnector;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -13,6 +12,7 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.AttachService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -47,6 +47,7 @@ class OverlayConnector {
 
 		if (bootstrap.isOverlayInitiator()) {
 			ctx.set(Overlay.class, overlay);
+			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", ctx.get(Configuration.class).getOverlayName(), bootstrap.getLocalNodeId(), bootstrap.getLocalAddress()));
 			overlayConnFut.set(overlay);
 			return overlayConnFut;
 		}
@@ -109,7 +110,7 @@ class OverlayConnector {
 
 		final DestinationList dest = new DestinationList(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
 
-		AttachConnector attachConnector = (AttachConnector) ctx.get(AttachConnector.class);
+		AttachService attachConnector = (AttachService) ctx.get(AttachService.class);
 
 		ListenableFuture<Connection> apConnFut = attachConnector.attachTo(dest, bootstrapServer, true);
 

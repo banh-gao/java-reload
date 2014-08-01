@@ -176,13 +176,6 @@ public class Header {
 		return Objects.toStringHelper(this).add("transactionId", transactionId).add("isLastFragment", isLastFragment).add("fragmentOffset", fragmentOffset).add("maxResponseLength", maxResponseLength).add("configurationSequence", configurationSequence).add("overlayHash", overlayHash).add("version", version).add("ttl", ttl).add("viaList", viaList).add("destinationList", destinationList).add("forwardingOptions", forwardingOptions).add("headerLength", headerLength).add("payloadLength", payloadLength).toString();
 	}
 
-	public void toForward() {
-		ttl -= 1;
-		// Move last destination-id from the destination list to the via list
-		RoutableID lastDest = destinationList.remove(0);
-		viaList.add(lastDest);
-	}
-
 	public static class Builder {
 
 		private static final SecureRandom transIdGen = new SecureRandom();
@@ -295,6 +288,12 @@ public class Header {
 			h.viaList = viaList;
 			return h;
 		}
+	}
+
+	public void toForward(NodeID lastHop) {
+		ttl -= 1;
+		if (!viaList.getDestination().equals(lastHop))
+			viaList.add(lastHop);
 	}
 
 }

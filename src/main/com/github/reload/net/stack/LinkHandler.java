@@ -10,6 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
+import com.github.reload.net.connections.Connection;
+import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.encoders.FramedMessage;
 import com.github.reload.net.encoders.FramedMessage.FramedAck;
 import com.github.reload.net.encoders.FramedMessage.FramedData;
@@ -39,6 +42,11 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 	@Override
 	public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
 		this.ctx = null;
+	}
+
+	@Override
+	public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {
+		compCtx.postEvent(new ConnectionManager.ConnectionStatusEvent(Type.CLOSED, ctx.attr(Connection.CONNECTION).get()));
 	}
 
 	@Override

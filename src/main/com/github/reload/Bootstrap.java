@@ -7,12 +7,13 @@ import com.github.reload.components.ComponentsRepository;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.connections.AttachConnector;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
 import com.github.reload.net.ice.ICEHelper;
+import com.github.reload.services.AttachService;
+import com.github.reload.services.PingService;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -130,15 +131,18 @@ public abstract class Bootstrap {
 
 		ComponentsRepository.register(MessageBuilder.class);
 		ComponentsRepository.register(ConnectionManager.class);
-		ComponentsRepository.register(AttachConnector.class);
+		ComponentsRepository.register(AttachService.class);
 		ComponentsRepository.register(ICEHelper.class);
 		ComponentsRepository.register(MessageRouter.class);
 
 		ComponentsContext ctx = ComponentsContext.newInstance();
 		ctx.set(Configuration.class, conf);
 		ctx.set(Bootstrap.class, this);
+
+		// setup default components
 		ctx.set(ConnectionManager.class, new ConnectionManager());
-		ctx.set(AttachConnector.class, new AttachConnector());
+		ctx.set(AttachService.class, new AttachService());
+		ctx.set(PingService.class, new PingService());
 
 		ctx.startComponents();
 

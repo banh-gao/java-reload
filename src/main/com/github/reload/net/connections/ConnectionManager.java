@@ -72,7 +72,7 @@ public class ConnectionManager {
 		b.setLinkType(SERVER_PROTO);
 
 		attachServer = b.buildStack();
-		l.info(String.format("Server started at %s", attachServer.getChannel().localAddress()));
+		l.debug(String.format("Server started at %s", attachServer.getChannel().localAddress()));
 	}
 
 	@CompStop

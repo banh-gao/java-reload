@@ -15,6 +15,7 @@ import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
@@ -49,16 +50,14 @@ public class TestPlugin implements TopologyPlugin {
 
 	@Component
 	private ComponentsContext ctx;
-
+	@Component
+	private Configuration conf;
 	@Component
 	private Bootstrap boot;
-
 	@Component
 	private ConnectionManager connMgr;
-
 	@Component
 	private MessageRouter router;
-
 	@Component
 	private MessageBuilder msgBuilder;
 
@@ -72,8 +71,8 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	@Override
-	public ListenableFuture<NodeID> requestJoin(NodeID admittingPeer) {
-		l.info("Joining to RELOAD overlay in progress...");
+	public ListenableFuture<NodeID> requestJoin(final NodeID admittingPeer) {
+		l.info(String.format("Joining to RELOAD overlay %s with %s through %s in progress...", conf.getOverlayName(), boot.getLocalNodeId(), admittingPeer));
 		Bootstrap connector = ctx.get(Bootstrap.class);
 		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
 		MessageRouter router = ctx.get(MessageRouter.class);
@@ -93,14 +92,15 @@ public class TestPlugin implements TopologyPlugin {
 		Futures.addCallback(joinAnsFut, new FutureCallback<Message>() {
 
 			public void onSuccess(Message joinAns) {
-				l.info("Joining to RELOAD overlay completed.");
+				r.neighbors.add(admittingPeer);
+				l.info(String.format("Joining to RELOAD overlay %s with %s completed.", conf.getOverlayName(), boot.getLocalNodeId()));
 				isJoined = true;
 				joinFuture.set(joinAns.getHeader().getSenderId());
 			};
 
 			@Override
 			public void onFailure(Throwable t) {
-				l.info("Joining to RELOAD overlay failed.");
+				l.info(String.format("Joining to RELOAD overlay %s with %s failed: %s", conf.getOverlayName(), boot.getLocalNodeId(), t.getMessage()));
 				joinFuture.setException(t);
 			}
 		});
@@ -109,15 +109,16 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	@MessageHandler(ContentType.JOIN_REQ)
-	public void handleJoinRequest(Message req) {
-
-		NodeID senderId = req.getHeader().getSenderId();
+	public void handleJoinRequest(final Message req) {
 
 		Message ans = msgBuilder.newResponseMessage(req.getHeader(), new JoinAnswer("JOIN ANS".getBytes()));
 
-		ans.setAttribute(Message.NEXT_HOP, senderId);
+		r.neighbors.add(((JoinRequest) req.getContent()).getJoiningNode());
+
+		System.out.println("NEIB:" + r.neighbors);
 
 		router.sendMessage(ans);
+
 	}
 
 	@MessageHandler(ContentType.LEAVE_REQ)
@@ -139,11 +140,7 @@ public class TestPlugin implements TopologyPlugin {
 			return;
 		}
 
-		Connection conn = connMgr.getConnection(prevHop);
-
-		conn.close();
-
-		ctx.postEvent(new ConnectionManager.ConnectionStatusEvent(Type.CLOSED, conn));
+		r.neighbors.remove(leavingNode);
 	}
 
 	@Subscribe

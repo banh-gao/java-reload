@@ -15,7 +15,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsRepository.Component;
-import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.Maps;
@@ -187,8 +186,6 @@ public class ComponentsContext {
 				Object obj = null;
 
 				try {
-					if (compBaseClazz.equals(MessageRouter.class))
-						System.out.println("LOAD:" + compBaseClazz);
 					obj = (compBaseClazz.equals(ComponentsContext.class)) ? this : get(compBaseClazz);
 				} catch (NoSuchElementException e) {
 					// Checked later

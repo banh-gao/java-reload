@@ -5,6 +5,7 @@ import org.junit.Test;
 import com.github.reload.APITest;
 import com.github.reload.Overlay;
 import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.services.storage.StorageService;
 
 public class StorageTest extends APITest {
 

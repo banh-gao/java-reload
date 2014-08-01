@@ -1,14 +1,14 @@
 package com.github.reload.net.encoders.content;
 
 import java.util.EnumSet;
-import com.github.reload.storage.encoders.FetchAnswer;
-import com.github.reload.storage.encoders.FetchRequest;
-import com.github.reload.storage.encoders.FindAnswer;
-import com.github.reload.storage.encoders.FindRequest;
-import com.github.reload.storage.encoders.StatAnswer;
-import com.github.reload.storage.encoders.StatRequest;
-import com.github.reload.storage.encoders.StoreAnswer;
-import com.github.reload.storage.encoders.StoreRequest;
+import com.github.reload.services.storage.encoders.FetchAnswer;
+import com.github.reload.services.storage.encoders.FetchRequest;
+import com.github.reload.services.storage.encoders.FindAnswer;
+import com.github.reload.services.storage.encoders.FindRequest;
+import com.github.reload.services.storage.encoders.StatAnswer;
+import com.github.reload.services.storage.encoders.StatRequest;
+import com.github.reload.services.storage.encoders.StoreAnswer;
+import com.github.reload.services.storage.encoders.StoreRequest;
 
 /**
  * Message type codes, also used to create message content object instances for

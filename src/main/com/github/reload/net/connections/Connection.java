@@ -5,14 +5,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.ForwardMessage;
 import com.github.reload.net.encoders.Header;
 import com.github.reload.net.encoders.Message;
+import com.github.reload.net.encoders.MessageEncoder;
 import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.stack.LinkHandler;
 import com.github.reload.net.stack.ReloadStack;
 
 /**
@@ -51,23 +50,31 @@ public class Connection {
 	 */
 	public ChannelFuture forward(ForwardMessage headedMessage) {
 		Channel ch = stack.getChannel();
-		LinkHandler lnkHandler = (LinkHandler) ch.pipeline().get(ReloadStack.HANDLER_LINK);
-
-		ChannelPromise promise = ch.newPromise();
-
-		ChannelHandlerContext context = ch.pipeline().context(ReloadStack.HANDLER_FORWARD);
 
 		ByteBuf buf = ch.alloc().buffer();
 
+		int messageStart = buf.writerIndex();
+
 		try {
 			hdrCodec.encode(headedMessage.getHeader(), buf);
-			buf.writeBytes(headedMessage.getPayload());
-			lnkHandler.write(context, buf, promise);
 		} catch (Exception e) {
-			promise.setFailure(e);
+			throw new RuntimeException(e);
 		}
 
-		return promise;
+		buf.writeBytes(headedMessage.getPayload());
+
+		setMessageLength(buf, messageStart);
+
+		// Get the context of the layer just before link handler, the write on
+		// this context passes the given buffer to the link handler
+		ChannelHandlerContext context = ch.pipeline().context(ReloadStack.DECODER_HEADER);
+
+		return context.writeAndFlush(buf);
+	}
+
+	private void setMessageLength(ByteBuf buf, int messageStart) {
+		int messageLength = buf.writerIndex() - messageStart;
+		buf.setInt(messageStart + MessageEncoder.HDR_LEADING_LEN, messageLength);
 	}
 
 	public ChannelFuture close() {

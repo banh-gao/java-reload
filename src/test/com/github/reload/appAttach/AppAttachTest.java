@@ -6,6 +6,7 @@ import org.junit.Test;
 import com.github.reload.APITest;
 import com.github.reload.components.ComponentsRepository;
 import com.github.reload.net.encoders.header.DestinationList;
+import com.github.reload.services.AppAttachService;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class AppAttachTest extends APITest {

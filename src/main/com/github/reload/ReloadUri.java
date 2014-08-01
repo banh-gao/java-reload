@@ -8,7 +8,7 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.storage.encoders.StoredDataSpecifier;
+import com.github.reload.services.storage.encoders.StoredDataSpecifier;
 
 /**
  * A RELOAD Uniform Resource Identifier defined as:
