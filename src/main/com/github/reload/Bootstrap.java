@@ -126,12 +126,13 @@ public abstract class Bootstrap {
 	 *         if the initialization of the local peer fails
 	 */
 	public final ListenableFuture<Overlay> connect() {
+		registerComponents();
+
 		ComponentsRepository.register(MessageBuilder.class);
 		ComponentsRepository.register(ConnectionManager.class);
 		ComponentsRepository.register(AttachConnector.class);
 		ComponentsRepository.register(ICEHelper.class);
 		ComponentsRepository.register(MessageRouter.class);
-		registerComponents();
 
 		ComponentsContext ctx = ComponentsContext.newInstance();
 		ctx.set(Configuration.class, conf);

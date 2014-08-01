@@ -8,14 +8,14 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsRepository.Component;
+import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.Maps;
@@ -28,7 +28,7 @@ public class ComponentsContext {
 
 	private final ComponentsRepository repo;
 
-	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(Collections.<Class<? extends Object>, Object>synchronizedMap(new LinkedHashMap<Class<? extends Object>, Object>()));
+	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(new ConcurrentHashMap<Class<? extends Object>, Object>());
 
 	private final Map<Class<?>, Integer> componentsStatus = Maps.newLinkedHashMap();
 
@@ -76,6 +76,7 @@ public class ComponentsContext {
 
 	public <T> void set(Class<T> compBaseClazz, T comp) {
 		loadedComponents.put(compBaseClazz, comp);
+
 		setComponentStatus(compBaseClazz, STATUS_LOADED);
 
 		injectComponents(comp);
@@ -186,7 +187,9 @@ public class ComponentsContext {
 				Object obj = null;
 
 				try {
-					obj = (compBaseClazz.equals(this.getClass())) ? this : get(compBaseClazz);
+					if (compBaseClazz.equals(MessageRouter.class))
+						System.out.println("LOAD:" + compBaseClazz);
+					obj = (compBaseClazz.equals(ComponentsContext.class)) ? this : get(compBaseClazz);
 				} catch (NoSuchElementException e) {
 					// Checked later
 				}
@@ -194,7 +197,7 @@ public class ComponentsContext {
 				if (obj != null)
 					try {
 						f.set(c, obj);
-						if (!compBaseClazz.equals(this.getClass()))
+						if (!compBaseClazz.equals(ComponentsContext.class))
 							startComponent(compBaseClazz);
 					} catch (IllegalArgumentException | IllegalAccessException e) {
 						throw new IllegalStateException(e);

@@ -15,11 +15,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 public interface TopologyPlugin {
 
 	/**
-	 * Requests to join into the overlay
+	 * Requests to join into the overlay through the given admitting peer
 	 * 
 	 * @return the node-id of the peer who answers to the join
 	 */
-	public ListenableFuture<NodeID> requestJoin();
+	public ListenableFuture<NodeID> requestJoin(NodeID admittingPeer);
 
 	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
@@ -42,12 +42,6 @@ public interface TopologyPlugin {
 	 * @return The id in the collection closer to the given destination
 	 */
 	public <T extends RoutableID> T getCloserId(RoutableID destination, Collection<T> ids);
-
-	/**
-	 * 
-	 * @return The routing table associated to the given local peer node-id
-	 */
-	public RoutingTable getRoutingTable();
 
 	public int getDistance(RoutableID source, RoutableID dest);
 

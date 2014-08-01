@@ -10,7 +10,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class MultiNodeTest {
 
-	public static final int NUM_NODES = 5;
+	public static final int NUM_NODES = 3;
 
 	public static Overlay[] overlays;
 
@@ -39,7 +39,6 @@ public class MultiNodeTest {
 
 		b.setLocalAddress(addr);
 		b.setLocalNodeId(cert.getNodeId());
-		b.setClientMode(true);
 		b.setLocalCert(cert);
 		b.setLocalKey(TestBootstrap.loadPrivateKey("privKeys/peer" + i + "_key.der", SignatureAlgorithm.RSA));
 

@@ -25,6 +25,7 @@ import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorType;
+import com.github.reload.net.encoders.content.JoinAnswer;
 import com.github.reload.net.encoders.content.JoinRequest;
 import com.github.reload.net.encoders.content.LeaveRequest;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -56,7 +57,10 @@ public class TestPlugin implements TopologyPlugin {
 	private ConnectionManager connMgr;
 
 	@Component
-	MessageBuilder msgBuilder;
+	private MessageRouter router;
+
+	@Component
+	private MessageBuilder msgBuilder;
 
 	private boolean isJoined = false;
 
@@ -64,11 +68,11 @@ public class TestPlugin implements TopologyPlugin {
 
 	@CompStart
 	private void start() {
-		// FIXME: add to routing table only after join
+		ctx.set(RoutingTable.class, r);
 	}
 
 	@Override
-	public ListenableFuture<NodeID> requestJoin() {
+	public ListenableFuture<NodeID> requestJoin(NodeID admittingPeer) {
 		l.info("Joining to RELOAD overlay in progress...");
 		Bootstrap connector = ctx.get(Bootstrap.class);
 		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
@@ -79,6 +83,8 @@ public class TestPlugin implements TopologyPlugin {
 		DestinationList dest = new DestinationList(ResourceID.valueOf(connector.getLocalNodeId().getData()));
 
 		Message request = msgBuilder.newMessage(req, dest);
+
+		request.setAttribute(Message.NEXT_HOP, admittingPeer);
 
 		ListenableFuture<Message> joinAnsFut = router.sendRequestMessage(request);
 
@@ -102,6 +108,18 @@ public class TestPlugin implements TopologyPlugin {
 		return joinFuture;
 	}
 
+	@MessageHandler(ContentType.JOIN_REQ)
+	public void handleJoinRequest(Message req) {
+
+		NodeID senderId = req.getHeader().getSenderId();
+
+		Message ans = msgBuilder.newResponseMessage(req.getHeader(), new JoinAnswer("JOIN ANS".getBytes()));
+
+		ans.setAttribute(Message.NEXT_HOP, senderId);
+
+		router.sendMessage(ans);
+	}
+
 	@MessageHandler(ContentType.LEAVE_REQ)
 	public void handleLeaveRequest(Message req) {
 		LeaveRequest leave = (LeaveRequest) req.getContent();
@@ -109,7 +127,7 @@ public class TestPlugin implements TopologyPlugin {
 
 		// Check sender id matches with the leaving node
 		if (!req.getHeader().getSenderId().equals(leavingNode)) {
-			msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node doesn't match with sender ID"));
+			router.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node doesn't match with sender ID")));
 			return;
 		}
 
@@ -117,7 +135,7 @@ public class TestPlugin implements TopologyPlugin {
 
 		// Check neighbor id matches with the leaving node
 		if (!prevHop.equals(leavingNode)) {
-			msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node is not a neighbor node"));
+			router.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.FORBITTEN, "Leaving node is not a neighbor node")));
 			return;
 		}
 
@@ -165,11 +183,6 @@ public class TestPlugin implements TopologyPlugin {
 			}
 		}
 		return closer;
-	}
-
-	@Override
-	public RoutingTable getRoutingTable() {
-		return r;
 	}
 
 	@Override

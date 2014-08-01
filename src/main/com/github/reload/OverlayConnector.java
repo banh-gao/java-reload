@@ -116,9 +116,9 @@ class OverlayConnector {
 		Futures.addCallback(apConnFut, new FutureCallback<Connection>() {
 
 			@Override
-			public void onSuccess(Connection result) {
+			public void onSuccess(Connection apConn) {
 				if (joinNeeded) {
-					ListenableFuture<NodeID> joinCB = ctx.get(TopologyPlugin.class).requestJoin();
+					ListenableFuture<NodeID> joinCB = ctx.get(TopologyPlugin.class).requestJoin(apConn.getNodeId());
 					Futures.addCallback(joinCB, new FutureCallback<NodeID>() {
 
 						@Override

@@ -44,7 +44,7 @@ public class TestBootstrap extends Bootstrap {
 
 	@Override
 	protected byte[] getJoinData() {
-		return new byte[0];
+		return "JOIN REQ".getBytes();
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
@@ -26,7 +25,6 @@ import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
-import com.github.reload.routing.TopologyPlugin;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -48,17 +46,10 @@ public class MessageRouter {
 	@Component
 	private MessageBuilder msgBuilder;
 
-	private RoutingTable routingTable;
-
 	private Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
 
 	@Component
 	private ComponentsContext ctx;
-
-	@CompStart
-	private void start() {
-		routingTable = ctx.get(TopologyPlugin.class).getRoutingTable();
-	}
 
 	/**
 	 * Send the given request message to the destination node into the overlay.
@@ -90,7 +81,7 @@ public class MessageRouter {
 		Set<NodeID> hops;
 
 		if (message.getAttribute(Message.NEXT_HOP) == null)
-			hops = routingTable.getNextHops(header.getDestinationId());
+			hops = ctx.get(RoutingTable.class).getNextHops(header.getDestinationId());
 		else
 			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
 
@@ -139,7 +130,7 @@ public class MessageRouter {
 	public void forwardMessage(ForwardMessage msg) {
 		// Change message header to be forwarded
 		msg.getHeader().toForward();
-		for (NodeID nextHop : routingTable.getNextHops(msg.getHeader().getDestinationId())) {
+		for (NodeID nextHop : ctx.get(RoutingTable.class).getNextHops(msg.getHeader().getDestinationId())) {
 			Connection c = connManager.getConnection(nextHop);
 			// Forward message and ignore delivery status
 			c.forward(msg);
