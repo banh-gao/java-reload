@@ -39,11 +39,11 @@ public class Overlay {
 	}
 
 	/**
-	 * Leave this overlay and release all the resources. This method returns
-	 * when the overlay has been left. All subsequent requests to this
+	 * Disconnect from this overlay and release all the resources. This method
+	 * returns when the overlay has been left. All subsequent requests to this
 	 * instance will fail.
 	 */
-	public void leave() {
+	public void disconnect() {
 		ctx.stopComponents();
 	}
 

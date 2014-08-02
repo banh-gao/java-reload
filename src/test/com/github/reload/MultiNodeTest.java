@@ -66,6 +66,6 @@ public class MultiNodeTest {
 	@AfterClass
 	public static void deinit() throws InterruptedException {
 		for (Overlay o : overlays)
-			o.leave();
+			o.disconnect();
 	}
 }

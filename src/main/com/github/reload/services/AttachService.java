@@ -11,6 +11,8 @@ import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
+import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
+import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AttachMessage;
@@ -23,8 +25,10 @@ import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.ice.HostCandidate;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.NoSuitableCandidateException;
+import com.github.reload.routing.TopologyPlugin;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -54,10 +58,15 @@ public class AttachService {
 	private ICEHelper iceHelper;
 
 	@Component
+	private TopologyPlugin plugin;
+
+	@Component
 	private ComponentsContext ctx;
 
 	private final Map<Long, SettableFuture<Connection>> pendingRequests = Maps.newConcurrentMap();
 	private final Set<NodeID> answeredRequests = Sets.newConcurrentHashSet();
+
+	private final Set<NodeID> updateAfterConnection = Sets.newConcurrentHashSet();
 
 	public ListenableFuture<Connection> attachTo(DestinationList destList, NodeID nextHop, boolean requestUpdate) {
 		final SettableFuture<Connection> fut = SettableFuture.create();
@@ -170,17 +179,19 @@ public class AttachService {
 			return;
 		}
 
-		// Pending request and already answered
+		// Pending request already answered
 		if (answeredRequests.contains(sender)) {
 			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach already in progress")));
 			return;
 		}
 
 		// Pending request not answered
-		if (bootstrap.getLocalNodeId().compareTo(sender) <= 0)
-			sendAnswer(req);
-		else
+		if (bootstrap.getLocalNodeId().compareTo(sender) > 0) {
 			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach request already sent")));
+			return;
+		}
+
+		sendAnswer(req);
 	}
 
 	private void sendAnswer(Message req) {
@@ -194,5 +205,16 @@ public class AttachService {
 		ans.setAttribute(Message.NEXT_HOP, req.getAttribute(Message.PREV_HOP));
 
 		msgRouter.sendMessage(ans);
+
+		AttachMessage attachRequest = (AttachMessage) req.getContent();
+
+		if (attachRequest.isSendUpdate())
+			updateAfterConnection.add(req.getHeader().getSenderId());
+	}
+
+	@Subscribe
+	public void sendUpdateAfterConnection(ConnectionStatusEvent e) {
+		if (e.type == Type.ACCEPTED && updateAfterConnection.remove(e.connection.getNodeId()))
+			plugin.requestUpdate(e.connection.getNodeId());
 	}
 }

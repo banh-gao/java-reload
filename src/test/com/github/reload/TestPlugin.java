@@ -1,7 +1,5 @@
 package com.github.reload;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,7 +15,6 @@ import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
@@ -199,6 +196,31 @@ public class TestPlugin implements TopologyPlugin {
 		return true;
 	}
 
+	@Override
+	public ListenableFuture<NodeID> requestLeave(final NodeID neighborNode) {
+		Message leaveMessage = msgBuilder.newMessage(new LeaveRequest(boot.getLocalNodeId(), new byte[0]), new DestinationList(msgBuilder.getWildcard()));
+		leaveMessage.setAttribute(Message.NEXT_HOP, neighborNode);
+		ListenableFuture<Message> ansFut = router.sendRequestMessage(leaveMessage);
+
+		final SettableFuture<NodeID> leaveOutcome = SettableFuture.create();
+
+		Futures.addCallback(ansFut, new FutureCallback<Message>() {
+
+			@Override
+			public void onSuccess(Message result) {
+				isJoined = false;
+				leaveOutcome.set(neighborNode);
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				leaveOutcome.setException(t);
+			}
+		});
+
+		return leaveOutcome;
+	}
+
 	@CompStop
 	private void stop() {
 		sendLeaveAndClose();
@@ -206,16 +228,7 @@ public class TestPlugin implements TopologyPlugin {
 
 	private void sendLeaveAndClose() {
 		for (NodeID n : r.neighbors) {
-			final Connection c = connMgr.getConnection(n);
-			Message leaveMessage = msgBuilder.newMessage(new LeaveRequest(boot.getLocalNodeId(), new byte[0]), new DestinationList(c.getNodeId()));
-			ChannelFuture cf = c.write(leaveMessage);
-			cf.addListener(new ChannelFutureListener() {
-
-				@Override
-				public void operationComplete(ChannelFuture future) throws Exception {
-					c.close();
-				}
-			});
+			requestLeave(n);
 		}
 	}
 
@@ -225,11 +238,6 @@ public class TestPlugin implements TopologyPlugin {
 
 		@Override
 		public Set<NodeID> getNextHops(RoutableID destination) {
-			return getNextHops(destination, Collections.<NodeID>emptyList());
-		}
-
-		@Override
-		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
 			if (neighbors.isEmpty())
 				return Collections.emptySet();
 
@@ -238,9 +246,6 @@ public class TestPlugin implements TopologyPlugin {
 			NodeID singleNextHop = getCloserId(destination, neighbors);
 
 			for (NodeID nodeId : neighbors) {
-				if (excludedIds.contains(nodeId)) {
-					continue;
-				}
 				int tmp = getDistance(destination, nodeId);
 				if (tmp <= minDinstance) {
 					minDinstance = tmp;
@@ -250,5 +255,11 @@ public class TestPlugin implements TopologyPlugin {
 
 			return Collections.singleton(singleNextHop);
 		}
+	}
+
+	@Override
+	public ListenableFuture<NodeID> requestUpdate(NodeID neighborNode) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

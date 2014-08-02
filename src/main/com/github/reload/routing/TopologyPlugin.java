@@ -22,6 +22,16 @@ public interface TopologyPlugin {
 	public ListenableFuture<NodeID> requestJoin(NodeID admittingPeer);
 
 	/**
+	 * Requests to send an update message to the given neighbor
+	 */
+	public ListenableFuture<NodeID> requestUpdate(NodeID neighborNode);
+
+	/**
+	 * Requests to send a leave message to the given neighbor
+	 */
+	public ListenableFuture<NodeID> requestLeave(NodeID neighborNode);
+
+	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
 	 */
 	public int getResourceIdLength();

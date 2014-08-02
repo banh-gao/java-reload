@@ -14,7 +14,6 @@ import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import com.github.reload.components.ComponentsRepository;
@@ -114,11 +113,5 @@ public class TestBootstrap extends Bootstrap {
 		public Set<NodeID> getNextHops(RoutableID destination) {
 			return Collections.singleton(boot.getLocalNodeId());
 		}
-
-		@Override
-		public Set<NodeID> getNextHops(RoutableID destination, Collection<? extends NodeID> excludedIds) {
-			return Collections.singleton(boot.getLocalNodeId());
-		}
-
 	}
 }

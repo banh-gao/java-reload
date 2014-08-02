@@ -21,6 +21,8 @@ public class MessageBuilder {
 	@Component
 	private CryptoHelper<?> cryptoHelper;
 
+	private NodeID wildcardId;
+
 	/**
 	 * Build a message for the given content and destination.
 	 */
@@ -41,6 +43,12 @@ public class MessageBuilder {
 		Header header = b.build();
 
 		return newMessage(header, content);
+	}
+
+	public NodeID getWildcard() {
+		if (wildcardId == null)
+			wildcardId = NodeID.getWildcardId(conf.getNodeIdLength());
+		return wildcardId;
 	}
 
 	private Message newMessage(Header header, Content content) {
