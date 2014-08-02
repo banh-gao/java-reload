@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.AttachMessage.AttachMessageCodec;
@@ -117,8 +117,8 @@ public class AttachMessage extends Content {
 		private final static int ROLE_LENGTH_FIELD = U_INT8;
 		private final static int CANDIDATES_LENGTH_FIELD = U_INT16;
 
-		public AttachMessageCodec(Configuration conf) {
-			super(conf);
+		public AttachMessageCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

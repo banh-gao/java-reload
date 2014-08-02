@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
@@ -88,8 +88,8 @@ public class StatKindResponse {
 		private final Codec<DataKind> dataKindCodec;
 		private final Codec<StoredMetadata> storedDataCodec;
 
-		public StatKindResponseCodec(Configuration conf) {
-			super(conf);
+		public StatKindResponseCodec(ComponentsContext ctx) {
+			super(ctx);
 			dataKindCodec = getCodec(DataKind.class);
 			storedDataCodec = getCodec(StoredMetadata.class);
 		}

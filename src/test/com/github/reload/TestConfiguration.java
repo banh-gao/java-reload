@@ -27,6 +27,8 @@ import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.UnknownKindException;
+import com.github.reload.services.storage.encoders.SingleModel;
+import com.github.reload.services.storage.policies.NodeMatch;
 
 /**
  * Representation of a RELOAD configuration document
@@ -35,6 +37,7 @@ import com.github.reload.services.storage.UnknownKindException;
 public class TestConfiguration implements Configuration {
 
 	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
+	public static DataKind TEST_KIND = new DataKind.Builder(2020).accessPolicy(NodeMatch.class).dataModel(SingleModel.class).build();
 
 	String instanceName;
 	int sequence;
@@ -71,6 +74,7 @@ public class TestConfiguration implements Configuration {
 		noICE = true;
 		linkProtocols = Collections.singletonList("TLS");
 		bootstrapNodes = Collections.singleton(BOOTSTRAP_ADDR);
+		requiredKinds = Collections.singletonMap(TEST_KIND.getKindId(), TEST_KIND);
 	}
 
 	public void setBootstrap(InetSocketAddress bootAddr) {

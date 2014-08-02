@@ -2,7 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.Signature;
@@ -23,8 +23,8 @@ public class StoredMetadata extends StoredData {
 		private static final int STORAGE_TIME_FIELD = U_INT64;
 		private static final int DATA_LENGTH_FIELD = U_INT32;
 
-		public StoredMetadataCodec(Configuration conf) {
-			super(conf);
+		public StoredMetadataCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@SuppressWarnings("unchecked")

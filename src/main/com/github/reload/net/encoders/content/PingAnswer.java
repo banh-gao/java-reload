@@ -2,7 +2,7 @@ package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.PingAnswer.PingAnswerCodec;
@@ -46,8 +46,8 @@ public class PingAnswer extends Content {
 
 		private static final int RESPONSE_TIME_SIZE = U_INT64;
 
-		public PingAnswerCodec(Configuration conf) {
-			super(conf);
+		public PingAnswerCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

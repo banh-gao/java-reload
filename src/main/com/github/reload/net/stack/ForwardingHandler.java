@@ -22,9 +22,9 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 	private final TopologyPlugin plugin;
 
 	public ForwardingHandler(ComponentsContext ctx) {
-		this.router = ctx.get(MessageRouter.class);
-		this.boot = ctx.get(Bootstrap.class);
-		this.plugin = ctx.get(TopologyPlugin.class);
+		router = ctx.get(MessageRouter.class);
+		boot = ctx.get(Bootstrap.class);
+		plugin = ctx.get(TopologyPlugin.class);
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.MessageExtension.MessageExtensionCodec;
@@ -43,8 +43,8 @@ public abstract class MessageExtension {
 
 		private static final int EXTENSION_CONTENT_LENGTH_FIELD = U_INT32;
 
-		public MessageExtensionCodec(Configuration conf) {
-			super(conf);
+		public MessageExtensionCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

@@ -1,7 +1,7 @@
 package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.LeaveAnswer.LeaveAnswerCodec;
@@ -16,8 +16,8 @@ public class LeaveAnswer extends Content {
 
 	static class LeaveAnswerCodec extends Codec<LeaveAnswer> {
 
-		public LeaveAnswerCodec(Configuration conf) {
-			super(conf);
+		public LeaveAnswerCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

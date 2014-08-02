@@ -1,18 +1,13 @@
 package com.github.reload.services.storage;
 
 import java.math.BigInteger;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
 import java.util.Date;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.services.storage.encoders.ArrayModel;
-import com.github.reload.services.storage.encoders.ArrayValue;
-import com.github.reload.services.storage.encoders.SingleValue;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.DataValueBuilder;
 import com.github.reload.services.storage.encoders.StoredData;
 
 /**
@@ -23,21 +18,29 @@ public class PreparedData {
 
 	private final static int DEFAULT_LIFETIME = 60;
 
-	private final ValueBuilder preparedValue;
+	public static final long MAX_LIFETIME = 0xffffffffl;
+	public static final BigInteger MAX_GENERATION = new BigInteger(1, new byte[]{
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff});
+
 	private final DataKind kind;
+	private final DataValueBuilder<?> valueBuilder;
 
-	private BigInteger generation = BigInteger.ZERO;
-	private BigInteger storageTime = BigInteger.valueOf(new Date().getTime());
-	private long lifeTime = DEFAULT_LIFETIME;
+	BigInteger generation = BigInteger.ONE;
+	BigInteger storageTime = BigInteger.valueOf(new Date().getTime());
+	long lifeTime = DEFAULT_LIFETIME;
 
-	PreparedData(DataKind kind, ValueBuilder preparedValue) {
-		this.preparedValue = preparedValue;
+	PreparedData(DataKind kind) {
 		this.kind = kind;
+		this.valueBuilder = kind.getDataModel().newValueBuilder();
 	}
 
-	/**
-	 * @return the associated datakind
-	 */
 	public DataKind getKind() {
 		return kind;
 	}
@@ -52,10 +55,6 @@ public class PreparedData {
 		return this;
 	}
 
-	public Date getStorageTime() {
-		return new Date(storageTime.longValue());
-	}
-
 	/**
 	 * Set the number of seconds until this value should be deleted from the
 	 * overlay.
@@ -63,14 +62,6 @@ public class PreparedData {
 	public PreparedData setLifeTime(long lifeTime) {
 		this.lifeTime = lifeTime;
 		return this;
-	}
-
-	/**
-	 * @return The number of seconds until this value should be deleted from the
-	 *         overlay.
-	 */
-	public long getLifeTime() {
-		return lifeTime;
 	}
 
 	/**
@@ -85,19 +76,12 @@ public class PreparedData {
 	}
 
 	/**
-	 * @return The version number of this data into the overlay storage
-	 */
-	public BigInteger getGeneration() {
-		return generation;
-	}
-
-	/**
 	 * @return the prepared value backed with this data, the runtime prepared
 	 *         value type depends on the data model used by the associated data
 	 *         kind
 	 */
-	public ValueBuilder getValue() {
-		return preparedValue;
+	public DataValueBuilder<?> getValueBuilder() {
+		return valueBuilder;
 	}
 
 	/**
@@ -112,57 +96,11 @@ public class PreparedData {
 	 * @return The stored data for the specified overlay
 	 * @throws DataBuildingException
 	 */
-	StoredData build(Configuration conf, ResourceID resourceId) throws DataBuildingException {
+	public StoredData build(ComponentsContext ctx, ResourceID resId) {
+		DataValue value = valueBuilder.build();
 
-		CryptoHelper cryptoHelper = context.getCryptoHelper();
+		Signer dataSigner = ctx.get(CryptoHelper.class).newSigner();
 
-		SingleValue value = preparedValue.build();
-
-		HashAlgorithm certHashAlg = cryptoHelper.getCertHashAlg();
-
-		Certificate localCert = cryptoHelper.getLocalCertificate().getOriginalCertificate();
-
-		NodeID storerId = context.getLocalId();
-
-		Signature signature = computeSignature(cryptoHelper, resourceId, value);
-
-		return new StoredData(kind, storageTime, lifeTime, value, signature);
-	}
-
-	private Signature computeSignature(CryptoHelper cryptoHelper, ResourceID resourceId, SingleValue value) {
-		Signature dataSigner = cryptoHelper.newSigner();
-
-		UnsignedByteBuffer signBuf = UnsignedByteBuffer.allocate(ResourceID.MAX_STRUCTURE_LENGTH + EncUtils.U_INT32 + EncUtils.U_INT64 + EncUtils.U_INT8 + SingleValue.VALUE_LENGTH_FIELD + value.getSize());
-
-		resourceId.writeTo(signBuf);
-		kind.getKindId().writeTo(signBuf);
-
-		signBuf.putUnsigned64(storageTime);
-
-		// Avoid signature breaking for array
-		if (value instanceof ArrayValue) {
-			ArrayValue signValue = ArrayModel.getValueForSigning((ArrayValue) value, kind);
-			signValue.writeTo(signBuf);
-		} else {
-			value.writeTo(signBuf);
-		}
-
-		try {
-			dataSigner.update(signBuf.array(), 0, signBuf.position());
-			dataSigner.sign();
-			return dataSigner;
-		} catch (SignatureException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Indicates an error occurred while building a storage data object
-	 */
-	public static class DataBuildingException extends RuntimeException {
-
-		public DataBuildingException(String message) {
-			super(message);
-		}
+		return new StoredData(storageTime, lifeTime, value, dataSigner, resId, kind);
 	}
 }

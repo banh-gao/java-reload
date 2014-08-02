@@ -179,7 +179,10 @@ public abstract class CryptoHelper<T extends Certificate> {
 	}
 
 	public ReloadCertificate getCertificate(SignerIdentity identity) {
-		// TODO: get certificate by signer identity
+		for (ReloadCertificate cert : getKeystore().getStoredCertificates().values())
+			if (belongsTo(cert, identity))
+				return cert;
+
 		return null;
 	}
 

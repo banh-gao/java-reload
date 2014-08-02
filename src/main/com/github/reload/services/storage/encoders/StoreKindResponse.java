@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.NodeID;
@@ -49,8 +49,8 @@ public class StoreKindResponse {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<NodeID> nodeIdCodec;
 
-		public StoreKindResponseCodec(Configuration conf) {
-			super(conf);
+		public StoreKindResponseCodec(ComponentsContext ctx) {
+			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 			nodeIdCodec = getCodec(NodeID.class);
 		}

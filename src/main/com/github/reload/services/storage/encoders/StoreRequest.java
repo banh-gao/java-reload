@@ -3,7 +3,7 @@ package com.github.reload.services.storage.encoders;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content;
@@ -48,8 +48,8 @@ public class StoreRequest extends Content {
 		private final Codec<ResourceID> resIdCodec;
 		private final Codec<StoreKindData> storeKindDataCodec;
 
-		public StoreRequestCodec(Configuration conf) {
-			super(conf);
+		public StoreRequestCodec(ComponentsContext ctx) {
+			super(ctx);
 			resIdCodec = getCodec(ResourceID.class);
 			storeKindDataCodec = getCodec(StoreKindData.class);
 		}

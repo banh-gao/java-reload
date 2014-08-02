@@ -22,7 +22,7 @@ public class PingService {
 	@Component
 	private MessageRouter router;
 
-	private Random rand = new Random();
+	private final Random rand = new Random();
 
 	@MessageHandler(ContentType.PING_REQ)
 	private void handleAppAttachRequest(Message requestMessage) {

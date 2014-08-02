@@ -37,6 +37,7 @@ public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 	public void start() {
 		privateKey = bootstrap.getLocalKey();
 		localCert = bootstrap.getLocalCert();
+		addCertificate(localCert);
 	}
 
 	@Override

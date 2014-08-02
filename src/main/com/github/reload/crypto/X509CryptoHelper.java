@@ -42,7 +42,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 	private SSLContext sslContext;
 
-	private X509CertificateParser certParser = new X509CertificateParser();
+	private final X509CertificateParser certParser = new X509CertificateParser();
 	private static HashAlgorithm signHashAlg;
 	private static SignatureAlgorithm signAlg;
 	private static HashAlgorithm certHashAlg;
@@ -99,7 +99,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 			certToAuthenticate = issuerCert;
 		}
 
-		out.add((X509Certificate) trustedIssuer);
+		out.add(trustedIssuer);
 		return out;
 	}
 

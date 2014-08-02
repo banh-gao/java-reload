@@ -1,7 +1,7 @@
 package com.github.reload.services.storage;
 
 import java.math.BigInteger;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
@@ -9,7 +9,6 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.services.storage.AccessPolicy.AccessPolicyException;
 import com.github.reload.services.storage.DataModel.DataValueBuilder;
-import com.github.reload.services.storage.PreparedData.DataBuildingException;
 import com.github.reload.services.storage.encoders.StoredData;
 
 public class DataUtils {
@@ -20,8 +19,8 @@ public class DataUtils {
 	 * @throws AccessPolicyException
 	 * @throws DataTooLargeException
 	 */
-	static void performKindChecks(ResourceID resourceId, StoredData requestData, DataKind kind, Configuration conf) throws ErrorMessageException {
-		kind.getAccessPolicy().accept(resourceId, requestData, requestData.getSignature().getIdentity());
+	static void performKindChecks(ResourceID resourceId, StoredData requestData, DataKind kind, ComponentsContext ctx) throws ErrorMessageException {
+		kind.getAccessPolicy().accept(resourceId, requestData, requestData.getSignature().getIdentity(), ctx);
 
 		if (requestData.getValue().getSize() > kind.getAttribute(DataKind.MAX_SIZE))
 			throw new ErrorMessageException(new Error(ErrorType.DATA_TOO_LARGE, "Size of the data exceeds the maximum allowed size"));
@@ -32,12 +31,7 @@ public class DataUtils {
 	 * situations
 	 */
 	static StoredData getNonExistentData(DataKind kind) {
-		try {
-			DataValueBuilder<?> svb = kind.getDataModel().newValueBuilder();
-			svb.build();
-			return new StoredData(BigInteger.ZERO, 0, svb.build(), Signature.EMPTY_SIGNATURE);
-		} catch (DataBuildingException e) {
-			throw new RuntimeException(e);
-		}
+		DataValueBuilder<?> svb = kind.getDataModel().newValueBuilder();
+		return new StoredData(BigInteger.ZERO, 0, svb.build(), Signature.EMPTY_SIGNATURE);
 	}
 }

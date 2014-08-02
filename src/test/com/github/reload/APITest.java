@@ -20,7 +20,7 @@ public abstract class APITest {
 
 		b.setLocalAddress(TestConfiguration.BOOTSTRAP_ADDR);
 		b.setLocalNodeId(TEST_NODEID);
-		b.setClientMode(true);
+		b.setOverlayInitiator(true);
 		b.setLocalCert(TestBootstrap.loadCert("certs/peer0_cert.der"));
 		b.setLocalKey(TestBootstrap.loadPrivateKey("privKeys/peer0_key.der", SignatureAlgorithm.RSA));
 
@@ -30,6 +30,6 @@ public abstract class APITest {
 
 	@AfterClass
 	public static void deinit() throws InterruptedException {
-		overlay.leave();
+		overlay.disconnect();
 	}
 }

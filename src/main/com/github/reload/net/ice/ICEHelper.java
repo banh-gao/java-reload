@@ -44,9 +44,8 @@ public class ICEHelper {
 
 	public List<InetAddress> getInterfaceAddresses() {
 		// FIXME: TEST return loopback only for test
-		if (true) {
+		if (true)
 			return Collections.singletonList(InetAddress.getLoopbackAddress());
-		}
 
 		// END TEST BLOCK
 

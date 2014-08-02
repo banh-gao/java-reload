@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.ProbeRequest.ProbeRequestCodec;
@@ -68,8 +68,8 @@ public class ProbeRequest extends Content {
 
 		private static final int LIST_LENGTH_FIELD = U_INT8;
 
-		public ProbeRequestCodec(Configuration conf) {
-			super(conf);
+		public ProbeRequestCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

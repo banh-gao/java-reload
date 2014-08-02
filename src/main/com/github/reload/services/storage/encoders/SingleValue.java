@@ -2,7 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
@@ -61,8 +61,8 @@ public class SingleValue implements DataValue {
 
 		final static int VALUE_LENGTH_FIELD = U_INT32;
 
-		public SingleEntryCodec(Configuration conf) {
-			super(conf);
+		public SingleEntryCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

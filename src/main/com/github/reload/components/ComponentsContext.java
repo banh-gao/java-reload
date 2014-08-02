@@ -35,7 +35,7 @@ public class ComponentsContext {
 
 	private final EventBus eventBus;
 
-	private Executor defaultExecutor = Executors.newSingleThreadExecutor();
+	private final Executor defaultExecutor = Executors.newSingleThreadExecutor();
 
 	private static final int STATUS_LOADED = 1;
 	private static final int STATUS_STARTED = 2;
@@ -134,8 +134,9 @@ public class ComponentsContext {
 	}
 
 	public void stopComponents() {
-		for (Class<?> compBaseClazz : loadedComponents.keySet())
+		for (Class<?> compBaseClazz : loadedComponents.keySet()) {
 			stopComponent(compBaseClazz);
+		}
 	}
 
 	public boolean stopComponent(Class<?> compBaseClazz) {
@@ -191,15 +192,16 @@ public class ComponentsContext {
 					// Checked later
 				}
 
-				if (obj != null)
+				if (obj != null) {
 					try {
 						f.set(c, obj);
-						if (!compBaseClazz.equals(ComponentsContext.class))
+						if (!compBaseClazz.equals(ComponentsContext.class)) {
 							startComponent(compBaseClazz);
+						}
 					} catch (IllegalArgumentException | IllegalAccessException e) {
 						throw new IllegalStateException(e);
 					}
-				else
+				} else
 					throw new IllegalStateException(String.format("Missing component %s required by %s", compBaseClazz.getCanonicalName(), c.getClass().getCanonicalName()));
 
 			}
@@ -275,8 +277,9 @@ public class ComponentsContext {
 			ctx.startComponent(compBaseClazz);
 
 			for (Method m : cmp.getClass().getDeclaredMethods()) {
-				if (!m.isAnnotationPresent(Service.class))
+				if (!m.isAnnotationPresent(Service.class)) {
 					continue;
+				}
 
 				try {
 					m.setAccessible(true);

@@ -1,7 +1,7 @@
 package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.ProbeRequest.ProbeInformationType;
@@ -37,8 +37,8 @@ public class ResponsibleSetProbeInformation extends ProbeInformation {
 
 	static class RespSetCodec extends Codec<ResponsibleSetProbeInformation> {
 
-		public RespSetCodec(Configuration conf) {
-			super(conf);
+		public RespSetCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

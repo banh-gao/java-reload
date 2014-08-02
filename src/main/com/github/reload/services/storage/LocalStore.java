@@ -51,28 +51,33 @@ public class LocalStore {
 		for (StoreKindData receivedData : data) {
 
 			// Verify data signature
-			for (StoredData d : receivedData.getValues())
+			for (StoredData d : receivedData.getValues()) {
 				d.verify(storerKey, resourceId, receivedData.getKind());
+			}
 
 			KindKey key = new KindKey(resourceId, receivedData.getKind().getKindId());
 
 			StoreKindData oldStoredKind = storedResources.put(key, receivedData);
 
-			BigInteger oldGeneration;
+			if (oldStoredKind != null) {
+				BigInteger oldGeneration = oldStoredKind.getGeneration();
+				System.out.println("RCV:" + receivedData.getGeneration());
+				System.out.println("OLD:" + oldGeneration);
+				if (receivedData.getGeneration().compareTo(oldGeneration) <= 0) {
+					// Restore old value
+					storedResources.put(key, oldStoredKind);
 
-			if (oldStoredKind == null)
-				oldGeneration = BigInteger.ZERO;
-			else
-				oldGeneration = oldStoredKind.getGeneration();
+					// TODO: get replica nodes
+					List<NodeID> replicas = Collections.emptyList();
 
-			if (receivedData.getGeneration().compareTo(oldGeneration) <= 0) {
-				// Restore old value
-				storedResources.put(key, oldStoredKind);
-
-				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldGeneration, new ArrayList<NodeID>()));
+					generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldGeneration, replicas));
+				}
 			}
 
-			List<NodeID> replicaIds = plugin.onReplicateData(resourceId, receivedData);
+			// FIXME: replicate data
+			// List<NodeID> replicaIds = plugin.onReplicateData(resourceId,
+			// receivedData);
+			List<NodeID> replicaIds = Collections.emptyList();
 
 			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicaIds));
 		}
@@ -97,8 +102,8 @@ public class LocalStore {
 		return storedResources.size();
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<FetchKindResponse> fetch(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {
+
 		List<FetchKindResponse> out = new ArrayList<FetchKindResponse>();
 
 		for (StoredDataSpecifier spec : specifiers) {
@@ -106,23 +111,27 @@ public class LocalStore {
 
 			StoreKindData kindData = storedResources.get(key);
 
-			if (kindData == null)
+			if (kindData == null) {
 				continue;
+			}
 
 			// If the generation in the request corresponds to the last
 			// value we don't need to resend the same content
-			if (kindData.getGeneration().equals(spec.getGeneration()))
+			if (kindData.getGeneration().equals(spec.getGeneration())) {
 				continue;
+			}
 
 			List<StoredData> matchingData = new ArrayList<StoredData>();
 
 			for (StoredData d : kindData.getValues()) {
-				if (spec.getModelSpecifier().isMatching(d.getValue()))
+				if (spec.getModelSpecifier().isMatching(d.getValue())) {
 					matchingData.add(d);
+				}
 			}
 
-			if (matchingData.isEmpty())
+			if (matchingData.isEmpty()) {
 				matchingData.add(DataUtils.getNonExistentData(spec.getKind()));
+			}
 
 			out.add(new FetchKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));
 		}
@@ -130,7 +139,6 @@ public class LocalStore {
 		return out;
 	}
 
-	@SuppressWarnings("unchecked")
 	public List<StatKindResponse> stat(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {
 		List<StatKindResponse> out = new ArrayList<StatKindResponse>();
 
@@ -139,19 +147,22 @@ public class LocalStore {
 
 			StoreKindData kindData = storedResources.get(key);
 
-			if (kindData == null)
+			if (kindData == null) {
 				continue;
+			}
 
 			// If the generation in the request corresponds to the last
 			// value we don't need to resend the same content
-			if (kindData.getGeneration().equals(spec.getGeneration()))
+			if (kindData.getGeneration().equals(spec.getGeneration())) {
 				continue;
+			}
 
 			List<StoredMetadata> matchingData = new ArrayList<StoredMetadata>();
 
 			for (StoredData d : kindData.getValues()) {
-				if (spec.getModelSpecifier().isMatching(d.getValue()))
+				if (spec.getModelSpecifier().isMatching(d.getValue())) {
 					matchingData.add(d.getMetadata(spec.getKind(), CryptoHelper.OVERLAY_HASHALG));
+				}
 			}
 
 			out.add(new StatKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content.ContentCodec;
@@ -55,8 +55,8 @@ public abstract class Content {
 		private static final int BODY_LENGTH_FIELD = U_INT32;
 		private static final int EXTENSIONS_LENGTH_FIELD = U_INT32;
 
-		public ContentCodec(Configuration conf) {
-			super(conf);
+		public ContentCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.ice.IPv6AddressPort.IPv6AddressPortCodec;
@@ -25,8 +25,8 @@ public class IPv6AddressPort extends IPAddressPort {
 
 		private static final int ADDR_LENGTH = U_INT128;
 
-		public IPv6AddressPortCodec(Configuration conf) {
-			super(conf);
+		public IPv6AddressPortCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

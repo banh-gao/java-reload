@@ -91,6 +91,7 @@ public interface Configuration {
 
 	public abstract ReloadCertificate getRootCertificate();
 
+	@Override
 	public abstract String toString();
 
 }

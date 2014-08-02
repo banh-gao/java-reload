@@ -58,6 +58,7 @@ class OverlayConnector {
 
 		Futures.addCallback(bootConnFut, new FutureCallback<Connection>() {
 
+			@Override
 			public void onSuccess(Connection neighbor) {
 				attachToAP(neighbor.getNodeId(), overlayConnFut, joinNeeded);
 			}
@@ -84,8 +85,9 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection result) {
-				if (!bootConnFut.set(result))
+				if (!bootConnFut.set(result)) {
 					result.close();
+				}
 			}
 
 			@Override
@@ -110,7 +112,7 @@ class OverlayConnector {
 
 		final DestinationList dest = new DestinationList(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
 
-		AttachService attachConnector = (AttachService) ctx.get(AttachService.class);
+		AttachService attachConnector = ctx.get(AttachService.class);
 
 		ListenableFuture<Connection> apConnFut = attachConnector.attachTo(dest, bootstrapServer, true);
 

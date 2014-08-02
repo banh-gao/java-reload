@@ -1,4 +1,4 @@
-package com.github.reload.net.encoders;
+package com.github.reload.net.stack;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -13,6 +13,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.net.encoders.Header;
+import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.Signature;
@@ -70,7 +72,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 		}
 
 		for (Certificate c : javaCerts) {
-			for (Certificate validIssuer : cryptoHelper.getAcceptedIssuers())
+			for (Certificate validIssuer : cryptoHelper.getAcceptedIssuers()) {
 				try {
 					javaCerts.add(validIssuer);
 					List<? extends Certificate> trustChain = cryptoHelper.getTrustRelationship(c, validIssuer, javaCerts);
@@ -78,6 +80,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 				} catch (GeneralSecurityException e) {
 					e.printStackTrace();
 				}
+			}
 		}
 
 		throw new CertificateException("Untrusted peer certificate");

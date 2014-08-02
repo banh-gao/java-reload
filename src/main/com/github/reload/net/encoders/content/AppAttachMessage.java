@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.AppAttachMessage.AppAttachMessageCodec;
@@ -135,8 +135,8 @@ public class AppAttachMessage extends Content {
 
 		private final Codec<HostCandidate> iceCodec;
 
-		public AppAttachMessageCodec(Configuration conf) {
-			super(conf);
+		public AppAttachMessageCodec(ComponentsContext ctx) {
+			super(ctx);
 			iceCodec = getCodec(HostCandidate.class);
 		}
 

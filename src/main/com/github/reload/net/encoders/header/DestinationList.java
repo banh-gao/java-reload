@@ -5,7 +5,7 @@ import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.DestinationList.DestinationListCodec;
@@ -49,28 +49,6 @@ public class DestinationList extends AbstractList<RoutableID> {
 		return list.getLast();
 	}
 
-	public NodeID getNodeDestination() {
-		RoutableID last = getDestination();
-		if (last instanceof NodeID)
-			return (NodeID) last;
-		throw new IllegalArgumentException("Invalid node-id destination");
-	}
-
-	public boolean isNodeDestination() {
-		return (getDestination() instanceof NodeID);
-	}
-
-	public boolean isResourceDestination() {
-		return (getDestination() instanceof ResourceID);
-	}
-
-	public ResourceID getResourceDestination() {
-		RoutableID last = getDestination();
-		if (last instanceof ResourceID)
-			return (ResourceID) last;
-		throw new IllegalArgumentException("Invalid resource-id destination");
-	}
-
 	@Override
 	public boolean add(RoutableID e) {
 		return list.add(e);
@@ -100,8 +78,8 @@ public class DestinationList extends AbstractList<RoutableID> {
 
 		private final Codec<RoutableID> rouIdCodec;
 
-		public DestinationListCodec(Configuration conf) {
-			super(conf);
+		public DestinationListCodec(ComponentsContext ctx) {
+			super(ctx);
 			rouIdCodec = getCodec(RoutableID.class);
 		}
 

@@ -53,9 +53,9 @@ public abstract class DataModel<T extends DataValue> {
 
 	public abstract Class<? extends Metadata<T>> getMetadataClass();
 
-	public abstract ModelSpecifier<T> newSpecifier();
+	public abstract ModelSpecifier newSpecifier();
 
-	public abstract Class<? extends ModelSpecifier<T>> getSpecifierClass();
+	public abstract Class<? extends ModelSpecifier> getSpecifierClass();
 
 	@SuppressWarnings("unchecked")
 	public String getName() {
@@ -89,16 +89,16 @@ public abstract class DataModel<T extends DataValue> {
 	 */
 	public interface DataValueBuilder<T extends DataValue> {
 
-		public T build();
+		T build();
 
 	}
 
 	/**
 	 * A model specifier used to query for a {@link DataValue}
 	 */
-	public interface ModelSpecifier<T extends DataValue> {
+	public interface ModelSpecifier {
 
-		boolean isMatching(T value);
+		boolean isMatching(DataValue value);
 
 	}
 

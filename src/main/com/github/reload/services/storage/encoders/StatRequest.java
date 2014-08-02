@@ -2,7 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -22,8 +22,8 @@ public class StatRequest extends FetchRequest {
 
 	static class StatRequestCodec extends FetchRequestCodec {
 
-		public StatRequestCodec(Configuration conf) {
-			super(conf);
+		public StatRequestCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

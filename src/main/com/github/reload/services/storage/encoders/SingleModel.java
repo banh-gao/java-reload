@@ -1,7 +1,7 @@
 package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -63,24 +63,31 @@ public class SingleModel extends DataModel<SingleValue> {
 
 		@Override
 		public SingleValue build() {
+			if (value == null)
+				value = new byte[0];
 			return new SingleValue(value, exists);
 		}
 	}
 
 	@ReloadCodec(SingleModelSpecifierCodec.class)
-	public static class SingleModelSpecifier implements ModelSpecifier<SingleValue> {
+	public static class SingleModelSpecifier implements ModelSpecifier {
 
 		@Override
-		public boolean isMatching(SingleValue value) {
-			return true;
+		public boolean isMatching(DataValue value) {
+			if (!(value instanceof SingleValue))
+				return false;
+
+			SingleValue v = (SingleValue) value;
+
+			return v.exists();
 		}
 
 	}
 
 	static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {
 
-		public SingleModelSpecifierCodec(Configuration conf) {
-			super(conf);
+		public SingleModelSpecifierCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

@@ -2,7 +2,7 @@ package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.ConfigUpdateRequest.ConfUpdateReqCodec;
@@ -52,8 +52,8 @@ public class ConfigUpdateRequest extends Content {
 
 		private static final int CONF_LENGTH_FIELD = U_INT24;
 
-		public ConfUpdateReqCodec(Configuration conf) {
-			super(conf);
+		public ConfUpdateReqCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

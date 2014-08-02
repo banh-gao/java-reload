@@ -122,9 +122,8 @@ public class X509CertificateParser implements ReloadCertificateParser {
 
 	private static NodeID extractNodeIdFromUri(X509Certificate cert, String overlayName) throws CertificateException {
 		ReloadUri uri = extractUri(cert);
-		if (overlayName == null || uri.getOverlayName().equalsIgnoreCase(overlayName)) {
-			return uri.getDestinationList().getNodeDestination();
-		}
+		if (overlayName == null || uri.getOverlayName().equalsIgnoreCase(overlayName))
+			return (NodeID) uri.getDestinationList().getDestination();
 
 		throw new CertificateException("No nodeid found");
 	}

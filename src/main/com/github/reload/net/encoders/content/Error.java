@@ -3,7 +3,7 @@ package com.github.reload.net.encoders.content;
 import io.netty.buffer.ByteBuf;
 import java.nio.charset.Charset;
 import java.util.EnumSet;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Error.ErrorCodec;
@@ -102,8 +102,8 @@ public class Error extends Content {
 
 		private static final int INFO_LENGTH_FIELD = U_INT16;
 
-		public ErrorCodec(Configuration conf) {
-			super(conf);
+		public ErrorCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override
@@ -136,8 +136,8 @@ public class Error extends Content {
 
 		public ErrorMessageException(Error error) {
 			super(error.getInfo());
-			this.type = error.getErrorType();
-			this.info = error.getEncodedInfo();
+			type = error.getErrorType();
+			info = error.getEncodedInfo();
 		}
 
 		public ErrorType getType() {

@@ -4,13 +4,12 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.DataModel.ModelName;
-import com.github.reload.services.storage.PreparedData.DataBuildingException;
 import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifier.ArrayRange;
 
 /**
@@ -32,7 +31,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 
 	@Override
 	public ArrayMetadata newMetadata(ArrayValue value, HashAlgorithm hashAlg) {
-		SingleModel singleModel = (SingleModel) getInstance(DataModel.SINGLE);
+		SingleModel singleModel = getInstance(DataModel.SINGLE);
 		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
 		return new ArrayMetadata(value.getIndex(), singleMeta);
 	}
@@ -89,11 +88,12 @@ public class ArrayModel extends DataModel<ArrayValue> {
 
 		@Override
 		public ArrayValue build() {
-			if (append)
+			if (append) {
 				index = LAST_INDEX;
+			}
 
 			if (index < 0)
-				throw new DataBuildingException("Array index not set");
+				throw new IllegalStateException("Array index not set");
 
 			return new ArrayValue(index, value);
 		}
@@ -104,7 +104,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 	 * 
 	 */
 	@ReloadCodec(ArrayModelSpecifierCodec.class)
-	public static class ArrayModelSpecifier implements ModelSpecifier<ArrayValue> {
+	public static class ArrayModelSpecifier implements ModelSpecifier {
 
 		private final List<ArrayRange> ranges = new ArrayList<ArrayRange>();
 
@@ -130,7 +130,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		/**
 		 * @return The array ranges where the returned values must be included
 		 */
-		List<ArrayRange> getRanges() {
+		public List<ArrayRange> getRanges() {
 			return ranges;
 		}
 
@@ -156,7 +156,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			return Objects.hash(super.hashCode(), ranges);
 		}
 
-		class ArrayRange {
+		public class ArrayRange {
 
 			private final long startIndex;
 			private final long endIndex;
@@ -201,9 +201,17 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		}
 
 		@Override
-		public boolean isMatching(ArrayValue value) {
+		public boolean isMatching(DataValue value) {
+			if (!(value instanceof ArrayValue))
+				return false;
+
+			ArrayValue v = (ArrayValue) value;
+
+			if (!v.getValue().exists())
+				return false;
+
 			for (ArrayRange r : getRanges()) {
-				if (r.contains(value.getIndex()))
+				if (r.contains(v.getIndex()))
 					return true;
 			}
 			return false;
@@ -214,8 +222,8 @@ public class ArrayModel extends DataModel<ArrayValue> {
 
 		private static final int RANGES_LENGTH_FIELD = U_INT16;
 
-		public ArrayModelSpecifierCodec(Configuration conf) {
-			super(conf);
+		public ArrayModelSpecifierCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

@@ -8,7 +8,7 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -146,8 +146,8 @@ public class Signature {
 		private final Codec<HashAlgorithm> hashAlgCodec;
 		private final Codec<SignerIdentity> signIdentityCodec;
 
-		public SignatureCodec(Configuration conf) {
-			super(conf);
+		public SignatureCodec(ComponentsContext ctx) {
+			super(ctx);
 			signAlgCodec = getCodec(SignatureAlgorithm.class);
 			hashAlgCodec = getCodec(HashAlgorithm.class);
 			signIdentityCodec = getCodec(SignerIdentity.class);

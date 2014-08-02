@@ -2,7 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
@@ -103,8 +103,8 @@ public class DictionaryValue implements DataValue {
 
 		private static final int KEY_LENGTH_FIELD = U_INT16;
 
-		public KeyCodec(Configuration conf) {
-			super(conf);
+		public KeyCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override
@@ -130,8 +130,8 @@ public class DictionaryValue implements DataValue {
 		private final Codec<SingleValue> valueCodec;
 		private final Codec<Key> keyCodec;
 
-		public DictionaryValueCodec(Configuration conf) {
-			super(conf);
+		public DictionaryValueCodec(ComponentsContext ctx) {
+			super(ctx);
 			valueCodec = getCodec(SingleValue.class);
 			keyCodec = getCodec(Key.class);
 		}

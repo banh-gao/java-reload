@@ -20,8 +20,8 @@ import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.services.storage.AccessPolicy;
-import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.AccessPolicy.PolicyName;
+import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.StoredData;
 
 /**

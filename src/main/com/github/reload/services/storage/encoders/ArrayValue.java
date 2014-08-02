@@ -1,7 +1,7 @@
 package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
@@ -60,8 +60,8 @@ public class ArrayValue implements DataValue {
 
 		private final Codec<SingleValue> valueCodec;
 
-		public ArrayEntryCodec(Configuration conf) {
-			super(conf);
+		public ArrayEntryCodec(ComponentsContext ctx) {
+			super(ctx);
 			valueCodec = getCodec(SingleValue.class);
 		}
 

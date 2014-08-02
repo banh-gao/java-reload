@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -32,7 +32,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 
 	@Override
 	public DictionaryMetadata newMetadata(DictionaryValue value, HashAlgorithm hashAlg) {
-		SingleModel singleModel = (SingleModel) getInstance(DataModel.SINGLE);
+		SingleModel singleModel = getInstance(DataModel.SINGLE);
 		SingleMetadata singleMeta = singleModel.newMetadata(value.getValue(), hashAlg);
 		return new DictionaryMetadata(value.getKey(), singleMeta);
 	}
@@ -48,7 +48,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	}
 
 	@Override
-	public Class<? extends ModelSpecifier<DictionaryValue>> getSpecifierClass() {
+	public Class<? extends ModelSpecifier> getSpecifierClass() {
 		return DictionaryModelSpecifier.class;
 	}
 
@@ -83,7 +83,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	 * 
 	 */
 	@ReloadCodec(DictionaryModelSpecifierCodec.class)
-	public static class DictionaryModelSpecifier implements ModelSpecifier<DictionaryValue> {
+	public static class DictionaryModelSpecifier implements ModelSpecifier {
 
 		List<Key> keys = new ArrayList<DictionaryValue.Key>();
 
@@ -120,9 +120,17 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 		}
 
 		@Override
-		public boolean isMatching(DictionaryValue value) {
+		public boolean isMatching(DataValue value) {
+			if (!(value instanceof DictionaryValue))
+				return false;
+
+			DictionaryValue v = (DictionaryValue) value;
+
+			if (!v.getValue().exists())
+				return false;
+
 			for (Key k : getKeys()) {
-				if (k.equals(value.getKey()))
+				if (k.equals(v.getKey()))
 					return true;
 			}
 
@@ -136,8 +144,8 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 		private static final int KEYS_LENGTH_FIELD = U_INT16;
 		private static final int KEY_ENTRY_FIELD = U_INT16;
 
-		public DictionaryModelSpecifierCodec(Configuration conf) {
-			super(conf);
+		public DictionaryModelSpecifierCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

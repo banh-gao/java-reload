@@ -30,7 +30,7 @@ import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoreRequest;
 
 /**
- * Elaborate the storage messages and is responsible for local storage
+ * Process incoming storage messages and is responsible for local storage
  * management
  * 
  */
@@ -62,15 +62,18 @@ class StorageController {
 	private void handleStoreRequest(Message requestMessage) {
 		StoreRequest req = (StoreRequest) requestMessage.getContent();
 
-		if (req.getReplicaNumber() == 0 && !plugin.isThisPeerResponsible(req.getResourceId())) {
+		if (req.getReplicaNumber() == 0 && !plugin.isLocalPeerResponsible(req.getResourceId())) {
 			sendAnswer(requestMessage, new Error(ErrorType.NOT_FOUND, "Node not responsible for requested resource"));
 			return;
 		}
 
-		if (req.getReplicaNumber() > 0 && !plugin.isThisNodeValidReplicaFor(requestMessage)) {
-			sendAnswer(requestMessage, new Error(ErrorType.NOT_FOUND, "Node not valid replica for requested resource"));
-			return;
-		}
+		// FIXME: check if valid replica
+		// if (req.getReplicaNumber() > 0 &&
+		// !plugin.isThisNodeValidReplicaFor(requestMessage)) {
+		// sendAnswer(requestMessage, new Error(ErrorType.NOT_FOUND,
+		// "Node not valid replica for requested resource"));
+		// return;
+		// }
 
 		NodeID sender = requestMessage.getHeader().getSenderId();
 

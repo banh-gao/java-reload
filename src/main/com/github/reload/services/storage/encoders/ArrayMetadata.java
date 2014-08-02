@@ -2,7 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.Metadata;
@@ -64,8 +64,8 @@ public class ArrayMetadata implements Metadata<ArrayValue> {
 
 		private final Codec<SingleMetadata> singleCodec;
 
-		public ArrayMetadataCodec(Configuration conf) {
-			super(conf);
+		public ArrayMetadataCodec(ComponentsContext ctx) {
+			super(ctx);
 			singleCodec = getCodec(SingleMetadata.class);
 		}
 

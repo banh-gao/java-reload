@@ -17,10 +17,8 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.FramedMessageCodec;
-import com.github.reload.net.encoders.MessageAuthenticator;
 import com.github.reload.net.encoders.MessageEncoder;
 import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.MessagePayloadDecoder;
@@ -35,7 +33,7 @@ public class ReloadStackBuilder {
 	private final AbstractBootstrap<?, ?> bootstrap;
 	private InetSocketAddress localAddress;
 	private OverlayLinkType linkType;
-	private ForwardingHandler fwdHandler;
+	private final ForwardingHandler fwdHandler;
 
 	public static ReloadStackBuilder newClientBuilder(ComponentsContext ctx, MessageDispatcher msgDispatcher) {
 		Bootstrap b = new Bootstrap();
@@ -59,7 +57,7 @@ public class ReloadStackBuilder {
 	protected <T extends AbstractBootstrap<T, ? extends Channel>> ReloadStackBuilder(ComponentsContext ctx, MessageDispatcher msgDispatcher, T bootstrap, boolean isServer) {
 		this.ctx = ctx;
 		this.isServer = isServer;
-		this.fwdHandler = new ForwardingHandler(ctx);
+		fwdHandler = new ForwardingHandler(ctx);
 		this.bootstrap = bootstrap;
 		this.msgDispatcher = msgDispatcher;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -81,8 +79,9 @@ public class ReloadStackBuilder {
 
 		initPipeline();
 
-		if (localAddress == null)
+		if (localAddress == null) {
 			localAddress = new InetSocketAddress(0);
+		}
 
 		return new ReloadStack(bootstrap.bind(localAddress).sync().channel());
 	}
@@ -117,14 +116,14 @@ public class ReloadStackBuilder {
 				pipeline.addLast(ReloadStack.HANDLER_LINK, LinkHandlerFactory.getInstance(ctx, linkType));
 
 				// Codec for RELOAD forwarding header
-				pipeline.addLast(ReloadStack.DECODER_HEADER, new MessageHeaderDecoder(ctx.get(Configuration.class)));
+				pipeline.addLast(ReloadStack.DECODER_HEADER, new MessageHeaderDecoder(ctx));
 
 				// Decides whether an incoming message has to be processed
 				// locally or forwarded to a neighbor node
 				pipeline.addLast(ReloadStack.HANDLER_FORWARD, fwdHandler);
 
 				// Decoder for message payload (content + security block)
-				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(ctx.get(Configuration.class)));
+				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(ctx));
 
 				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator(ctx.get(CryptoHelper.class)));
 

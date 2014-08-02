@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.content.Content;
@@ -39,10 +38,9 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 
 	public MessageEncoder(ComponentsContext ctx) {
 		this.ctx = ctx;
-		Configuration conf = ctx.get(Configuration.class);
-		hdrCodec = Codec.getCodec(Header.class, conf);
-		contentCodec = Codec.getCodec(Content.class, conf);
-		secBlockCodec = Codec.getCodec(SecurityBlock.class, conf);
+		hdrCodec = Codec.getCodec(Header.class, ctx);
+		contentCodec = Codec.getCodec(Content.class, ctx);
+		secBlockCodec = Codec.getCodec(SecurityBlock.class, ctx);
 	}
 
 	@Override

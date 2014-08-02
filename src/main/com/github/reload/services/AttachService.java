@@ -88,8 +88,9 @@ public class AttachService {
 
 		final Message req = msgBuilder.newMessage(attachRequest, destList);
 
-		if (nextHop != null)
+		if (nextHop != null) {
 			req.setAttribute(Message.NEXT_HOP, nextHop);
+		}
 
 		pendingRequests.put(req.getHeader().getTransactionId(), fut);
 
@@ -208,13 +209,15 @@ public class AttachService {
 
 		AttachMessage attachRequest = (AttachMessage) req.getContent();
 
-		if (attachRequest.isSendUpdate())
+		if (attachRequest.isSendUpdate()) {
 			updateAfterConnection.add(req.getHeader().getSenderId());
+		}
 	}
 
 	@Subscribe
 	public void sendUpdateAfterConnection(ConnectionStatusEvent e) {
-		if (e.type == Type.ACCEPTED && updateAfterConnection.remove(e.connection.getNodeId()))
+		if (e.type == Type.ACCEPTED && updateAfterConnection.remove(e.connection.getNodeId())) {
 			plugin.requestUpdate(e.connection.getNodeId());
+		}
 	}
 }

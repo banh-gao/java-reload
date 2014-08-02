@@ -14,6 +14,7 @@ import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateTyp
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.services.AttachService;
 import com.github.reload.services.PingService;
+import com.github.reload.services.storage.StorageService;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -141,6 +142,7 @@ public abstract class Bootstrap {
 
 		// setup default components
 		ctx.set(ConnectionManager.class, new ConnectionManager());
+		ctx.set(StorageService.class, new StorageService());
 		ctx.set(AttachService.class, new AttachService());
 		ctx.set(PingService.class, new PingService());
 

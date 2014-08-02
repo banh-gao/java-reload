@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
@@ -25,6 +26,7 @@ import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
+import com.github.reload.routing.TopologyPlugin;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -46,7 +48,7 @@ public class MessageRouter {
 	@Component
 	private MessageBuilder msgBuilder;
 
-	private Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
+	private final Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
 
 	@Component
 	private ComponentsContext ctx;
@@ -73,17 +75,33 @@ public class MessageRouter {
 		return reqFut;
 	}
 
-	public ListenableFuture<NodeID> sendMessage(Message message) {
-		Header header = message.getHeader();
+	public ListenableFuture<NodeID> sendMessage(final Message message) {
+		final Header header = message.getHeader();
 
-		SettableFuture<NodeID> status = SettableFuture.create();
+		final SettableFuture<NodeID> status = SettableFuture.create();
 
 		Set<NodeID> hops;
 
-		if (message.getAttribute(Message.NEXT_HOP) == null)
+		if (message.getAttribute(Message.NEXT_HOP) == null) {
 			hops = ctx.get(RoutingTable.class).getNextHops(header.getDestinationId());
-		else
+		} else {
 			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
+		}
+
+		if (ctx.get(TopologyPlugin.class).isLocalPeerResponsible(header.getDestinationId())) {
+
+			ctx.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					l.debug(String.format("Local handling for message %#x", header.getTransactionId()));
+					status.set(ctx.get(Bootstrap.class).getLocalNodeId());
+					ctx.handleMessage(message);
+				}
+			});
+
+			return status;
+		}
 
 		if (hops.isEmpty()) {
 			String err = String.format("No route to %s for message %#x", header.getDestinationId(), header.getTransactionId());
@@ -116,10 +134,11 @@ public class MessageRouter {
 
 					@Override
 					public void run() {
-						if (future.isSuccess())
+						if (future.isSuccess()) {
 							status.set(nextHop);
-						else
+						} else {
 							status.setException(future.cause());
+						}
 					}
 
 				});
@@ -135,8 +154,9 @@ public class MessageRouter {
 		// If destination node is directly connected forward message to it
 		if (msg.getHeader().getDestinationId() instanceof NodeID) {
 			Connection directConn = connManager.getConnection((NodeID) msg.getHeader().getDestinationId());
-			if (directConn != null)
+			if (directConn != null) {
 				directConn.forward(msg);
+			}
 			return;
 		}
 

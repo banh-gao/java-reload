@@ -46,8 +46,9 @@ public class MessageBuilder {
 	}
 
 	public NodeID getWildcard() {
-		if (wildcardId == null)
+		if (wildcardId == null) {
 			wildcardId = NodeID.getWildcardId(conf.getNodeIdLength());
+		}
 		return wildcardId;
 	}
 

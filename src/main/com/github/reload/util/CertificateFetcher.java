@@ -11,15 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.sf.jReload.crypto.ReloadCertificate;
-import net.sf.jReload.crypto.X509CertificateParser;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
+import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.crypto.X509CertificateParser;
 
 /**
  * Utility class to request a signed certificate to a remote enrollment web

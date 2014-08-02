@@ -13,6 +13,7 @@ public class ServerStatusHandler extends ChannelInboundHandlerAdapter {
 		this.mgr = mgr;
 	}
 
+	@Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 		mgr.remoteNodeAccepted(ctx.channel());
 		super.channelRegistered(ctx);

@@ -7,7 +7,7 @@ import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
@@ -35,7 +35,7 @@ public class StoredData {
 		this.signature = signature;
 	}
 
-	public StoredData(BigInteger storageTime, long lifeTime, DataValue value, Signer s, ResourceID resId, DataKind kind) throws SignatureException {
+	public StoredData(BigInteger storageTime, long lifeTime, DataValue value, Signer s, ResourceID resId, DataKind kind) {
 		this(storageTime, lifeTime, value, generateSignature(storageTime, lifeTime, value, s, resId, kind));
 	}
 
@@ -61,31 +61,42 @@ public class StoredData {
 		return signature;
 	}
 
-	private static Signature generateSignature(BigInteger storageTime, long lifeTime, DataValue value, Signer s, ResourceID resId, DataKind kind) throws SignatureException {
+	private static Signature generateSignature(BigInteger storageTime, long lifeTime, DataValue value, Signer s, ResourceID resId, DataKind kind) {
 		ByteBuf b = UnpooledByteBufAllocator.DEFAULT.buffer();
 		b.writeBytes(resId.getData());
 		b.writeLong(kind.getKindId());
-		b.writeBytes(storageTime.toByteArray());
+
+		byte[] storageTimeBytes = storageTime.toByteArray();
+
+		// Make sure field is always of the fixed size by padding with zeros
+		b.writeZero(StoredDataCodec.STORAGE_TIME_FIELD - storageTimeBytes.length);
+
+		b.writeBytes(storageTimeBytes);
 
 		@SuppressWarnings("unchecked")
 		Codec<DataValue> valueCodec = (Codec<DataValue>) Codec.getCodec(value.getClass(), null);
 		try {
 			valueCodec.encode(value, b);
 			s.update(b);
-		} catch (CodecException e) {
+			return s.sign();
+		} catch (CodecException | SignatureException e) {
 			throw new RuntimeException(e);
 		} finally {
 			b.release();
 		}
-
-		return s.sign();
 	}
 
 	public boolean verify(PublicKey publicKey, ResourceID resId, DataKind kind) throws GeneralSecurityException {
 		ByteBuf b = UnpooledByteBufAllocator.DEFAULT.buffer();
 		b.writeBytes(resId.getData());
 		b.writeLong(kind.getKindId());
-		b.writeBytes(storageTime.toByteArray());
+
+		byte[] storageTimeBytes = storageTime.toByteArray();
+
+		// Make sure field is always of the fixed size by padding with zeros
+		b.writeZero(StoredDataCodec.STORAGE_TIME_FIELD - storageTimeBytes.length);
+
+		b.writeBytes(storageTimeBytes);
 
 		@SuppressWarnings("unchecked")
 		Codec<DataValue> valueCodec = (Codec<DataValue>) Codec.getCodec(value.getClass(), null);
@@ -144,8 +155,8 @@ public class StoredData {
 
 		private final Codec<Signature> signatureCodec;
 
-		public StoredDataCodec(Configuration conf) {
-			super(conf);
+		public StoredDataCodec(ComponentsContext ctx) {
+			super(ctx);
 			signatureCodec = getCodec(Signature.class);
 		}
 

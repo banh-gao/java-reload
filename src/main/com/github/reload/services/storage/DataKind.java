@@ -5,18 +5,12 @@ import io.netty.util.AttributeKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.Overlay;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.AccessPolicy.AccessPolicyParamsGenerator;
 import com.github.reload.services.storage.DataKind.DataKindCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
-import com.github.reload.services.storage.DataModel.ModelSpecifier;
-import com.github.reload.services.storage.encoders.ArrayValue;
-import com.github.reload.services.storage.encoders.DictionaryValue;
-import com.github.reload.services.storage.encoders.SingleValue;
-import com.github.reload.services.storage.encoders.StoredDataSpecifier;
 
 /**
  * The description of the data kind that a peer can handle
@@ -45,8 +39,12 @@ public class DataKind {
 
 	DataKind(Builder builder) {
 		kindId = builder.kindId;
-		accessPolicy = builder.accessPolicy;
-		dataModel = builder.dataModel;
+		try {
+			accessPolicy = builder.accessPolicy.newInstance();
+			dataModel = builder.dataModel.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 		attributes = new HashMap<AttributeKey<?>, Object>(builder.attributes);
 	}
 
@@ -55,20 +53,6 @@ public class DataKind {
 	 */
 	public long getKindId() {
 		return kindId;
-	}
-
-	/**
-	 * Create a data specifier used to fetch data from the overlay
-	 * 
-	 * @param modelSpecifier
-	 *            the data model specifier used to query for a specific data
-	 *            value
-	 * @return the specifier for this kind
-	 * @see Overlay#fetchData(net.sf.jReload.overlay.ResourceID,
-	 *      StoredDataSpecifier...)
-	 */
-	public StoredDataSpecifier newDataSpecifier(ModelSpecifier<?> modelSpecifier) {
-		return new StoredDataSpecifier(this, modelSpecifier);
 	}
 
 	/**
@@ -98,7 +82,7 @@ public class DataKind {
 	/**
 	 * @return The access control policy associated with this data kind
 	 */
-	public AccessPolicy getAccessPolicy() {
+	AccessPolicy getAccessPolicy() {
 		return accessPolicy;
 	}
 
@@ -109,51 +93,41 @@ public class DataKind {
 
 	public static class Builder {
 
-		public static final Class<SingleValue> TYPE_SINGLE = SingleValue.class;
-		public static final Class<ArrayValue> TYPE_ARRAY = ArrayValue.class;
-		public static final Class<DictionaryValue> TYPE_DICTIONARY = DictionaryValue.class;
-
 		private final long kindId;
-		private DataModel<? extends DataValue> dataModel;
-		private AccessPolicy accessPolicy;
-		private Map<AttributeKey<?>, Object> attributes = new HashMap<AttributeKey<?>, Object>();
+		private Class<? extends DataModel<?>> dataModel;
+		private Class<? extends AccessPolicy> accessPolicy;
+		private final Map<AttributeKey<?>, Object> attributes = new HashMap<AttributeKey<?>, Object>();
 
 		public Builder(long kindId) {
 			this.kindId = kindId;
 		}
 
-		public Builder dataModel(DataModel<? extends DataValue> dataModel) {
+		public Builder dataModel(Class<? extends DataModel<?>> dataModel) {
 			this.dataModel = dataModel;
 			return this;
 		}
 
 		public <T> Builder attribute(AttributeKey<T> key, T value) {
-			this.attributes.put(key, value);
+			attributes.put(key, value);
 			return this;
 		}
 
-		public Builder accessPolicy(AccessPolicy accessPolicy) {
+		public Builder accessPolicy(Class<? extends AccessPolicy> accessPolicy) {
 			this.accessPolicy = accessPolicy;
 			return this;
 		}
 
 		public DataKind build() {
-			checkParams();
-			return new DataKind(this);
-		}
-
-		private void checkParams() {
 			if (dataModel == null || accessPolicy == null)
 				throw new IllegalStateException();
-
-			accessPolicy.checkKindParams(this);
+			return new DataKind(this);
 		}
 	}
 
 	static class DataKindCodec extends Codec<DataKind> {
 
-		public DataKindCodec(Configuration conf) {
-			super(conf);
+		public DataKindCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

@@ -3,7 +3,7 @@ package com.github.reload.net.encoders.secBlock;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.SecurityBlock.SecurityBlockCodec;
@@ -37,8 +37,8 @@ public class SecurityBlock {
 		private final Codec<GenericCertificate> certCodec;
 		private final Codec<Signature> signCodec;
 
-		public SecurityBlockCodec(Configuration conf) {
-			super(conf);
+		public SecurityBlockCodec(ComponentsContext ctx) {
+			super(ctx);
 			certCodec = getCodec(GenericCertificate.class);
 			signCodec = getCodec(Signature.class);
 		}

@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
 import org.apache.log4j.Logger;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 
@@ -17,9 +17,9 @@ public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessag
 	private final Codec<Content> contentCodec;
 	private final Codec<SecurityBlock> secBlockCodec;
 
-	public MessagePayloadDecoder(Configuration conf) {
-		contentCodec = Codec.getCodec(Content.class, conf);
-		secBlockCodec = Codec.getCodec(SecurityBlock.class, conf);
+	public MessagePayloadDecoder(ComponentsContext ctx) {
+		contentCodec = Codec.getCodec(Content.class, ctx);
+		secBlockCodec = Codec.getCodec(SecurityBlock.class, ctx);
 	}
 
 	@Override

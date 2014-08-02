@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.Map;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.google.common.collect.Maps;
 
@@ -64,19 +65,19 @@ public abstract class Codec<T> {
 	 */
 	public static final int U_INT128 = 16;
 
-	protected final Configuration conf;
+	protected final ComponentsContext ctx;
 
 	protected final Map<Class<?>, Codec<?>> codecs = Maps.newHashMap();
 
 	private static final Object[] NO_PARAMS = new Object[0];
 
 	/**
-	 * Construct new codec with the given configuration
+	 * Construct new codec with the given context
 	 * 
-	 * @param conf
+	 * @param ctx
 	 */
-	public Codec(Configuration conf) {
-		this.conf = conf;
+	public Codec(ComponentsContext ctx) {
+		this.ctx = ctx;
 	}
 
 	/**
@@ -93,7 +94,7 @@ public abstract class Codec<T> {
 		Codec<?> codec = codecs.get(clazz);
 
 		if (codec == null) {
-			codec = getCodec(clazz, conf);
+			codec = getCodec(clazz, ctx);
 			codecs.put(clazz, codec);
 		}
 
@@ -110,13 +111,13 @@ public abstract class Codec<T> {
 	 * 
 	 * @param clazz
 	 *            the class that the codec is associated with
-	 * @param conf
+	 * @param ctx
 	 *            the configuration to be used to initialize to the codec or
 	 *            null if the codec doesn't need one
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Codec<T> getCodec(Class<T> clazz, Configuration conf) {
+	public static <T> Codec<T> getCodec(Class<T> clazz, ComponentsContext ctx) {
 		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
 		if (codecAnn == null)
 			throw new IllegalStateException("No codec associated with " + clazz.toString());
@@ -124,9 +125,9 @@ public abstract class Codec<T> {
 		Class<? extends Codec<T>> codecClass = (Class<? extends Codec<T>>) codecAnn.value();
 
 		try {
-			Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(Configuration.class);
+			Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(ComponentsContext.class);
 			codecConstr.setAccessible(true);
-			return (Codec<T>) codecConstr.newInstance(conf);
+			return (Codec<T>) codecConstr.newInstance(ctx);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new IllegalStateException("Codec instantiation failed for " + clazz.toString(), e);

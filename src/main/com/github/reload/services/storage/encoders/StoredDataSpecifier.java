@@ -3,7 +3,7 @@ package com.github.reload.services.storage.encoders;
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
@@ -17,9 +17,13 @@ public class StoredDataSpecifier {
 	private BigInteger generation = BigInteger.ZERO;
 	private final ModelSpecifier modelSpecifier;
 
-	public StoredDataSpecifier(DataKind kind, ModelSpecifier spec) {
+	public StoredDataSpecifier(DataKind kind) {
+		this(kind, kind.getDataModel().newSpecifier());
+	}
+
+	StoredDataSpecifier(DataKind kind, ModelSpecifier modelSpecifier) {
 		this.kind = kind;
-		modelSpecifier = spec;
+		this.modelSpecifier = modelSpecifier;
 	}
 
 	public DataKind getKind() {
@@ -82,8 +86,8 @@ public class StoredDataSpecifier {
 
 		private final Codec<DataKind> kindCodec;
 
-		public StoredDataSpecifierCodec(Configuration conf) {
-			super(conf);
+		public StoredDataSpecifierCodec(ComponentsContext ctx) {
+			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 		}
 

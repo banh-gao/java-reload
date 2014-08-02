@@ -1,7 +1,7 @@
 package com.github.reload.net.encoders.header;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.UnknownForwardingOption.UnknownForwardingOptionCodec;
@@ -18,14 +18,15 @@ public class UnknownForwardingOption extends ForwardingOption {
 
 	static class UnknownForwardingOptionCodec extends Codec<UnknownForwardingOption> {
 
-		public UnknownForwardingOptionCodec(Configuration conf) {
-			super(conf);
+		public UnknownForwardingOptionCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override
 		public void encode(UnknownForwardingOption obj, ByteBuf buf, Object... params) {
-			if (obj.data != null)
+			if (obj.data != null) {
 				buf.writeBytes(obj.data);
+			}
 		}
 
 		@Override

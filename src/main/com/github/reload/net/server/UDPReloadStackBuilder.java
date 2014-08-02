@@ -17,11 +17,11 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.FramedMessageCodec;
-import com.github.reload.net.encoders.MessageAuthenticator;
 import com.github.reload.net.encoders.MessageEncoder;
 import com.github.reload.net.encoders.MessageHeaderDecoder;
 import com.github.reload.net.encoders.MessagePayloadDecoder;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
+import com.github.reload.net.stack.MessageAuthenticator;
 import com.github.reload.net.stack.ReloadStack;
 
 public class UDPReloadStackBuilder {
@@ -68,13 +68,15 @@ public class UDPReloadStackBuilder {
 
 		initPipeline();
 
-		if (localAddress == null)
+		if (localAddress == null) {
 			localAddress = new InetSocketAddress(0);
+		}
 
 		DatagramChannel ch = (DatagramChannel) bootstrap.bind(localAddress).sync().channel();
 
-		if (localAddress.getAddress().isMulticastAddress())
+		if (localAddress.getAddress().isMulticastAddress()) {
 			ch.joinGroup(localAddress.getAddress());
+		}
 
 		return new ReloadStack(ch);
 	}

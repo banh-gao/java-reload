@@ -1,7 +1,7 @@
 package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.ice.IPAddressPort.AddressType;
 
@@ -12,8 +12,8 @@ class IPAddressPortCodec extends Codec<IPAddressPort> {
 	private final Codec<IPv4AddressPort> ip4codec;
 	private final Codec<IPv6AddressPort> ip6codec;
 
-	public IPAddressPortCodec(Configuration conf) {
-		super(conf);
+	public IPAddressPortCodec(ComponentsContext ctx) {
+		super(ctx);
 		ip4codec = getCodec(IPv4AddressPort.class);
 		ip6codec = getCodec(IPv6AddressPort.class);
 	}

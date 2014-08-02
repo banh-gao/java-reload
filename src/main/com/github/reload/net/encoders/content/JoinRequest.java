@@ -1,7 +1,7 @@
 package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.JoinRequest.JoinRequestCodec;
@@ -37,8 +37,8 @@ public class JoinRequest extends Content {
 
 		private final Codec<NodeID> nodeCodec;
 
-		public JoinRequestCodec(Configuration conf) {
-			super(conf);
+		public JoinRequestCodec(ComponentsContext ctx) {
+			super(ctx);
 			nodeCodec = getCodec(NodeID.class);
 		}
 

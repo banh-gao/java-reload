@@ -23,17 +23,18 @@ public class MessageHandlersManager {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
 			MessageHandler ann = m.getAnnotation(MessageHandler.class);
 
-			if (ann == null)
+			if (ann == null) {
 				continue;
-
-			if (!checkHandlerMethodSignature(m)) {
-				throw new IllegalArgumentException(String.format("Invalid signature for annotated method %s in class %s", m.getName(), m.getDeclaringClass().getCanonicalName()));
 			}
 
-			if (ann.handleAnswers())
+			if (!checkHandlerMethodSignature(m))
+				throw new IllegalArgumentException(String.format("Invalid signature for annotated method %s in class %s", m.getName(), m.getDeclaringClass().getCanonicalName()));
+
+			if (ann.handleAnswers()) {
 				answerHandler = new MessageHandlerMethod(obj, m);
-			else
+			} else {
 				messageHandlers.put(ann.value(), new MessageHandlerMethod(obj, m));
+			}
 		}
 	}
 
@@ -41,8 +42,9 @@ public class MessageHandlersManager {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
 			MessageHandler ann = m.getAnnotation(MessageHandler.class);
 
-			if (ann == null)
+			if (ann == null) {
 				continue;
+			}
 
 			messageHandlers.remove(ann.value());
 

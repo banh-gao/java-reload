@@ -1,7 +1,7 @@
 package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.ProbeRequest.ProbeInformationType;
@@ -39,8 +39,8 @@ public class UptimeProbeInformation extends ProbeInformation {
 
 	static class UptimeCodec extends Codec<UptimeProbeInformation> {
 
-		public UptimeCodec(Configuration conf) {
-			super(conf);
+		public UptimeCodec(ComponentsContext ctx) {
+			super(ctx);
 		}
 
 		@Override

@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -95,8 +95,8 @@ public class SingleMetadata implements Metadata<SingleValue> {
 
 		private final Codec<HashAlgorithm> hashAlgCodec;
 
-		public SingleMetadataCodec(Configuration conf) {
-			super(conf);
+		public SingleMetadataCodec(ComponentsContext ctx) {
+			super(ctx);
 			hashAlgCodec = getCodec(HashAlgorithm.class);
 		}
 

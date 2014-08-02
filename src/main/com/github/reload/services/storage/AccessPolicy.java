@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
@@ -72,7 +73,7 @@ public abstract class AccessPolicy {
 	 * @throws ForbittenException
 	 *             if the policy check fails
 	 */
-	public abstract void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException;
+	public abstract void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException;
 
 	/**
 	 * Get a parameter generator for this access policy to be used with the

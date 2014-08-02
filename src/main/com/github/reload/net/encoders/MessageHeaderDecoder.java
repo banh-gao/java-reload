@@ -6,7 +6,7 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.CodecException;
 import java.util.List;
 import org.apache.log4j.Logger;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.encoders.header.NodeID;
 
@@ -19,8 +19,8 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 	private NodeID neighborId;
 
-	public MessageHeaderDecoder(Configuration conf) {
-		hdrCodec = Codec.getCodec(Header.class, conf);
+	public MessageHeaderDecoder(ComponentsContext ctx) {
+		hdrCodec = Codec.getCodec(Header.class, ctx);
 	}
 
 	@Override
@@ -30,8 +30,9 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-		if (neighborId == null)
-			this.neighborId = ctx.channel().attr(Connection.CONNECTION).get().getNodeId();
+		if (neighborId == null) {
+			neighborId = ctx.channel().attr(Connection.CONNECTION).get().getNodeId();
+		}
 
 		try {
 

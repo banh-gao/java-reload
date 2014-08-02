@@ -109,6 +109,7 @@ public class ConnectionManager {
 					Future<Channel> handshakeFuture = sslHandler.handshakeFuture();
 					handshakeFuture.addListener(new FutureListener<Channel>() {
 
+						@Override
 						public void operationComplete(Future<Channel> future) throws Exception {
 
 							ctx.execute(new Runnable() {
@@ -146,13 +147,15 @@ public class ConnectionManager {
 
 		handshakeFuture.addListener(new FutureListener<Channel>() {
 
+			@Override
 			public void operationComplete(final Future<Channel> future) throws Exception {
 				ctx.execute(new Runnable() {
 
 					@Override
 					public void run() {
-						if (!future.isSuccess())
+						if (!future.isSuccess()) {
 							future.cause().printStackTrace();
+						}
 						try {
 							Connection c = addConnection(new ReloadStack(channel));
 							ctx.postEvent(new ConnectionManager.ConnectionStatusEvent(Type.ACCEPTED, c));

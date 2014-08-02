@@ -2,7 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -69,8 +69,8 @@ public class FindKindData {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<ResourceID> resIdCodec;
 
-		public FindKindDataCodec(Configuration conf) {
-			super(conf);
+		public FindKindDataCodec(ComponentsContext ctx) {
+			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 			resIdCodec = getCodec(ResourceID.class);
 		}

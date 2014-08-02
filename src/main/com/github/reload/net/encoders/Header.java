@@ -279,10 +279,11 @@ public class Header {
 			h.isLastFragment = isLastFragment;
 			h.maxResponseLength = maxResponseLength;
 			h.overlayHash = overlayHash;
-			if (h.transactionId == 0)
+			if (h.transactionId == 0) {
 				h.transactionId = transIdGen.nextLong();
-			else
+			} else {
 				h.transactionId = transactionId;
+			}
 			h.ttl = ttl;
 			h.version = version;
 			h.viaList = viaList;
@@ -292,8 +293,9 @@ public class Header {
 
 	public void toForward(NodeID lastHop) {
 		ttl -= 1;
-		if (!viaList.getDestination().equals(lastHop))
+		if (!viaList.getDestination().equals(lastHop)) {
 			viaList.add(lastHop);
+		}
 	}
 
 }
