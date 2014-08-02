@@ -132,6 +132,14 @@ public class MessageRouter {
 		// Change message header to be forwarded
 		msg.getHeader().toForward(msg.getAttribute(Message.PREV_HOP));
 
+		// If destination node is directly connected forward message to it
+		if (msg.getHeader().getDestinationId() instanceof NodeID) {
+			Connection directConn = connManager.getConnection((NodeID) msg.getHeader().getDestinationId());
+			if (directConn != null)
+				directConn.forward(msg);
+			return;
+		}
+
 		for (NodeID nextHop : ctx.get(RoutingTable.class).getNextHops(msg.getHeader().getDestinationId())) {
 			Connection c = connManager.getConnection(nextHop);
 			// Forward message and ignore delivery status

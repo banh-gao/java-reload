@@ -18,7 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class MultiNodeTest {
 
-	public static final int NUM_NODES = 3;
+	public static final int NUM_NODES = 4;
 
 	public static Overlay[] overlays;
 
@@ -34,7 +34,7 @@ public class MultiNodeTest {
 		for (int i = 1; i < NUM_NODES; i++)
 			overlays[i] = startNode(new InetSocketAddress(InetAddress.getLoopbackAddress(), 2000 + i), i);
 
-		ComponentsContext ctx = overlays[2].getService(TestService.SERVICE_ID).getCtx();
+		ComponentsContext ctx = overlays[1].getService(TestService.SERVICE_ID).getCtx();
 
 		Message req = ctx.get(MessageBuilder.class).newMessage(new PingRequest(), new DestinationList(NodeID.valueOf("ceeadf392596529d0f6aaabe39fbb116")));
 
