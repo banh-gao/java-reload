@@ -61,8 +61,7 @@ public class LocalStore {
 
 			if (oldStoredKind != null) {
 				BigInteger oldGeneration = oldStoredKind.getGeneration();
-				System.out.println("RCV:" + receivedData.getGeneration());
-				System.out.println("OLD:" + oldGeneration);
+
 				if (receivedData.getGeneration().compareTo(oldGeneration) <= 0) {
 					// Restore old value
 					storedResources.put(key, oldStoredKind);

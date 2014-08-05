@@ -1,5 +1,6 @@
 package com.github.reload.services.storage;
 
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -31,12 +32,10 @@ import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifie
 import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
 import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryModelSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueBuilder;
-import com.github.reload.services.storage.encoders.DictionaryValue.Key;
 import com.github.reload.services.storage.encoders.FetchAnswer;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.FetchRequest;
 import com.github.reload.services.storage.encoders.SingleModel.SingleValueBuilder;
-import com.github.reload.services.storage.encoders.SingleValue;
 import com.github.reload.services.storage.encoders.StoreAnswer;
 import com.github.reload.services.storage.encoders.StoreKindData;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
@@ -306,18 +305,18 @@ public class StorageService {
 						continue;
 					}
 					preparedVal.index(i);
-					preparedVal.value(new SingleValue(new byte[0], false));
+					preparedVal.value(new byte[0], false);
 					settedIndexes.add(i);
 
 					preparedDatas.add(b);
 				}
 			}
 		} else if (modelSpec instanceof DictionaryModelSpecifier) {
-			for (Key k : ((DictionaryModelSpecifier) modelSpec).getKeys()) {
+			for (byte[] k : ((DictionaryModelSpecifier) modelSpec).getKeys()) {
 				PreparedData b = newPreparedData(kind);
 				DictionaryValueBuilder preparedVal = (DictionaryValueBuilder) b.getValueBuilder();
 				preparedVal.key(k);
-				preparedVal.value(new SingleValue(new byte[0], false));
+				preparedVal.value(new byte[0], false);
 
 				preparedDatas.add(b);
 			}
@@ -330,7 +329,8 @@ public class StorageService {
 		}
 
 		for (PreparedData b : preparedDatas) {
-			b.setGeneration(PreparedData.MAX_GENERATION);
+			// FIXME: determine correct generation value
+			b.setGeneration(BigInteger.valueOf(2));
 			b.setLifeTime(PreparedData.MAX_LIFETIME);
 		}
 

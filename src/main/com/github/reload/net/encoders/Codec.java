@@ -224,6 +224,13 @@ public abstract class Codec<T> {
 		return dataLength;
 	}
 
+	public static byte[] toUnsigned(BigInteger signedValue) {
+		byte[] signed = signedValue.toByteArray();
+		byte[] out = new byte[signed.length - 1];
+		System.arraycopy(signed, 1, out, 0, out.length);
+		return out;
+	}
+
 	public static class Field {
 
 		private final ByteBuf buf;

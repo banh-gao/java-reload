@@ -57,7 +57,7 @@ public class PingAnswer extends Content {
 			if (obj.responseTime.compareTo(BigInteger.ZERO) < 0 || obj.responseTime.bitCount() > 8 * RESPONSE_TIME_SIZE)
 				throw new CodecException("Invalid response time");
 
-			byte[] respTime = obj.responseTime.toByteArray();
+			byte[] respTime = toUnsigned(obj.responseTime);
 
 			// Add zeros padding to response time to ensure the field has always
 			// the size specified in RESPONSE_TIME_SIZE

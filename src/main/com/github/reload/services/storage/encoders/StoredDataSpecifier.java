@@ -95,7 +95,7 @@ public class StoredDataSpecifier {
 		public void encode(StoredDataSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 			kindCodec.encode(obj.kind, buf);
 
-			byte[] genBytes = obj.generation.toByteArray();
+			byte[] genBytes = toUnsigned(obj.generation);
 
 			// Make sure the field is of a fixed size by padding with zeros
 			buf.writeZero(GENERATION_FIELD - genBytes.length);

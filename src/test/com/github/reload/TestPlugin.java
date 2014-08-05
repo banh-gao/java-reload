@@ -112,8 +112,6 @@ public class TestPlugin implements TopologyPlugin {
 
 		r.neighbors.add(((JoinRequest) req.getContent()).getJoiningNode());
 
-		System.out.println("NEIB:" + r.neighbors);
-
 		router.sendMessage(ans);
 
 	}

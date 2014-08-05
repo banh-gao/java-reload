@@ -32,7 +32,7 @@ public class StoredMetadata extends StoredData {
 		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 
-			byte[] storTimeBytes = obj.getStorageTime().toByteArray();
+			byte[] storTimeBytes = toUnsigned(obj.getStorageTime());
 			// Make sure the field has always a fixed size by padding with zeros
 			buf.writeZero(STORAGE_TIME_FIELD - storTimeBytes.length);
 			buf.writeBytes(storTimeBytes);

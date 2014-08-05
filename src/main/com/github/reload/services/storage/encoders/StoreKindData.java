@@ -55,7 +55,7 @@ public class StoreKindData {
 		public void encode(StoreKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			kindCodec.encode(obj.kind, buf);
 
-			byte[] genCounterBytes = obj.generationCounter.toByteArray();
+			byte[] genCounterBytes = toUnsigned(obj.generationCounter);
 			// Make sure generation counter field is always of the fixed size by
 			// padding with zeros
 			buf.writeZero(GEN_COUNTER_FIELD - genCounterBytes.length);

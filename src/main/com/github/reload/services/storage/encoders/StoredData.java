@@ -66,7 +66,7 @@ public class StoredData {
 		b.writeBytes(resId.getData());
 		b.writeLong(kind.getKindId());
 
-		byte[] storageTimeBytes = storageTime.toByteArray();
+		byte[] storageTimeBytes = Codec.toUnsigned(storageTime);
 
 		// Make sure field is always of the fixed size by padding with zeros
 		b.writeZero(StoredDataCodec.STORAGE_TIME_FIELD - storageTimeBytes.length);
@@ -91,7 +91,7 @@ public class StoredData {
 		b.writeBytes(resId.getData());
 		b.writeLong(kind.getKindId());
 
-		byte[] storageTimeBytes = storageTime.toByteArray();
+		byte[] storageTimeBytes = Codec.toUnsigned(storageTime);
 
 		// Make sure field is always of the fixed size by padding with zeros
 		b.writeZero(StoredDataCodec.STORAGE_TIME_FIELD - storageTimeBytes.length);
@@ -164,7 +164,7 @@ public class StoredData {
 		public void encode(StoredData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 
-			byte[] storageTimeBytes = obj.storageTime.toByteArray();
+			byte[] storageTimeBytes = Codec.toUnsigned(obj.storageTime);
 
 			// Make sure field is always of the fixed size by padding with zeros
 			buf.writeZero(STORAGE_TIME_FIELD - storageTimeBytes.length);

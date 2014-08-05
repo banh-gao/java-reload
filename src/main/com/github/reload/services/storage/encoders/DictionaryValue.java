@@ -12,15 +12,15 @@ import com.google.common.base.Objects;
 @ReloadCodec(DictionaryValueCodec.class)
 public class DictionaryValue implements DataValue {
 
-	private final Key key;
+	private final byte[] key;
 	private final SingleValue value;
 
-	DictionaryValue(Key key, SingleValue value) {
+	DictionaryValue(byte[] key, SingleValue value) {
 		this.key = key;
 		this.value = value;
 	}
 
-	public Key getKey() {
+	public byte[] getKey() {
 		return key;
 	}
 
@@ -57,96 +57,45 @@ public class DictionaryValue implements DataValue {
 
 	@Override
 	public String toString() {
-		return "DictionaryValue [key=" + key + ", value=" + value + "]";
-	}
-
-	static public class Key {
-
-		private final byte[] data;
-
-		public Key(byte[] key) {
-			if (key == null)
-				throw new NullPointerException();
-			data = key;
-		}
-
-		public byte[] getValue() {
-			return data;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hashCode(super.hashCode(), data);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Key other = (Key) obj;
-			if (!Arrays.equals(data, other.data))
-				return false;
-			return true;
-		}
-
-		@Override
-		public String toString() {
-			return Codec.hexDump(data);
-		}
-	}
-
-	static class KeyCodec extends Codec<Key> {
-
-		private static final int KEY_LENGTH_FIELD = U_INT16;
-
-		public KeyCodec(ComponentsContext ctx) {
-			super(ctx);
-		}
-
-		@Override
-		public void encode(Key obj, ByteBuf buf, Object... params) throws CodecException {
-			Field lenFld = allocateField(buf, KEY_LENGTH_FIELD);
-			buf.writeBytes(obj.data);
-			lenFld.updateDataLength();
-		}
-
-		@Override
-		public Key decode(ByteBuf buf, Object... params) throws CodecException {
-			ByteBuf keyFld = readField(buf, KEY_LENGTH_FIELD);
-			byte[] keyData = new byte[keyFld.readableBytes()];
-			keyFld.readBytes(keyData);
-			keyFld.release();
-			return new Key(keyData);
-		}
-
+		return "DictionaryValue [key=" + Arrays.toString(key) + ", value=" + value + "]";
 	}
 
 	static class DictionaryValueCodec extends Codec<DictionaryValue> {
 
+		static final int KEY_LENGTH_FIELD = U_INT16;
+
 		private final Codec<SingleValue> valueCodec;
-		private final Codec<Key> keyCodec;
 
 		public DictionaryValueCodec(ComponentsContext ctx) {
 			super(ctx);
 			valueCodec = getCodec(SingleValue.class);
-			keyCodec = getCodec(Key.class);
 		}
 
 		@Override
 		public void encode(DictionaryValue obj, ByteBuf buf, Object... params) throws CodecException {
-			keyCodec.encode(obj.key, buf);
+			encodeKey(obj.key, buf);
 			valueCodec.encode(obj.value, buf);
+		}
+
+		static void encodeKey(byte[] key, ByteBuf buf) {
+			Field lenFld = allocateField(buf, KEY_LENGTH_FIELD);
+			buf.writeBytes(key);
+			lenFld.updateDataLength();
 		}
 
 		@Override
 		public DictionaryValue decode(ByteBuf buf, Object... params) throws CodecException {
-			Key k = keyCodec.decode(buf);
+			byte[] k = decodeKey(buf);
 			SingleValue v = valueCodec.decode(buf);
 			return new DictionaryValue(k, v);
+		}
+
+		static byte[] decodeKey(ByteBuf buf) {
+			ByteBuf keyFld = readField(buf, KEY_LENGTH_FIELD);
+			byte[] k = new byte[keyFld.readableBytes()];
+			keyFld.readBytes(k);
+			keyFld.release();
+			return k;
 		}
 
 	}

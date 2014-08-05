@@ -55,8 +55,6 @@ public class ArrayModel extends DataModel<ArrayValue> {
 	 * An array prepared value created by adding an index to a single prepared
 	 * value
 	 * 
-	 * @author Daniel Zozin <zdenial@gmx.com>
-	 * 
 	 */
 	public class ArrayValueBuilder implements DataValueBuilder<ArrayValue> {
 
@@ -67,9 +65,11 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		 */
 		public static final long LAST_INDEX = 0xffffffffl;
 
-		private long index = -1;
+		private final SingleValue DEFAULT_VALUE = new SingleValue(new byte[0], false);
+
+		private long index = 0;
 		private boolean append = false;
-		private SingleValue value;
+		private SingleValue value = DEFAULT_VALUE;
 
 		public ArrayValueBuilder index(long index) {
 			this.index = index;
@@ -81,8 +81,8 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			return this;
 		}
 
-		public ArrayValueBuilder value(SingleValue value) {
-			this.value = value;
+		public ArrayValueBuilder value(byte[] value, boolean exists) {
+			this.value = new SingleValue(value, exists);
 			return this;
 		}
 
@@ -91,9 +91,6 @@ public class ArrayModel extends DataModel<ArrayValue> {
 			if (append) {
 				index = LAST_INDEX;
 			}
-
-			if (index < 0)
-				throw new IllegalStateException("Array index not set");
 
 			return new ArrayValue(index, value);
 		}
@@ -211,10 +208,11 @@ public class ArrayModel extends DataModel<ArrayValue> {
 				return false;
 
 			for (ArrayRange r : getRanges()) {
-				if (r.contains(v.getIndex()))
-					return true;
+				if (!r.contains(v.getIndex()))
+					return false;
 			}
-			return false;
+
+			return true;
 		}
 	}
 

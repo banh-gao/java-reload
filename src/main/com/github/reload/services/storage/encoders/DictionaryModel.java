@@ -2,6 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import com.github.reload.components.ComponentsContext;
@@ -10,7 +11,6 @@ import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.DataModel.ModelName;
-import com.github.reload.services.storage.encoders.DictionaryValue.Key;
 
 /**
  * Factory class used to create objects specialized for the dictionary data
@@ -59,16 +59,18 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	 */
 	public class DictionaryValueBuilder implements DataValueBuilder<DictionaryValue> {
 
-		private Key key;
-		private SingleValue value;
+		private final SingleValue DEFAULT_VALUE = new SingleValue(new byte[0], false);
 
-		public DictionaryValueBuilder key(Key key) {
+		private byte[] key;
+		private SingleValue value = DEFAULT_VALUE;
+
+		public DictionaryValueBuilder key(byte[] key) {
 			this.key = key;
 			return this;
 		}
 
-		public DictionaryValueBuilder value(SingleValue value) {
-			this.value = value;
+		public DictionaryValueBuilder value(byte[] value, boolean exists) {
+			this.value = new SingleValue(value, exists);
 			return this;
 		}
 
@@ -85,15 +87,15 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	@ReloadCodec(DictionaryModelSpecifierCodec.class)
 	public static class DictionaryModelSpecifier implements ModelSpecifier {
 
-		List<Key> keys = new ArrayList<DictionaryValue.Key>();
+		List<byte[]> keys = new ArrayList<byte[]>();
 
 		public void addKey(byte[] key) {
 			if (key == null)
 				throw new NullPointerException();
-			keys.add(new Key(key));
+			keys.add(key);
 		}
 
-		public List<Key> getKeys() {
+		public List<byte[]> getKeys() {
 			return keys;
 		}
 
@@ -129,8 +131,8 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 			if (!v.getValue().exists())
 				return false;
 
-			for (Key k : getKeys()) {
-				if (k.equals(v.getKey()))
+			for (byte[] k : getKeys()) {
+				if (Arrays.equals(k, v.getKey()))
 					return true;
 			}
 
@@ -152,8 +154,8 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 		public void encode(DictionaryModelSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, KEYS_LENGTH_FIELD);
 
-			for (Key k : obj.keys) {
-				buf.writeBytes(k.getValue());
+			for (byte[] k : obj.keys) {
+				buf.writeBytes(k);
 			}
 
 			lenFld.updateDataLength();

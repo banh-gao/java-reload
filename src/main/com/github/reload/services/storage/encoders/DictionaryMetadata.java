@@ -1,13 +1,12 @@
 package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
-import java.util.Objects;
+import java.util.Arrays;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.Metadata;
 import com.github.reload.services.storage.encoders.DictionaryMetadata.DictionaryMetadataCodec;
-import com.github.reload.services.storage.encoders.DictionaryValue.Key;
 
 /**
  * Metadata of a stored dictionary entry
@@ -16,21 +15,59 @@ import com.github.reload.services.storage.encoders.DictionaryValue.Key;
 @ReloadCodec(DictionaryMetadataCodec.class)
 public class DictionaryMetadata implements Metadata<DictionaryValue> {
 
-	private final Key key;
+	private final byte[] key;
 	private final SingleMetadata singleMeta;
 
-	public DictionaryMetadata(Key key, SingleMetadata singleMeta) {
+	public DictionaryMetadata(byte[] key, SingleMetadata singleMeta) {
 		this.key = key;
 		this.singleMeta = singleMeta;
 	}
 
-	public Key getKey() {
+	public byte[] getKey() {
 		return key;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), key, singleMeta);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(key);
+		result = prime * result + ((singleMeta == null) ? 0 : singleMeta.hashCode());
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "DictionaryMetadata [key=" + key + ", singleMeta=" + singleMeta + "]";
+	}
+
+	static class DictionaryMetadataCodec extends Codec<DictionaryMetadata> {
+
+		private final Codec<SingleMetadata> singleCodec;
+
+		public DictionaryMetadataCodec(ComponentsContext ctx) {
+			super(ctx);
+			singleCodec = getCodec(SingleMetadata.class);
+		}
+
+		@Override
+		public void encode(DictionaryMetadata obj, ByteBuf buf, Object... params) throws CodecException {
+			DictionaryValue.DictionaryValueCodec.encodeKey(obj.key, buf);
+			singleCodec.encode(obj.singleMeta, buf);
+		}
+
+		@Override
+		public DictionaryMetadata decode(ByteBuf buf, Object... params) throws CodecException {
+			byte[] key = DictionaryValue.DictionaryValueCodec.decodeKey(buf);
+			SingleMetadata single = singleCodec.decode(buf);
+			return new DictionaryMetadata(key, single);
+		}
+
+	}
+
+	@Override
+	public long getSize() {
+		return singleMeta.getSize();
 	}
 
 	@Override
@@ -42,10 +79,7 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		if (getClass() != obj.getClass())
 			return false;
 		DictionaryMetadata other = (DictionaryMetadata) obj;
-		if (key == null) {
-			if (other.key != null)
-				return false;
-		} else if (!key.equals(other.key))
+		if (!Arrays.equals(key, other.key))
 			return false;
 		if (singleMeta == null) {
 			if (other.singleMeta != null)
@@ -53,42 +87,6 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		} else if (!singleMeta.equals(other.singleMeta))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "DictionaryMetadata [key=" + key + ", singleMeta=" + singleMeta + "]";
-	}
-
-	static class DictionaryMetadataCodec extends Codec<DictionaryMetadata> {
-
-		private final Codec<Key> keyCodec;
-		private final Codec<SingleMetadata> singleCodec;
-
-		public DictionaryMetadataCodec(ComponentsContext ctx) {
-			super(ctx);
-			keyCodec = getCodec(Key.class);
-			singleCodec = getCodec(SingleMetadata.class);
-		}
-
-		@Override
-		public void encode(DictionaryMetadata obj, ByteBuf buf, Object... params) throws CodecException {
-			keyCodec.encode(obj.key, buf);
-			singleCodec.encode(obj.singleMeta, buf);
-		}
-
-		@Override
-		public DictionaryMetadata decode(ByteBuf buf, Object... params) throws CodecException {
-			Key key = keyCodec.decode(buf);
-			SingleMetadata single = singleCodec.decode(buf);
-			return new DictionaryMetadata(key, single);
-		}
-
-	}
-
-	@Override
-	public long getSize() {
-		return singleMeta.getSize();
 	}
 
 }

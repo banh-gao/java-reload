@@ -98,7 +98,7 @@ public class StatKindResponse {
 		public void encode(StatKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			dataKindCodec.encode(obj.kind, buf);
 
-			byte[] genBytes = obj.generation.toByteArray();
+			byte[] genBytes = toUnsigned(obj.generation);
 
 			// Make sure the field has a fixed size by padding with zeros
 			buf.writeZero(GENERATION_FIELD - genBytes.length);

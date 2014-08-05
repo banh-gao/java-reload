@@ -27,6 +27,8 @@ import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.UnknownKindException;
+import com.github.reload.services.storage.encoders.ArrayModel;
+import com.github.reload.services.storage.encoders.DictionaryModel;
 import com.github.reload.services.storage.encoders.SingleModel;
 import com.github.reload.services.storage.policies.NodeMatch;
 
@@ -37,7 +39,9 @@ import com.github.reload.services.storage.policies.NodeMatch;
 public class TestConfiguration implements Configuration {
 
 	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
-	public static DataKind TEST_KIND = new DataKind.Builder(2020).accessPolicy(NodeMatch.class).dataModel(SingleModel.class).build();
+	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).accessPolicy(NodeMatch.class).dataModel(SingleModel.class).build();
+	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).accessPolicy(NodeMatch.class).dataModel(ArrayModel.class).build();
+	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).accessPolicy(NodeMatch.class).dataModel(DictionaryModel.class).build();
 
 	String instanceName;
 	int sequence;
@@ -74,7 +78,7 @@ public class TestConfiguration implements Configuration {
 		noICE = true;
 		linkProtocols = Collections.singletonList("TLS");
 		bootstrapNodes = Collections.singleton(BOOTSTRAP_ADDR);
-		requiredKinds = Collections.singletonMap(TEST_KIND.getKindId(), TEST_KIND);
+		requiredKinds = Collections.singletonMap(TEST_KIND_SINGLE.getKindId(), TEST_KIND_SINGLE);
 	}
 
 	public void setBootstrap(InetSocketAddress bootAddr) {

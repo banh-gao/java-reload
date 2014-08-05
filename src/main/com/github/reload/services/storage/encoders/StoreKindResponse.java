@@ -59,7 +59,7 @@ public class StoreKindResponse {
 		public void encode(StoreKindResponse obj, ByteBuf buf, Object... params) throws CodecException {
 			kindCodec.encode(obj.kind, buf);
 
-			byte[] genBytes = obj.generation.toByteArray();
+			byte[] genBytes = toUnsigned(obj.generation);
 
 			// Make sure the field is always the fixed size by padding with
 			// zeros
