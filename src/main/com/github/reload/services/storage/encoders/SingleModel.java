@@ -49,7 +49,7 @@ public class SingleModel extends DataModel<SingleValue> {
 	public static class SingleValueBuilder implements DataValueBuilder<SingleValue> {
 
 		private byte[] value;
-		private boolean exists;
+		private boolean exists = true;
 
 		public SingleValueBuilder value(byte[] value) {
 			this.value = value;

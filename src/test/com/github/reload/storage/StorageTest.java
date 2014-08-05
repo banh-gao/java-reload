@@ -35,11 +35,11 @@ public class StorageTest extends APITest {
 
 		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
-		System.out.println(fetchFut.get());
+		System.out.println(fetchFut.get().get(0).getValues());
 
-		System.out.println(storServ.removeData(TEST_RES, spec).get());
+		storServ.removeData(TEST_RES, spec).get();
 
 		fetchFut = storServ.fetchData(TEST_RES, spec);
-		System.out.println(fetchFut.get());
+		System.out.println(fetchFut.get().get(0).getValues());
 	}
 }
