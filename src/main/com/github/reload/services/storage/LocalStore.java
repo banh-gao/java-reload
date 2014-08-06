@@ -10,6 +10,7 @@ import java.util.Map;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.StatKindResponse;
@@ -129,13 +130,17 @@ public class LocalStore {
 			}
 
 			if (matchingData.isEmpty()) {
-				matchingData.add(DataUtils.getNonExistentData(spec.getKind()));
+				matchingData.add(getNonExistentData(spec.getKind()));
 			}
 
 			out.add(new FetchKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));
 		}
 
 		return out;
+	}
+
+	private StoredData getNonExistentData(DataKind kind) {
+		return new StoredData(BigInteger.ZERO, 0, kind.getDataModel().getNonExistentValue(), Signature.EMPTY_SIGNATURE);
 	}
 
 	public List<StatKindResponse> stat(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {

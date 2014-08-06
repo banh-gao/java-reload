@@ -5,8 +5,7 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.services.storage.DataModel;
-import com.github.reload.services.storage.DataModel.ModelName;
+import com.github.reload.services.storage.encoders.DataModel.ModelName;
 
 /**
  * Factory class used to create objects specialized for the single data model
@@ -14,6 +13,8 @@ import com.github.reload.services.storage.DataModel.ModelName;
  */
 @ModelName("SINGLE")
 public class SingleModel extends DataModel<SingleValue> {
+
+	private static final SingleValue NON_EXISTENT = new SingleValue(new byte[0], false);
 
 	@Override
 	public SingleValueBuilder newValueBuilder() {
@@ -37,13 +38,18 @@ public class SingleModel extends DataModel<SingleValue> {
 	}
 
 	@Override
-	public SingleModelSpecifier newSpecifier() {
-		return new SingleModelSpecifier();
+	public SingleValueSpecifier newSpecifier() {
+		return new SingleValueSpecifier();
 	}
 
 	@Override
-	public Class<SingleModelSpecifier> getSpecifierClass() {
-		return SingleModelSpecifier.class;
+	public Class<SingleValueSpecifier> getSpecifierClass() {
+		return SingleValueSpecifier.class;
+	}
+
+	@Override
+	public SingleValue getNonExistentValue() {
+		return NON_EXISTENT;
 	}
 
 	public static class SingleValueBuilder implements DataValueBuilder<SingleValue> {
@@ -69,8 +75,8 @@ public class SingleModel extends DataModel<SingleValue> {
 		}
 	}
 
-	@ReloadCodec(SingleModelSpecifierCodec.class)
-	public static class SingleModelSpecifier implements ModelSpecifier {
+	@ReloadCodec(SingleValueSpecifierCodec.class)
+	public static class SingleValueSpecifier implements ValueSpecifier {
 
 		@Override
 		public boolean isMatching(DataValue value) {
@@ -84,20 +90,20 @@ public class SingleModel extends DataModel<SingleValue> {
 
 	}
 
-	static class SingleModelSpecifierCodec extends Codec<SingleModelSpecifier> {
+	static class SingleValueSpecifierCodec extends Codec<SingleValueSpecifier> {
 
-		public SingleModelSpecifierCodec(ComponentsContext ctx) {
+		public SingleValueSpecifierCodec(ComponentsContext ctx) {
 			super(ctx);
 		}
 
 		@Override
-		public void encode(SingleModelSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(SingleValueSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 
 		}
 
 		@Override
-		public SingleModelSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
-			return new SingleModelSpecifier();
+		public SingleValueSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
+			return new SingleValueSpecifier();
 		}
 
 	}

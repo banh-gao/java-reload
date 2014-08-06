@@ -6,9 +6,9 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.services.storage.DataModel.DataValue;
-import com.github.reload.services.storage.DataModel.DataValueBuilder;
 import com.github.reload.services.storage.encoders.StoredData;
+import com.github.reload.services.storage.encoders.DataModel.DataValue;
+import com.github.reload.services.storage.encoders.DataModel.DataValueBuilder;
 
 /**
  * Helps to generate a signed data

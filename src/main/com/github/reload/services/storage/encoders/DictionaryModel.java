@@ -9,8 +9,7 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.services.storage.DataModel;
-import com.github.reload.services.storage.DataModel.ModelName;
+import com.github.reload.services.storage.encoders.DataModel.ModelName;
 
 /**
  * Factory class used to create objects specialized for the dictionary data
@@ -19,6 +18,8 @@ import com.github.reload.services.storage.DataModel.ModelName;
  */
 @ModelName("DICT")
 public class DictionaryModel extends DataModel<DictionaryValue> {
+
+	private static final DictionaryValue NON_EXISTENT = new DictionaryValue(new byte[0], new SingleValue(new byte[0], false));
 
 	@Override
 	public DictionaryValueBuilder newValueBuilder() {
@@ -43,13 +44,18 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	}
 
 	@Override
-	public DictionaryModelSpecifier newSpecifier() {
-		return new DictionaryModelSpecifier();
+	public DictionaryValueSpecifier newSpecifier() {
+		return new DictionaryValueSpecifier();
 	}
 
 	@Override
-	public Class<? extends ModelSpecifier> getSpecifierClass() {
-		return DictionaryModelSpecifier.class;
+	public Class<? extends ValueSpecifier> getSpecifierClass() {
+		return DictionaryValueSpecifier.class;
+	}
+
+	@Override
+	public DictionaryValue getNonExistentValue() {
+		return NON_EXISTENT;
 	}
 
 	/**
@@ -59,7 +65,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	 */
 	public class DictionaryValueBuilder implements DataValueBuilder<DictionaryValue> {
 
-		private final SingleValue DEFAULT_VALUE = new SingleValue(new byte[0], false);
+		private final SingleValue DEFAULT_VALUE = new SingleValue(new byte[0], true);
 
 		private byte[] key;
 		private SingleValue value = DEFAULT_VALUE;
@@ -84,8 +90,8 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 	 * Specifier used to fetch dictionary values
 	 * 
 	 */
-	@ReloadCodec(DictionaryModelSpecifierCodec.class)
-	public static class DictionaryModelSpecifier implements ModelSpecifier {
+	@ReloadCodec(DictionaryValueSpecifierCodec.class)
+	public static class DictionaryValueSpecifier implements ValueSpecifier {
 
 		List<byte[]> keys = new ArrayList<byte[]>();
 
@@ -107,7 +113,7 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			DictionaryModelSpecifier other = (DictionaryModelSpecifier) obj;
+			DictionaryValueSpecifier other = (DictionaryValueSpecifier) obj;
 			if (keys == null) {
 				if (other.keys != null)
 					return false;
@@ -141,17 +147,17 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 
 	}
 
-	static class DictionaryModelSpecifierCodec extends Codec<DictionaryModelSpecifier> {
+	static class DictionaryValueSpecifierCodec extends Codec<DictionaryValueSpecifier> {
 
 		private static final int KEYS_LENGTH_FIELD = U_INT16;
 		private static final int KEY_ENTRY_FIELD = U_INT16;
 
-		public DictionaryModelSpecifierCodec(ComponentsContext ctx) {
+		public DictionaryValueSpecifierCodec(ComponentsContext ctx) {
 			super(ctx);
 		}
 
 		@Override
-		public void encode(DictionaryModelSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(DictionaryValueSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, KEYS_LENGTH_FIELD);
 
 			for (byte[] k : obj.keys) {
@@ -162,10 +168,10 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 		}
 
 		@Override
-		public DictionaryModelSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
+		public DictionaryValueSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
 			ByteBuf keysBuf = readField(buf, KEYS_LENGTH_FIELD);
 
-			DictionaryModelSpecifier spec = new DictionaryModelSpecifier();
+			DictionaryValueSpecifier spec = new DictionaryValueSpecifier();
 
 			while (keysBuf.readableBytes() > 0) {
 				ByteBuf keyFld = readField(keysBuf, KEY_ENTRY_FIELD);

@@ -7,7 +7,7 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.DataModel.ModelSpecifier;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.encoders.StoredDataSpecifier.StoredDataSpecifierCodec;
 
 @ReloadCodec(StoredDataSpecifierCodec.class)
@@ -15,13 +15,13 @@ public class StoredDataSpecifier {
 
 	private final DataKind kind;
 	private BigInteger generation = BigInteger.ZERO;
-	private final ModelSpecifier modelSpecifier;
+	private final ValueSpecifier modelSpecifier;
 
 	public StoredDataSpecifier(DataKind kind) {
 		this(kind, kind.getDataModel().newSpecifier());
 	}
 
-	StoredDataSpecifier(DataKind kind, ModelSpecifier modelSpecifier) {
+	StoredDataSpecifier(DataKind kind, ValueSpecifier modelSpecifier) {
 		this.kind = kind;
 		this.modelSpecifier = modelSpecifier;
 	}
@@ -30,7 +30,7 @@ public class StoredDataSpecifier {
 		return kind;
 	}
 
-	public ModelSpecifier getModelSpecifier() {
+	public ValueSpecifier getModelSpecifier() {
 		return modelSpecifier;
 	}
 
@@ -105,7 +105,7 @@ public class StoredDataSpecifier {
 			Field lenFld = allocateField(buf, MODEL_SPEC_LENGTH_FIELD);
 
 			@SuppressWarnings("unchecked")
-			Codec<ModelSpecifier> modelSpecCodec = (Codec<ModelSpecifier>) getCodec(obj.modelSpecifier.getClass());
+			Codec<ValueSpecifier> modelSpecCodec = (Codec<ValueSpecifier>) getCodec(obj.modelSpecifier.getClass());
 			modelSpecCodec.encode(obj.modelSpecifier, buf);
 
 			lenFld.updateDataLength();
@@ -122,9 +122,9 @@ public class StoredDataSpecifier {
 			ByteBuf modelSpecFld = readField(buf, MODEL_SPEC_LENGTH_FIELD);
 
 			@SuppressWarnings("unchecked")
-			Codec<ModelSpecifier> modelSpecCodec = (Codec<ModelSpecifier>) getCodec(kind.getDataModel().getSpecifierClass());
+			Codec<ValueSpecifier> modelSpecCodec = (Codec<ValueSpecifier>) getCodec(kind.getDataModel().getSpecifierClass());
 
-			ModelSpecifier modelSpec = modelSpecCodec.decode(modelSpecFld);
+			ValueSpecifier modelSpec = modelSpecCodec.decode(modelSpecFld);
 
 			StoredDataSpecifier spec = new StoredDataSpecifier(kind, modelSpec);
 			spec.setGeneration(generation);

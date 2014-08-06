@@ -1,4 +1,4 @@
-package com.github.reload.services.storage;
+package com.github.reload.services.storage.encoders;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,10 +7,7 @@ import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.services.storage.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.ArrayModel;
-import com.github.reload.services.storage.encoders.DictionaryModel;
-import com.github.reload.services.storage.encoders.SingleModel;
+import com.github.reload.services.storage.encoders.DataModel.DataValue;
 
 public abstract class DataModel<T extends DataValue> {
 
@@ -45,17 +42,23 @@ public abstract class DataModel<T extends DataValue> {
 	public DataModel() {
 	}
 
+	/**
+	 * Syntetic data value used to indicate non existent data in particular
+	 * situations
+	 */
+	public abstract T getNonExistentValue();
+
 	public abstract DataValueBuilder<T> newValueBuilder();
 
-	public abstract Class<T> getValueClass();
+	protected abstract Class<T> getValueClass();
 
 	public abstract Metadata<T> newMetadata(T value, HashAlgorithm hashAlg);
 
-	public abstract Class<? extends Metadata<T>> getMetadataClass();
+	protected abstract Class<? extends Metadata<T>> getMetadataClass();
 
-	public abstract ModelSpecifier newSpecifier();
+	public abstract ValueSpecifier newSpecifier();
 
-	public abstract Class<? extends ModelSpecifier> getSpecifierClass();
+	protected abstract Class<? extends ValueSpecifier> getSpecifierClass();
 
 	@SuppressWarnings("unchecked")
 	public String getName() {
@@ -96,7 +99,7 @@ public abstract class DataModel<T extends DataValue> {
 	/**
 	 * A model specifier used to query for a {@link DataValue}
 	 */
-	public interface ModelSpecifier {
+	public interface ValueSpecifier {
 
 		boolean isMatching(DataValue value);
 

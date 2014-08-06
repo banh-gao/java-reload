@@ -26,11 +26,11 @@ import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.DataModel.ModelSpecifier;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifier;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifier.ArrayRange;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier.ArrayRange;
 import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryModelSpecifier;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueBuilder;
 import com.github.reload.services.storage.encoders.FetchAnswer;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
@@ -291,13 +291,13 @@ public class StorageService {
 
 		DataKind kind = dataSpecifier.getKind();
 
-		ModelSpecifier modelSpec = dataSpecifier.getModelSpecifier();
+		ValueSpecifier modelSpec = dataSpecifier.getModelSpecifier();
 
 		List<PreparedData> preparedDatas = new ArrayList<PreparedData>();
 
-		if (modelSpec instanceof ArrayModelSpecifier) {
+		if (modelSpec instanceof ArrayValueSpecifier) {
 			Set<Long> settedIndexes = new HashSet<Long>();
-			for (ArrayRange r : ((ArrayModelSpecifier) modelSpec).getRanges()) {
+			for (ArrayRange r : ((ArrayValueSpecifier) modelSpec).getRanges()) {
 				for (long i = r.getStartIndex(); i < r.getEndIndex(); i++) {
 					PreparedData b = newPreparedData(kind);
 					ArrayValueBuilder preparedVal = (ArrayValueBuilder) b.getValueBuilder();
@@ -311,8 +311,8 @@ public class StorageService {
 					preparedDatas.add(b);
 				}
 			}
-		} else if (modelSpec instanceof DictionaryModelSpecifier) {
-			for (byte[] k : ((DictionaryModelSpecifier) modelSpec).getKeys()) {
+		} else if (modelSpec instanceof DictionaryValueSpecifier) {
+			for (byte[] k : ((DictionaryValueSpecifier) modelSpec).getKeys()) {
 				PreparedData b = newPreparedData(kind);
 				DictionaryValueBuilder preparedVal = (DictionaryValueBuilder) b.getValueBuilder();
 				preparedVal.key(k);

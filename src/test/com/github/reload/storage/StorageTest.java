@@ -12,11 +12,11 @@ import com.github.reload.TestConfiguration;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.services.storage.PreparedData;
 import com.github.reload.services.storage.StorageService;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifier;
 import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
 import com.github.reload.services.storage.encoders.ArrayValue;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryModelSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueBuilder;
+import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryValue;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.SingleModel.SingleValueBuilder;
@@ -71,7 +71,7 @@ public class StorageTest extends APITest {
 		storeFut.get();
 
 		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_ARRAY);
-		ArrayModelSpecifier mSpec = (ArrayModelSpecifier) spec.getModelSpecifier();
+		ArrayValueSpecifier mSpec = (ArrayValueSpecifier) spec.getModelSpecifier();
 		mSpec.addRange(3, 4);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
 
@@ -94,7 +94,7 @@ public class StorageTest extends APITest {
 		storeFut.get();
 
 		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_DICT);
-		DictionaryModelSpecifier mSpec = (DictionaryModelSpecifier) spec.getModelSpecifier();
+		DictionaryValueSpecifier mSpec = (DictionaryValueSpecifier) spec.getModelSpecifier();
 		mSpec.addKey(TEST_KEY);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
 
@@ -120,6 +120,8 @@ public class StorageTest extends APITest {
 		storServ.removeData(TEST_RES, spec).get();
 
 		fetchFut = storServ.fetchData(TEST_RES, spec);
-		System.out.println(fetchFut.get().get(0).getValues());
+
+		// Check returned value is "non-existent" value
+		assertEquals(TestConfiguration.TEST_KIND_SINGLE.getDataModel().getNonExistentValue(), fetchFut.get().get(0).getValues().get(0).getValue());
 	}
 }

@@ -10,7 +10,8 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.AccessPolicy.AccessPolicyParamsGenerator;
 import com.github.reload.services.storage.DataKind.DataKindCodec;
-import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.encoders.DataModel;
+import com.github.reload.services.storage.encoders.DataModel.DataValue;
 
 /**
  * The description of the data kind that a peer can handle

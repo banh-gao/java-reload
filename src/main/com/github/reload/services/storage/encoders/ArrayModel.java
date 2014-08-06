@@ -8,9 +8,8 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.services.storage.DataModel;
-import com.github.reload.services.storage.DataModel.ModelName;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifier.ArrayRange;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier.ArrayRange;
+import com.github.reload.services.storage.encoders.DataModel.ModelName;
 
 /**
  * Factory class used to create objects specialized for the array data model
@@ -18,6 +17,8 @@ import com.github.reload.services.storage.encoders.ArrayModel.ArrayModelSpecifie
  */
 @ModelName("ARRAY")
 public class ArrayModel extends DataModel<ArrayValue> {
+
+	private static final ArrayValue NON_EXISTENT = new ArrayValue(0, new SingleValue(new byte[0], false));
 
 	@Override
 	public Class<ArrayValue> getValueClass() {
@@ -42,13 +43,18 @@ public class ArrayModel extends DataModel<ArrayValue> {
 	}
 
 	@Override
-	public ArrayModelSpecifier newSpecifier() {
-		return new ArrayModelSpecifier();
+	public ArrayValueSpecifier newSpecifier() {
+		return new ArrayValueSpecifier();
 	}
 
 	@Override
-	public Class<ArrayModelSpecifier> getSpecifierClass() {
-		return ArrayModelSpecifier.class;
+	public Class<ArrayValueSpecifier> getSpecifierClass() {
+		return ArrayValueSpecifier.class;
+	}
+
+	@Override
+	public ArrayValue getNonExistentValue() {
+		return NON_EXISTENT;
 	}
 
 	/**
@@ -100,8 +106,8 @@ public class ArrayModel extends DataModel<ArrayValue> {
 	 * Specifier used to fetch array values
 	 * 
 	 */
-	@ReloadCodec(ArrayModelSpecifierCodec.class)
-	public static class ArrayModelSpecifier implements ModelSpecifier {
+	@ReloadCodec(ArrayValueSpecifierCodec.class)
+	public static class ArrayValueSpecifier implements ValueSpecifier {
 
 		private final List<ArrayRange> ranges = new ArrayList<ArrayRange>();
 
@@ -139,7 +145,7 @@ public class ArrayModel extends DataModel<ArrayValue> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ArrayModelSpecifier other = (ArrayModelSpecifier) obj;
+			ArrayValueSpecifier other = (ArrayValueSpecifier) obj;
 			if (ranges == null) {
 				if (other.ranges != null)
 					return false;
@@ -216,16 +222,16 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		}
 	}
 
-	static class ArrayModelSpecifierCodec extends Codec<ArrayModelSpecifier> {
+	static class ArrayValueSpecifierCodec extends Codec<ArrayValueSpecifier> {
 
 		private static final int RANGES_LENGTH_FIELD = U_INT16;
 
-		public ArrayModelSpecifierCodec(ComponentsContext ctx) {
+		public ArrayValueSpecifierCodec(ComponentsContext ctx) {
 			super(ctx);
 		}
 
 		@Override
-		public void encode(ArrayModelSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(ArrayValueSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 			Field lenFld = allocateField(buf, RANGES_LENGTH_FIELD);
 
 			for (ArrayRange r : obj.ranges) {
@@ -237,11 +243,11 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		}
 
 		@Override
-		public ArrayModelSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
+		public ArrayValueSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
 
 			ByteBuf rangesData = readField(buf, RANGES_LENGTH_FIELD);
 
-			ArrayModelSpecifier spec = new ArrayModelSpecifier();
+			ArrayValueSpecifier spec = new ArrayValueSpecifier();
 
 			while (rangesData.readableBytes() > 0) {
 				long startIndex = rangesData.readUnsignedInt();

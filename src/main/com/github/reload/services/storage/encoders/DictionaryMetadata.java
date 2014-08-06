@@ -5,7 +5,7 @@ import java.util.Arrays;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.DataModel.Metadata;
+import com.github.reload.services.storage.encoders.DataModel.Metadata;
 import com.github.reload.services.storage.encoders.DictionaryMetadata.DictionaryMetadataCodec;
 
 /**

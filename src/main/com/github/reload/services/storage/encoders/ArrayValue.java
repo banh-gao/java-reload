@@ -4,8 +4,8 @@ import io.netty.buffer.ByteBuf;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.encoders.ArrayValue.ArrayEntryCodec;
+import com.github.reload.services.storage.encoders.DataModel.DataValue;
 import com.google.common.base.Objects;
 
 @ReloadCodec(ArrayEntryCodec.class)

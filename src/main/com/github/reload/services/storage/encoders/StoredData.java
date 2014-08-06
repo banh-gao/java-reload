@@ -16,8 +16,7 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.DataModel;
-import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.encoders.DataModel.DataValue;
 import com.github.reload.services.storage.encoders.StoredData.StoredDataCodec;
 
 @ReloadCodec(StoredDataCodec.class)
