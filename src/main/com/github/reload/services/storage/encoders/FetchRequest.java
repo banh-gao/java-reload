@@ -15,9 +15,9 @@ import com.github.reload.services.storage.encoders.FetchRequest.FetchRequestCode
 public class FetchRequest extends Content {
 
 	private final ResourceID resourceId;
-	private final List<StoredDataSpecifier> specifiers;
+	private final List<StoreKindDataSpecifier> specifiers;
 
-	public FetchRequest(ResourceID resId, List<StoredDataSpecifier> specifiers) {
+	public FetchRequest(ResourceID resId, List<StoreKindDataSpecifier> specifiers) {
 		resourceId = resId;
 		this.specifiers = specifiers;
 	}
@@ -26,7 +26,7 @@ public class FetchRequest extends Content {
 		return resourceId;
 	}
 
-	public List<StoredDataSpecifier> getSpecifiers() {
+	public List<StoreKindDataSpecifier> getSpecifiers() {
 		return specifiers;
 	}
 
@@ -40,12 +40,12 @@ public class FetchRequest extends Content {
 		private static final int SPECIFIERS_LENGTH_FIELD = U_INT16;
 
 		private final Codec<ResourceID> resIdCodec;
-		private final Codec<StoredDataSpecifier> dataSpecifierCodec;
+		private final Codec<StoreKindDataSpecifier> dataSpecifierCodec;
 
 		public FetchRequestCodec(ComponentsContext ctx) {
 			super(ctx);
 			resIdCodec = getCodec(ResourceID.class);
-			dataSpecifierCodec = getCodec(StoredDataSpecifier.class);
+			dataSpecifierCodec = getCodec(StoreKindDataSpecifier.class);
 		}
 
 		@Override
@@ -57,7 +57,7 @@ public class FetchRequest extends Content {
 		private void encodeSpecifiers(FetchRequest obj, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
 			Field lenFld = allocateField(buf, SPECIFIERS_LENGTH_FIELD);
 
-			for (StoredDataSpecifier s : obj.specifiers) {
+			for (StoreKindDataSpecifier s : obj.specifiers) {
 				dataSpecifierCodec.encode(s, buf);
 			}
 
@@ -67,12 +67,12 @@ public class FetchRequest extends Content {
 		@Override
 		public FetchRequest decode(ByteBuf buf, Object... params) throws CodecException {
 			ResourceID resourceId = resIdCodec.decode(buf);
-			List<StoredDataSpecifier> specifiers = decodeSpecifiers(buf);
+			List<StoreKindDataSpecifier> specifiers = decodeSpecifiers(buf);
 			return new FetchRequest(resourceId, specifiers);
 		}
 
-		private List<StoredDataSpecifier> decodeSpecifiers(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
-			List<StoredDataSpecifier> out = new ArrayList<StoredDataSpecifier>();
+		private List<StoreKindDataSpecifier> decodeSpecifiers(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+			List<StoreKindDataSpecifier> out = new ArrayList<StoreKindDataSpecifier>();
 
 			ByteBuf specifiersData = readField(buf, SPECIFIERS_LENGTH_FIELD);
 			while (specifiersData.readableBytes() > 0) {

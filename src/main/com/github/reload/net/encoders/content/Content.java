@@ -2,11 +2,8 @@ package com.github.reload.net.encoders.content;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -32,14 +29,6 @@ public abstract class Content {
 
 	public List<MessageExtension> getMessageExtensions() {
 		return messageExtensions;
-	}
-
-	/**
-	 * @return the certificates needed to authenticate content values such as
-	 *         storage signatures
-	 */
-	public Set<? extends Certificate> getNeededCertificates() {
-		return Collections.emptySet();
 	}
 
 	public boolean isRequest() {

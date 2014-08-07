@@ -3,21 +3,22 @@ package com.github.reload.services.storage;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
-import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.Error;
+import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.LocalStore.KindKey;
 import com.github.reload.services.storage.encoders.FetchAnswer;
@@ -51,11 +52,14 @@ class StorageController {
 	@Component
 	private CryptoHelper<?> crypto;
 
+	@Component
+	private ComponentsContext ctx;
+
 	private LocalStore localStore;
 
 	@CompStart
 	public void start() {
-		localStore = new LocalStore(plugin);
+		localStore = new LocalStore();
 	}
 
 	@MessageHandler(ContentType.STORE_REQ)
@@ -67,6 +71,8 @@ class StorageController {
 			return;
 		}
 
+		boolean isReplica = req.getReplicaNumber() != 0;
+
 		// FIXME: check if valid replica
 		// if (req.getReplicaNumber() > 0 &&
 		// !plugin.isThisNodeValidReplicaFor(requestMessage)) {
@@ -75,18 +81,16 @@ class StorageController {
 		// return;
 		// }
 
-		NodeID sender = requestMessage.getHeader().getSenderId();
-
-		ReloadCertificate senderCert = crypto.getCertificate(sender);
+		SignerIdentity senderIdentity = requestMessage.getSecBlock().getSignature().getIdentity();
 
 		List<StoreKindResponse> response;
 		try {
-			response = localStore.store(req.getResourceId(), req.getKindData(), senderCert.getOriginalCertificate().getPublicKey());
+			response = localStore.store(req.getResourceId(), req.getKindData(), senderIdentity, isReplica, ctx);
 		} catch (GeneralSecurityException e) {
 			sendAnswer(requestMessage, new Error(ErrorType.FORBITTEN, "Invalid data signature"));
 			return;
-		} catch (GenerationTooLowException e) {
-			sendAnswer(requestMessage, new Error(ErrorType.GEN_COUNTER_TOO_LOW, e.getMessage()));
+		} catch (ErrorMessageException e) {
+			sendAnswer(requestMessage, new Error(e.getType(), e.getInfo()));
 			return;
 		}
 		StoreAnswer answer = new StoreAnswer(response);

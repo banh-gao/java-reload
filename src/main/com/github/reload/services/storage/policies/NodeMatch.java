@@ -18,6 +18,7 @@ import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.AccessPolicy;
 import com.github.reload.services.storage.AccessPolicy.PolicyName;
+import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.StoredData;
 
 /**
@@ -28,7 +29,7 @@ import com.github.reload.services.storage.encoders.StoredData;
 public class NodeMatch extends AccessPolicy {
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
 

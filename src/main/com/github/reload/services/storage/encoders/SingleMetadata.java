@@ -10,7 +10,9 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.services.storage.encoders.DataModel.Metadata;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.encoders.SingleMetadata.SingleMetadataCodec;
+import com.github.reload.services.storage.encoders.SingleModel.SingleValueSpecifier;
 
 /**
  * Metadata used to describe a stored data
@@ -136,4 +138,8 @@ public class SingleMetadata implements Metadata<SingleValue> {
 		return storedValueSize;
 	}
 
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		return new SingleValueSpecifier();
+	}
 }

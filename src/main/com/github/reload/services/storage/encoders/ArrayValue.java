@@ -4,8 +4,10 @@ import io.netty.buffer.ByteBuf;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
 import com.github.reload.services.storage.encoders.ArrayValue.ArrayEntryCodec;
 import com.github.reload.services.storage.encoders.DataModel.DataValue;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.google.common.base.Objects;
 
 @ReloadCodec(ArrayEntryCodec.class)
@@ -83,5 +85,10 @@ public class ArrayValue implements DataValue {
 	@Override
 	public long getSize() {
 		return value.getSize();
+	}
+
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		return new ArrayValueSpecifier().addRange(index, index);
 	}
 }

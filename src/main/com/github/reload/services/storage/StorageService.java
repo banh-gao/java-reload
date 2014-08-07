@@ -41,7 +41,7 @@ import com.github.reload.services.storage.encoders.StoreKindData;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoreRequest;
 import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.encoders.StoredDataSpecifier;
+import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
@@ -180,8 +180,8 @@ public class StorageService {
 		return storeFut;
 	}
 
-	public StoredDataSpecifier newDataSpecifier(DataKind kind) {
-		return new StoredDataSpecifier(kind);
+	public StoreKindDataSpecifier newDataSpecifier(DataKind kind) {
+		return new StoreKindDataSpecifier(kind);
 	}
 
 	/**
@@ -209,7 +209,7 @@ public class StorageService {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public ListenableFuture<List<FetchKindResponse>> fetchData(final ResourceID resourceId, StoredDataSpecifier... specifiers) {
+	public ListenableFuture<List<FetchKindResponse>> fetchData(final ResourceID resourceId, StoreKindDataSpecifier... specifiers) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(specifiers);
 
@@ -282,7 +282,7 @@ public class StorageService {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public ListenableFuture<List<StoreKindResponse>> removeData(ResourceID resourceId, StoredDataSpecifier dataSpecifier) {
+	public ListenableFuture<List<StoreKindResponse>> removeData(ResourceID resourceId, StoreKindDataSpecifier dataSpecifier) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(dataSpecifier);
 
@@ -291,7 +291,7 @@ public class StorageService {
 
 		DataKind kind = dataSpecifier.getKind();
 
-		ValueSpecifier modelSpec = dataSpecifier.getModelSpecifier();
+		ValueSpecifier modelSpec = dataSpecifier.getValueSpecifier();
 
 		List<PreparedData> preparedDatas = new ArrayList<PreparedData>();
 

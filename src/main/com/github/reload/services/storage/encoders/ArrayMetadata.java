@@ -6,7 +6,9 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.encoders.ArrayMetadata.ArrayMetadataCodec;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
 import com.github.reload.services.storage.encoders.DataModel.Metadata;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 
 /**
  * Metadata of a stored array entry
@@ -89,4 +91,8 @@ public class ArrayMetadata implements Metadata<ArrayValue> {
 		return singleMeta.getSize();
 	}
 
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		return new ArrayValueSpecifier().addRange(index, index);
+	}
 }

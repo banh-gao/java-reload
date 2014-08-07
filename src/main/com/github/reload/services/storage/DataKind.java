@@ -24,6 +24,7 @@ public class DataKind {
 
 	public static final AttributeKey<Integer> MAX_SIZE = AttributeKey.valueOf("maxSize");
 	public static final AttributeKey<Integer> MAX_COUNT = AttributeKey.valueOf("maxCount");
+	public static final AttributeKey<Long> MAX_NODE_MULTIPLE = AttributeKey.valueOf("maxCount");
 
 	private final long kindId;
 	private final DataModel<? extends DataValue> dataModel;

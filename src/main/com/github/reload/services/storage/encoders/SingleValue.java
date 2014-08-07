@@ -6,6 +6,8 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.encoders.DataModel.DataValue;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.encoders.SingleModel.SingleValueSpecifier;
 import com.github.reload.services.storage.encoders.SingleValue.SingleEntryCodec;
 import com.google.common.base.Objects;
 
@@ -92,6 +94,11 @@ public class SingleValue implements DataValue {
 	@Override
 	public long getSize() {
 		return value.length;
+	}
+
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		return new SingleValueSpecifier();
 	}
 
 }

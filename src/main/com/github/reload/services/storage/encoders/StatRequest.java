@@ -11,7 +11,7 @@ import com.github.reload.services.storage.encoders.StatRequest.StatRequestCodec;
 @ReloadCodec(StatRequestCodec.class)
 public class StatRequest extends FetchRequest {
 
-	public StatRequest(ResourceID resId, List<StoredDataSpecifier> specifiers) {
+	public StatRequest(ResourceID resId, List<StoreKindDataSpecifier> specifiers) {
 		super(resId, specifiers);
 	}
 

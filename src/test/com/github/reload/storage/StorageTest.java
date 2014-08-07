@@ -22,7 +22,7 @@ import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.SingleModel.SingleValueBuilder;
 import com.github.reload.services.storage.encoders.SingleValue;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
-import com.github.reload.services.storage.encoders.StoredDataSpecifier;
+import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class StorageTest extends APITest {
@@ -51,7 +51,7 @@ public class StorageTest extends APITest {
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.storeData(TEST_RES, p);
 		storeFut.get();
 
-		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
+		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
 
 		SingleValue ans = (SingleValue) fetchFut.get().get(0).getValues().get(0).getValue();
@@ -70,8 +70,8 @@ public class StorageTest extends APITest {
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.storeData(TEST_RES, p);
 		storeFut.get();
 
-		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_ARRAY);
-		ArrayValueSpecifier mSpec = (ArrayValueSpecifier) spec.getModelSpecifier();
+		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_ARRAY);
+		ArrayValueSpecifier mSpec = (ArrayValueSpecifier) spec.getValueSpecifier();
 		mSpec.addRange(3, 4);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
 
@@ -93,8 +93,8 @@ public class StorageTest extends APITest {
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.storeData(TEST_RES, p);
 		storeFut.get();
 
-		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_DICT);
-		DictionaryValueSpecifier mSpec = (DictionaryValueSpecifier) spec.getModelSpecifier();
+		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_DICT);
+		DictionaryValueSpecifier mSpec = (DictionaryValueSpecifier) spec.getValueSpecifier();
 		mSpec.addKey(TEST_KEY);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
 
@@ -113,7 +113,7 @@ public class StorageTest extends APITest {
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.storeData(TEST_RES, p);
 		storeFut.get();
 
-		StoredDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
+		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetchData(TEST_RES, spec);
 		System.out.println(fetchFut.get().get(0).getValues());
 		SINGLE_GEN = SINGLE_GEN.add(BigInteger.ONE);

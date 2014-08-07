@@ -6,6 +6,8 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.encoders.DataModel.DataValue;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryValue.DictionaryValueCodec;
 import com.google.common.base.Objects;
 
@@ -103,6 +105,11 @@ public class DictionaryValue implements DataValue {
 	@Override
 	public long getSize() {
 		return value.getSize();
+	}
+
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		return new DictionaryValueSpecifier().addKey(key);
 	}
 
 }

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Set;
 import javax.naming.ConfigurationException;
 import com.github.reload.Overlay;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -33,12 +34,12 @@ import com.github.reload.services.storage.encoders.StoredData;
 public class NodeMultipleMatch extends AccessPolicy {
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
-		long maxIndex = data.getKind().getLongAttribute(DataKind.ATTR_MAX_NODE_MULTIPLE);
+		long maxIndex = kind.getAttribute(DataKind.MAX_NODE_MULTIPLE);
 
-		validate(resourceId, signerIdentity, maxIndex, context);
+		validate(resourceId, signerIdentity, maxIndex, ctx);
 	}
 
 	@Override
@@ -47,9 +48,9 @@ public class NodeMultipleMatch extends AccessPolicy {
 			throw new ConfigurationException("The node-multiple access policy requires max-node-multiple parameter");
 	}
 
-	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, long maxIndex, Configuration conf) throws AccessPolicyException {
+	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, long maxIndex, ComponentsContext ctx) throws AccessPolicyException {
 
-		ReloadCertificate storerReloadCert = context.getCryptoHelper().getCertificate(storerIdentity);
+		ReloadCertificate storerReloadCert = ctx.get(CryptoHelper.class).getCertificate(storerIdentity);
 		if (storerReloadCert == null)
 			throw new AccessPolicyException("Unknown signer identity");
 
@@ -111,7 +112,8 @@ public class NodeMultipleMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(Overlay conn) {
-		return new NodeMultipleParamsGenerator(conn);
+	public AccessPolicyParamsGenerator getParamsGenerator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

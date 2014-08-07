@@ -77,6 +77,8 @@ public abstract class DataModel<T extends DataValue> {
 
 		long getSize();
 
+		ValueSpecifier getMatchingSpecifier();
+
 	}
 
 	/**

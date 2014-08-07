@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -70,10 +69,10 @@ public abstract class AccessPolicy {
 	/**
 	 * Check if the store should be accepted
 	 * 
-	 * @throws ForbittenException
+	 * @throws AccessPolicyException
 	 *             if the policy check fails
 	 */
-	public abstract void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException;
+	public abstract void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException;
 
 	/**
 	 * Get a parameter generator for this access policy to be used with the
@@ -103,7 +102,7 @@ public abstract class AccessPolicy {
 	public static class AccessPolicyException extends ErrorMessageException {
 
 		public AccessPolicyException(String message) {
-			super(new Error(ErrorType.FORBITTEN, "Access Policy check failed: " + message));
+			super(ErrorType.FORBITTEN, "Access Policy check failed: " + message);
 		}
 
 	}

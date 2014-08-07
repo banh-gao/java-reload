@@ -90,7 +90,7 @@ public class Error extends Content {
 	}
 
 	public ErrorMessageException toException() {
-		return new ErrorMessageException(this);
+		return new ErrorMessageException(error, info);
 	}
 
 	@Override
@@ -134,10 +134,20 @@ public class Error extends Content {
 		private final ErrorType type;
 		private final byte[] info;
 
-		public ErrorMessageException(Error error) {
-			super(error.getInfo());
-			type = error.getErrorType();
-			info = error.getEncodedInfo();
+		public ErrorMessageException(ErrorType type, byte[] info) {
+			super(new String(info, MSG_CHARSET));
+			this.type = type;
+			this.info = info;
+		}
+
+		public ErrorMessageException(ErrorType type, String info) {
+			super(info);
+			this.type = type;
+			this.info = info.getBytes(MSG_CHARSET);
+		}
+
+		public ErrorMessageException(ErrorType type) {
+			this(type, type.toString());
 		}
 
 		public ErrorType getType() {

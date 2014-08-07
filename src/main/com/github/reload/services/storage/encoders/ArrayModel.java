@@ -123,11 +123,13 @@ public class ArrayModel extends DataModel<ArrayValue> {
 		 * @throws IllegalArgumentException
 		 *             if the index values are not valid
 		 */
-		public void addRange(long startIndex, long endIndex) {
+		public ArrayValueSpecifier addRange(long startIndex, long endIndex) {
 			if (0 <= startIndex && startIndex <= endIndex) {
 				ranges.add(new ArrayRange(startIndex, endIndex));
 			} else
 				throw new IllegalArgumentException("Invalid index values");
+
+			return this;
 		}
 
 		/**

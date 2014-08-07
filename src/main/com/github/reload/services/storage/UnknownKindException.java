@@ -22,12 +22,12 @@ public class UnknownKindException extends ErrorMessageException {
 	private final List<Long> unknownKinds;
 
 	public UnknownKindException(List<Long> kindIds) {
-		super(new Error(ErrorType.UNKNOWN_KIND, getEncodedKinds(kindIds)));
+		super(ErrorType.UNKNOWN_KIND, getEncodedKinds(kindIds));
 		unknownKinds = kindIds;
 	}
 
 	public UnknownKindException(String info) {
-		super(new Error(ErrorType.UNKNOWN_KIND, info.getBytes(Error.MSG_CHARSET)));
+		super(ErrorType.UNKNOWN_KIND, info.getBytes(Error.MSG_CHARSET));
 
 		byte[] infoData = getInfo();
 

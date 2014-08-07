@@ -6,7 +6,9 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.encoders.DataModel.Metadata;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryMetadata.DictionaryMetadataCodec;
+import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
 
 /**
  * Metadata of a stored dictionary entry
@@ -68,6 +70,11 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 	@Override
 	public long getSize() {
 		return singleMeta.getSize();
+	}
+
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		return new DictionaryValueSpecifier().addKey(key);
 	}
 
 	@Override

@@ -229,7 +229,7 @@ public class MessageRouter {
 	public static class RequestTimeoutException extends ErrorMessageException {
 
 		public RequestTimeoutException(String message) {
-			super(new Error(ErrorType.REQUEST_TIMEOUT, message));
+			super(ErrorType.REQUEST_TIMEOUT, message);
 		}
 	}
 }

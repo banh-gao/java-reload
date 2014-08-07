@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
-import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.services.storage.encoders.StoreAnswer;
@@ -19,12 +18,12 @@ public class GenerationTooLowException extends ErrorMessageException {
 	private final StoreAnswer answer;
 
 	public GenerationTooLowException(StoreAnswer answer) {
-		super(new Error(ErrorType.GEN_COUNTER_TOO_LOW, getEncodedAnswer(answer)));
+		super(ErrorType.GEN_COUNTER_TOO_LOW, getEncodedAnswer(answer));
 		this.answer = answer;
 	}
 
 	public GenerationTooLowException(byte[] answer) {
-		super(new Error(ErrorType.GEN_COUNTER_TOO_LOW, answer));
+		super(ErrorType.GEN_COUNTER_TOO_LOW, answer);
 		this.answer = getDecodedAnswer(answer);
 	}
 

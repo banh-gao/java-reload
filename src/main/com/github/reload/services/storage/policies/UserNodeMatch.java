@@ -4,9 +4,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.util.Arrays;
-import java.util.Set;
 import com.github.reload.Overlay;
-import com.github.reload.conf.Configuration;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.NodeID;
@@ -15,8 +14,10 @@ import com.github.reload.net.encoders.secBlock.CertHashNodeIdSignerIdentityValue
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
+import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.AccessPolicy;
 import com.github.reload.services.storage.AccessPolicy.PolicyName;
+import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.DictionaryValue;
 import com.github.reload.services.storage.encoders.StoredData;
 
@@ -29,8 +30,8 @@ import com.github.reload.services.storage.encoders.StoredData;
 public class UserNodeMatch extends AccessPolicy {
 
 	@Override
-	public void accept(ResourceID resourceId, StoredData data, SignerIdentity signerIdentity, Configuration conf) throws AccessPolicyException {
-		ReloadCertificate storerReloadCert = context.getCryptoHelper().getCertificate(signerIdentity);
+	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
+		ReloadCertificate storerReloadCert = ctx.get(CryptoHelper.class).getCertificate(signerIdentity);
 		if (storerReloadCert == null)
 			throw new AccessPolicyException("Unknown signer identity");
 
@@ -38,32 +39,29 @@ public class UserNodeMatch extends AccessPolicy {
 
 		byte[] resourceIdHash = resourceId.getData();
 
-		byte[] nodeIdHash = hashUsername(CryptoHelper.OVERLAY_HASHALG, storerUsername, context);
+		byte[] nodeIdHash = hashUsername(CryptoHelper.OVERLAY_HASHALG, storerUsername, ctx);
 
 		if (!Arrays.equals(nodeIdHash, resourceIdHash))
 			throw new AccessPolicyException("Identity hash value mismatch");
 
-		validateKey(((DictionaryValue) data.getValue()).getKey(), storerReloadCert, signerIdentity, context);
+		validateKey(((DictionaryValue) data.getValue()).getKey(), storerReloadCert, signerIdentity, ctx);
 	}
 
-	private static void validateKey(Key key, ReloadCertificate storerReloadCert, SignerIdentity storerIdentity, Configuration conf) throws AccessPolicyException {
-		byte[] keyHash = key.getValue();
+	private static void validateKey(byte[] key, ReloadCertificate storerReloadCert, SignerIdentity storerIdentity, ComponentsContext ctx) throws AccessPolicyException {
+		NodeID storerNodeId = storerReloadCert.getNodeId();
 
-		Set<NodeID> storerNodeIds = storerReloadCert.getNodeIds();
+		byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId, ctx);
 
-		for (NodeID storerNodeId : storerNodeIds) {
-			byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId, context);
-			if (Arrays.equals(nodeIdHash, keyHash)) {
-				validateIdentityHash(storerReloadCert.getOriginalCertificate(), storerNodeId, storerIdentity);
-				return;
-			}
+		if (Arrays.equals(nodeIdHash, key)) {
+			validateIdentityHash(storerReloadCert.getOriginalCertificate(), storerNodeId, storerIdentity);
+			return;
 		}
 
 		throw new AccessPolicyException("Wrong dictionary key");
 	}
 
-	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, Configuration conf) {
-		int length = context.getTopologyPlugin().getResourceIdLength();
+	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, ComponentsContext ctx) {
+		int length = ctx.get(TopologyPlugin.class).getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
 			return Arrays.copyOfRange(d.digest(username.getBytes()), 0, length);
@@ -72,8 +70,8 @@ public class UserNodeMatch extends AccessPolicy {
 		}
 	}
 
-	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, Configuration conf) {
-		int length = context.getTopologyPlugin().getResourceIdLength();
+	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, ComponentsContext ctx) {
+		int length = ctx.get(TopologyPlugin.class).getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
 			return Arrays.copyOfRange(d.digest(storerId.getData()), 0, length);
@@ -85,10 +83,16 @@ public class UserNodeMatch extends AccessPolicy {
 	private static void validateIdentityHash(Certificate storerCert, NodeID storerId, SignerIdentity storerIdentity) throws AccessPolicyException {
 		SignerIdentityValue storerIdentityValue = storerIdentity.getSignerIdentityValue();
 
-		byte[] computedIdentityValue = CertHashNodeIdSignerIdentityValue.computeHash(storerIdentityValue.getCertHashAlg(), storerCert, storerId);
+		byte[] computedIdentityValue = CertHashNodeIdSignerIdentityValue.computeHash(storerIdentityValue.getHashAlgorithm(), storerCert, storerId);
 
 		if (!Arrays.equals(storerIdentityValue.getHashValue(), computedIdentityValue))
 			throw new AccessPolicyException("Identity hash value mismatch");
+	}
+
+	@Override
+	public AccessPolicyParamsGenerator getParamsGenerator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**

@@ -2,23 +2,27 @@ package com.github.reload.services.storage;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.net.encoders.content.Error.ErrorMessageException;
+import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.StatKindResponse;
 import com.github.reload.services.storage.encoders.StoreAnswer;
 import com.github.reload.services.storage.encoders.StoreKindData;
+import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.encoders.StoredDataSpecifier;
 import com.github.reload.services.storage.encoders.StoredMetadata;
 import com.google.common.collect.Maps;
 
@@ -29,13 +33,7 @@ import com.google.common.collect.Maps;
  */
 public class LocalStore {
 
-	private final TopologyPlugin plugin;
-
 	private final Map<KindKey, StoreKindData> storedResources = Maps.newConcurrentMap();
-
-	public LocalStore(TopologyPlugin plugin) {
-		this.plugin = plugin;
-	}
 
 	/**
 	 * Perform controls on data and stores it
@@ -45,20 +43,37 @@ public class LocalStore {
 	 * @throws StorageException
 	 * 
 	 */
-	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data, PublicKey storerKey) throws GeneralSecurityException, GenerationTooLowException {
+	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data, SignerIdentity senderIdentity, boolean isReplica, ComponentsContext ctx) throws GeneralSecurityException, ErrorMessageException {
 		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
 		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
 		for (StoreKindData receivedData : data) {
 
-			// Verify data signature
-			for (StoredData d : receivedData.getValues()) {
-				d.verify(storerKey, resourceId, receivedData.getKind());
-			}
-
 			KindKey key = new KindKey(resourceId, receivedData.getKind().getKindId());
 
-			StoreKindData oldStoredKind = storedResources.put(key, receivedData);
+			StoreKindData oldStoredKind = storedResources.get(key);
+
+			// Verify request validity, storage policy and signature
+			for (StoredData d : receivedData.getValues()) {
+				checkValidReplace(oldStoredKind, d);
+
+				SignerIdentity storerIdentity = d.getSignature().getIdentity();
+
+				// Perform policy checks for storer node
+				receivedData.getKind().getAccessPolicy().accept(resourceId, receivedData.getKind(), d, storerIdentity, ctx);
+
+				// If the store is not a replica (it is a normal store request
+				// from a peer), perform policy checks also for the node that
+				// sends the store message
+				if (!isReplica)
+					receivedData.getKind().getAccessPolicy().accept(resourceId, receivedData.getKind(), d, senderIdentity, ctx);
+
+				ReloadCertificate storerCert = ctx.get(CryptoHelper.class).getCertificate(storerIdentity);
+
+				d.verify(storerCert.getOriginalCertificate().getPublicKey(), resourceId, receivedData.getKind());
+			}
+
+			storedResources.put(key, receivedData);
 
 			if (oldStoredKind != null) {
 				BigInteger oldGeneration = oldStoredKind.getGeneration();
@@ -74,7 +89,7 @@ public class LocalStore {
 				}
 			}
 
-			// FIXME: replicate data
+			// FIXME: replicate data to other nodes
 			// List<NodeID> replicaIds = plugin.onReplicateData(resourceId,
 			// receivedData);
 			List<NodeID> replicaIds = Collections.emptyList();
@@ -90,6 +105,21 @@ public class LocalStore {
 		return response;
 	}
 
+	private void checkValidReplace(StoreKindData oldKindData, StoredData newData) throws ErrorMessageException {
+		if (oldKindData == null)
+			return;
+
+		ValueSpecifier spec = newData.getValue().getMatchingSpecifier();
+		StoredData oldValue = getMatchingData(oldKindData, spec).get(0);
+
+		if (oldValue == null)
+			return;
+
+		// Check storage time for values that will be replaced
+		if (newData.getStorageTime().compareTo(oldValue.getStorageTime()) < 0)
+			throw new ErrorMessageException(ErrorType.DATA_TOO_OLD);
+	}
+
 	public Map<KindKey, StoreKindData> getStoredResources() {
 		return Collections.unmodifiableMap(storedResources);
 	}
@@ -102,11 +132,11 @@ public class LocalStore {
 		return storedResources.size();
 	}
 
-	public List<FetchKindResponse> fetch(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {
+	public List<FetchKindResponse> fetch(ResourceID resourceId, List<StoreKindDataSpecifier> specifiers) {
 
 		List<FetchKindResponse> out = new ArrayList<FetchKindResponse>();
 
-		for (StoredDataSpecifier spec : specifiers) {
+		for (StoreKindDataSpecifier spec : specifiers) {
 			KindKey key = new KindKey(resourceId, spec.getKind().getKindId());
 
 			StoreKindData kindData = storedResources.get(key);
@@ -121,13 +151,7 @@ public class LocalStore {
 				continue;
 			}
 
-			List<StoredData> matchingData = new ArrayList<StoredData>();
-
-			for (StoredData d : kindData.getValues()) {
-				if (spec.getModelSpecifier().isMatching(d.getValue())) {
-					matchingData.add(d);
-				}
-			}
+			List<StoredData> matchingData = getMatchingData(kindData, spec.getValueSpecifier());
 
 			if (matchingData.isEmpty()) {
 				matchingData.add(getNonExistentData(spec.getKind()));
@@ -139,14 +163,34 @@ public class LocalStore {
 		return out;
 	}
 
+	/**
+	 * Returns the data in the given StoreKindData that matches the given
+	 * ValueSpecifier
+	 * 
+	 * @param kindData
+	 * @param spec
+	 * @return
+	 */
+	private List<StoredData> getMatchingData(StoreKindData kindData, ValueSpecifier spec) {
+		List<StoredData> matchingData = new ArrayList<StoredData>();
+
+		for (StoredData d : kindData.getValues()) {
+			if (spec.isMatching(d.getValue())) {
+				matchingData.add(d);
+			}
+		}
+
+		return matchingData;
+	}
+
 	private StoredData getNonExistentData(DataKind kind) {
 		return new StoredData(BigInteger.ZERO, 0, kind.getDataModel().getNonExistentValue(), Signature.EMPTY_SIGNATURE);
 	}
 
-	public List<StatKindResponse> stat(ResourceID resourceId, List<StoredDataSpecifier> specifiers) {
+	public List<StatKindResponse> stat(ResourceID resourceId, List<StoreKindDataSpecifier> specifiers) {
 		List<StatKindResponse> out = new ArrayList<StatKindResponse>();
 
-		for (StoredDataSpecifier spec : specifiers) {
+		for (StoreKindDataSpecifier spec : specifiers) {
 			KindKey key = new KindKey(resourceId, spec.getKind().getKindId());
 
 			StoreKindData kindData = storedResources.get(key);
@@ -164,7 +208,7 @@ public class LocalStore {
 			List<StoredMetadata> matchingData = new ArrayList<StoredMetadata>();
 
 			for (StoredData d : kindData.getValues()) {
-				if (spec.getModelSpecifier().isMatching(d.getValue())) {
+				if (spec.getValueSpecifier().isMatching(d.getValue())) {
 					matchingData.add(d.getMetadata(spec.getKind(), CryptoHelper.OVERLAY_HASHALG));
 				}
 			}

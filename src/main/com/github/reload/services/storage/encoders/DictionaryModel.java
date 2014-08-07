@@ -95,10 +95,11 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 
 		List<byte[]> keys = new ArrayList<byte[]>();
 
-		public void addKey(byte[] key) {
+		public DictionaryValueSpecifier addKey(byte[] key) {
 			if (key == null)
 				throw new NullPointerException();
 			keys.add(key);
+			return this;
 		}
 
 		public List<byte[]> getKeys() {

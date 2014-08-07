@@ -8,20 +8,20 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.StoredDataSpecifier.StoredDataSpecifierCodec;
+import com.github.reload.services.storage.encoders.StoreKindDataSpecifier.StoreKindDataSpecifierCodec;
 
-@ReloadCodec(StoredDataSpecifierCodec.class)
-public class StoredDataSpecifier {
+@ReloadCodec(StoreKindDataSpecifierCodec.class)
+public class StoreKindDataSpecifier {
 
 	private final DataKind kind;
 	private BigInteger generation = BigInteger.ZERO;
 	private final ValueSpecifier modelSpecifier;
 
-	public StoredDataSpecifier(DataKind kind) {
+	public StoreKindDataSpecifier(DataKind kind) {
 		this(kind, kind.getDataModel().newSpecifier());
 	}
 
-	StoredDataSpecifier(DataKind kind, ValueSpecifier modelSpecifier) {
+	StoreKindDataSpecifier(DataKind kind, ValueSpecifier modelSpecifier) {
 		this.kind = kind;
 		this.modelSpecifier = modelSpecifier;
 	}
@@ -30,7 +30,7 @@ public class StoredDataSpecifier {
 		return kind;
 	}
 
-	public ValueSpecifier getModelSpecifier() {
+	public ValueSpecifier getValueSpecifier() {
 		return modelSpecifier;
 	}
 
@@ -55,7 +55,7 @@ public class StoredDataSpecifier {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		StoredDataSpecifier other = (StoredDataSpecifier) obj;
+		StoreKindDataSpecifier other = (StoreKindDataSpecifier) obj;
 		if (generation == null) {
 			if (other.generation != null)
 				return false;
@@ -79,20 +79,20 @@ public class StoredDataSpecifier {
 		return "StoredDataSpecifier [kind=" + kind + ", generation=" + generation + ", modelSpecifier=" + modelSpecifier + "]";
 	}
 
-	static class StoredDataSpecifierCodec extends Codec<StoredDataSpecifier> {
+	static class StoreKindDataSpecifierCodec extends Codec<StoreKindDataSpecifier> {
 
 		private static final int GENERATION_FIELD = U_INT64;
 		private static final int MODEL_SPEC_LENGTH_FIELD = U_INT16;
 
 		private final Codec<DataKind> kindCodec;
 
-		public StoredDataSpecifierCodec(ComponentsContext ctx) {
+		public StoreKindDataSpecifierCodec(ComponentsContext ctx) {
 			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 		}
 
 		@Override
-		public void encode(StoredDataSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
+		public void encode(StoreKindDataSpecifier obj, ByteBuf buf, Object... params) throws CodecException {
 			kindCodec.encode(obj.kind, buf);
 
 			byte[] genBytes = toUnsigned(obj.generation);
@@ -112,7 +112,7 @@ public class StoredDataSpecifier {
 		}
 
 		@Override
-		public StoredDataSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
+		public StoreKindDataSpecifier decode(ByteBuf buf, Object... params) throws CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
 			byte[] genData = new byte[GENERATION_FIELD];
@@ -126,7 +126,7 @@ public class StoredDataSpecifier {
 
 			ValueSpecifier modelSpec = modelSpecCodec.decode(modelSpecFld);
 
-			StoredDataSpecifier spec = new StoredDataSpecifier(kind, modelSpec);
+			StoreKindDataSpecifier spec = new StoreKindDataSpecifier(kind, modelSpec);
 			spec.setGeneration(generation);
 
 			return spec;
