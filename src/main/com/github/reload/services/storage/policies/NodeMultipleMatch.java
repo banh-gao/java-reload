@@ -99,7 +99,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 	 * @author Daniel Zozin <zdenial@gmx.com>
 	 * 
 	 */
-	public static class NodeMultipleParamsGenerator extends AccessPolicyParamsGenerator {
+	public static class NodeMultipleParamsGenerator extends AccessParamsGenerator {
 
 		public NodeMultipleParamsGenerator(Overlay conn) {
 			super(conn);
@@ -112,7 +112,7 @@ public class NodeMultipleMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator() {
+	public AccessParamsGenerator getParamsGenerator() {
 		// TODO Auto-generated method stub
 		return null;
 	}

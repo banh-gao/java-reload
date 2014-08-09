@@ -9,6 +9,7 @@ import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.services.storage.StoreKindData;
 import com.github.reload.services.storage.encoders.StoreRequest.StoreRequestCodec;
 
 @ReloadCodec(StoreRequestCodec.class)

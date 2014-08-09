@@ -8,7 +8,7 @@ import java.util.Map;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.AccessPolicy.AccessPolicyParamsGenerator;
+import com.github.reload.services.storage.AccessPolicy.AccessParamsGenerator;
 import com.github.reload.services.storage.DataKind.DataKindCodec;
 import com.github.reload.services.storage.encoders.DataModel;
 import com.github.reload.services.storage.encoders.DataModel.DataValue;
@@ -24,7 +24,7 @@ public class DataKind {
 
 	public static final AttributeKey<Integer> MAX_SIZE = AttributeKey.valueOf("maxSize");
 	public static final AttributeKey<Integer> MAX_COUNT = AttributeKey.valueOf("maxCount");
-	public static final AttributeKey<Long> MAX_NODE_MULTIPLE = AttributeKey.valueOf("maxCount");
+	public static final AttributeKey<Long> MAX_NODE_MULTIPLE = AttributeKey.valueOf("maxNodeMultiple");
 
 	private final long kindId;
 	private final DataModel<? extends DataValue> dataModel;
@@ -68,7 +68,7 @@ public class DataKind {
 	 * Get a parameter generator for the associated access control policy to be
 	 * used with the specified overlay
 	 */
-	public AccessPolicyParamsGenerator getPolicyParamsGenerator() {
+	public AccessParamsGenerator getPolicyParamsGenerator() {
 		return accessPolicy.getParamsGenerator();
 	}
 

@@ -162,7 +162,9 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 			Field lenFld = allocateField(buf, KEYS_LENGTH_FIELD);
 
 			for (byte[] k : obj.keys) {
+				Field entryFld = allocateField(buf, KEY_ENTRY_FIELD);
 				buf.writeBytes(k);
+				entryFld.updateDataLength();
 			}
 
 			lenFld.updateDataLength();
@@ -177,11 +179,14 @@ public class DictionaryModel extends DataModel<DictionaryValue> {
 			while (keysBuf.readableBytes() > 0) {
 				ByteBuf keyFld = readField(keysBuf, KEY_ENTRY_FIELD);
 				byte[] value = new byte[keyFld.readableBytes()];
+				keyFld.readBytes(value);
 				spec.addKey(value);
+				keyFld.release();
 			}
+
+			keysBuf.release();
 
 			return spec;
 		}
-
 	}
 }

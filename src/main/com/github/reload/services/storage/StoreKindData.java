@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -7,21 +7,21 @@ import java.util.List;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.StoreKindData.StoreKindDataCodec;
+import com.github.reload.services.storage.StoreKindData.StoreKindDataCodec;
+import com.github.reload.services.storage.encoders.StoredData;
 
 @ReloadCodec(StoreKindDataCodec.class)
 public class StoreKindData {
 
 	protected final DataKind kind;
 
-	private final BigInteger generationCounter;
+	BigInteger generation;
 
 	private final List<StoredData> data;
 
-	public StoreKindData(DataKind kind, BigInteger generationCounter, List<StoredData> data) {
+	public StoreKindData(DataKind kind, BigInteger generation, List<StoredData> data) {
 		this.kind = kind;
-		this.generationCounter = generationCounter;
+		this.generation = generation;
 		this.data = data;
 	}
 
@@ -30,7 +30,7 @@ public class StoreKindData {
 	}
 
 	public BigInteger getGeneration() {
-		return generationCounter;
+		return generation;
 	}
 
 	public List<StoredData> getValues() {
@@ -39,7 +39,7 @@ public class StoreKindData {
 
 	static class StoreKindDataCodec extends Codec<StoreKindData> {
 
-		protected static final int GEN_COUNTER_FIELD = U_INT64;
+		protected static final int GENERATION_FIELD = U_INT64;
 		protected static final int VALUES_LENGTH_FIELD = U_INT32;
 
 		private final Codec<DataKind> kindCodec;
@@ -55,12 +55,12 @@ public class StoreKindData {
 		public void encode(StoreKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			kindCodec.encode(obj.kind, buf);
 
-			byte[] genCounterBytes = toUnsigned(obj.generationCounter);
-			// Make sure generation counter field is always of the fixed size by
+			byte[] generationBytes = toUnsigned(obj.generation);
+			// Make sure generation field is always of the fixed size by
 			// padding with zeros
-			buf.writeZero(GEN_COUNTER_FIELD - genCounterBytes.length);
+			buf.writeZero(GENERATION_FIELD - generationBytes.length);
 
-			buf.writeBytes(genCounterBytes);
+			buf.writeBytes(generationBytes);
 
 			Field lenFld = allocateField(buf, VALUES_LENGTH_FIELD);
 
@@ -75,12 +75,12 @@ public class StoreKindData {
 		public StoreKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
-			byte[] genCounterData = new byte[GEN_COUNTER_FIELD];
-			buf.readBytes(genCounterData);
-			BigInteger generationCounter = new BigInteger(1, genCounterData);
+			byte[] generationData = new byte[GENERATION_FIELD];
+			buf.readBytes(generationData);
+			BigInteger generation = new BigInteger(1, generationData);
 
 			List<StoredData> data = decodeStoredDataList(kind, buf);
-			return new StoreKindData(kind, generationCounter, data);
+			return new StoreKindData(kind, generation, data);
 		}
 
 		private List<StoredData> decodeStoredDataList(DataKind kind, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {

@@ -78,7 +78,7 @@ public abstract class AccessPolicy {
 	 * Get a parameter generator for this access policy to be used with the
 	 * specified overlay
 	 */
-	public abstract AccessPolicyParamsGenerator getParamsGenerator();
+	public abstract AccessParamsGenerator newParamsGenerator(ComponentsContext ctx);
 
 	/**
 	 * Throw an exception if the given datakind builder doesn't
@@ -111,7 +111,7 @@ public abstract class AccessPolicy {
 	 * Generate the parameters in conformity to an access control policy
 	 * 
 	 */
-	public interface AccessPolicyParamsGenerator {
+	public interface AccessParamsGenerator {
 
 	}
 

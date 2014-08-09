@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
-import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
@@ -26,7 +25,6 @@ import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
-import com.github.reload.routing.TopologyPlugin;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -86,21 +84,6 @@ public class MessageRouter {
 			hops = ctx.get(RoutingTable.class).getNextHops(header.getDestinationId());
 		} else {
 			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
-		}
-
-		if (ctx.get(TopologyPlugin.class).isLocalPeerResponsible(header.getDestinationId())) {
-
-			ctx.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					l.debug(String.format("Local handling for message %#x", header.getTransactionId()));
-					status.set(ctx.get(Bootstrap.class).getLocalNodeId());
-					ctx.handleMessage(message);
-				}
-			});
-
-			return status;
 		}
 
 		if (hops.isEmpty()) {

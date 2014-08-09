@@ -80,12 +80,7 @@ public class SingleModel extends DataModel<SingleValue> {
 
 		@Override
 		public boolean isMatching(DataValue value) {
-			if (!(value instanceof SingleValue))
-				return false;
-
-			SingleValue v = (SingleValue) value;
-
-			return v.exists();
+			return value instanceof SingleValue;
 		}
 
 	}

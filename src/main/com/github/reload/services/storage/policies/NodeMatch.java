@@ -47,14 +47,13 @@ public class NodeMatch extends AccessPolicy {
 		byte[] resourceIdHash = resourceId.getData();
 
 		X509Certificate storerCert = (X509Certificate) storerReloadCert.getOriginalCertificate();
-
 		byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId, ctx);
 		if (Arrays.equals(nodeIdHash, resourceIdHash)) {
 			checkIdentityHash(storerCert, storerNodeId, storerIdentity);
 			return;
 		}
 
-		throw new AccessPolicyException("Matching node-id not found in signer certificate");
+		throw new AccessPolicyException("Signer node-id not matching with resource-id");
 	}
 
 	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, ComponentsContext ctx) {
@@ -77,20 +76,26 @@ public class NodeMatch extends AccessPolicy {
 			throw new AccessPolicyException("Identity hash value mismatch");
 	}
 
+	@Override
+	public AccessParamsGenerator newParamsGenerator(ComponentsContext ctx) {
+		return new NodeParamsGenerator(ctx);
+	}
+
 	/**
 	 * Parameters generator for NODE-MATCH policy
 	 * 
 	 */
-	public static class NodeParamsGenerator implements AccessPolicyParamsGenerator {
+	public static class NodeParamsGenerator implements AccessParamsGenerator {
 
-		public ResourceID getResourceId(NodeID storerId, ComponentsContext ctx) {
+		private final ComponentsContext ctx;
+
+		public NodeParamsGenerator(ComponentsContext ctx) {
+			this.ctx = ctx;
+		}
+
+		public ResourceID getResourceId(NodeID storerId) {
 			TopologyPlugin plugin = (TopologyPlugin) ctx.get(TopologyPlugin.class);
 			return plugin.getResourceId(hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerId, ctx));
 		}
-	}
-
-	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator() {
-		return new NodeParamsGenerator();
 	}
 }

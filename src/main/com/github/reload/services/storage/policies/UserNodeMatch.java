@@ -90,7 +90,7 @@ public class UserNodeMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator() {
+	public AccessParamsGenerator getParamsGenerator() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -101,7 +101,7 @@ public class UserNodeMatch extends AccessPolicy {
 	 * @author Daniel Zozin <zdenial@gmx.com>
 	 * 
 	 */
-	public static class UserNodeParamsGenerator extends AccessPolicyParamsGenerator {
+	public static class UserNodeParamsGenerator extends AccessParamsGenerator {
 
 		public UserNodeParamsGenerator(Overlay conn) {
 			super(conn);
@@ -118,7 +118,7 @@ public class UserNodeMatch extends AccessPolicy {
 	}
 
 	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(Overlay conn) {
+	public AccessParamsGenerator getParamsGenerator(Overlay conn) {
 		return new UserNodeParamsGenerator(conn);
 	}
 }

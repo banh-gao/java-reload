@@ -26,7 +26,6 @@ import com.github.reload.services.storage.encoders.FetchRequest;
 import com.github.reload.services.storage.encoders.StatAnswer;
 import com.github.reload.services.storage.encoders.StatRequest;
 import com.github.reload.services.storage.encoders.StoreAnswer;
-import com.github.reload.services.storage.encoders.StoreKindData;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoreRequest;
 

@@ -34,8 +34,7 @@ class OverlayConnector {
 	}
 
 	/**
-	 * Start local components, connect to a bootstrap server and then to the
-	 * admitting peer
+	 * Connect to a bootstrap server and then to the admitting peer
 	 * 
 	 * @return the amount of local nodeids successful joined
 	 */

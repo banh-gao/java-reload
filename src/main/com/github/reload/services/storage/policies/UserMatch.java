@@ -3,9 +3,7 @@ package com.github.reload.services.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import com.github.reload.Overlay;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -52,34 +50,26 @@ public class UserMatch extends AccessPolicy {
 		}
 	}
 
+	@Override
+	public AccessParamsGenerator newParamsGenerator(ComponentsContext ctx) {
+		return new UserParamsGenerator(ctx);
+	}
+
 	/**
 	 * Parameters generator for USER-MATCH policy
 	 * 
 	 */
-	public static class UserParamsGenerator extends AccessPolicyParamsGenerator {
+	public static class UserParamsGenerator implements AccessParamsGenerator {
 
-		public UserParamsGenerator(Overlay conn) {
-			super(conn);
+		private final ComponentsContext ctx;
+
+		public UserParamsGenerator(ComponentsContext ctx) {
+			this.ctx = ctx;
 		}
 
-		public ResourceID getResourceId(String username) {
-			return context.getTopologyPlugin().getResourceId(hashUsername(CryptoHelper.OVERLAY_HASHALG, username, context));
+		public ResourceID getResourceId() {
+			String username = ctx.get(CryptoHelper.class).getLocalCertificate().getUsername();
+			return ctx.get(TopologyPlugin.class).getResourceId(hashUsername(CryptoHelper.OVERLAY_HASHALG, username, ctx));
 		}
-	}
-
-	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator(Overlay conn) {
-		return new UserParamsGenerator(conn);
-	}
-
-	
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public AccessPolicyParamsGenerator getParamsGenerator() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

@@ -19,7 +19,6 @@ import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.StatKindResponse;
 import com.github.reload.services.storage.encoders.StoreAnswer;
-import com.github.reload.services.storage.encoders.StoreKindData;
 import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoredData;
@@ -55,7 +54,8 @@ public class LocalStore {
 
 			// Verify request validity, storage policy and signature
 			for (StoredData d : receivedData.getValues()) {
-				checkValidReplace(oldStoredKind, d);
+				if (oldStoredKind != null)
+					checkValidReplace(oldStoredKind, d);
 
 				SignerIdentity storerIdentity = d.getSignature().getIdentity();
 
@@ -73,28 +73,20 @@ public class LocalStore {
 				d.verify(storerCert.getOriginalCertificate().getPublicKey(), resourceId, receivedData.getKind());
 			}
 
-			storedResources.put(key, receivedData);
+			// TODO: get replica nodes
+			List<NodeID> replicas = Collections.emptyList();
 
-			if (oldStoredKind != null) {
-				BigInteger oldGeneration = oldStoredKind.getGeneration();
-
-				if (receivedData.getGeneration().compareTo(oldGeneration) <= 0) {
-					// Restore old value
-					storedResources.put(key, oldStoredKind);
-
-					// TODO: get replica nodes
-					List<NodeID> replicas = Collections.emptyList();
-
-					generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldGeneration, replicas));
-				}
+			if (oldStoredKind != null && !checkGeneration(receivedData, oldStoredKind)) {
+				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldStoredKind.getGeneration(), replicas));
+				continue;
 			}
 
-			// FIXME: replicate data to other nodes
-			// List<NodeID> replicaIds = plugin.onReplicateData(resourceId,
-			// receivedData);
-			List<NodeID> replicaIds = Collections.emptyList();
+			// Increase stored data generation by one
+			receivedData.generation = receivedData.generation.add(BigInteger.ONE);
 
-			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicaIds));
+			storedResources.put(key, receivedData);
+
+			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicas));
 		}
 
 		if (generTooLowResponses.size() > 0)
@@ -103,6 +95,17 @@ public class LocalStore {
 		// TODO: store cleanup
 
 		return response;
+	}
+
+	private boolean checkGeneration(StoreKindData receivedData, StoreKindData oldStoredKind) {
+		if (receivedData.getGeneration().compareTo(BigInteger.ZERO) == 0)
+			return true;
+
+		BigInteger oldGeneration = oldStoredKind.getGeneration();
+
+		// True (valid request) only if the new data generation is greater than
+		// old generation
+		return receivedData.getGeneration().compareTo(oldGeneration) > 0;
 	}
 
 	private void checkValidReplace(StoreKindData oldKindData, StoredData newData) throws ErrorMessageException {

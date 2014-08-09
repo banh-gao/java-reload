@@ -26,22 +26,22 @@ import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.storage.AccessPolicy.AccessParamsGenerator;
+import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
 import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
 import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier.ArrayRange;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
 import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
 import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueBuilder;
+import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
 import com.github.reload.services.storage.encoders.FetchAnswer;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
 import com.github.reload.services.storage.encoders.FetchRequest;
 import com.github.reload.services.storage.encoders.SingleModel.SingleValueBuilder;
 import com.github.reload.services.storage.encoders.StoreAnswer;
-import com.github.reload.services.storage.encoders.StoreKindData;
+import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoreRequest;
 import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
@@ -99,6 +99,10 @@ public class StorageService {
 		return new PreparedData(kind);
 	}
 
+	public AccessParamsGenerator newParamsGenerator(DataKind kind) {
+		return kind.getAccessPolicy().newParamsGenerator(ctx);
+	}
+
 	/**
 	 * Store specified values into the overlay, warn about the resource-id and
 	 * the sender-id that may be restricted by some data-kind access control
@@ -130,7 +134,7 @@ public class StorageService {
 	 *             overlay algorithm or if the final id in the destination list
 	 *             is not a resource
 	 */
-	public ListenableFuture<List<StoreKindResponse>> storeData(ResourceID resourceId, PreparedData... preparedData) {
+	public ListenableFuture<List<StoreKindResponse>> store(ResourceID resourceId, PreparedData... preparedData) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(preparedData);
 
@@ -209,7 +213,7 @@ public class StorageService {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public ListenableFuture<List<FetchKindResponse>> fetchData(final ResourceID resourceId, StoreKindDataSpecifier... specifiers) {
+	public ListenableFuture<List<FetchKindResponse>> fetch(final ResourceID resourceId, StoreKindDataSpecifier... specifiers) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(specifiers);
 
@@ -334,6 +338,6 @@ public class StorageService {
 			b.setLifeTime(PreparedData.MAX_LIFETIME);
 		}
 
-		return storeData(resourceId, preparedDatas.toArray(new PreparedData[0]));
+		return store(resourceId, preparedDatas.toArray(new PreparedData[0]));
 	}
 }

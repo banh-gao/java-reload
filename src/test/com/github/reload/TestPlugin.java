@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
@@ -30,6 +31,7 @@ import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
 import com.google.common.eventbus.Subscribe;
@@ -65,6 +67,13 @@ public class TestPlugin implements TopologyPlugin {
 	@CompStart
 	private void start() {
 		ctx.set(RoutingTable.class, r);
+		// Create loopback connection and add to routing table
+		try {
+			connMgr.connectTo(boot.getLocalAddress(), OverlayLinkType.TLS_TCP_FH_NO_ICE).get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		r.neighbors.add(boot.getLocalNodeId());
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ import com.github.reload.services.storage.UnknownKindException;
 import com.github.reload.services.storage.encoders.ArrayModel;
 import com.github.reload.services.storage.encoders.DictionaryModel;
 import com.github.reload.services.storage.encoders.SingleModel;
-import com.github.reload.services.storage.policies.NodeMatch;
+import com.github.reload.services.storage.policies.UserMatch;
 
 /**
  * Representation of a RELOAD configuration document
@@ -39,9 +40,9 @@ import com.github.reload.services.storage.policies.NodeMatch;
 public class TestConfiguration implements Configuration {
 
 	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
-	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).accessPolicy(NodeMatch.class).dataModel(SingleModel.class).build();
-	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).accessPolicy(NodeMatch.class).dataModel(ArrayModel.class).build();
-	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).accessPolicy(NodeMatch.class).dataModel(DictionaryModel.class).build();
+	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).accessPolicy(UserMatch.class).dataModel(SingleModel.class).build();
+	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).accessPolicy(UserMatch.class).dataModel(ArrayModel.class).build();
+	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).accessPolicy(UserMatch.class).dataModel(DictionaryModel.class).build();
 
 	String instanceName;
 	int sequence;
@@ -78,7 +79,13 @@ public class TestConfiguration implements Configuration {
 		noICE = true;
 		linkProtocols = Collections.singletonList("TLS");
 		bootstrapNodes = Collections.singleton(BOOTSTRAP_ADDR);
-		requiredKinds = Collections.singletonMap(TEST_KIND_SINGLE.getKindId(), TEST_KIND_SINGLE);
+		requiredKinds = new HashMap<Long, DataKind>();
+		requiredKinds.put(TEST_KIND_SINGLE.getKindId(), TEST_KIND_SINGLE);
+		DataKind.registerDataKind(TEST_KIND_SINGLE);
+		requiredKinds.put(TEST_KIND_ARRAY.getKindId(), TEST_KIND_ARRAY);
+		DataKind.registerDataKind(TEST_KIND_ARRAY);
+		requiredKinds.put(TEST_KIND_DICT.getKindId(), TEST_KIND_DICT);
+		DataKind.registerDataKind(TEST_KIND_DICT);
 	}
 
 	public void setBootstrap(InetSocketAddress bootAddr) {
