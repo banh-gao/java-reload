@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.util.EnumSet;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
+import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Error.ErrorCodec;
 
@@ -129,7 +130,7 @@ public class Error extends Content {
 
 	}
 
-	public static class ErrorMessageException extends Exception {
+	public static class ErrorMessageException extends CodecException {
 
 		private final ErrorType type;
 		private final byte[] info;

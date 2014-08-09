@@ -1,6 +1,7 @@
 package com.github.reload.routing;
 
 import java.util.Collection;
+import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
@@ -56,5 +57,7 @@ public interface TopologyPlugin {
 	public int getDistance(RoutableID source, RoutableID dest);
 
 	public boolean isLocalPeerResponsible(RoutableID destination);
+
+	public boolean isLocalPeerValidReplica(Message requestMessage);
 
 }

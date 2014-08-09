@@ -92,7 +92,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 		signedData.writeInt(h.getOverlayHash());
 		signedData.writeLong(h.getTransactionId());
-		ByteBuf rawContent = msg.getAttribute(Message.RAW_CONTENT);
+		ByteBuf rawContent = h.getAttribute(Header.RAW_CONTENT);
 		signedData.writeBytes(rawContent);
 		rawContent.release();
 

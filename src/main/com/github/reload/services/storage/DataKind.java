@@ -8,7 +8,6 @@ import java.util.Map;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.AccessPolicy.AccessParamsGenerator;
 import com.github.reload.services.storage.DataKind.DataKindCodec;
 import com.github.reload.services.storage.encoders.DataModel;
 import com.github.reload.services.storage.encoders.DataModel.DataValue;
@@ -62,14 +61,6 @@ public class DataKind {
 	 */
 	public DataModel<? extends DataValue> getDataModel() {
 		return dataModel;
-	}
-
-	/**
-	 * Get a parameter generator for the associated access control policy to be
-	 * used with the specified overlay
-	 */
-	public AccessParamsGenerator getPolicyParamsGenerator() {
-		return accessPolicy.getParamsGenerator();
 	}
 
 	public Map<AttributeKey<?>, Object> getAttributes() {
@@ -143,7 +134,7 @@ public class DataKind {
 
 			DataKind kind = DataKind.getInstance(kindId);
 			if (kind == null)
-				throw new CodecException("Unknown data kind");
+				throw new UnknownKindException(Collections.singletonList(kindId));
 
 			return kind;
 		}

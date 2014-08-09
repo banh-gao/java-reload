@@ -1,24 +1,13 @@
 package com.github.reload.net.encoders;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.util.AttributeKey;
-import java.util.Map;
 import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.SecurityBlock;
 import com.google.common.base.Objects;
-import com.google.common.collect.Maps;
 
 /**
  * A RELOAD message
  */
 public class Message {
-
-	final Map<AttributeKey<?>, Object> attributes = Maps.newHashMap();
-
-	public static final AttributeKey<NodeID> PREV_HOP = AttributeKey.valueOf("PREV_HOP");
-	public static final AttributeKey<NodeID> NEXT_HOP = AttributeKey.valueOf("NEXT_HOP");
-	public static final AttributeKey<ByteBuf> RAW_CONTENT = AttributeKey.valueOf("RAW_CONTENT");
 
 	Header header;
 	Content content;
@@ -42,22 +31,9 @@ public class Message {
 		return secBlock;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T setAttribute(AttributeKey<T> key, T value) {
-		return (T) attributes.put(key, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getAttribute(AttributeKey<T> key) {
-		Object a = attributes.get(key);
-		if (a != null)
-			return (T) a;
-		return null;
-	}
-
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).add("attributes", attributes).add("header", header).add("content", content).add("secBlock", secBlock).toString();
+		return Objects.toStringHelper(this).add("header", header).add("content", content).add("secBlock", secBlock).toString();
 	}
 
 }

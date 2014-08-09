@@ -80,10 +80,10 @@ public class MessageRouter {
 
 		Set<NodeID> hops;
 
-		if (message.getAttribute(Message.NEXT_HOP) == null) {
+		if (header.getAttribute(Header.NEXT_HOP) == null) {
 			hops = ctx.get(RoutingTable.class).getNextHops(header.getDestinationId());
 		} else {
-			hops = Collections.singleton(message.getAttribute(Message.NEXT_HOP));
+			hops = Collections.singleton(header.getAttribute(Header.NEXT_HOP));
 		}
 
 		if (hops.isEmpty()) {
@@ -131,8 +131,9 @@ public class MessageRouter {
 	}
 
 	public void forwardMessage(ForwardMessage msg) {
+		Header header = msg.getHeader();
 		// Change message header to be forwarded
-		msg.getHeader().toForward(msg.getAttribute(Message.PREV_HOP));
+		header.toForward(header.getAttribute(Header.PREV_HOP));
 
 		// If destination node is directly connected forward message to it
 		if (msg.getHeader().getDestinationId() instanceof NodeID) {
@@ -152,6 +153,14 @@ public class MessageRouter {
 
 	public ListenableFuture<NodeID> sendAnswer(Header requestHdr, Content answer) {
 		return sendMessage(msgBuilder.newResponseMessage(requestHdr, answer));
+	}
+
+	public ListenableFuture<NodeID> sendError(Header requestHdr, ErrorType type, byte[] info) {
+		return sendAnswer(requestHdr, new Error(type, info));
+	}
+
+	public ListenableFuture<NodeID> sendError(Header requestHdr, ErrorType type, String info) {
+		return sendAnswer(requestHdr, new Error(type, info));
 	}
 
 	@MessageHandler(handleAnswers = true, value = ContentType.ERROR)

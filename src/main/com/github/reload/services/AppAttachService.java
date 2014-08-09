@@ -15,7 +15,6 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AppAttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.ice.HostCandidate;
@@ -150,7 +149,7 @@ public class AppAttachService {
 		InetSocketAddress addr = registeredServers.get(request.getApplicationID());
 
 		if (addr == null) {
-			router.sendAnswer(requestMessage.getHeader(), new Error(ErrorType.NOT_FOUND, "Application " + request.getApplicationID() + " not registered"));
+			router.sendError(requestMessage.getHeader(), ErrorType.NOT_FOUND, "Application " + request.getApplicationID() + " not registered");
 			return;
 		}
 

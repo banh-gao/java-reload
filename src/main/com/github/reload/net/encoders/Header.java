@@ -1,11 +1,14 @@
 package com.github.reload.net.encoders;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.util.AttributeKey;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ForwardingOption;
@@ -13,12 +16,19 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.google.common.base.Objects;
+import com.google.common.collect.Maps;
 
 /**
  * RELOAD message header
  */
 @ReloadCodec(HeaderCodec.class)
 public class Header {
+
+	final Map<AttributeKey<?>, Object> attributes = Maps.newHashMap();
+
+	public static final AttributeKey<NodeID> PREV_HOP = AttributeKey.valueOf("PREV_HOP");
+	public static final AttributeKey<NodeID> NEXT_HOP = AttributeKey.valueOf("NEXT_HOP");
+	public static final AttributeKey<ByteBuf> RAW_CONTENT = AttributeKey.valueOf("RAW_CONTENT");
 
 	long transactionId;
 
@@ -174,6 +184,19 @@ public class Header {
 	@Override
 	public String toString() {
 		return Objects.toStringHelper(this).add("transactionId", transactionId).add("isLastFragment", isLastFragment).add("fragmentOffset", fragmentOffset).add("maxResponseLength", maxResponseLength).add("configurationSequence", configurationSequence).add("overlayHash", overlayHash).add("version", version).add("ttl", ttl).add("viaList", viaList).add("destinationList", destinationList).add("forwardingOptions", forwardingOptions).add("headerLength", headerLength).add("payloadLength", payloadLength).toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T setAttribute(AttributeKey<T> key, T value) {
+		return (T) attributes.put(key, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(AttributeKey<T> key) {
+		Object a = attributes.get(key);
+		if (a != null)
+			return (T) a;
+		return null;
 	}
 
 	public static class Builder {

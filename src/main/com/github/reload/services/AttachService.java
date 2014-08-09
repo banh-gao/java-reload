@@ -13,11 +13,11 @@ import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
+import com.github.reload.net.encoders.Header;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.AttachMessage;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
@@ -88,11 +88,13 @@ public class AttachService {
 
 		final Message req = msgBuilder.newMessage(attachRequest, destList);
 
+		Header reqHeader = req.getHeader();
+
 		if (nextHop != null) {
-			req.setAttribute(Message.NEXT_HOP, nextHop);
+			reqHeader.setAttribute(Header.NEXT_HOP, nextHop);
 		}
 
-		pendingRequests.put(req.getHeader().getTransactionId(), fut);
+		pendingRequests.put(reqHeader.getTransactionId(), fut);
 
 		l.log(Level.DEBUG, "Attach to " + destinationID + " in progress...");
 
@@ -182,13 +184,13 @@ public class AttachService {
 
 		// Pending request already answered
 		if (answeredRequests.contains(sender)) {
-			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach already in progress")));
+			msgRouter.sendError(req.getHeader(), ErrorType.IN_PROGRESS, "Attach already in progress");
 			return;
 		}
 
 		// Pending request not answered
 		if (bootstrap.getLocalNodeId().compareTo(sender) > 0) {
-			msgRouter.sendMessage(msgBuilder.newResponseMessage(req.getHeader(), new Error(ErrorType.IN_PROGRESS, "Attach request already sent")));
+			msgRouter.sendError(req.getHeader(), ErrorType.IN_PROGRESS, "Attach request already sent");
 			return;
 		}
 
@@ -200,12 +202,12 @@ public class AttachService {
 		b.candidates(iceHelper.getCandidates(connMgr.getServerAddress()));
 		AttachMessage attachAnswer = b.buildAnswer();
 
-		Message ans = msgBuilder.newResponseMessage(req.getHeader(), attachAnswer);
+		Header reqHeader = req.getHeader();
 
 		// Send attach answer through the same neighbor
-		ans.setAttribute(Message.NEXT_HOP, req.getAttribute(Message.PREV_HOP));
+		reqHeader.setAttribute(Header.NEXT_HOP, reqHeader.getAttribute(Header.PREV_HOP));
 
-		msgRouter.sendMessage(ans);
+		msgRouter.sendAnswer(reqHeader, attachAnswer);
 
 		AttachMessage attachRequest = (AttachMessage) req.getContent();
 

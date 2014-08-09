@@ -38,9 +38,9 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 			ForwardMessage message = new ForwardMessage();
 
-			message.setAttribute(Message.PREV_HOP, neighborId);
-
 			message.header = hdrCodec.decode(in);
+
+			message.header.setAttribute(Header.PREV_HOP, neighborId);
 
 			if (in.readableBytes() != message.header.getPayloadLength())
 				throw new CodecException("Payload length not matching with length specified in header");

@@ -14,7 +14,6 @@ import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.Error;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -66,19 +65,17 @@ class StorageController {
 		StoreRequest req = (StoreRequest) requestMessage.getContent();
 
 		if (req.getReplicaNumber() == 0 && !plugin.isLocalPeerResponsible(req.getResourceId())) {
-			sendAnswer(requestMessage, new Error(ErrorType.NOT_FOUND, "Node not responsible for requested resource"));
+			router.sendError(requestMessage.getHeader(), ErrorType.NOT_FOUND, "Node not responsible for requested resource");
 			return;
 		}
 
 		boolean isReplica = req.getReplicaNumber() != 0;
 
 		// FIXME: check if valid replica
-		// if (req.getReplicaNumber() > 0 &&
-		// !plugin.isThisNodeValidReplicaFor(requestMessage)) {
-		// sendAnswer(requestMessage, new Error(ErrorType.NOT_FOUND,
-		// "Node not valid replica for requested resource"));
-		// return;
-		// }
+		if (req.getReplicaNumber() > 0 && !plugin.isLocalPeerValidReplica(requestMessage)) {
+			router.sendError(requestMessage.getHeader(), ErrorType.NOT_FOUND, "Node not valid replica for requested resource");
+			return;
+		}
 
 		SignerIdentity senderIdentity = requestMessage.getSecBlock().getSignature().getIdentity();
 
@@ -86,39 +83,34 @@ class StorageController {
 		try {
 			response = localStore.store(req.getResourceId(), req.getKindData(), senderIdentity, isReplica, ctx);
 		} catch (GeneralSecurityException e) {
-			sendAnswer(requestMessage, new Error(ErrorType.FORBITTEN, "Invalid data signature"));
+			router.sendError(requestMessage.getHeader(), ErrorType.FORBITTEN, "Invalid data signature");
 			return;
 		} catch (ErrorMessageException e) {
-			sendAnswer(requestMessage, new Error(e.getType(), e.getInfo()));
+			router.sendError(requestMessage.getHeader(), e.getType(), e.getInfo());
 			return;
 		}
 		StoreAnswer answer = new StoreAnswer(response);
 
-		sendAnswer(requestMessage, answer);
+		router.sendAnswer(requestMessage.getHeader(), answer);
 	}
 
 	@MessageHandler(ContentType.FETCH_REQ)
 	private void handleFetchRequest(Message requestMessage) {
 		FetchRequest req = (FetchRequest) requestMessage.getContent();
 		FetchAnswer answer = new FetchAnswer(localStore.fetch(req.getResourceId(), req.getSpecifiers()));
-		sendAnswer(requestMessage, answer);
+		router.sendAnswer(requestMessage.getHeader(), answer);
 	}
 
 	@MessageHandler(ContentType.STAT_REQ)
 	private void handleStatRequest(Message requestMessage) {
 		StatRequest req = (StatRequest) requestMessage.getContent();
 		Content answer = new StatAnswer(localStore.stat(req.getResourceId(), req.getSpecifiers()));
-		sendAnswer(requestMessage, answer);
+		router.sendAnswer(requestMessage.getHeader(), answer);
 	}
 
 	@MessageHandler(ContentType.FIND_REQ)
 	private void handleFindRequest(Message requestMessage) {
 		// TODO
-	}
-
-	private void sendAnswer(Message req, Content answer) {
-		Message ans = msgBuilder.newResponseMessage(req.getHeader(), answer);
-		router.sendMessage(ans);
 	}
 
 	public Map<KindKey, StoreKindData> getLocalResources() {

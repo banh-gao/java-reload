@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.github.reload.components.ComponentsContext;
@@ -46,6 +47,8 @@ public class LocalStore {
 		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
 		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
+		Map<KindKey, StoreKindData> tempStore = new HashMap<LocalStore.KindKey, StoreKindData>(data.size());
+
 		for (StoreKindData receivedData : data) {
 
 			KindKey key = new KindKey(resourceId, receivedData.getKind().getKindId());
@@ -84,13 +87,16 @@ public class LocalStore {
 			// Increase stored data generation by one
 			receivedData.generation = receivedData.generation.add(BigInteger.ONE);
 
-			storedResources.put(key, receivedData);
+			tempStore.put(key, receivedData);
 
 			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicas));
 		}
 
 		if (generTooLowResponses.size() > 0)
 			throw new GenerationTooLowException(new StoreAnswer(generTooLowResponses));
+
+		// Store incoming data in the effettive storage
+		storedResources.putAll(tempStore);
 
 		// TODO: store cleanup
 
