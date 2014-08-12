@@ -1,4 +1,4 @@
-package com.github.reload.services;
+package com.github.reload.net;
 
 import java.util.Map;
 import java.util.Set;
@@ -8,7 +8,6 @@ import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
-import com.github.reload.net.MessageRouter;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;

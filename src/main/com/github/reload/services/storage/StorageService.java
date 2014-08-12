@@ -134,7 +134,7 @@ public class StorageService {
 	 *             overlay algorithm or if the final id in the destination list
 	 *             is not a resource
 	 */
-	public ListenableFuture<List<StoreKindResponse>> store(ResourceID resourceId, PreparedData... preparedData) {
+	public ListenableFuture<List<StoreKindResponse>> store(final ResourceID resourceId, PreparedData... preparedData) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(preparedData);
 
@@ -177,11 +177,17 @@ public class StorageService {
 
 			@Override
 			public void onFailure(Throwable t) {
+				if (t instanceof UnknownKindException)
+					sendKindConfigUpdate(resourceId, ((UnknownKindException) t).getUnknownKinds());
 				storeFut.setException(t);
 			}
 		});
 
 		return storeFut;
+	}
+
+	protected void sendKindConfigUpdate(ResourceID resourceId, List<Long> unknownKinds) {
+		// TODO Auto-generated method stub
 	}
 
 	public StoreKindDataSpecifier newDataSpecifier(DataKind kind) {

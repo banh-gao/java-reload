@@ -1,10 +1,11 @@
 package com.github.reload.routing;
 
 import java.util.Collection;
-import com.github.reload.net.encoders.Message;
+import java.util.List;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.services.storage.DataKind;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -58,6 +59,9 @@ public interface TopologyPlugin {
 
 	public boolean isLocalPeerResponsible(RoutableID destination);
 
-	public boolean isLocalPeerValidReplica(Message requestMessage);
+	public boolean isLocalPeerValidStorage(ResourceID resourceId, boolean isReplica);
 
+	public List<NodeID> getReplicaNodes(ResourceID resourceId);
+
+	public void requestReplication(ResourceID resourceId, DataKind kind);
 }

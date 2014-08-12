@@ -272,8 +272,7 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	@Override
-	public boolean isLocalPeerValidReplica(Message requestMessage) {
-		// TODO Auto-generated method stub
+	public boolean isLocalPeerValidStorage(ResourceID resourceId, boolean isReplica) {
 		return true;
 	}
 }

@@ -3,10 +3,13 @@ package com.github.reload.services.storage;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.ReloadCertificate;
@@ -16,15 +19,20 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
+import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.encoders.FetchKindResponse;
+import com.github.reload.services.storage.encoders.FindKindData;
 import com.github.reload.services.storage.encoders.StatKindResponse;
 import com.github.reload.services.storage.encoders.StoreAnswer;
 import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoredData;
 import com.github.reload.services.storage.encoders.StoredMetadata;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 /**
  * The map of the data stored locally. It stores the data which the peer is
@@ -35,32 +43,46 @@ public class LocalStore {
 
 	private final Map<KindKey, StoreKindData> storedResources = Maps.newConcurrentMap();
 
+	private final Multimap<Long, ResourceID> storedKinds = ArrayListMultimap.create();
+
 	/**
 	 * Perform controls on data and stores it
 	 * 
-	 * @throws GenerationTooLowException
-	 * 
-	 * @throws StorageException
-	 * 
 	 */
-	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data, SignerIdentity senderIdentity, boolean isReplica, ComponentsContext ctx) throws GeneralSecurityException, ErrorMessageException {
+	public List<StoreKindResponse> store(ResourceID resourceId, List<StoreKindData> data, SignerIdentity senderIdentity, boolean isReplica, List<NodeID> replicaNodes, ComponentsContext ctx) throws GeneralSecurityException, ErrorMessageException {
 		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
 		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
 		Map<KindKey, StoreKindData> tempStore = new HashMap<LocalStore.KindKey, StoreKindData>(data.size());
 
+		Set<Long> requestKinds = new HashSet<Long>();
+
 		for (StoreKindData receivedData : data) {
 
-			KindKey key = new KindKey(resourceId, receivedData.getKind().getKindId());
+			DataKind kind = receivedData.getKind();
+
+			requestKinds.add(kind.getKindId());
+
+			KindKey key = new KindKey(resourceId, kind.getKindId());
 
 			StoreKindData oldStoredKind = storedResources.get(key);
 
+			if (receivedData.getValues().size() > kind.getAttribute(DataKind.MAX_COUNT))
+				throw new ErrorMessageException(ErrorType.DATA_TOO_LARGE, "Stored data exceeds maximum number of values for this kind");
+
 			// Verify request validity, storage policy and signature
 			for (StoredData d : receivedData.getValues()) {
+
+				if (d.getValue().getSize() > kind.getAttribute(DataKind.MAX_SIZE))
+					throw new ErrorMessageException(ErrorType.DATA_TOO_LARGE, "Stored data exceeds maximum size for this kind");
+
 				if (oldStoredKind != null)
 					checkValidReplace(oldStoredKind, d);
 
 				SignerIdentity storerIdentity = d.getSignature().getIdentity();
+
+				if (storerIdentity.getIdentityType() == IdentityType.NONE)
+					throw new ErrorMessageException(ErrorType.FORBITTEN, "NONE identity type not allowed");
 
 				// Perform policy checks for storer node
 				receivedData.getKind().getAccessPolicy().accept(resourceId, receivedData.getKind(), d, storerIdentity, ctx);
@@ -76,20 +98,20 @@ public class LocalStore {
 				d.verify(storerCert.getOriginalCertificate().getPublicKey(), resourceId, receivedData.getKind());
 			}
 
-			// TODO: get replica nodes
-			List<NodeID> replicas = Collections.emptyList();
-
 			if (oldStoredKind != null && !checkGeneration(receivedData, oldStoredKind)) {
-				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldStoredKind.getGeneration(), replicas));
+				generTooLowResponses.add(new StoreKindResponse(receivedData.getKind(), oldStoredKind.getGeneration(), replicaNodes));
 				continue;
 			}
 
 			// Increase stored data generation by one
-			receivedData.generation = receivedData.generation.add(BigInteger.ONE);
+			if (oldStoredKind != null)
+				receivedData.generation = oldStoredKind.getGeneration().add(BigInteger.ONE);
+			else
+				receivedData.generation = receivedData.generation.add(BigInteger.ONE);
 
 			tempStore.put(key, receivedData);
 
-			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicas));
+			response.add(new StoreKindResponse(receivedData.getKind(), receivedData.getGeneration(), replicaNodes));
 		}
 
 		if (generTooLowResponses.size() > 0)
@@ -98,9 +120,19 @@ public class LocalStore {
 		// Store incoming data in the effettive storage
 		storedResources.putAll(tempStore);
 
-		// TODO: store cleanup
+		updateKindToResource(requestKinds, resourceId);
 
 		return response;
+	}
+
+	private void updateKindToResource(Set<Long> kinds, ResourceID resId) {
+		for (Long k : kinds)
+			storedKinds.put(k, resId);
+	}
+
+	public StoreKindData getStoredData(ResourceID resId, DataKind kind) {
+		KindKey key = new KindKey(resId, kind.getKindId());
+		return storedResources.get(key);
 	}
 
 	private boolean checkGeneration(StoreKindData receivedData, StoreKindData oldStoredKind) {
@@ -216,10 +248,8 @@ public class LocalStore {
 
 			List<StoredMetadata> matchingData = new ArrayList<StoredMetadata>();
 
-			for (StoredData d : kindData.getValues()) {
-				if (spec.getValueSpecifier().isMatching(d.getValue())) {
-					matchingData.add(d.getMetadata(spec.getKind(), CryptoHelper.OVERLAY_HASHALG));
-				}
+			for (StoredData d : getMatchingData(kindData, spec.getValueSpecifier())) {
+				matchingData.add(d.getMetadata(spec.getKind(), CryptoHelper.OVERLAY_HASHALG));
 			}
 
 			out.add(new StatKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));
@@ -265,5 +295,26 @@ public class LocalStore {
 				return false;
 			return true;
 		}
+	}
+
+	public Set<FindKindData> find(ResourceID reqResId, Set<DataKind> reqKinds, TopologyPlugin plugin) {
+
+		Set<FindKindData> out = new HashSet<FindKindData>();
+
+		for (DataKind k : reqKinds) {
+
+			Collection<ResourceID> resources = storedKinds.get(k.getKindId());
+
+			ResourceID resId;
+
+			if (resources.isEmpty())
+				resId = plugin.getResourceId(new byte[0]);
+			else
+				resId = plugin.getCloserId(reqResId, resources);
+
+			out.add(new FindKindData(k, resId));
+		}
+
+		return out;
 	}
 }
