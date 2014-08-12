@@ -33,7 +33,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Send the outgoing messages to neighbor nodes by using the routing table
  */
-@Component(MessageRouter.class)
+@Component(value = MessageRouter.class, priority = 0)
 public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();

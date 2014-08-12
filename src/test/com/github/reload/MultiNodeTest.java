@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import org.junit.AfterClass;
 import org.junit.Test;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsRepository;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
@@ -25,7 +24,6 @@ public class MultiNodeTest {
 	@Test
 	public void init() throws Exception {
 		BootstrapFactory.register(new TestFactory());
-		ComponentsRepository.register(TestService.class);
 
 		overlays = new Overlay[NUM_NODES];
 

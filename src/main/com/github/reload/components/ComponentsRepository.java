@@ -93,6 +93,8 @@ public class ComponentsRepository {
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	public @interface Component {
 
+		short priority() default Short.MAX_VALUE;
+
 		Class<?> value() default Object.class;
 	}
 }

@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import org.junit.Assert;
 import org.junit.Test;
 import com.github.reload.APITest;
-import com.github.reload.components.ComponentsRepository;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.services.AppAttachService;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -15,8 +14,6 @@ public class AppAttachTest extends APITest {
 
 	@Test
 	public void testRegister() throws Exception {
-		ComponentsRepository.register(AppAttachService.class);
-
 		AppAttachService srv = overlay.getService(AppAttachService.SERVICE_ID);
 
 		srv.registerApplicativeServer(TEST_PORT);

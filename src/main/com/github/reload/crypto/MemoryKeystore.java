@@ -16,17 +16,14 @@ import com.github.reload.net.encoders.header.NodeID;
  * Keystore that stored initialization values and running crypto material into
  * memory
  */
-@Component(Keystore.class)
-public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
+@Component(value = Keystore.class, priority = 1)
+public class MemoryKeystore implements Keystore {
 
 	@Component
 	private Configuration conf;
 
 	@Component
 	private Bootstrap bootstrap;
-
-	@Component
-	protected CryptoHelper<T> cryptoHelper;
 
 	private final Map<NodeID, ReloadCertificate> storedCerts = new HashMap<NodeID, ReloadCertificate>();
 
@@ -63,10 +60,9 @@ public class MemoryKeystore<T extends Certificate> implements Keystore<T> {
 		return Collections.unmodifiableMap(storedCerts);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<? extends T> getAcceptedIssuers() {
-		return (List<? extends T>) conf.getRootCerts();
+	public List<? extends Certificate> getAcceptedIssuers() {
+		return conf.getRootCerts();
 	}
 
 	@Override

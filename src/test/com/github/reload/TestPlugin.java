@@ -12,10 +12,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompLoaded;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
-import com.github.reload.components.ComponentsRepository;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
@@ -38,7 +36,7 @@ import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.LocalStore;
+import com.github.reload.services.storage.DataStorage;
 import com.github.reload.services.storage.StoreKindData;
 import com.github.reload.services.storage.encoders.StoreRequest;
 import com.google.common.base.Optional;
@@ -69,18 +67,13 @@ public class TestPlugin implements TopologyPlugin {
 	private MessageBuilder msgBuilder;
 
 	@Component
-	private LocalStore store;
+	private DataStorage store;
 
 	private boolean isJoined = false;
 
 	private final TestRouting r = new TestRouting();
 
 	private NodeID TEST_REPLICA_NODE = NodeID.valueOf(new byte[16]);
-
-	@CompLoaded
-	private void load() {
-		ComponentsRepository.register(LocalStore.class);
-	}
 
 	@CompStart
 	private void start() {

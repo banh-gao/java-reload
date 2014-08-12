@@ -37,7 +37,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish direct connections to other peers using attach messages
  */
-@Component(AttachService.class)
+@Component(value = AttachService.class, priority = 1)
 public class AttachService {
 
 	private static final Logger l = Logger.getRootLogger();

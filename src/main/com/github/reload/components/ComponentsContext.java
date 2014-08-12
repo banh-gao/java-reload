@@ -8,9 +8,13 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
@@ -27,7 +31,7 @@ public class ComponentsContext {
 
 	private final ComponentsRepository repo;
 
-	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(new ConcurrentHashMap<Class<? extends Object>, Object>());
+	private final ClassToInstanceMap<Object> loadedComponents = MutableClassToInstanceMap.create(new LinkedHashMap<Class<? extends Object>, Object>());
 
 	private final Map<Class<?>, Integer> componentsStatus = Maps.newLinkedHashMap();
 
@@ -89,11 +93,26 @@ public class ComponentsContext {
 
 		componentsStatus.put(compBaseClazz, status);
 
-		for (Method m : c.getClass().getDeclaredMethods()) {
+		triggerStatusMethod(c.getClass(), c, annotation);
+	}
+
+	/**
+	 * Call objects trigger methods annotated with the given annotation. Trigger
+	 * methods in parent classes will be called from the base class down to the
+	 * current object runtime class.
+	 */
+	private void triggerStatusMethod(Class<?> clazz, Object obj, Class<? extends Annotation> annotation) {
+
+		// Recursively call parent classes trigger methods before calling object
+		// runtime class methods
+		if (clazz.getSuperclass() != null)
+			triggerStatusMethod(clazz.getSuperclass(), obj, annotation);
+
+		for (Method m : clazz.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(annotation)) {
 				try {
 					m.setAccessible(true);
-					m.invoke(c);
+					m.invoke(obj);
 				} catch (IllegalArgumentException | IllegalAccessException
 						| InvocationTargetException e) {
 					e.printStackTrace();
@@ -128,7 +147,20 @@ public class ComponentsContext {
 	}
 
 	public void startComponents() {
-		for (Class<?> compBaseClazz : loadedComponents.keySet()) {
+		List<Class<?>> startOrder = new ArrayList<Class<?>>(loadedComponents.keySet());
+		Collections.sort(startOrder, new Comparator<Class<?>>() {
+
+			@Override
+			public int compare(Class<?> o1, Class<?> o2) {
+				Component ann1 = o1.getAnnotation(Component.class);
+				Component ann2 = o2.getAnnotation(Component.class);
+				if (ann1 == null || ann2 == null)
+					return 0;
+				return Integer.compare(ann1.priority(), ann2.priority());
+			}
+		});
+
+		for (Class<?> compBaseClazz : startOrder) {
 			startComponent(compBaseClazz);
 		}
 	}
@@ -176,7 +208,17 @@ public class ComponentsContext {
 	}
 
 	private void injectComponents(Object c) {
-		for (Field f : c.getClass().getDeclaredFields()) {
+		Class<?> superClazz = c.getClass();
+
+		// Inject fields either of the object class and of all its parents
+		while (superClazz != null) {
+			injectFields(c, superClazz);
+			superClazz = superClazz.getSuperclass();
+		}
+	}
+
+	private void injectFields(Object comp, Class<?> clazz) {
+		for (Field f : clazz.getDeclaredFields()) {
 			Component cmp = f.getAnnotation(Component.class);
 			if (cmp != null) {
 
@@ -194,15 +236,12 @@ public class ComponentsContext {
 
 				if (obj != null) {
 					try {
-						f.set(c, obj);
-						if (!compBaseClazz.equals(ComponentsContext.class)) {
-							startComponent(compBaseClazz);
-						}
+						f.set(comp, obj);
 					} catch (IllegalArgumentException | IllegalAccessException e) {
 						throw new IllegalStateException(e);
 					}
 				} else
-					throw new IllegalStateException(String.format("Missing component %s required by %s", compBaseClazz.getCanonicalName(), c.getClass().getCanonicalName()));
+					throw new IllegalStateException(String.format("Missing component %s required by %s", compBaseClazz.getCanonicalName(), clazz.getCanonicalName()));
 
 			}
 		}
@@ -268,6 +307,7 @@ public class ComponentsContext {
 
 		public ServiceIdentifier(Class<?> compBaseClazz) {
 			this.compBaseClazz = compBaseClazz;
+			ComponentsRepository.register(compBaseClazz);
 		}
 
 		@SuppressWarnings("unchecked")

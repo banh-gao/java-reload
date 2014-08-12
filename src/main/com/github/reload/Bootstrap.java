@@ -4,16 +4,21 @@ import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
+import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.AttachService;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.services.PingService;
+import com.github.reload.services.storage.MemoryStorage;
 import com.github.reload.services.storage.StorageService;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -22,7 +27,26 @@ import com.google.common.util.concurrent.ListenableFuture;
  * local peer to operate with a specific overlay instance
  * 
  */
-public abstract class Bootstrap {
+@Component(Bootstrap.class)
+public class Bootstrap {
+
+	public static HashAlgorithm DEFAULT_HASH = HashAlgorithm.SHA1;
+	public static SignatureAlgorithm DEFAULT_SIGN = SignatureAlgorithm.RSA;
+
+	/**
+	 * Core components and services
+	 */
+	private static final Class<?>[] CORE_COMPONENTS = new Class<?>[]{
+																		MessageBuilder.class,
+																		ConnectionManager.class,
+																		AttachService.class,
+																		ICEHelper.class,
+																		MessageRouter.class,
+																		AttachService.class,
+																		StorageService.class,
+																		PingService.class
+
+	};
 
 	private final Configuration conf;
 	private InetSocketAddress localAddr;
@@ -40,9 +64,13 @@ public abstract class Bootstrap {
 	/**
 	 * @return the data to be send in the join request
 	 */
-	protected abstract byte[] getJoinData();
+	protected byte[] getJoinData() {
+		return new byte[0];
+	}
 
-	protected abstract CertificateType getCertificateType();
+	protected void registerComponents() {
+
+	}
 
 	public void setLocalCert(ReloadCertificate localCert) {
 		this.localCert = localCert;
@@ -58,6 +86,18 @@ public abstract class Bootstrap {
 
 	public PrivateKey getLocalKey() {
 		return localKey;
+	}
+
+	public HashAlgorithm getSignHashAlg() {
+		return DEFAULT_HASH;
+	}
+
+	public SignatureAlgorithm getSignAlg() {
+		return DEFAULT_SIGN;
+	}
+
+	public HashAlgorithm getHashAlg() {
+		return DEFAULT_HASH;
 	}
 
 	/**
@@ -128,23 +168,26 @@ public abstract class Bootstrap {
 	 *         if the initialization of the local peer fails
 	 */
 	public final ListenableFuture<Overlay> connect() {
-		registerComponents();
+		// Register core components
+		for (Class<?> coreComp : CORE_COMPONENTS)
+			ComponentsRepository.register(coreComp);
 
-		ComponentsRepository.register(MessageBuilder.class);
-		ComponentsRepository.register(ConnectionManager.class);
-		ComponentsRepository.register(AttachService.class);
-		ComponentsRepository.register(ICEHelper.class);
-		ComponentsRepository.register(MessageRouter.class);
+		registerCryptoHelper();
+
+		// Register default keystore and storage implementations
+		ComponentsRepository.register(MemoryKeystore.class);
+		ComponentsRepository.register(MemoryStorage.class);
+
+		// Register overlay specific components
+		registerComponents();
 
 		ComponentsContext ctx = ComponentsContext.newInstance();
 		ctx.set(Configuration.class, conf);
 		ctx.set(Bootstrap.class, this);
 
-		// setup default components
-		ctx.set(ConnectionManager.class, new ConnectionManager());
-		ctx.set(StorageService.class, new StorageService());
-		ctx.set(AttachService.class, new AttachService());
-		ctx.set(PingService.class, new PingService());
+		// Start core components
+		for (Class<?> coreComp : CORE_COMPONENTS)
+			ctx.startComponent(coreComp);
 
 		ctx.startComponents();
 
@@ -153,27 +196,16 @@ public abstract class Bootstrap {
 		return overlayConnFut;
 	}
 
+	private void registerCryptoHelper() {
+		if (getLocalCert().getOriginalCertificate().getType().equalsIgnoreCase("X.509"))
+			ComponentsRepository.register(X509CryptoHelper.class);
+	}
+
 	public boolean isClientMode() {
 		return isClientMode;
 	}
 
-	/**
-	 * Used to compare overlay instances
-	 */
-	@Override
-	public abstract boolean equals(Object obj);
-
-	/**
-	 * Used to map overlay instances
-	 */
-	@Override
-	public abstract int hashCode();
-
 	public NodeID getLocalNodeId() {
 		return localNodeId;
-	}
-
-	protected void registerComponents() {
-
 	}
 }

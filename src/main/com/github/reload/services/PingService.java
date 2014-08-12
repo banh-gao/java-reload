@@ -13,7 +13,7 @@ import com.github.reload.net.encoders.content.PingAnswer;
 /**
  * Answers remote peers ping requests
  */
-@Component(PingService.class)
+@Component(value = PingService.class, priority = 10)
 public class PingService {
 
 	@Component

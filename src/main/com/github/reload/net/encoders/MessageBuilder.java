@@ -11,7 +11,7 @@ import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 
-@Component(MessageBuilder.class)
+@Component(value = MessageBuilder.class, priority = 0)
 public class MessageBuilder {
 
 	@Component

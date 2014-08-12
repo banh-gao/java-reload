@@ -19,7 +19,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 /**
- * This helper class is used to connect to the overlay and to send join requests
+ * This helper class is used to connect and join to the overlay
  */
 class OverlayConnector {
 

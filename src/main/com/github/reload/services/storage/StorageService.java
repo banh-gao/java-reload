@@ -52,6 +52,7 @@ import com.google.common.util.concurrent.SettableFuture;
  * Helps a peer to send storage requests into the overlay
  * 
  */
+@Component(value = StorageService.class, priority = 10)
 public class StorageService {
 
 	public static final ServiceIdentifier<StorageService> SERVICE_ID = new ServiceIdentifier<StorageService>(StorageService.class);

@@ -36,7 +36,7 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish and manage connections for all neighbor nodes
  */
-@Component(ConnectionManager.class)
+@Component(value = ConnectionManager.class, priority = 0)
 public class ConnectionManager {
 
 	private static final Logger l = Logger.getRootLogger();

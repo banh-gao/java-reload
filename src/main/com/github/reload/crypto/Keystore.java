@@ -11,7 +11,7 @@ import com.github.reload.net.encoders.header.NodeID;
  * the protocol
  * 
  */
-public interface Keystore<T extends Certificate> {
+public interface Keystore {
 
 	/**
 	 * @return the local certificate used by the local node for overlay
@@ -45,7 +45,7 @@ public interface Keystore<T extends Certificate> {
 	 * @return the certificate of the peers accepted as issuer (commonly the
 	 *         enrollment peers root certificates)
 	 */
-	public List<? extends T> getAcceptedIssuers();
+	public List<? extends Certificate> getAcceptedIssuers();
 
 	/**
 	 * @return the local node private key

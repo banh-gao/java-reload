@@ -18,12 +18,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
+import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
@@ -31,28 +31,21 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * Crypto helper for X.509 certificates
  * 
  */
-@Component(CryptoHelper.class)
+@Component(value = CryptoHelper.class, priority = 1)
 public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
+
+	@Component
+	private Bootstrap boot;
 
 	@Component
 	private Configuration conf;
 
 	@Component
-	private Keystore<X509Certificate> keystore;
+	private Keystore keystore;
 
 	private SSLContext sslContext;
 
 	private final X509CertificateParser certParser = new X509CertificateParser();
-	private static HashAlgorithm signHashAlg;
-	private static SignatureAlgorithm signAlg;
-	private static HashAlgorithm certHashAlg;
-
-	public static void init(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
-		// FIXME: set from context
-		X509CryptoHelper.signHashAlg = signHashAlg;
-		X509CryptoHelper.signAlg = signAlg;
-		X509CryptoHelper.certHashAlg = certHashAlg;
-	}
 
 	@CompStart
 	public void start() throws Exception {
@@ -61,22 +54,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 	}
 
 	@Override
-	public HashAlgorithm getSignHashAlg() {
-		return signHashAlg;
-	}
-
-	@Override
-	public SignatureAlgorithm getSignAlg() {
-		return signAlg;
-	}
-
-	@Override
-	public HashAlgorithm getCertHashAlg() {
-		return certHashAlg;
-	}
-
-	@Override
-	public List<X509Certificate> getTrustRelationship(X509Certificate peerCert, X509Certificate trustedIssuer, List<? extends X509Certificate> availableCerts) throws GeneralSecurityException {
+	public List<X509Certificate> getTrustRelationship(X509Certificate peerCert, X509Certificate trustedIssuer, List<X509Certificate> availableCerts) throws GeneralSecurityException {
 		List<X509Certificate> out = new ArrayList<X509Certificate>();
 
 		X509Certificate certToAuthenticate = peerCert;
@@ -101,11 +79,6 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 		out.add(trustedIssuer);
 		return out;
-	}
-
-	@Override
-	protected Keystore<X509Certificate> getKeystore() {
-		return keystore;
 	}
 
 	/**

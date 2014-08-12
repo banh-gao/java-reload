@@ -14,7 +14,7 @@ import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
-@Component(ICEHelper.class)
+@Component(value = ICEHelper.class, priority = 0)
 public class ICEHelper {
 
 	/**

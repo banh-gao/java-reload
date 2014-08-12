@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLEngine;
+import com.github.reload.Bootstrap;
+import com.github.reload.components.ComponentsContext.CompStart;
+import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -22,6 +25,7 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * node
  * 
  */
+@Component(CryptoHelper.class)
 public abstract class CryptoHelper<T extends Certificate> {
 
 	/**
@@ -29,20 +33,34 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 */
 	public static final HashAlgorithm OVERLAY_HASHALG = HashAlgorithm.SHA1;
 
-	/**
-	 * @return the algorithm used for signatures hashing
-	 */
-	public abstract HashAlgorithm getSignHashAlg();
+	@Component
+	private Bootstrap boot;
 
-	/**
-	 * @return the algorithm used for compute the signatures
-	 */
-	public abstract SignatureAlgorithm getSignAlg();
+	@Component
+	private Keystore keystore;
 
-	/**
-	 * @return the algorithm used for certificates hashing
-	 */
-	public abstract HashAlgorithm getCertHashAlg();
+	private HashAlgorithm signHashAlg;
+	private SignatureAlgorithm signAlg;
+	private HashAlgorithm certHashAlg;
+
+	@CompStart
+	public void init() {
+		signHashAlg = boot.getSignHashAlg();
+		signAlg = boot.getSignAlg();
+		certHashAlg = boot.getHashAlg();
+	}
+
+	public HashAlgorithm getSignHashAlg() {
+		return signHashAlg;
+	}
+
+	public SignatureAlgorithm getSignAlg() {
+		return signAlg;
+	}
+
+	public HashAlgorithm getCertHashAlg() {
+		return certHashAlg;
+	}
 
 	/**
 	 * @return true if the certificate belongs to the specified identity
@@ -73,13 +91,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         peerCert and the last the trustedIssuer
 	 * @throws GeneralSecurityException
 	 */
-	public abstract List<? extends T> getTrustRelationship(T peerCert, T trustedIssuer, List<? extends T> availableCerts) throws GeneralSecurityException;
-
-	/**
-	 * @return the keystore used by the helper implementation to store
-	 *         cryptographic material
-	 */
-	protected abstract Keystore<T> getKeystore();
+	public abstract List<T> getTrustRelationship(T peerCert, T trustedIssuer, List<T> availableCerts) throws GeneralSecurityException;
 
 	/**
 	 * @return a signer object used by the local node to sign the
@@ -95,7 +107,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 			throw new RuntimeException(e);
 		}
 		try {
-			signer.initSign(getKeystore().getPrivateKey());
+			signer.initSign(keystore.getPrivateKey());
 		} catch (InvalidKeyException e) {
 			throw new RuntimeException(e);
 		}
@@ -112,15 +124,16 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * @throws CertificateException
 	 *             if the trusted relation cannot be built
 	 */
-	public void authenticateTrustRelationship(T peerCert, List<? extends T> availableCerts) throws CertificateException {
-		List<? extends T> trustedRelation = null;
+	@SuppressWarnings("unchecked")
+	public void authenticateTrustRelationship(T peerCert, List<T> availableCerts) throws CertificateException {
+		List<T> trustedRelation = null;
 		List<T> available = new ArrayList<T>(availableCerts);
 
-		available.addAll(getKeystore().getAcceptedIssuers());
+		available.addAll((List<T>) keystore.getAcceptedIssuers());
 
-		for (T issuerCert : getKeystore().getAcceptedIssuers()) {
+		for (Certificate issuerCert : keystore.getAcceptedIssuers()) {
 			try {
-				trustedRelation = getTrustRelationship(peerCert, issuerCert, available);
+				trustedRelation = getTrustRelationship(peerCert, (T) issuerCert, available);
 				if (trustedRelation != null)
 					return;
 			} catch (GeneralSecurityException e) {
@@ -139,13 +152,13 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         overlay.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<? extends T> getLocalTrustRelationship() {
-		List<? extends T> issuers = getKeystore().getAcceptedIssuers();
+	public List<T> getLocalTrustRelationship() {
+		List<T> issuers = (List<T>) keystore.getAcceptedIssuers();
 
-		List<? extends T> relations = null;
+		List<T> relations = null;
 		for (T issuer : issuers) {
 			try {
-				relations = getTrustRelationship((T) getKeystore().getLocalCertificate().getOriginalCertificate(), issuer, issuers);
+				relations = getTrustRelationship((T) keystore.getLocalCertificate().getOriginalCertificate(), issuer, issuers);
 				if (relations != null) {
 					relations.remove(issuer);
 					return relations;
@@ -163,7 +176,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         operations
 	 */
 	public ReloadCertificate getLocalCertificate() {
-		return getKeystore().getLocalCertificate();
+		return keystore.getLocalCertificate();
 	}
 
 	/**
@@ -171,15 +184,15 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * is stored
 	 */
 	public void addCertificate(ReloadCertificate cert) {
-		getKeystore().addCertificate(cert);
+		keystore.addCertificate(cert);
 	}
 
 	public ReloadCertificate getCertificate(NodeID nodeId) {
-		return getKeystore().getCertificate(nodeId);
+		return keystore.getCertificate(nodeId);
 	}
 
 	public ReloadCertificate getCertificate(SignerIdentity identity) {
-		for (ReloadCertificate cert : getKeystore().getStoredCertificates().values())
+		for (ReloadCertificate cert : keystore.getStoredCertificates().values())
 			if (belongsTo(cert, identity))
 				return cert;
 
@@ -190,7 +203,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * @return all the stored certificates
 	 */
 	public Map<NodeID, ReloadCertificate> getStoredCertificates() {
-		return getKeystore().getStoredCertificates();
+		return keystore.getStoredCertificates();
 	}
 
 	/**
@@ -198,21 +211,21 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         enrollment peers root certificates)
 	 */
 	public List<? extends Certificate> getAcceptedIssuers() {
-		return getKeystore().getAcceptedIssuers();
+		return keystore.getAcceptedIssuers();
 	}
 
 	/**
 	 * @return the local node private key
 	 */
 	public PrivateKey getPrivateKey() {
-		return getKeystore().getPrivateKey();
+		return keystore.getPrivateKey();
 	}
 
 	/**
 	 * @return true if the node is classified as a bad node, false otherwise
 	 */
 	public boolean isBadNode(NodeID nodeId) {
-		return getKeystore().isBadNode(nodeId);
+		return keystore.isBadNode(nodeId);
 	}
 
 	/**
