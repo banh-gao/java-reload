@@ -61,7 +61,7 @@ public class ComponentsContext {
 		throw new IllegalStateException();
 	}
 
-	private ComponentsContext() {
+	public ComponentsContext() {
 		repo = ComponentsRepository.getInstance();
 		msgHandlerMgr = new MessageHandlersManager();
 		eventBus = new EventBus();

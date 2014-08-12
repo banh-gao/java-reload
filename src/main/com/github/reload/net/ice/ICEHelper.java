@@ -8,7 +8,6 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import com.github.reload.components.ComponentsRepository.Component;
@@ -43,13 +42,11 @@ public class ICEHelper {
 	}
 
 	public List<InetAddress> getInterfaceAddresses() {
-		// FIXME: TEST return loopback only for test
-		if (true)
-			return Collections.singletonList(InetAddress.getLoopbackAddress());
-
-		// END TEST BLOCK
-
 		List<InetAddress> out = new ArrayList<InetAddress>();
+
+		// Include loopback address for local connections
+		out.add(InetAddress.getLoopbackAddress());
+
 		Enumeration<NetworkInterface> netIfs;
 		try {
 			netIfs = NetworkInterface.getNetworkInterfaces();
@@ -59,12 +56,10 @@ public class ICEHelper {
 		while (netIfs.hasMoreElements()) {
 			NetworkInterface netIf = netIfs.nextElement();
 			for (InterfaceAddress ifAddr : netIf.getInterfaceAddresses()) {
-				// NOTE: TEST only IPv4 for wireshark ssl decrypt
-				if (ifAddr.getAddress() instanceof Inet4Address) {
-					out.add(ifAddr.getAddress());
-				}
+				out.add(ifAddr.getAddress());
 			}
 		}
+		System.out.println(out);
 		return out;
 	}
 

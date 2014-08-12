@@ -21,6 +21,8 @@ public class DataKind {
 
 	private static final Map<Long, DataKind> REGISTERED_KINDS = new HashMap<Long, DataKind>();
 
+	public static final int MAX_SIZE_DEFAULT = 1024;
+	public static final int MAX_COUNT_DEFAULT = 1;
 	public static final AttributeKey<Integer> MAX_SIZE = AttributeKey.valueOf("maxSize");
 	public static final AttributeKey<Integer> MAX_COUNT = AttributeKey.valueOf("maxCount");
 	public static final AttributeKey<Long> MAX_NODE_MULTIPLE = AttributeKey.valueOf("maxNodeMultiple");
@@ -70,6 +72,13 @@ public class DataKind {
 	@SuppressWarnings("unchecked")
 	public <T> T getAttribute(AttributeKey<T> key) {
 		return (T) attributes.get(key);
+	}
+
+	public <T> T getAttribute(AttributeKey<T> key, T defaultValue) {
+		T value = getAttribute(key);
+		if (value == null)
+			return defaultValue;
+		return value;
 	}
 
 	/**

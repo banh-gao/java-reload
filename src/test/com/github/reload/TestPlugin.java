@@ -4,14 +4,18 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.ComponentsContext.CompLoaded;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
+import com.github.reload.components.ComponentsRepository;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
@@ -34,6 +38,10 @@ import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.storage.LocalStore;
+import com.github.reload.services.storage.StoreKindData;
+import com.github.reload.services.storage.encoders.StoreRequest;
+import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -60,9 +68,19 @@ public class TestPlugin implements TopologyPlugin {
 	@Component
 	private MessageBuilder msgBuilder;
 
+	@Component
+	private LocalStore store;
+
 	private boolean isJoined = false;
 
 	private final TestRouting r = new TestRouting();
+
+	private NodeID TEST_REPLICA_NODE = NodeID.valueOf(new byte[16]);
+
+	@CompLoaded
+	private void load() {
+		ComponentsRepository.register(LocalStore.class);
+	}
 
 	@CompStart
 	private void start() {
@@ -146,6 +164,8 @@ public class TestPlugin implements TopologyPlugin {
 		}
 
 		r.neighbors.remove(leavingNode);
+
+		l.debug(String.format("Node %s has left the overlay", leavingNode));
 	}
 
 	@Subscribe
@@ -274,5 +294,34 @@ public class TestPlugin implements TopologyPlugin {
 	@Override
 	public boolean isLocalPeerValidStorage(ResourceID resourceId, boolean isReplica) {
 		return true;
+	}
+
+	@Override
+	public List<NodeID> getReplicaNodes(ResourceID resourceId) {
+		// TODO Auto-generated method stub
+		return Collections.singletonList(TEST_REPLICA_NODE);
+	}
+
+	@Override
+	public void requestReplication(ResourceID resourceId) {
+		List<NodeID> replicaNodes = getReplicaNodes(resourceId);
+
+		Optional<Map<Long, StoreKindData>> res = store.getResource(resourceId);
+
+		if (!res.isPresent())
+			return;
+
+		Collection<StoreKindData> data = res.get().values();
+
+		short replNum = 1;
+		for (NodeID repl : replicaNodes) {
+			replicateData(msgBuilder.newMessage(new StoreRequest(resourceId, replNum, data), new DestinationList(repl)));
+			replNum++;
+		}
+	}
+
+	private void replicateData(Message replicaStore) {
+		// TODO: check replication
+		// router.sendRequestMessage(replicaStore);
 	}
 }

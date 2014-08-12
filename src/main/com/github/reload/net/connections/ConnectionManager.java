@@ -27,6 +27,7 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.net.stack.MessageDispatcher;
 import com.github.reload.net.stack.ReloadStack;
 import com.github.reload.net.stack.ReloadStackBuilder;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -205,8 +206,8 @@ public class ConnectionManager {
 		// TODO
 	}
 
-	public Connection getConnection(NodeID neighbor) {
-		return connections.get(neighbor);
+	public Optional<Connection> getConnection(NodeID neighbor) {
+		return Optional.fromNullable(connections.get(neighbor));
 	}
 
 	public OverlayLinkType getServerProtocol() {

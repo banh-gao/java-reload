@@ -2,6 +2,7 @@ package com.github.reload.services.storage.encoders;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
@@ -17,11 +18,11 @@ public class StoreRequest extends Content {
 
 	private final ResourceID resourceId;
 	private final short replicaNumber;
-	private final List<StoreKindData> kindData;
+	private final Collection<StoreKindData> kindData;
 
-	public StoreRequest(ResourceID id, short replicaNumber, List<StoreKindData> data) {
+	public StoreRequest(ResourceID id, short replNum, Collection<StoreKindData> data) {
 		resourceId = id;
-		this.replicaNumber = replicaNumber;
+		this.replicaNumber = replNum;
 		kindData = data;
 	}
 
@@ -34,7 +35,7 @@ public class StoreRequest extends Content {
 		return resourceId;
 	}
 
-	public List<StoreKindData> getKindData() {
+	public Collection<StoreKindData> getKindData() {
 		return kindData;
 	}
 

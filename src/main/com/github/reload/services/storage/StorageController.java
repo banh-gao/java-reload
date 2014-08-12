@@ -3,7 +3,8 @@ package com.github.reload.services.storage;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompStart;
+import com.github.reload.components.ComponentsContext.CompLoaded;
+import com.github.reload.components.ComponentsRepository;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
@@ -51,11 +52,12 @@ class StorageController {
 	@Component
 	private ComponentsContext ctx;
 
+	@Component
 	private LocalStore localStore;
 
-	@CompStart
-	public void start() {
-		localStore = new LocalStore();
+	@CompLoaded
+	public void load() {
+		ComponentsRepository.register(LocalStore.class);
 	}
 
 	@MessageHandler(ContentType.STORE_REQ)
@@ -77,7 +79,7 @@ class StorageController {
 
 		List<StoreKindResponse> response;
 		try {
-			response = localStore.store(req.getResourceId(), req.getKindData(), senderIdentity, isReplica, replicaNodes, ctx);
+			response = localStore.store(req.getResourceId(), req.getKindData(), senderIdentity, isReplica, replicaNodes);
 		} catch (GeneralSecurityException e) {
 			router.sendError(requestMessage.getHeader(), ErrorType.FORBITTEN, "Invalid data signature");
 			return;
@@ -86,21 +88,23 @@ class StorageController {
 			return;
 		}
 
-		for (StoreKindResponse resp : response) {
-			plugin.requestReplication(req.getResourceId(), resp.getKind());
-		}
-
 		StoreAnswer answer = new StoreAnswer(response);
 
 		router.sendAnswer(requestMessage.getHeader(), answer);
 
-		cleanupStore();
+		plugin.requestReplication(req.getResourceId());
 	}
 
 	@MessageHandler(ContentType.FETCH_REQ)
 	private void handleFetchRequest(Message requestMessage) {
 		FetchRequest req = (FetchRequest) requestMessage.getContent();
-		FetchAnswer answer = new FetchAnswer(localStore.fetch(req.getResourceId(), req.getSpecifiers()));
+		FetchAnswer answer;
+		try {
+			answer = new FetchAnswer(localStore.fetch(req.getResourceId(), req.getSpecifiers()));
+		} catch (ErrorMessageException e) {
+			router.sendError(requestMessage.getHeader(), e.getType(), e.getInfo());
+			return;
+		}
 		router.sendAnswer(requestMessage.getHeader(), answer);
 
 		cleanupStore();
@@ -109,7 +113,13 @@ class StorageController {
 	@MessageHandler(ContentType.STAT_REQ)
 	private void handleStatRequest(Message requestMessage) {
 		StatRequest req = (StatRequest) requestMessage.getContent();
-		StatAnswer answer = new StatAnswer(localStore.stat(req.getResourceId(), req.getSpecifiers()));
+		StatAnswer answer;
+		try {
+			answer = new StatAnswer(localStore.stat(req.getResourceId(), req.getSpecifiers()));
+		} catch (ErrorMessageException e) {
+			router.sendError(requestMessage.getHeader(), e.getType(), e.getInfo());
+			return;
+		}
 		router.sendAnswer(requestMessage.getHeader(), answer);
 
 		cleanupStore();
@@ -118,7 +128,7 @@ class StorageController {
 	@MessageHandler(ContentType.FIND_REQ)
 	private void handleFindRequest(Message requestMessage) {
 		FindRequest req = (FindRequest) requestMessage.getContent();
-		FindAnswer answer = new FindAnswer(localStore.find(req.getResourceId(), req.getKinds(), plugin));
+		FindAnswer answer = new FindAnswer(localStore.find(req.getResourceId(), req.getKinds()));
 		router.sendAnswer(requestMessage.getHeader(), answer);
 
 		cleanupStore();

@@ -25,6 +25,7 @@ import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.routing.RoutingTable;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -93,33 +94,35 @@ public class MessageRouter {
 		}
 
 		for (NodeID nextHop : hops) {
-			l.debug(String.format("Sent message %s for %#x to %s through %s", message.getContent().getType(), message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop));
 			transmit(message, nextHop, status);
 		}
 		return status;
 	}
 
-	private void transmit(Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {
-		Connection conn = connManager.getConnection(nextHop);
+	private void transmit(final Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {
+		final Optional<Connection> conn = connManager.getConnection(nextHop);
 
-		if (conn == null) {
+		if (!conn.isPresent()) {
 			status.setException(new NetworkException(String.format("Connection to neighbor node %s not valid", nextHop)));
 			return;
 		}
 
-		ChannelFuture f = conn.write(message);
+		ChannelFuture f = conn.get().write(message);
 
 		f.addListener(new ChannelFutureListener() {
 
 			@Override
 			public void operationComplete(final ChannelFuture future) throws Exception {
+				l.debug(String.format("Transmitting message %#x (%s) to %s through %s at %s...", message.getHeader().getTransactionId(), message.getContent().getType(), message.getHeader().getDestinationId(), nextHop, conn.get().getStack().getChannel().remoteAddress()));
 				ctx.execute(new Runnable() {
 
 					@Override
 					public void run() {
 						if (future.isSuccess()) {
+							l.debug(String.format("Message %#x transmitted to %s through %s", message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop));
 							status.set(nextHop);
 						} else {
+							l.debug(String.format("Message %#x transmission to %s through %s failed", message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop), future.cause());
 							status.setException(future.cause());
 						}
 					}
@@ -130,24 +133,44 @@ public class MessageRouter {
 		});
 	}
 
-	public void forwardMessage(ForwardMessage msg) {
+	public void forwardMessage(final ForwardMessage msg) {
 		Header header = msg.getHeader();
 		// Change message header to be forwarded
 		header.toForward(header.getAttribute(Header.PREV_HOP));
 
 		// If destination node is directly connected forward message to it
 		if (msg.getHeader().getDestinationId() instanceof NodeID) {
-			Connection directConn = connManager.getConnection((NodeID) msg.getHeader().getDestinationId());
-			if (directConn != null) {
-				directConn.forward(msg);
+			final Optional<Connection> directConn = connManager.getConnection((NodeID) msg.getHeader().getDestinationId());
+			if (directConn.isPresent()) {
+				ChannelFuture fut = directConn.get().forward(msg);
+				fut.addListener(new ChannelFutureListener() {
+
+					@Override
+					public void operationComplete(ChannelFuture future) throws Exception {
+						if (future.isSuccess())
+							l.debug(String.format("Message %#x forwarded to %s", msg.getHeader().getTransactionId(), directConn.get().getNodeId()), future.cause());
+						else
+							l.debug(String.format("Message forwarding of %#x failed", msg.getHeader().getTransactionId()), future.cause());
+					}
+				});
 			}
 			return;
 		}
 
 		for (NodeID nextHop : ctx.get(RoutingTable.class).getNextHops(msg.getHeader().getDestinationId())) {
-			Connection c = connManager.getConnection(nextHop);
+			final Optional<Connection> c = connManager.getConnection(nextHop);
 			// Forward message and ignore delivery status
-			c.forward(msg);
+			ChannelFuture fut = c.get().forward(msg);
+			fut.addListener(new ChannelFutureListener() {
+
+				@Override
+				public void operationComplete(ChannelFuture future) throws Exception {
+					if (future.isSuccess())
+						l.debug(String.format("Message %#x forwarded to %s", msg.getHeader().getTransactionId(), c.get().getNodeId()), future.cause());
+					else
+						l.debug(String.format("Message forwarding of %#x failed", msg.getHeader().getTransactionId()), future.cause());
+				}
+			});
 		}
 	}
 

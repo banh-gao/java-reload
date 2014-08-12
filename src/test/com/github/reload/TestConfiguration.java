@@ -75,6 +75,7 @@ public class TestConfiguration implements Configuration {
 		rootCerts = Collections.singletonList((X509Certificate) loadLocalCert("CAcert.der"));
 		instanceName = "testOverlay.com";
 		maxMessageSize = 5000;
+		nodeIdLength = 16;
 		initialTTL = 6;
 		noICE = true;
 		linkProtocols = Collections.singletonList("TLS");

@@ -5,7 +5,6 @@ import java.util.List;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.header.RoutableID;
-import com.github.reload.services.storage.DataKind;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**
@@ -63,5 +62,5 @@ public interface TopologyPlugin {
 
 	public List<NodeID> getReplicaNodes(ResourceID resourceId);
 
-	public void requestReplication(ResourceID resourceId, DataKind kind);
+	public void requestReplication(ResourceID resourceId);
 }

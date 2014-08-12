@@ -25,6 +25,7 @@ import com.github.reload.net.ice.HostCandidate;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.NoSuitableCandidateException;
 import com.github.reload.routing.TopologyPlugin;
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
@@ -72,10 +73,10 @@ public class AttachService {
 		final RoutableID destinationID = destList.getDestination();
 
 		if (destinationID instanceof NodeID) {
-			Connection c = connMgr.getConnection((NodeID) destinationID);
-			if (c != null) {
-				l.info(String.format("Attach to %s not performed, already connected", c.getNodeId()));
-				fut.set(c);
+			Optional<Connection> c = connMgr.getConnection((NodeID) destinationID);
+			if (c.isPresent()) {
+				l.info(String.format("Attach to %s not performed, already connected", c.get().getNodeId()));
+				fut.set(c.get());
 				return fut;
 			}
 		}

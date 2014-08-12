@@ -1,6 +1,5 @@
 package com.github.reload.services.storage;
 
-import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -339,9 +338,7 @@ public class StorageService {
 		}
 
 		for (PreparedData b : preparedDatas) {
-			// FIXME: determine correct generation value
-			b.setGeneration(BigInteger.valueOf(2));
-			b.setLifeTime(PreparedData.MAX_LIFETIME);
+			b.setLifeTime(0);
 		}
 
 		return store(resourceId, preparedDatas.toArray(new PreparedData[0]));
