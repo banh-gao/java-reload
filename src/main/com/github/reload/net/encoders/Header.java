@@ -27,7 +27,6 @@ public class Header {
 	final Map<AttributeKey<?>, Object> attributes = Maps.newHashMap();
 
 	public static final AttributeKey<NodeID> PREV_HOP = AttributeKey.valueOf("PREV_HOP");
-	public static final AttributeKey<NodeID> NEXT_HOP = AttributeKey.valueOf("NEXT_HOP");
 	public static final AttributeKey<ByteBuf> RAW_CONTENT = AttributeKey.valueOf("RAW_CONTENT");
 
 	long transactionId;
@@ -319,6 +318,9 @@ public class Header {
 		if (!viaList.getDestination().equals(lastHop)) {
 			viaList.add(lastHop);
 		}
+
+		if (destinationList.size() > 1)
+			destinationList.remove(0);
 	}
 
 }

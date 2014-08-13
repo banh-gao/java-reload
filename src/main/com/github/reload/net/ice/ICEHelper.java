@@ -59,7 +59,6 @@ public class ICEHelper {
 				out.add(ifAddr.getAddress());
 			}
 		}
-		System.out.println(out);
 		return out;
 	}
 

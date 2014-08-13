@@ -55,6 +55,11 @@ public class DestinationList extends AbstractList<RoutableID> {
 	}
 
 	@Override
+	public void add(int index, RoutableID element) {
+		list.add(index, element);
+	}
+
+	@Override
 	public RoutableID set(int index, RoutableID element) {
 		return list.set(index, element);
 	}

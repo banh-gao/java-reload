@@ -5,9 +5,6 @@ import io.netty.channel.ChannelFutureListener;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository.Component;
@@ -21,12 +18,13 @@ import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.Error;
-import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.routing.RoutingTable;
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -37,9 +35,6 @@ import com.google.common.util.concurrent.SettableFuture;
 public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
-	private static final int REQUEST_TIMEOUT = 5000;
-
-	private final ScheduledExecutorService expiredRequestsRemover = Executors.newScheduledThreadPool(1);
 
 	@Component
 	private ConnectionManager connManager;
@@ -47,10 +42,10 @@ public class MessageRouter {
 	@Component
 	private MessageBuilder msgBuilder;
 
-	private final Map<Long, SettableFuture<Message>> pendingRequests = Maps.newConcurrentMap();
-
 	@Component
 	private ComponentsContext ctx;
+
+	private RequestManager reqManager = new RequestManager();
 
 	/**
 	 * Send the given request message to the destination node into the overlay.
@@ -59,17 +54,22 @@ public class MessageRouter {
 	 * available or the request goes in error
 	 * 
 	 */
-	public ListenableFuture<Message> sendRequestMessage(Message request) {
+	public ListenableFuture<Message> sendRequestMessage(final Message request) {
+		final SettableFuture<Message> reqFut = reqManager.put(request);
 
-		final SettableFuture<Message> reqFut = SettableFuture.create();
+		ListenableFuture<NodeID> linkStatus = sendMessage(request);
+		Futures.addCallback(linkStatus, new FutureCallback<NodeID>() {
 
-		long reqId = request.getHeader().getTransactionId();
+			@Override
+			public void onSuccess(NodeID result) {
+			}
 
-		pendingRequests.put(reqId, reqFut);
-
-		expiredRequestsRemover.schedule(new ExiredRequestsRemover(reqId), REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
-
-		sendMessage(request);
+			@Override
+			public void onFailure(Throwable t) {
+				// Fail fast request when neighbor transmission fails
+				reqFut.setException(t);
+			}
+		});
 
 		return reqFut;
 	}
@@ -79,31 +79,40 @@ public class MessageRouter {
 
 		final SettableFuture<NodeID> status = SettableFuture.create();
 
-		Set<NodeID> hops;
+		RoutableID nextDest = header.getNextHop();
 
-		if (header.getAttribute(Header.NEXT_HOP) == null) {
-			hops = ctx.get(RoutingTable.class).getNextHops(header.getDestinationId());
-		} else {
-			hops = Collections.singleton(header.getAttribute(Header.NEXT_HOP));
-		}
+		Set<NodeID> hops = getNextHops(nextDest);
 
 		if (hops.isEmpty()) {
-			String err = String.format("No route to %s for message %#x", header.getDestinationId(), header.getTransactionId());
+			String err = String.format("No route to %s for message %#x", header.getNextHop(), header.getTransactionId());
 			l.warn(err);
 			status.setException(new NetworkException(err));
+			return status;
 		}
 
 		for (NodeID nextHop : hops) {
 			transmit(message, nextHop, status);
 		}
+
 		return status;
 	}
 
-	private void transmit(final Message message, final NodeID nextHop, final SettableFuture<NodeID> status) {
-		final Optional<Connection> conn = connManager.getConnection(nextHop);
+	private Set<NodeID> getNextHops(RoutableID dest) {
+		if (dest instanceof NodeID && isDirectlyConnected((NodeID) dest))
+			return Collections.singleton((NodeID) dest);
+		else
+			return ctx.get(RoutingTable.class).getNextHops(dest);
+	}
+
+	private boolean isDirectlyConnected(NodeID nextDest) {
+		return ctx.get(ConnectionManager.class).isNeighbor(nextDest);
+	}
+
+	private void transmit(final Message message, final NodeID neighborNode, final SettableFuture<NodeID> status) {
+		final Optional<Connection> conn = connManager.getConnection(neighborNode);
 
 		if (!conn.isPresent()) {
-			status.setException(new NetworkException(String.format("Connection to neighbor node %s not valid", nextHop)));
+			status.setException(new NetworkException(String.format("Connection to neighbor node %s not valid", neighborNode)));
 			return;
 		}
 
@@ -113,16 +122,16 @@ public class MessageRouter {
 
 			@Override
 			public void operationComplete(final ChannelFuture future) throws Exception {
-				l.debug(String.format("Transmitting message %#x (%s) to %s through %s at %s...", message.getHeader().getTransactionId(), message.getContent().getType(), message.getHeader().getDestinationId(), nextHop, conn.get().getStack().getChannel().remoteAddress()));
+				l.debug(String.format("Transmitting message %#x (%s) to %s through %s at %s...", message.getHeader().getTransactionId(), message.getContent().getType(), message.getHeader().getDestinationId(), neighborNode, conn.get().getStack().getChannel().remoteAddress()));
 				ctx.execute(new Runnable() {
 
 					@Override
 					public void run() {
 						if (future.isSuccess()) {
-							l.debug(String.format("Message %#x transmitted to %s through %s", message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop));
-							status.set(nextHop);
+							l.debug(String.format("Message %#x transmitted to %s through %s", message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), neighborNode));
+							status.set(neighborNode);
 						} else {
-							l.debug(String.format("Message %#x transmission to %s through %s failed", message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), nextHop), future.cause());
+							l.debug(String.format("Message %#x transmission to %s through %s failed", message.getHeader().getTransactionId(), message.getHeader().getDestinationId(), neighborNode), future.cause());
 							status.setException(future.cause());
 						}
 					}
@@ -139,8 +148,8 @@ public class MessageRouter {
 		header.toForward(header.getAttribute(Header.PREV_HOP));
 
 		// If destination node is directly connected forward message to it
-		if (msg.getHeader().getDestinationId() instanceof NodeID) {
-			final Optional<Connection> directConn = connManager.getConnection((NodeID) msg.getHeader().getDestinationId());
+		if (msg.getHeader().getNextHop() instanceof NodeID) {
+			final Optional<Connection> directConn = connManager.getConnection((NodeID) msg.getHeader().getNextHop());
 			if (directConn.isPresent()) {
 				ChannelFuture fut = directConn.get().forward(msg);
 				fut.addListener(new ChannelFutureListener() {
@@ -157,8 +166,9 @@ public class MessageRouter {
 			return;
 		}
 
-		for (NodeID nextHop : ctx.get(RoutingTable.class).getNextHops(msg.getHeader().getDestinationId())) {
+		for (NodeID nextHop : getNextHops(msg.getHeader().getNextHop())) {
 			final Optional<Connection> c = connManager.getConnection(nextHop);
+
 			// Forward message and ignore delivery status
 			ChannelFuture fut = c.get().forward(msg);
 			fut.addListener(new ChannelFutureListener() {
@@ -188,26 +198,7 @@ public class MessageRouter {
 
 	@MessageHandler(handleAnswers = true, value = ContentType.ERROR)
 	private void handleAnswer(Message message) {
-		Long transactionId = message.getHeader().getTransactionId();
-
-		SettableFuture<Message> reqFut = pendingRequests.get(transactionId);
-
-		if (reqFut == null) {
-			l.debug(String.format("Unattended answer message %#x dropped", message.getHeader().getTransactionId()));
-			return;
-		}
-
-		pendingRequests.remove(transactionId);
-
-		Content content = message.getContent();
-
-		if (content.getType() == ContentType.ERROR) {
-			l.debug(String.format("Received error message %s for %#x: %s", ((Error) content).getErrorType(), message.getHeader().getTransactionId(), ((Error) content).toException().getMessage()));
-			reqFut.setException(((Error) content).toException());
-		} else {
-			l.debug(String.format("Received answer message %s for %#x", content.getType(), message.getHeader().getTransactionId()));
-			reqFut.set(message);
-		}
+		reqManager.handleAnswer(message, ctx);
 	}
 
 	public static class ForwardingException extends Exception {
@@ -222,29 +213,5 @@ public class MessageRouter {
 			return failures;
 		}
 
-	}
-
-	private class ExiredRequestsRemover implements Runnable {
-
-		private final long transactionId;
-
-		public ExiredRequestsRemover(long transactionId) {
-			this.transactionId = transactionId;
-		}
-
-		@Override
-		public void run() {
-			SettableFuture<Message> future = pendingRequests.remove(transactionId);
-			if (future != null) {
-				future.setException(new RequestTimeoutException(String.format("Request %#x times out", transactionId)));
-			}
-		}
-	}
-
-	public static class RequestTimeoutException extends ErrorMessageException {
-
-		public RequestTimeoutException(String message) {
-			super(ErrorType.REQUEST_TIMEOUT, message);
-		}
 	}
 }

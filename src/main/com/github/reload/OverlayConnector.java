@@ -109,18 +109,25 @@ class OverlayConnector {
 
 		Bootstrap bootstrap = ctx.get(Bootstrap.class);
 
-		final DestinationList dest = new DestinationList(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
+		final DestinationList dest = new DestinationList();
+
+		// Pass request through bootstrap server
+		dest.add(bootstrapServer);
+
+		// ResourceId destination corresponding to local node-id to route the
+		// attach request to the correct Admitting Peer
+		dest.add(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
 
 		AttachService attachConnector = ctx.get(AttachService.class);
 
-		ListenableFuture<Connection> apConnFut = attachConnector.attachTo(dest, bootstrapServer, true);
+		ListenableFuture<Connection> apConnFut = attachConnector.attachTo(dest, true);
 
 		Futures.addCallback(apConnFut, new FutureCallback<Connection>() {
 
 			@Override
 			public void onSuccess(Connection apConn) {
 				if (joinNeeded) {
-					ListenableFuture<NodeID> joinCB = ctx.get(TopologyPlugin.class).requestJoin(apConn.getNodeId());
+					ListenableFuture<NodeID> joinCB = ctx.get(TopologyPlugin.class).requestJoin();
 					Futures.addCallback(joinCB, new FutureCallback<NodeID>() {
 
 						@Override

@@ -20,7 +20,7 @@ public interface TopologyPlugin {
 	 * 
 	 * @return the node-id of the peer who answers to the join
 	 */
-	public ListenableFuture<NodeID> requestJoin(NodeID admittingPeer);
+	public ListenableFuture<NodeID> requestJoin();
 
 	/**
 	 * Requests to send an update message to the given neighbor
@@ -28,9 +28,9 @@ public interface TopologyPlugin {
 	public ListenableFuture<NodeID> requestUpdate(NodeID neighborNode);
 
 	/**
-	 * Requests to send a leave message to the given neighbor
+	 * Requests to leave message to the given neighbor
 	 */
-	public ListenableFuture<NodeID> requestLeave(NodeID neighborNode);
+	public ListenableFuture<Void> requestLeave();
 
 	/**
 	 * @return the length in bytes of resource identifiers used by this plugin
@@ -56,7 +56,7 @@ public interface TopologyPlugin {
 
 	public int getDistance(RoutableID source, RoutableID dest);
 
-	public boolean isLocalPeerResponsible(RoutableID destination);
+	public boolean isLocalPeerResponsible(RoutableID dest);
 
 	public boolean isLocalPeerValidStorage(ResourceID resourceId, boolean isReplica);
 

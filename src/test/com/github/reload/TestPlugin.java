@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,7 @@ import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
+import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
@@ -78,18 +80,17 @@ public class TestPlugin implements TopologyPlugin {
 	@CompStart
 	private void start() {
 		ctx.set(RoutingTable.class, r);
-		// Create loopback connection and add to routing table
-		try {
-			connMgr.connectTo(boot.getLocalAddress(), OverlayLinkType.TLS_TCP_FH_NO_ICE).get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		r.neighbors.add(boot.getLocalNodeId());
+		if (boot.isOverlayInitiator())
+			try {
+				addLoopback().get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
 	}
 
 	@Override
-	public ListenableFuture<NodeID> requestJoin(final NodeID admittingPeer) {
-		l.info(String.format("Joining to RELOAD overlay %s with %s through %s in progress...", conf.getOverlayName(), boot.getLocalNodeId(), admittingPeer));
+	public ListenableFuture<NodeID> requestJoin() {
+		l.info(String.format("Joining to RELOAD overlay %s with %s in progress...", conf.getOverlayName(), boot.getLocalNodeId()));
 		Bootstrap connector = ctx.get(Bootstrap.class);
 		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
 		MessageRouter router = ctx.get(MessageRouter.class);
@@ -100,8 +101,6 @@ public class TestPlugin implements TopologyPlugin {
 
 		Message request = msgBuilder.newMessage(req, dest);
 
-		request.getHeader().setAttribute(Header.NEXT_HOP, admittingPeer);
-
 		ListenableFuture<Message> joinAnsFut = router.sendRequestMessage(request);
 
 		final SettableFuture<NodeID> joinFuture = SettableFuture.create();
@@ -109,7 +108,9 @@ public class TestPlugin implements TopologyPlugin {
 		Futures.addCallback(joinAnsFut, new FutureCallback<Message>() {
 
 			public void onSuccess(Message joinAns) {
-				r.neighbors.add(admittingPeer);
+				NodeID ap = joinAns.getHeader().getSenderId();
+				addLoopback();
+				r.neighbors.add(ap);
 				l.info(String.format("Joining to RELOAD overlay %s with %s completed.", conf.getOverlayName(), boot.getLocalNodeId()));
 				isJoined = true;
 				joinFuture.set(joinAns.getHeader().getSenderId());
@@ -125,15 +126,34 @@ public class TestPlugin implements TopologyPlugin {
 		return joinFuture;
 	}
 
+	private ListenableFuture<Connection> addLoopback() {
+		ListenableFuture<Connection> fut = connMgr.connectTo(boot.getLocalAddress(), OverlayLinkType.TLS_TCP_FH_NO_ICE);
+		Futures.addCallback(fut, new FutureCallback<Connection>() {
+
+			@Override
+			public void onSuccess(Connection result) {
+				r.neighbors.add(result.getNodeId());
+			}
+
+			@Override
+			public void onFailure(Throwable t) {
+				t.printStackTrace();
+			}
+		});
+		return fut;
+	}
+
 	@MessageHandler(ContentType.JOIN_REQ)
 	public void handleJoinRequest(final Message req) {
 
 		JoinAnswer ans = new JoinAnswer("JOIN ANS".getBytes());
 
-		r.neighbors.add(((JoinRequest) req.getContent()).getJoiningNode());
-
 		router.sendAnswer(req.getHeader(), ans);
 
+		NodeID joinNode = ((JoinRequest) req.getContent()).getJoiningNode();
+
+		if (connMgr.isNeighbor(joinNode))
+			r.neighbors.add(joinNode);
 	}
 
 	@MessageHandler(ContentType.LEAVE_REQ)
@@ -163,6 +183,10 @@ public class TestPlugin implements TopologyPlugin {
 
 	@Subscribe
 	public void handleConnectionEvent(ConnectionStatusEvent e) {
+		if (e.type == Type.ESTABLISHED) {
+			r.neighbors.add(e.connection.getNodeId());
+		}
+
 		if (e.type == Type.CLOSED)
 			r.neighbors.remove(e.connection.getNodeId());
 	}
@@ -218,28 +242,25 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	@Override
-	public ListenableFuture<NodeID> requestLeave(final NodeID neighborNode) {
-		Message leaveMessage = msgBuilder.newMessage(new LeaveRequest(boot.getLocalNodeId(), new byte[0]), new DestinationList(msgBuilder.getWildcard()));
-		leaveMessage.getHeader().setAttribute(Header.NEXT_HOP, neighborNode);
-		ListenableFuture<Message> ansFut = router.sendRequestMessage(leaveMessage);
+	public ListenableFuture<Void> requestLeave() {
+		SettableFuture<Void> fut = SettableFuture.create();
+		for (NodeID n : r.neighbors) {
+			sendLeave(n);
+		}
 
-		final SettableFuture<NodeID> leaveOutcome = SettableFuture.create();
+		fut.set(null);
 
-		Futures.addCallback(ansFut, new FutureCallback<Message>() {
+		return fut;
+	}
 
-			@Override
-			public void onSuccess(Message result) {
-				isJoined = false;
-				leaveOutcome.set(neighborNode);
-			}
+	private void sendLeave(final NodeID neighborNode) {
+		DestinationList dest = new DestinationList();
+		dest.add(neighborNode);
+		dest.add(msgBuilder.getWildcard());
 
-			@Override
-			public void onFailure(Throwable t) {
-				leaveOutcome.setException(t);
-			}
-		});
+		Message leaveMessage = msgBuilder.newMessage(new LeaveRequest(boot.getLocalNodeId(), new byte[0]), dest);
 
-		return leaveOutcome;
+		router.sendMessage(leaveMessage);
 	}
 
 	@CompStop
@@ -248,9 +269,7 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	private void sendLeaveAndClose() {
-		for (NodeID n : r.neighbors) {
-			requestLeave(n);
-		}
+
 	}
 
 	private class TestRouting implements RoutingTable {
@@ -259,22 +278,25 @@ public class TestPlugin implements TopologyPlugin {
 
 		@Override
 		public Set<NodeID> getNextHops(RoutableID destination) {
-			if (neighbors.isEmpty())
+
+			Set<NodeID> candidates = new HashSet<NodeID>(neighbors);
+
+			if (candidates.isEmpty())
 				return Collections.emptySet();
 
-			int minDinstance = Integer.MAX_VALUE;
+			// Remove loopback connection from results if destination is not
+			// itself and there are other available neighbors
+			if (!destination.equals(boot.getLocalNodeId()) && candidates.size() > 1)
+				candidates.remove(boot.getLocalNodeId());
 
-			NodeID singleNextHop = getCloserId(destination, neighbors);
-
-			for (NodeID nodeId : neighbors) {
-				int tmp = getDistance(destination, nodeId);
-				if (tmp <= minDinstance) {
-					minDinstance = tmp;
-					singleNextHop = nodeId;
-				}
-			}
+			NodeID singleNextHop = getCloserId(destination, candidates);
 
 			return Collections.singleton(singleNextHop);
+		}
+
+		@Override
+		public Set<NodeID> getNeighbors() {
+			return Collections.unmodifiableSet(neighbors);
 		}
 	}
 

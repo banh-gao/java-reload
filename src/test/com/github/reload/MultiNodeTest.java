@@ -37,8 +37,6 @@ public class MultiNodeTest {
 		Message req = ctx.get(MessageBuilder.class).newMessage(new PingRequest(), new DestinationList(NodeID.valueOf("ceeadf392596529d0f6aaabe39fbb116")));
 
 		ListenableFuture<Message> ansFut = ctx.get(MessageRouter.class).sendRequestMessage(req);
-		System.out.println(ansFut.get());
-
 	}
 
 	private Overlay startNode(InetSocketAddress addr, int i) throws Exception {

@@ -83,6 +83,6 @@ public abstract class RoutableID implements Comparable<RoutableID> {
 	 * @return True if this id is the wildcard id, false otherwise
 	 */
 	public boolean isWildcard() {
-		return new BigInteger(getData()).equals(BigInteger.ZERO);
+		return (getType() == DestinationType.NODEID) && new BigInteger(getData()).equals(BigInteger.ZERO);
 	}
 }

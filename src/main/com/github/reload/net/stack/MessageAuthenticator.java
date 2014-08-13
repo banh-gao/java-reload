@@ -43,7 +43,6 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 			authenticateSignature(msg, cert, ctx.alloc());
 
 		} catch (GeneralSecurityException e) {
-			// TODO: react to authentication failure
 			l.info(e.getMessage());
 			return;
 		}

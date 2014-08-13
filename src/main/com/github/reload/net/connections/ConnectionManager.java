@@ -10,6 +10,7 @@ import io.netty.util.concurrent.FutureListener;
 import java.net.InetSocketAddress;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
@@ -203,11 +204,14 @@ public class ConnectionManager {
 				l.debug("Connection to " + event.connection.getNodeId() + " at " + event.connection.getStack().getChannel().remoteAddress() + " completed");
 				break;
 		}
-		// TODO
 	}
 
 	public Optional<Connection> getConnection(NodeID neighbor) {
 		return Optional.fromNullable(connections.get(neighbor));
+	}
+
+	public boolean isNeighbor(NodeID nodeId) {
+		return getConnection(nodeId).isPresent();
 	}
 
 	public OverlayLinkType getServerProtocol() {
@@ -232,5 +236,9 @@ public class ConnectionManager {
 			this.connection = connection;
 		}
 
+	}
+
+	public Map<NodeID, Connection> getConnections() {
+		return Collections.unmodifiableMap(connections);
 	}
 }

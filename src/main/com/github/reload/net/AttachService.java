@@ -68,7 +68,7 @@ public class AttachService {
 
 	private final Set<NodeID> updateAfterConnection = Sets.newConcurrentHashSet();
 
-	public ListenableFuture<Connection> attachTo(DestinationList destList, NodeID nextHop, boolean requestUpdate) {
+	public ListenableFuture<Connection> attachTo(DestinationList destList, boolean requestUpdate) {
 		final SettableFuture<Connection> fut = SettableFuture.create();
 		final RoutableID destinationID = destList.getDestination();
 
@@ -89,10 +89,6 @@ public class AttachService {
 		final Message req = msgBuilder.newMessage(attachRequest, destList);
 
 		Header reqHeader = req.getHeader();
-
-		if (nextHop != null) {
-			reqHeader.setAttribute(Header.NEXT_HOP, nextHop);
-		}
 
 		pendingRequests.put(reqHeader.getTransactionId(), fut);
 
@@ -140,7 +136,7 @@ public class AttachService {
 		try {
 			remoteCandidate = iceHelper.testAndSelectCandidate(answer.getCandidates());
 
-			l.debug(String.format("Attach negotiation with " + remoteNode + " completed, selected remote candidate: %s...", remoteCandidate.getSocketAddress()));
+			l.debug(String.format("Attach negotiation with " + remoteNode + " completed, selected remote candidate: %s", remoteCandidate.getSocketAddress()));
 
 			ListenableFuture<Connection> connFut = connMgr.connectTo(remoteCandidate.getSocketAddress(), remoteCandidate.getOverlayLinkType());
 
@@ -205,7 +201,7 @@ public class AttachService {
 		Header reqHeader = req.getHeader();
 
 		// Send attach answer through the same neighbor
-		reqHeader.setAttribute(Header.NEXT_HOP, reqHeader.getAttribute(Header.PREV_HOP));
+		reqHeader.getDestinationList().add(0, reqHeader.getAttribute(Header.PREV_HOP));
 
 		msgRouter.sendAnswer(reqHeader, attachAnswer);
 

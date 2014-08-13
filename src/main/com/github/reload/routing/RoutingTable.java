@@ -14,4 +14,6 @@ public interface RoutingTable {
 	 * @return the the next hops node-ids
 	 */
 	public Set<NodeID> getNextHops(RoutableID destination);
+
+	public Set<NodeID> getNeighbors();
 }
