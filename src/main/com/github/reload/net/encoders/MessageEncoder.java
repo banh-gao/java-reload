@@ -69,10 +69,8 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	}
 
 	private SecurityBlock computeSecBlock(Header header, ByteBuf rawContent, ByteBufAllocator bufAlloc) throws Exception {
-		CryptoHelper<?> cryptoHelper = ctx.get(CryptoHelper.class);
+		CryptoHelper cryptoHelper = ctx.get(CryptoHelper.class);
 		Signer signer = cryptoHelper.newSigner();
-
-		signer.initSign(cryptoHelper.getPrivateKey());
 
 		ByteBuf signedDataBuf = bufAlloc.buffer();
 		signedDataBuf.writeInt(header.getOverlayHash());

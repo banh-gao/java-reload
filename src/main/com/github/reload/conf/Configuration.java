@@ -6,7 +6,6 @@ import java.security.cert.Certificate;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
@@ -88,10 +87,4 @@ public interface Configuration {
 	public abstract byte[] getRawXML();
 
 	public abstract Signature getSignature();
-
-	public abstract ReloadCertificate getRootCertificate();
-
-	@Override
-	public abstract String toString();
-
 }

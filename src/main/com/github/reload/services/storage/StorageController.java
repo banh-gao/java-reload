@@ -14,6 +14,7 @@ import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
@@ -64,9 +65,6 @@ class StorageController {
 	private MessageRouter router;
 
 	@Component
-	private CryptoHelper<?> crypto;
-
-	@Component
 	private ComponentsContext ctx;
 
 	@Component
@@ -82,8 +80,6 @@ class StorageController {
 			router.sendError(requestMessage.getHeader(), ErrorType.FORBITTEN, "Node not responsible to store requested resource");
 			return;
 		}
-
-		// FIXME: Check generation counter for replica stores
 
 		SignerIdentity senderIdentity = requestMessage.getSecBlock().getSignature().getIdentity();
 
@@ -154,12 +150,15 @@ class StorageController {
 				if (!isReplica)
 					kind.getAccessPolicy().accept(resourceId, kind, d, senderIdentity, ctx);
 
-				ReloadCertificate storerCert = ctx.get(CryptoHelper.class).getCertificate(storerIdentity);
+				Optional<ReloadCertificate> storerCert = ctx.get(Keystore.class).getCertificate(storerIdentity);
 
-				d.verify(storerCert.getOriginalCertificate().getPublicKey(), resourceId, receivedData.getKind());
+				if (!storerCert.isPresent())
+					throw new GeneralSecurityException("Storer certificate not available");
+
+				d.verify(storerCert.get().getOriginalCertificate().getPublicKey(), resourceId, receivedData.getKind());
 			}
 
-			if (oldStoredKind.isPresent() && !checkGeneration(receivedData, oldStoredKind.get())) {
+			if (oldStoredKind.isPresent() && !checkGeneration(receivedData, oldStoredKind.get(), isReplica)) {
 				generTooLowResponses.add(new StoreKindResponse(kind, oldStoredKind.get().getGeneration(), replicaNodes));
 				continue;
 			}
@@ -199,8 +198,14 @@ class StorageController {
 			throw new ErrorMessageException(ErrorType.DATA_TOO_OLD);
 	}
 
-	private boolean checkGeneration(StoreKindData receivedData, StoreKindData oldStoredKind) {
-		if (receivedData.getGeneration().compareTo(BigInteger.ZERO) == 0)
+	private boolean checkGeneration(StoreKindData receivedData, StoreKindData oldStoredKind, boolean isReplica) {
+		BigInteger rcvGen = receivedData.getGeneration();
+
+		// Generation for replica stores needs only to be not zero
+		if (isReplica)
+			return !rcvGen.equals(BigInteger.ZERO);
+
+		if (rcvGen.equals(BigInteger.ZERO))
 			return true;
 
 		BigInteger oldGeneration = oldStoredKind.getGeneration();

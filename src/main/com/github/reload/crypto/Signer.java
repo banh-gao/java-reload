@@ -20,16 +20,13 @@ public class Signer {
 	private final HashAlgorithm hashAlg;
 	private final SignatureAlgorithm signAlg;
 
-	Signer(SignerIdentity identity, HashAlgorithm hashAlg, SignatureAlgorithm signAlg) throws NoSuchAlgorithmException {
+	Signer(SignerIdentity identity, PrivateKey signerKey, HashAlgorithm hashAlg, SignatureAlgorithm signAlg) throws NoSuchAlgorithmException, InvalidKeyException {
 		this.identity = identity;
 		this.hashAlg = hashAlg;
 		this.signAlg = signAlg;
 		signer = java.security.Signature.getInstance(hashAlg.toString() + "with" + signAlg.toString());
-	}
-
-	public void initSign(PrivateKey privateKey) throws InvalidKeyException {
 		if (identity != SignerIdentity.EMPTY_IDENTITY) {
-			signer.initSign(privateKey);
+			signer.initSign(signerKey);
 		}
 	}
 

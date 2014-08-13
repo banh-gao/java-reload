@@ -3,8 +3,10 @@ package com.github.reload.services.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -14,6 +16,7 @@ import com.github.reload.services.storage.AccessPolicy;
 import com.github.reload.services.storage.AccessPolicy.PolicyName;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.StoredData;
+import com.google.common.base.Optional;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id
@@ -25,11 +28,12 @@ public class UserMatch extends AccessPolicy {
 	@Override
 	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
 
-		ReloadCertificate storerReloadCert = ctx.get(CryptoHelper.class).getCertificate(signerIdentity);
-		if (storerReloadCert == null)
+		Optional<ReloadCertificate> storerReloadCert = ctx.get(Keystore.class).getCertificate(signerIdentity);
+
+		if (!storerReloadCert.isPresent())
 			throw new AccessPolicyException("Unknown signer identity");
 
-		String storerUsername = storerReloadCert.getUsername();
+		String storerUsername = storerReloadCert.get().getUsername();
 
 		byte[] resourceIdHash = resourceId.getData();
 
@@ -68,7 +72,7 @@ public class UserMatch extends AccessPolicy {
 		}
 
 		public ResourceID getResourceId() {
-			String username = ctx.get(CryptoHelper.class).getLocalCertificate().getUsername();
+			String username = ctx.get(Bootstrap.class).getLocalCert().getUsername();
 			return ctx.get(TopologyPlugin.class).getResourceId(hashUsername(CryptoHelper.OVERLAY_HASHALG, username, ctx));
 		}
 	}

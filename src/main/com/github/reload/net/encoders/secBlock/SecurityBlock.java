@@ -1,6 +1,7 @@
 package com.github.reload.net.encoders.secBlock;
 
 import io.netty.buffer.ByteBuf;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.reload.components.ComponentsContext;
@@ -22,8 +23,12 @@ public class SecurityBlock {
 		this.signature = signature;
 	}
 
-	public List<GenericCertificate> getCertificates() {
-		return certificates;
+	public List<? extends Certificate> getCertificates() {
+		List<Certificate> out = new ArrayList<Certificate>();
+		for (GenericCertificate c : certificates)
+			out.add(c.certificate);
+
+		return out;
 	}
 
 	public Signature getSignature() {

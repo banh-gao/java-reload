@@ -11,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -39,7 +40,7 @@ public class TestBootstrap extends Bootstrap {
 	}
 
 	public static ReloadCertificate loadCert(String certPath) throws CertificateException, FileNotFoundException {
-		return new X509CertificateParser().parse(loadLocalCert(certPath));
+		return X509CertificateParser.parse((X509Certificate) loadLocalCert(certPath));
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {

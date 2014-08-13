@@ -6,6 +6,7 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CryptoHelper;
@@ -17,6 +18,7 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.ICEHelper;
+import com.github.reload.routing.DefaultPathCompressor;
 import com.github.reload.services.PingService;
 import com.github.reload.services.storage.MemoryStorage;
 import com.github.reload.services.storage.StorageService;
@@ -174,9 +176,10 @@ public class Bootstrap {
 
 		registerCryptoHelper();
 
-		// Register default keystore and storage implementations
+		// Register default implementations
 		ComponentsRepository.register(MemoryKeystore.class);
 		ComponentsRepository.register(MemoryStorage.class);
+		ComponentsRepository.register(DefaultPathCompressor.class);
 
 		// Register overlay specific components
 		registerComponents();
@@ -190,6 +193,8 @@ public class Bootstrap {
 			ctx.startComponent(coreComp);
 
 		ctx.startComponents();
+
+		ctx.get(Keystore.class).addCertificate(getLocalCert());
 
 		ListenableFuture<Overlay> overlayConnFut = new OverlayConnector(ctx).connectToOverlay(!isClientMode);
 

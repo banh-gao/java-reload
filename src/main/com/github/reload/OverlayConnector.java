@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.AttachService;
+import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.encoders.header.DestinationList;
@@ -64,15 +65,14 @@ class OverlayConnector {
 
 			@Override
 			public void onFailure(Throwable t) {
-				t.printStackTrace();
-				// TODO Detect failure to connect to bootstrap nodes
+				overlayConnFut.setException(t);
 			}
 		});
 
 		return overlayConnFut;
 	}
 
-	private ListenableFuture<Connection> connectToBootstrap(Set<InetSocketAddress> bootstrapNodes, Set<OverlayLinkType> linkTypes) {
+	private ListenableFuture<Connection> connectToBootstrap(final Set<InetSocketAddress> bootstrapNodes, Set<OverlayLinkType> linkTypes) {
 
 		ConnectionManager connMgr = ctx.get(ConnectionManager.class);
 
@@ -81,6 +81,8 @@ class OverlayConnector {
 		// Called by the first successful connection to a bootstrap node, other
 		// successfully connection will be closed
 		FutureCallback<Connection> connCB = new FutureCallback<Connection>() {
+
+			int remainingServers = bootstrapNodes.size();
 
 			@Override
 			public void onSuccess(Connection result) {
@@ -91,7 +93,10 @@ class OverlayConnector {
 
 			@Override
 			public void onFailure(Throwable t) {
-				l.debug("Connection to bootstrap node failed", t);
+				if (remainingServers == 0)
+					bootConnFut.setException(new NetworkException("Cannot connect to any bootstrap server"));
+				else
+					remainingServers--;
 			}
 		};
 

@@ -19,7 +19,7 @@ public class MessageBuilder {
 	@Component
 	private Bootstrap connector;
 	@Component
-	private CryptoHelper<?> cryptoHelper;
+	private CryptoHelper cryptoHelper;
 
 	private NodeID wildcardId;
 

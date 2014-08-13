@@ -21,21 +21,11 @@ import com.github.reload.Overlay;
 import com.github.reload.ReloadUri;
 import com.github.reload.net.encoders.header.NodeID;
 
-public class X509CertificateParser implements ReloadCertificateParser {
+public class X509CertificateParser {
 
 	private static final Logger logger = Logger.getLogger(Overlay.class);
 
 	private static final String SDN_OID = "2.5.29.17";
-
-	public X509CertificateParser() {
-	}
-
-	@Override
-	public ReloadCertificate parse(Certificate certificate) throws CertificateException {
-		if (!(certificate instanceof X509Certificate))
-			throw new IllegalArgumentException("Invalid X.509 certificate");
-		return parse((X509Certificate) certificate);
-	}
 
 	/**
 	 * Parse the given certificate as a Reload certificate

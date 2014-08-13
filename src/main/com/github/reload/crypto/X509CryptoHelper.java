@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -22,9 +23,6 @@ import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 /**
@@ -32,7 +30,7 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * 
  */
 @Component(value = CryptoHelper.class, priority = 1)
-public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
+public class X509CryptoHelper extends CryptoHelper {
 
 	@Component
 	private Bootstrap boot;
@@ -45,8 +43,6 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 	private SSLContext sslContext;
 
-	private final X509CertificateParser certParser = new X509CertificateParser();
-
 	@CompStart
 	public void start() throws Exception {
 		sslContext = SSLContext.getInstance("TLS");
@@ -54,10 +50,10 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 	}
 
 	@Override
-	public List<X509Certificate> getTrustRelationship(X509Certificate peerCert, X509Certificate trustedIssuer, List<X509Certificate> availableCerts) throws GeneralSecurityException {
+	public List<X509Certificate> getTrustRelationship(Certificate peerCert, Certificate trustedIssuer, List<? extends Certificate> availableCerts) throws GeneralSecurityException {
 		List<X509Certificate> out = new ArrayList<X509Certificate>();
 
-		X509Certificate certToAuthenticate = peerCert;
+		X509Certificate certToAuthenticate = (X509Certificate) peerCert;
 
 		while (true) {
 			X500Principal issuer = certToAuthenticate.getIssuerX500Principal();
@@ -77,29 +73,13 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 			certToAuthenticate = issuerCert;
 		}
 
-		out.add(trustedIssuer);
+		out.add((X509Certificate) trustedIssuer);
 		return out;
 	}
 
-	/**
-	 * @return true if the specified certificate belongs to the specified signer
-	 *         identity
-	 * @throws CertificateException
-	 */
 	@Override
-	public boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity) {
-		HashAlgorithm certHashAlg = identity.getSignerIdentityValue().getHashAlgorithm();
-		SignerIdentity computedIdentity = null;
-		if (identity.getSignerIdentityValue() instanceof CertHashSignerIdentityValue) {
-			computedIdentity = SignerIdentity.singleIdIdentity(certHashAlg, certificate.getOriginalCertificate());
-			return computedIdentity.equals(identity);
-		}
-		return false;
-	}
-
-	@Override
-	public ReloadCertificateParser getCertificateParser() {
-		return certParser;
+	public ReloadCertificate toReloadCertificate(Certificate cert) throws CertificateException {
+		return X509CertificateParser.parse((X509Certificate) cert);
 	}
 
 	@Override
@@ -150,7 +130,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 		@Override
 		public PrivateKey getPrivateKey(String alias) {
-			return X509CryptoHelper.this.getPrivateKey();
+			return boot.getLocalKey();
 		}
 
 		@Override
@@ -175,7 +155,7 @@ public class X509CryptoHelper extends CryptoHelper<X509Certificate> {
 
 		@Override
 		public X509Certificate[] getAcceptedIssuers() {
-			return X509CryptoHelper.this.getAcceptedIssuers().toArray(new X509Certificate[0]);
+			return conf.getRootCerts().toArray(new X509Certificate[0]);
 		}
 
 		@Override

@@ -93,13 +93,12 @@ public class ReloadStackBuilder {
 	protected ChannelInitializer<Channel> newInitializer(final ChannelHandler... extraHandlers) {
 		return new ChannelInitializer<Channel>() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			protected void initChannel(Channel ch) throws Exception {
 				ChannelPipeline pipeline = ch.pipeline();
 
 				// Encrypted tunnel handler
-				SSLEngine eng = ((CryptoHelper<?>) ctx.get(CryptoHelper.class)).newSSLEngine(linkType);
+				SSLEngine eng = ctx.get(CryptoHelper.class).newSSLEngine(linkType);
 				if (isServer) {
 					eng.setNeedClientAuth(true);
 					eng.setUseClientMode(false);
@@ -125,7 +124,7 @@ public class ReloadStackBuilder {
 				// Decoder for message payload (content + security block)
 				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(ctx));
 
-				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator(ctx.get(CryptoHelper.class)));
+				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator(ctx));
 
 				// Encorder for message entire outgoing message, also
 				// responsible for message signature generation

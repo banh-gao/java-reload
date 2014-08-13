@@ -15,7 +15,7 @@ import com.github.reload.components.ComponentsContext.Service;
 import com.github.reload.components.ComponentsContext.ServiceIdentifier;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
-import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.NetworkException;
@@ -41,6 +41,7 @@ import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoreRequest;
 import com.github.reload.services.storage.encoders.StoredData;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
@@ -75,7 +76,7 @@ public class StorageService {
 	private MessageBuilder msgBuilder;
 
 	@Component
-	private CryptoHelper<?> crypto;
+	private Keystore keystore;
 
 	@CompStart
 	private void loadController() {
@@ -187,7 +188,7 @@ public class StorageService {
 	}
 
 	protected void sendKindConfigUpdate(ResourceID resourceId, List<Long> unknownKinds) {
-		// TODO Auto-generated method stub
+		// TODO send kind config update
 	}
 
 	public StoreKindDataSpecifier newDataSpecifier(DataKind kind) {
@@ -259,10 +260,11 @@ public class StorageService {
 		for (StoredData data : r.getValues()) {
 			// Synthetic values are not authenticated
 			if (data.getSignature().getIdentity().getIdentityType() != IdentityType.NONE) {
-				ReloadCertificate reloCert = crypto.getCertificate(data.getSignature().getIdentity());
-				// FIXME: handle certificate not found situation
+				Optional<ReloadCertificate> reloCert = keystore.getCertificate(data.getSignature().getIdentity());
+				if (!reloCert.isPresent())
+					throw new GeneralSecurityException("Data signer certificate not found");
 
-				Certificate signerCert = reloCert.getOriginalCertificate();
+				Certificate signerCert = reloCert.get().getOriginalCertificate();
 				data.verify(signerCert.getPublicKey(), resourceId, r.getKind());
 			}
 		}

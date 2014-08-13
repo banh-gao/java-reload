@@ -3,18 +3,15 @@ package com.github.reload.crypto;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
@@ -26,7 +23,7 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * 
  */
 @Component(CryptoHelper.class)
-public abstract class CryptoHelper<T extends Certificate> {
+public abstract class CryptoHelper {
 
 	/**
 	 * The hashing algorithm of the overlay
@@ -35,6 +32,9 @@ public abstract class CryptoHelper<T extends Certificate> {
 
 	@Component
 	private Bootstrap boot;
+
+	@Component
+	private Configuration conf;
 
 	@Component
 	private Keystore keystore;
@@ -63,14 +63,9 @@ public abstract class CryptoHelper<T extends Certificate> {
 	}
 
 	/**
-	 * @return true if the certificate belongs to the specified identity
+	 * @return Tries to convert the given certificate into a reload certificate
 	 */
-	public abstract boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity);
-
-	/**
-	 * @return the parser used to generate reload certificates
-	 */
-	public abstract ReloadCertificateParser getCertificateParser();
+	public abstract ReloadCertificate toReloadCertificate(Certificate cert) throws CertificateException;
 
 	public abstract SSLEngine newSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException;
 
@@ -91,7 +86,7 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         peerCert and the last the trustedIssuer
 	 * @throws GeneralSecurityException
 	 */
-	public abstract List<T> getTrustRelationship(T peerCert, T trustedIssuer, List<T> availableCerts) throws GeneralSecurityException;
+	public abstract List<? extends Certificate> getTrustRelationship(Certificate peerCert, Certificate trustedIssuer, List<? extends Certificate> availableCerts) throws GeneralSecurityException;
 
 	/**
 	 * @return a signer object used by the local node to sign the
@@ -99,16 +94,11 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         signing algorithms.
 	 */
 	public Signer newSigner() {
-		SignerIdentity identity = SignerIdentity.singleIdIdentity(getCertHashAlg(), getLocalCertificate().getOriginalCertificate());
+		SignerIdentity identity = SignerIdentity.singleIdIdentity(getCertHashAlg(), boot.getLocalCert().getOriginalCertificate());
 		Signer signer;
 		try {
-			signer = new Signer(identity, getSignHashAlg(), getSignAlg());
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
-		try {
-			signer.initSign(keystore.getPrivateKey());
-		} catch (InvalidKeyException e) {
+			signer = new Signer(identity, boot.getLocalKey(), getSignHashAlg(), getSignAlg());
+		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
 			throw new RuntimeException(e);
 		}
 		return signer;
@@ -124,16 +114,15 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 * @throws CertificateException
 	 *             if the trusted relation cannot be built
 	 */
-	@SuppressWarnings("unchecked")
-	public void authenticateTrustRelationship(T peerCert, List<T> availableCerts) throws CertificateException {
-		List<T> trustedRelation = null;
-		List<T> available = new ArrayList<T>(availableCerts);
+	public void authenticateTrustRelationship(Certificate peerCert, List<? extends Certificate> availableCerts) throws CertificateException {
+		List<? extends Certificate> trustedRelation = null;
+		List<Certificate> available = new ArrayList<Certificate>(availableCerts);
 
-		available.addAll((List<T>) keystore.getAcceptedIssuers());
+		available.addAll(conf.getRootCerts());
 
-		for (Certificate issuerCert : keystore.getAcceptedIssuers()) {
+		for (Certificate issuerCert : conf.getRootCerts()) {
 			try {
-				trustedRelation = getTrustRelationship(peerCert, (T) issuerCert, available);
+				trustedRelation = getTrustRelationship(peerCert, issuerCert, available);
 				if (trustedRelation != null)
 					return;
 			} catch (GeneralSecurityException e) {
@@ -151,14 +140,13 @@ public abstract class CryptoHelper<T extends Certificate> {
 	 *         certificate is not included since it is known by all nodes in the
 	 *         overlay.
 	 */
-	@SuppressWarnings("unchecked")
-	public List<T> getLocalTrustRelationship() {
-		List<T> issuers = (List<T>) keystore.getAcceptedIssuers();
+	public List<? extends Certificate> getLocalTrustRelationship() {
+		List<? extends Certificate> issuers = conf.getRootCerts();
 
-		List<T> relations = null;
-		for (T issuer : issuers) {
+		List<? extends Certificate> relations = null;
+		for (Certificate issuer : issuers) {
 			try {
-				relations = getTrustRelationship((T) keystore.getLocalCertificate().getOriginalCertificate(), issuer, issuers);
+				relations = getTrustRelationship(boot.getLocalCert().getOriginalCertificate(), issuer, issuers);
 				if (relations != null) {
 					relations.remove(issuer);
 					return relations;
@@ -169,77 +157,5 @@ public abstract class CryptoHelper<T extends Certificate> {
 		}
 
 		throw new RuntimeException("Trust relation for local peer not found");
-	}
-
-	/**
-	 * @return the local certificate used by the local node for overlay
-	 *         operations
-	 */
-	public ReloadCertificate getLocalCertificate() {
-		return keystore.getLocalCertificate();
-	}
-
-	/**
-	 * Store a new certificate locally, the certificate is validated before it
-	 * is stored
-	 */
-	public void addCertificate(ReloadCertificate cert) {
-		keystore.addCertificate(cert);
-	}
-
-	public ReloadCertificate getCertificate(NodeID nodeId) {
-		return keystore.getCertificate(nodeId);
-	}
-
-	public ReloadCertificate getCertificate(SignerIdentity identity) {
-		for (ReloadCertificate cert : keystore.getStoredCertificates().values())
-			if (belongsTo(cert, identity))
-				return cert;
-
-		return null;
-	}
-
-	/**
-	 * @return all the stored certificates
-	 */
-	public Map<NodeID, ReloadCertificate> getStoredCertificates() {
-		return keystore.getStoredCertificates();
-	}
-
-	/**
-	 * @return the certificate of the peers accepted as issuer (commonly the
-	 *         enrollment peers root certificates)
-	 */
-	public List<? extends Certificate> getAcceptedIssuers() {
-		return keystore.getAcceptedIssuers();
-	}
-
-	/**
-	 * @return the local node private key
-	 */
-	public PrivateKey getPrivateKey() {
-		return keystore.getPrivateKey();
-	}
-
-	/**
-	 * @return true if the node is classified as a bad node, false otherwise
-	 */
-	public boolean isBadNode(NodeID nodeId) {
-		return keystore.isBadNode(nodeId);
-	}
-
-	/**
-	 * Parses the given certificate to a reload certificate
-	 * 
-	 * @return the parsed certificate
-	 * @throws CertificateException
-	 *             if the certificate cannot be parsed
-	 */
-	public ReloadCertificate parseCertificate(T cert, Configuration conf) throws CertificateException {
-		ReloadCertificate reloadCert = getCertificateParser().parse(cert);
-		if (reloadCert.isSelfSigned() && !conf.isSelfSignedPermitted())
-			throw new CertificateException("Self-signed certificates not allowed");
-
-		return reloadCert;
 	}
 }

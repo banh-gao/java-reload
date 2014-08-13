@@ -14,9 +14,7 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.services.storage.encoders.StoredData;
 import com.github.reload.services.storage.policies.NodeMatch;
-import com.github.reload.services.storage.policies.NodeMultipleMatch;
 import com.github.reload.services.storage.policies.UserMatch;
-import com.github.reload.services.storage.policies.UserNodeMatch;
 
 /**
  * An access control policy used by data kinds that determines if a store
@@ -28,9 +26,7 @@ public abstract class AccessPolicy {
 	private static final Map<String, AccessPolicy> policies = new HashMap<String, AccessPolicy>();
 
 	public static final Class<NodeMatch> NODE = NodeMatch.class;
-	public static final Class<NodeMultipleMatch> NODE_MULTIPLE = NodeMultipleMatch.class;
 	public static final Class<UserMatch> USER = UserMatch.class;
-	public static final Class<UserNodeMatch> USER_NODE = UserNodeMatch.class;
 
 	protected AccessPolicy() {
 	}

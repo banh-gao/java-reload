@@ -20,6 +20,7 @@ import com.github.reload.components.ComponentsContext.CompStop;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.encoders.MessageBuilder;
@@ -44,7 +45,10 @@ public class ConnectionManager {
 	private static final OverlayLinkType SERVER_PROTO = OverlayLinkType.TLS_TCP_FH_NO_ICE;
 
 	@Component
-	private CryptoHelper<Certificate> cryptoHelper;
+	private CryptoHelper cryptoHelper;
+
+	@Component
+	private Keystore keystore;
 
 	@Component
 	private Configuration conf;
@@ -173,7 +177,7 @@ public class ConnectionManager {
 
 	private Connection addConnection(ReloadStack stack) throws CertificateException {
 		ReloadCertificate cert = extractRemoteCert(stack.getChannel());
-		cryptoHelper.addCertificate(cert);
+		keystore.addCertificate(cert);
 		Connection c = new Connection(cert.getNodeId(), stack);
 
 		connections.put(cert.getNodeId(), c);
@@ -185,7 +189,7 @@ public class ConnectionManager {
 			ChannelPipeline pipeline = ch.pipeline();
 			SslHandler sslHandler = (SslHandler) pipeline.get(ReloadStack.HANDLER_SSL);
 			Certificate remoteCert = sslHandler.engine().getSession().getPeerCertificates()[0];
-			return cryptoHelper.getCertificateParser().parse(remoteCert);
+			return cryptoHelper.toReloadCertificate(remoteCert);
 		} catch (Exception e) {
 			throw new CertificateException(e);
 		}

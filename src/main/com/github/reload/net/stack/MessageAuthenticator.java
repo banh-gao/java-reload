@@ -8,25 +8,30 @@ import java.security.GeneralSecurityException;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
+import com.github.reload.components.ComponentsContext;
+import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
+import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.encoders.Header;
 import com.github.reload.net.encoders.Message;
 import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.GenericCertificate;
 import com.github.reload.net.encoders.secBlock.Signature;
 
 public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private final CryptoHelper<Certificate> cryptoHelper;
+	private final Configuration conf;
+	private final Keystore keystore;
+	private final CryptoHelper cryptoHelper;
 
-	public MessageAuthenticator(CryptoHelper<Certificate> cryptoHelper) {
-		this.cryptoHelper = cryptoHelper;
+	public MessageAuthenticator(ComponentsContext ctx) {
+		this.conf = ctx.get(Configuration.class);
+		this.keystore = ctx.get(Keystore.class);
+		this.cryptoHelper = ctx.get(CryptoHelper.class);
 	}
 
 	@Override
@@ -38,7 +43,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 			ReloadCertificate cert = authenticateSender(msg, trustedPeerCert);
 
-			cryptoHelper.addCertificate(cert);
+			keystore.addCertificate(cert);
 
 			authenticateSignature(msg, cert, ctx.alloc());
 
@@ -53,7 +58,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 	private ReloadCertificate authenticateSender(Message msg, Certificate trustedPeerCert) throws CertificateException {
 		NodeID untrustedSender = msg.getHeader().getSenderId();
-		ReloadCertificate reloadCert = cryptoHelper.getCertificateParser().parse(trustedPeerCert);
+		ReloadCertificate reloadCert = cryptoHelper.toReloadCertificate(trustedPeerCert);
 
 		if (!reloadCert.getNodeId().equals(untrustedSender))
 			throw new CertificateException(String.format("Untrusted sender %s for message %#x: Sender node-id not matching certificate node-id %s", untrustedSender, msg.getHeader().getTransactionId(), reloadCert.getNodeId()));
@@ -63,18 +68,14 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 	private Certificate authenticateCertificates(Message msg) throws CertificateException {
 
-		List<GenericCertificate> certs = msg.getSecBlock().getCertificates();
+		@SuppressWarnings("unchecked")
+		List<Certificate> certs = (List<Certificate>) msg.getSecBlock().getCertificates();
 
-		List<Certificate> javaCerts = new ArrayList<Certificate>();
-		for (GenericCertificate c : certs) {
-			javaCerts.add(c.getCertificate());
-		}
-
-		for (Certificate c : javaCerts) {
-			for (Certificate validIssuer : cryptoHelper.getAcceptedIssuers()) {
+		for (Certificate c : certs) {
+			for (Certificate validIssuer : conf.getRootCerts()) {
 				try {
-					javaCerts.add(validIssuer);
-					List<? extends Certificate> trustChain = cryptoHelper.getTrustRelationship(c, validIssuer, javaCerts);
+					certs.add(validIssuer);
+					List<? extends Certificate> trustChain = cryptoHelper.getTrustRelationship(c, validIssuer, certs);
 					return trustChain.get(0);
 				} catch (GeneralSecurityException e) {
 					e.printStackTrace();

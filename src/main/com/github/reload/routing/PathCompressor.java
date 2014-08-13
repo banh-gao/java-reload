@@ -1,6 +1,6 @@
 package com.github.reload.routing;
 
-import com.github.reload.net.encoders.Header;
+import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.OpaqueID;
 
 /**
@@ -11,22 +11,20 @@ import com.github.reload.net.encoders.header.OpaqueID;
 public interface PathCompressor {
 
 	/**
-	 * Replace part of the header destination list with a compressed path
-	 * identified by an opaque-id
-	 * 
-	 * @param outgoingHeader
+	 * Stores the given destination list locally and returns the opaque-id that
+	 * can be used later to decompress it back to the original list
 	 */
-	public void compressDestinationFor(Header outgoingHeader);
+	public OpaqueID compress(DestinationList list);
 
 	/**
-	 * If the first entry of the header destination list is an opaque-id,
-	 * replace it with the corresponding decompressed list
+	 * Get a previously stored destination list associated with the given
+	 * opaque-id
 	 * 
 	 * @throws UnknownOpaqueIdException
 	 *             if the first entry of the destination list is an opaque-id
 	 *             not known by this manager
 	 */
-	public void decompressDestinationFor(Header incomingHeader) throws UnknownOpaqueIdException;
+	public DestinationList decompress(OpaqueID id) throws UnknownOpaqueIdException;
 
 	/**
 	 * Indicates that the requested opaque-id is not known

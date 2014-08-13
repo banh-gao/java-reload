@@ -104,15 +104,12 @@ class RequestManager {
 					TopologyPlugin plugin = ctx.get(TopologyPlugin.class);
 
 					Set<NodeID> neighbors = new HashSet<NodeID>(r.getNeighbors());
-					// neighbors.add(sender);
+					neighbors.add(sender);
 
 					// Sender node should be closer than any of the neighbor
 					// nodes to the destination resource
-					// FIXME: enable control
-					// if (!plugin.getCloserId(reqDest,
-					// neighbors).equals(sender))
-					// throw new
-					// GeneralSecurityException("Answering node is not closer than neighbors to the request destination resource");
+					if (!plugin.getCloserId(reqDest, neighbors).equals(sender))
+						throw new GeneralSecurityException("Answering node is not closer than neighbors to the request destination resource");
 
 					break;
 

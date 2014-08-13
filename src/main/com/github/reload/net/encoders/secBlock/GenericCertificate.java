@@ -3,6 +3,11 @@ package com.github.reload.net.encoders.secBlock;
 import io.netty.buffer.ByteBuf;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -14,7 +19,7 @@ import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.GenericCertificate.GenericCertificateCodec;
 
 @ReloadCodec(GenericCertificateCodec.class)
-public class GenericCertificate {
+public class GenericCertificate extends Certificate {
 
 	public enum CertificateType {
 		X509((byte) 0, "X.509"), PGP((byte) 1, "openPGP");
@@ -56,15 +61,37 @@ public class GenericCertificate {
 	}
 
 	private final CertificateType type;
-	private final Certificate certificate;
+	final Certificate certificate;
 
 	public GenericCertificate(CertificateType type, Certificate certificate) {
+		super(type.toString());
 		this.type = type;
 		this.certificate = certificate;
 	}
 
-	public Certificate getCertificate() {
-		return certificate;
+	@Override
+	public String toString() {
+		return certificate.toString();
+	}
+
+	@Override
+	public byte[] getEncoded() throws CertificateEncodingException {
+		return certificate.getEncoded();
+	}
+
+	@Override
+	public void verify(PublicKey key) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
+		certificate.verify(key);
+	}
+
+	@Override
+	public void verify(PublicKey key, String sigProvider) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
+		certificate.verify(key, sigProvider);
+	}
+
+	@Override
+	public PublicKey getPublicKey() {
+		return certificate.getPublicKey();
 	}
 
 	static class GenericCertificateCodec extends Codec<GenericCertificate> {
@@ -117,14 +144,5 @@ public class GenericCertificate {
 				throw new CodecException(e);
 			}
 		}
-	}
-
-	public CertificateType getType() {
-		return type;
-	}
-
-	@Override
-	public String toString() {
-		return certificate.toString();
 	}
 }

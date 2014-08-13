@@ -302,7 +302,7 @@ public class TestPlugin implements TopologyPlugin {
 
 	@Override
 	public ListenableFuture<NodeID> requestUpdate(NodeID neighborNode) {
-		// TODO Auto-generated method stub
+		// NO update
 		return null;
 	}
 
@@ -313,7 +313,6 @@ public class TestPlugin implements TopologyPlugin {
 
 	@Override
 	public List<NodeID> getReplicaNodes(ResourceID resourceId) {
-		// TODO Auto-generated method stub
 		return Collections.singletonList(TEST_REPLICA_NODE);
 	}
 
@@ -336,7 +335,6 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	private void replicateData(Message replicaStore) {
-		// TODO: check replication
-		// router.sendRequestMessage(replicaStore);
+		router.sendRequestMessage(replicaStore);
 	}
 }
