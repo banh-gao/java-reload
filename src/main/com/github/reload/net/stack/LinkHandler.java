@@ -2,14 +2,14 @@ package com.github.reload.net.stack;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
+import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
@@ -79,15 +79,10 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 		t.promise = promise;
 		transmissions.put(data.getSequence(), t);
 		l.trace("Passing DATA frame " + data.getSequence() + " to lower layer...");
-		ChannelFuture f = ctx.write(data);
-		f.addListener(new ChannelFutureListener() {
+		ctx.write(data, promise);
 
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-				// TODO: notify write error event
-			}
-		});
-		// TODO: detect transmission timeout for unacked data
+		if (getLinkTimeout() > 0)
+			t.startTimeout(getLinkTimeout());
 	}
 
 	/**
@@ -113,13 +108,9 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 	 */
 	protected abstract FramedData getDataFrame(ByteBuf payload);
 
-	/**
-	 * @return the link timeout in milliseconds before a message should me
-	 *         considerated unacked, this value can be calculated dynamically by
-	 *         using the RoundTripTime value passed when an ACK for a message is
-	 *         received.
-	 */
-	protected abstract long getLinkTimeout();
+	protected long getLinkTimeout() {
+		return 0;
+	}
 
 	class Transmission {
 
@@ -128,6 +119,16 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 
 		public int getRTT() {
 			return (int) (System.currentTimeMillis() - startTime);
+		}
+
+		public void startTimeout(long timeout) {
+			ctx.executor().schedule(new Runnable() {
+
+				@Override
+				public void run() {
+					promise.setFailure(new NetworkException("Unacked message from neighbor"));
+				}
+			}, timeout, TimeUnit.MILLISECONDS);
 		}
 	}
 }

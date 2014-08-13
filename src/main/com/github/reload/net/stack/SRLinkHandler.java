@@ -119,7 +119,7 @@ public class SRLinkHandler extends LinkHandler {
 	}
 
 	@Override
-	public long getLinkTimeout() {
+	protected long getLinkTimeout() {
 		return linkTimeout;
 	}
 }
