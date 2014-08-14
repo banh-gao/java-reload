@@ -107,7 +107,7 @@ class StorageController {
 		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
 		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
-		Optional<Map<Long, StoreKindData>> oldStoredResource = storage.getResource(resourceId);
+		Optional<Map<Long, StoreKindData>> oldStoredResource = storage.get(resourceId);
 
 		Map<Long, StoreKindData> tempStore = new HashMap<Long, StoreKindData>(data.size());
 
@@ -231,7 +231,7 @@ class StorageController {
 	private List<FetchKindResponse> fetch(ResourceID resourceId, List<StoreKindDataSpecifier> specifiers) throws ErrorMessageException {
 		List<FetchKindResponse> out = new ArrayList<FetchKindResponse>();
 
-		Optional<Map<Long, StoreKindData>> resource = storage.getResource(resourceId);
+		Optional<Map<Long, StoreKindData>> resource = storage.get(resourceId);
 
 		if (!resource.isPresent())
 			throw new ErrorMessageException(ErrorType.NOT_FOUND, String.format("Resource %s not found", resourceId));
@@ -302,7 +302,7 @@ class StorageController {
 	private List<StatKindResponse> stat(ResourceID resourceId, List<StoreKindDataSpecifier> specifiers) throws ErrorMessageException {
 		List<StatKindResponse> out = new ArrayList<StatKindResponse>();
 
-		Optional<Map<Long, StoreKindData>> resource = storage.getResource(resourceId);
+		Optional<Map<Long, StoreKindData>> resource = storage.get(resourceId);
 
 		if (!resource.isPresent())
 			throw new ErrorMessageException(ErrorType.NOT_FOUND, String.format("Resource %s not found", resourceId));

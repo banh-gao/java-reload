@@ -320,7 +320,7 @@ public class TestPlugin implements TopologyPlugin {
 	public void requestReplication(ResourceID resourceId) {
 		List<NodeID> replicaNodes = getReplicaNodes(resourceId);
 
-		Optional<Map<Long, StoreKindData>> res = store.getResource(resourceId);
+		Optional<Map<Long, StoreKindData>> res = store.get(resourceId);
 
 		if (!res.isPresent())
 			return;

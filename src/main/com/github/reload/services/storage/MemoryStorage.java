@@ -1,17 +1,18 @@
 package com.github.reload.services.storage;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.storage.encoders.StoredData;
 import com.google.common.base.Optional;
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 
 /**
  * The data stored locally. It stores the data the peer is
@@ -29,7 +30,13 @@ public class MemoryStorage implements DataStorage {
 
 	private final Map<ResourceID, Map<Long, StoreKindData>> storedResources = Maps.newConcurrentMap();
 
-	private final Multimap<Long, ResourceID> storedKinds = ArrayListMultimap.create();
+	private final SetMultimap<Long, ResourceID> storedKinds = LinkedHashMultimap.create();
+
+	@Override
+	public Optional<Map<Long, StoreKindData>> put(ResourceID resourceId, Map<Long, StoreKindData> values) {
+		updateKindToResource(values.keySet(), resourceId);
+		return Optional.fromNullable(storedResources.put(resourceId, values));
+	}
 
 	private void updateKindToResource(Set<Long> kinds, ResourceID resId) {
 		for (Long k : kinds)
@@ -37,39 +44,43 @@ public class MemoryStorage implements DataStorage {
 	}
 
 	@Override
-	public Map<ResourceID, Map<Long, StoreKindData>> getStoredResources() {
-		return Collections.unmodifiableMap(storedResources);
+	public Optional<Map<Long, StoreKindData>> get(ResourceID resId) {
+		Optional<Map<Long, StoreKindData>> res = Optional.fromNullable(storedResources.get(resId));
+
+		if (res.isPresent())
+			deleteExpired(res.get());
+
+		return res;
+	}
+
+	private void deleteExpired(Map<Long, StoreKindData> res) {
+		for (StoreKindData kd : res.values()) {
+			Iterator<StoredData> i = kd.getValues().iterator();
+			while (i.hasNext()) {
+				StoredData d = i.next();
+				if (d.isExpired())
+					i.remove();
+			}
+		}
 	}
 
 	@Override
-	public Optional<Map<Long, StoreKindData>> getResource(ResourceID resId) {
-		cleanupStore();
-		return Optional.fromNullable(storedResources.get(resId));
+	public Optional<Map<Long, StoreKindData>> remove(ResourceID resourceId) {
+		return Optional.fromNullable(storedResources.remove(resourceId));
 	}
 
 	@Override
-	public void removeResource(ResourceID resourceId) {
-		storedResources.remove(resourceId);
-	}
-
-	@Override
-	public int getSize() {
+	public int size() {
 		return storedResources.size();
 	}
 
 	@Override
-	public void put(ResourceID resourceId, Map<Long, StoreKindData> values) {
-		storedResources.put(resourceId, values);
-		updateKindToResource(values.keySet(), resourceId);
-		cleanupStore();
+	public Set<ResourceID> keySet() {
+		return Collections.unmodifiableSet(storedResources.keySet());
 	}
 
 	@Override
-	public Collection<ResourceID> getResourcesByKind(long kindId) {
+	public Set<ResourceID> getResourcesByKind(long kindId) {
 		return storedKinds.get(kindId);
-	}
-
-	private void cleanupStore() {
-		// TODO: perform store cleanup
 	}
 }

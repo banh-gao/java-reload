@@ -108,6 +108,10 @@ public class StoredData {
 		return signature.verify(b, publicKey);
 	}
 
+	public boolean isExpired() {
+		return storageTime.add(BigInteger.valueOf(lifeTime)).longValue() > System.currentTimeMillis();
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(super.hashCode(), storageTime, lifeTime, value, signature);

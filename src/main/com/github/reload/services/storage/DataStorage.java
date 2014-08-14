@@ -1,22 +1,22 @@
 package com.github.reload.services.storage;
 
-import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.google.common.base.Optional;
 
 public interface DataStorage {
 
-	public abstract Map<ResourceID, Map<Long, StoreKindData>> getStoredResources();
+	public Optional<Map<Long, StoreKindData>> put(ResourceID resourceId, Map<Long, StoreKindData> value);
 
-	public abstract Optional<Map<Long, StoreKindData>> getResource(ResourceID resId);
+	public Optional<Map<Long, StoreKindData>> get(ResourceID resId);
 
-	public abstract void removeResource(ResourceID resourceId);
+	public Optional<Map<Long, StoreKindData>> remove(ResourceID resourceId);
 
-	public abstract int getSize();
+	public int size();
 
-	public abstract void put(ResourceID resourceId, Map<Long, StoreKindData> tempStore);
+	public Set<ResourceID> keySet();
 
-	public abstract Collection<ResourceID> getResourcesByKind(long kindId);
+	public Set<ResourceID> getResourcesByKind(long kindId);
 
 }
