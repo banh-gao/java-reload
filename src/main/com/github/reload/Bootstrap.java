@@ -163,11 +163,7 @@ public class Bootstrap {
 	}
 
 	/**
-	 * Try to connect to the overlay by using the informations provided by this
-	 * connector
-	 * 
-	 * @return The connection handler
-	 *         if the initialization of the local peer fails
+	 * Connects to the overlay
 	 */
 	public final ListenableFuture<Overlay> connect() {
 		// Register core components
