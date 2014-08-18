@@ -2,7 +2,6 @@ package com.github.reload.util;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -14,6 +13,10 @@ import java.util.regex.Pattern;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CertificateParser;
@@ -25,9 +28,11 @@ import com.github.reload.crypto.X509CertificateParser;
  * @author Daniel Zozin <zdenial@gmx.com>
  * 
  */
-public class CertificateFetcher extends RemoteFetcher {
+public class CertificateFetcher {
 
 	private static final Pattern EMAIL_PATTERN = Pattern.compile("^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+
+	private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
 	private final List<Certificate> rootCerts;
 	private final URL enrollmentServer;
@@ -99,21 +104,23 @@ public class CertificateFetcher extends RemoteFetcher {
 			postRequest = new HttpPost(enrollmentServer.toURI());
 			postRequest.addHeader("Accept", "application/pkix-cert");
 
-			MultipartEntity requestForm = new MultipartEntity();
+			MultipartEntityBuilder multiEnt = MultipartEntityBuilder.create();
+
 			if (username != null && !username.isEmpty()) {
-				requestForm.addPart("username", new StringBody(username, Charset.forName("UTF-8")));
+				multiEnt.addTextBody("username", username);
 			}
 			if (password != null && !password.isEmpty()) {
-				requestForm.addPart("password", new StringBody(password, Charset.forName("UTF-8")));
+				multiEnt.addTextBody("password", password);
 			}
 
 			if (neededIds > 1) {
-				requestForm.addPart("nodeids", new StringBody(String.valueOf(neededIds), Charset.forName("UTF-8")));
+				multiEnt.addTextBody("nodeids", String.valueOf(neededIds));
 			}
 
-			requestForm.addPart("csr", new ByteArrayBody(csr.getEncoded(), "application/pkcs10"));
+			multiEnt.addBinaryBody("csr", csr.getEncoded(), ContentType.create("application/pkcs10"), "csr");
 
-			postRequest.setEntity(requestForm);
+			postRequest.setEntity(multiEnt.build());
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -137,8 +144,8 @@ public class CertificateFetcher extends RemoteFetcher {
 
 		X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("x.509").generateCertificate(response.getEntity().getContent());
 
-		if (!Arrays.equals(cert.getPublicKey().getEncoded(), (csr.getSubjectPublicKeyInfo().getEncoded())))
-			throw new CertificateException("The fetched certificate is doesn't contain the requested public key");
+		if (!Arrays.equals(cert.getPublicKey().getEncoded(), (csr.getCertificationRequestInfo().getSubjectPublicKeyInfo().getEncoded())))
+			throw new CertificateException("The fetched certificate doesn't contain the requested public key");
 
 		for (Certificate rootCert : rootCerts) {
 			try {

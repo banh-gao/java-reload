@@ -1,5 +1,6 @@
 package com.github.reload;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.naming.ConfigurationException;
@@ -47,10 +48,10 @@ public abstract class BootstrapFactory {
 	 * Create a new overlay bootstrap for the specified overlay. The
 	 * configuration is automatically fetched from the overlay server.
 	 * 
-	 * @throws ConfigurationException
 	 * @throws NoSuchFactoryException
+	 * @throws IOException
 	 */
-	public static Bootstrap createBootstrap(String instanceName) throws ConfigurationException, NoSuchFactoryException {
+	public static Bootstrap createBootstrap(String instanceName) throws NoSuchFactoryException, IOException {
 		Configuration conf = ConfigurationFetcher.fetchConfiguration(instanceName);
 		return createBootstrap(conf);
 	}

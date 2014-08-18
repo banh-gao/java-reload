@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.naming.ConfigurationException;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
@@ -21,24 +20,24 @@ import javax.naming.directory.InitialDirContext;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import com.github.reload.conf.Configuration;
+import com.github.reload.conf.XMLConfiguration;
 
 /**
  * Utility class to fetch, parse and authenticate an overlay configuration from
  * a remote configuration server
  * 
- * @author Daniel Zozin <zdenial@gmx.com>
- * 
  */
-public class ConfigurationFetcher extends RemoteFetcher {
+public class ConfigurationFetcher {
 
 	private static final String DNS_SRV_NAME_PREFIX = "_reload-config._tcp.";
 
 	private static final String PROTOCOL = "https";
 	private static final String WELL_KNOWN_PATH = ".well-known/reload-config";
 
-	private ConfigurationFetcher() {
-	}
+	private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
 	/**
 	 * Get the configuration file fetched from the standard configuration
@@ -48,10 +47,10 @@ public class ConfigurationFetcher extends RemoteFetcher {
 	 * 
 	 * @param instanceName
 	 *            The name of the overlay instance to connect to
-	 * @throws ConfigurationException
+	 * @throws IOException
 	 *             if some error occurs while parsing the configuration
 	 */
-	public static Configuration fetchConfiguration(String instanceName) throws ConfigurationException {
+	public static Configuration fetchConfiguration(String instanceName) throws IOException {
 		IOException ex = null;
 		for (URL url : getServiceUrls(instanceName)) {
 			try {
@@ -63,10 +62,10 @@ public class ConfigurationFetcher extends RemoteFetcher {
 				throw new RuntimeException(e);
 			}
 		}
-		throw new ConfigurationException(ex);
+		throw new IOException(ex);
 	}
 
-	private static Collection<URL> getServiceUrls(String instanceName) throws ConfigurationException {
+	private static Collection<URL> getServiceUrls(String instanceName) throws IOException {
 		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
 		env.put("java.naming.provider.url", "dns:");
@@ -92,7 +91,7 @@ public class ConfigurationFetcher extends RemoteFetcher {
 
 			return results.values();
 		} catch (NamingException e) {
-			throw new ConfigurationException(e);
+			throw new IOException(e);
 		}
 	}
 
@@ -103,11 +102,10 @@ public class ConfigurationFetcher extends RemoteFetcher {
 	 *            The name of the overlay instance to connect to
 	 * @param configurationLocation
 	 *            The location where to fetch the configuration file
-	 * @throws ConfigurationException
-	 *             if some error occurs while parsing the configuration
 	 * @throws IOException
+	 *             if some error occurs while parsing the configuration
 	 */
-	public static Configuration fetchConfiguration(String instanceName, URI configurationLocation) throws ConfigurationException, IOException {
+	public static Configuration fetchConfiguration(String instanceName, URI configurationLocation) throws IOException {
 		ConfigurationFetcher f = new ConfigurationFetcher();
 		try {
 			HttpGet get = new HttpGet(configurationLocation);
@@ -127,11 +125,11 @@ public class ConfigurationFetcher extends RemoteFetcher {
 
 			in.close();
 
-			return Configuration.parse(instanceName, conf.toByteArray());
+			return XMLConfiguration.parse(instanceName, conf.toByteArray());
 		} catch (IOException e) {
 			throw e;
 		} finally {
-			f.httpClient.getConnectionManager().shutdown();
+			f.httpClient.close();
 		}
 	}
 }
