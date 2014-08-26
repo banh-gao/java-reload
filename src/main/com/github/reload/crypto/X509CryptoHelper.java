@@ -155,7 +155,7 @@ public class X509CryptoHelper extends CryptoHelper {
 
 		@Override
 		public X509Certificate[] getAcceptedIssuers() {
-			return conf.getRootCerts().toArray(new X509Certificate[0]);
+			return conf.get(Configuration.ROOT_CERTS).toArray(new X509Certificate[0]);
 		}
 
 		@Override

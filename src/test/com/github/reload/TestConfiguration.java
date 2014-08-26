@@ -1,5 +1,6 @@
 package com.github.reload;
 
+import io.netty.util.AttributeKey;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,27 +8,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
-import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.UnknownKindException;
 import com.github.reload.services.storage.encoders.ArrayModel;
 import com.github.reload.services.storage.encoders.DictionaryModel;
 import com.github.reload.services.storage.encoders.SingleModel;
@@ -44,53 +37,31 @@ public class TestConfiguration implements Configuration {
 	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).accessPolicy(UserMatch.class).dataModel(ArrayModel.class).build();
 	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).accessPolicy(UserMatch.class).dataModel(DictionaryModel.class).build();
 
-	String instanceName;
-	int sequence;
-	Date expiration;
-	int reliabilityTimer;
-	String topologyPlugin;
-	long maxMessageSize;
-	short initialTTL;
-	List<? extends Certificate> rootCerts;
-	Map<Long, DataKind> requiredKinds;
-	List<URL> enrollmentServers;
-	List<NodeID> kindSigners;
-	List<NodeID> configurationSigners;
-	List<NodeID> badNodes;
-	boolean noICE;
-	String sharedSecret;
-	List<String> linkProtocols;
-	boolean clientPermitted;
-	short turnDensity;
-	short nodeIdLength;
-	List<String> mandatoryExtensions;
-	boolean selfSignedPermitted;
-	HashAlgorithm selfSignedDigestType;
-	public Set<InetSocketAddress> bootstrapNodes;
-	byte[] rawXml;
-	Signature signature;
-	private ReloadCertificate rootCert;
+	private final Map<AttributeKey<?>, Object> conf = new HashMap<AttributeKey<?>, Object>();
 
 	public TestConfiguration() throws Exception {
-		rootCerts = Collections.singletonList((X509Certificate) loadLocalCert("CAcert.der"));
-		instanceName = "testOverlay.com";
-		maxMessageSize = 5000;
-		nodeIdLength = 16;
-		initialTTL = 6;
-		noICE = true;
-		linkProtocols = Collections.singletonList("TLS");
-		bootstrapNodes = Collections.singleton(BOOTSTRAP_ADDR);
-		requiredKinds = new HashMap<Long, DataKind>();
-		requiredKinds.put(TEST_KIND_SINGLE.getKindId(), TEST_KIND_SINGLE);
+		set(ROOT_CERTS, Collections.singletonList((X509Certificate) loadLocalCert("CAcert.der")));
+		set(OVERLAY_NAME, "testOverlay.com");
+		set(MAX_MESSAGE_SIZE, 5000);
+		set(NODE_ID_LENGTH, 16);
+		set(INITIAL_TTL, (short) 6);
+		set(LINK_PROTOCOLS, Collections.singleton("TLS"));
+		set(BOOT_NODES, Collections.singleton(BOOTSTRAP_ADDR));
+		set(NO_ICE, true);
+		set(LINK_TYPES, getOverlayLinkTypes());
+
+		Set<DataKind> requiredKinds = new HashSet<DataKind>();
+		requiredKinds.add(TEST_KIND_SINGLE);
 		DataKind.registerDataKind(TEST_KIND_SINGLE);
-		requiredKinds.put(TEST_KIND_ARRAY.getKindId(), TEST_KIND_ARRAY);
+		requiredKinds.add(TEST_KIND_ARRAY);
 		DataKind.registerDataKind(TEST_KIND_ARRAY);
-		requiredKinds.put(TEST_KIND_DICT.getKindId(), TEST_KIND_DICT);
+		requiredKinds.add(TEST_KIND_DICT);
 		DataKind.registerDataKind(TEST_KIND_DICT);
+		set(DATA_KINDS, requiredKinds);
 	}
 
 	public void setBootstrap(InetSocketAddress bootAddr) {
-		this.bootstrapNodes = Collections.singleton(bootAddr);
+		set(BOOT_NODES, Collections.singleton(bootAddr));
 	}
 
 	public static Certificate loadLocalCert(String localCertPath) throws FileNotFoundException, CertificateException {
@@ -110,128 +81,15 @@ public class TestConfiguration implements Configuration {
 		}
 	}
 
-	/**
-	 * @return The overlay name
-	 */
-	public String getOverlayName() {
-		return instanceName;
-	}
-
-	public int getConfigurationSequence() {
-		return sequence;
-	}
-
-	public Date getExpiration() {
-		return expiration;
-	}
-
-	public String getTopologyPlugin() {
-		return topologyPlugin;
-	}
-
-	/**
-	 * @return the length in bytes of the nodeids used in this overlay
-	 */
-	public int getNodeIdLength() {
-		return nodeIdLength;
-	}
-
-	/**
-	 * @return the maximum size of a message allowed in the overlay in bytes
-	 */
-	public int getMaxMessageSize() {
-		return (int) maxMessageSize;
-	}
-
-	/**
-	 * @return the maximum time in milliseconds to wait until a request should
-	 *         be considerated unreplied
-	 */
-	public int getReliabilityTimer() {
-		return reliabilityTimer;
-	}
-
-	/**
-	 * @return the initial value of the time to live field of the forwarding
-	 *         header
-	 */
-	public short getInitialTTL() {
-		return initialTTL;
-	}
-
-	public DataKind getDataKind(long kindId) throws UnknownKindException {
-		DataKind k = requiredKinds.get(kindId);
-		if (k == null)
-			throw new UnknownKindException("Unregistered data kind " + kindId);
-		return k;
-	}
-
-	@Override
-	public Set<DataKind> getDataKinds() {
-		return new HashSet<DataKind>(requiredKinds.values());
-	}
-
-	public List<NodeID> getKindSigners() {
-		return Collections.unmodifiableList(kindSigners);
-	}
-
-	public Set<InetSocketAddress> getBootstrapNodes() {
-		return Collections.unmodifiableSet(bootstrapNodes);
-	}
-
-	public List<URL> getEnrollmentServers() {
-		return Collections.unmodifiableList(enrollmentServers);
-	}
-
-	public List<Certificate> getRootCerts() {
-		return Collections.unmodifiableList(rootCerts);
-	}
-
-	public boolean admitSelfSigned() {
-		return selfSignedPermitted;
-	}
-
-	public List<NodeID> getBadNodes() {
-		return Collections.unmodifiableList(badNodes);
-	}
-
-	public List<String> getMandatoryExtensions() {
-		return Collections.unmodifiableList(mandatoryExtensions);
-	}
-
-	public List<String> getLinkProtocols() {
-		return Collections.unmodifiableList(linkProtocols);
-	}
-
-	public short getTurnDensity() {
-		return turnDensity;
-	}
-
-	public HashAlgorithm getSelfSignedDigestType() {
-		return selfSignedDigestType;
-	}
-
-	public String getSharedSecret() {
-		return sharedSecret;
-	}
-
-	public boolean isClientPermitted() {
-		return clientPermitted;
-	}
-
-	public boolean isNoICE() {
-		return noICE;
-	}
-
-	public Set<OverlayLinkType> getOverlayLinkTypes() {
+	private Set<OverlayLinkType> getOverlayLinkTypes() {
 		Set<OverlayLinkType> out = new HashSet<OverlayLinkType>();
 
-		if (isNoICE() == false) {
+		if (get(NO_ICE) == false) {
 			out.add(OverlayLinkType.DTLS_UDP_SR);
 			return out;
 		}
 
-		for (String proto : getLinkProtocols()) {
+		for (String proto : get(LINK_PROTOCOLS)) {
 			if ("DTLS".equalsIgnoreCase(proto)) {
 				out.add(OverlayLinkType.DTLS_UDP_SR_NO_ICE);
 			} else if ("TLS".equalsIgnoreCase(proto)) {
@@ -242,28 +100,15 @@ public class TestConfiguration implements Configuration {
 		return Collections.unmodifiableSet(out);
 	}
 
-	public List<NodeID> getConfSigners() {
-		return Collections.unmodifiableList(configurationSigners);
-	}
-
-	public boolean isSelfSignedPermitted() {
-		return selfSignedPermitted;
-	}
-
-	public byte[] getRawXML() {
-		return rawXml;
-	}
-
-	public Signature getSignature() {
-		return signature;
-	}
-
-	public ReloadCertificate getRootCertificate() {
-		return rootCert;
-	}
-
+	@SuppressWarnings("unchecked")
 	@Override
-	public String toString() {
-		return "XMLConfiguration [instanceName=" + instanceName + ", reliabilityTimer=" + reliabilityTimer + ", topologyPlugin=" + topologyPlugin + ", maxMessageSize=" + maxMessageSize + ", initialTTL=" + initialTTL + ", rootCerts=" + rootCerts + ", requiredKinds=" + requiredKinds + ", enrollmentServers=" + enrollmentServers + ", kindSigners=" + kindSigners + ", configurationSigners=" + configurationSigners + ", badNodes=" + badNodes + ", noICE=" + noICE + ", sharedSecret=" + sharedSecret + ", linkProtocols=" + linkProtocols + ", clientPermitted=" + clientPermitted + ", turnDensity=" + turnDensity + ", nodeIdLength=" + nodeIdLength + ", mandatoryExtensions=" + mandatoryExtensions + ", selfSignedPermitted=" + selfSignedPermitted + ", selfSignedDigestType=" + selfSignedDigestType + ", bootstrapNodes=" + bootstrapNodes + "]";
+	public <T> T get(AttributeKey<T> name) {
+		return (T) conf.get(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T set(AttributeKey<T> name, T value) {
+		return (T) conf.put(name, value);
 	}
 }

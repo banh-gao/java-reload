@@ -36,9 +36,9 @@ public class MessageBuilder {
 		Builder b = new Header.Builder();
 
 		b.setDestinationList(destList);
-		b.setOverlayHash(Builder.overlayNameToHash(conf.getOverlayName(), CryptoHelper.OVERLAY_HASHALG));
-		b.setTtl(conf.getInitialTTL());
-		b.setMaxResponseLength(conf.getMaxMessageSize());
+		b.setOverlayHash(Builder.overlayNameToHash(conf.get(Configuration.OVERLAY_NAME), CryptoHelper.OVERLAY_HASHALG));
+		b.setTtl(conf.get(Configuration.INITIAL_TTL));
+		b.setMaxResponseLength(conf.get(Configuration.MAX_MESSAGE_SIZE));
 		b.setVersion(Overlay.RELOAD_PROTOCOL_VERSION);
 		Header header = b.build();
 
@@ -47,7 +47,7 @@ public class MessageBuilder {
 
 	public NodeID getWildcard() {
 		if (wildcardId == null) {
-			wildcardId = NodeID.getWildcardId(conf.getNodeIdLength());
+			wildcardId = NodeID.getWildcardId(conf.get(Configuration.NODE_ID_LENGTH));
 		}
 		return wildcardId;
 	}
@@ -82,7 +82,7 @@ public class MessageBuilder {
 		viaList.add(connector.getLocalNodeId());
 
 		// Reset TTL
-		requestHeader.ttl = conf.getInitialTTL();
+		requestHeader.ttl = conf.get(Configuration.INITIAL_TTL);
 
 		return msg;
 	}

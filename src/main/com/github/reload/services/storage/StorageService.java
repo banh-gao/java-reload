@@ -93,7 +93,7 @@ public class StorageService {
 	 * @return the available data kinds
 	 */
 	public Set<DataKind> getDataKinds() {
-		return conf.getDataKinds();
+		return conf.get(Configuration.DATA_KINDS);
 	}
 
 	public PreparedData newPreparedData(DataKind kind) {

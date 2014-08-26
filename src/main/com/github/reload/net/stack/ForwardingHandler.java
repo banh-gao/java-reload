@@ -68,10 +68,10 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 		} else {
 
 			short ttl = message.getHeader().getTimeToLive();
-			if (ttl == 0 || ttl > conf.getInitialTTL()) {
+			if (ttl == 0 || ttl > conf.get(Configuration.INITIAL_TTL)) {
 				if (ttl == 0)
 					router.sendError(message.getHeader(), ErrorType.TLL_EXCEEDED, "Expired message TTL");
-				else if (ttl > conf.getInitialTTL())
+				else if (ttl > conf.get(Configuration.INITIAL_TTL))
 					router.sendError(message.getHeader(), ErrorType.TLL_EXCEEDED, "Message TTL greater than initial overlay TTL");
 
 				l.debug(String.format("Expired message %#x not forwarded", message.getHeader().getTransactionId()));

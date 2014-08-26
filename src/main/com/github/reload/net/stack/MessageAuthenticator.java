@@ -72,7 +72,7 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 		List<Certificate> certs = (List<Certificate>) msg.getSecBlock().getCertificates();
 
 		for (Certificate c : certs) {
-			for (Certificate validIssuer : conf.getRootCerts()) {
+			for (Certificate validIssuer : conf.get(Configuration.ROOT_CERTS)) {
 				try {
 					certs.add(validIssuer);
 					List<? extends Certificate> trustChain = cryptoHelper.getTrustRelationship(c, validIssuer, certs);

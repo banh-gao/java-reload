@@ -118,9 +118,9 @@ public abstract class CryptoHelper {
 		List<? extends Certificate> trustedRelation = null;
 		List<Certificate> available = new ArrayList<Certificate>(availableCerts);
 
-		available.addAll(conf.getRootCerts());
+		available.addAll(conf.get(Configuration.ROOT_CERTS));
 
-		for (Certificate issuerCert : conf.getRootCerts()) {
+		for (Certificate issuerCert : conf.get(Configuration.ROOT_CERTS)) {
 			try {
 				trustedRelation = getTrustRelationship(peerCert, issuerCert, available);
 				if (trustedRelation != null)
@@ -141,7 +141,7 @@ public abstract class CryptoHelper {
 	 *         overlay.
 	 */
 	public List<? extends Certificate> getLocalTrustRelationship() {
-		List<? extends Certificate> issuers = conf.getRootCerts();
+		List<? extends Certificate> issuers = conf.get(Configuration.ROOT_CERTS);
 
 		List<? extends Certificate> relations = null;
 		for (Certificate issuer : issuers) {

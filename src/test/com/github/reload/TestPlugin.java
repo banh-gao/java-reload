@@ -90,7 +90,7 @@ public class TestPlugin implements TopologyPlugin {
 
 	@Override
 	public ListenableFuture<NodeID> requestJoin() {
-		l.info(String.format("Joining to RELOAD overlay %s with %s in progress...", conf.getOverlayName(), boot.getLocalNodeId()));
+		l.info(String.format("Joining to RELOAD overlay %s with %s in progress...", conf.get(Configuration.OVERLAY_NAME), boot.getLocalNodeId()));
 		Bootstrap connector = ctx.get(Bootstrap.class);
 		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
 		MessageRouter router = ctx.get(MessageRouter.class);
@@ -111,14 +111,14 @@ public class TestPlugin implements TopologyPlugin {
 				NodeID ap = joinAns.getHeader().getSenderId();
 				addLoopback();
 				r.neighbors.add(ap);
-				l.info(String.format("Joining to RELOAD overlay %s with %s completed.", conf.getOverlayName(), boot.getLocalNodeId()));
+				l.info(String.format("Joining to RELOAD overlay %s with %s completed.", conf.get(Configuration.OVERLAY_NAME), boot.getLocalNodeId()));
 				isJoined = true;
 				joinFuture.set(joinAns.getHeader().getSenderId());
 			};
 
 			@Override
 			public void onFailure(Throwable t) {
-				l.info(String.format("Joining to RELOAD overlay %s with %s failed: %s", conf.getOverlayName(), boot.getLocalNodeId(), t.getMessage()));
+				l.info(String.format("Joining to RELOAD overlay %s with %s failed: %s", conf.get(Configuration.OVERLAY_NAME), boot.getLocalNodeId(), t.getMessage()));
 				joinFuture.setException(t);
 			}
 		});

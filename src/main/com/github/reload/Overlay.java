@@ -71,6 +71,6 @@ public class Overlay {
 
 	@Override
 	public String toString() {
-		return "OverlayConnection [overlay=" + conf.getOverlayName() + ", localId=" + bootstrap.getLocalNodeId() + "]";
+		return "OverlayConnection [overlay=" + conf.get(Configuration.OVERLAY_NAME) + ", localId=" + bootstrap.getLocalNodeId() + "]";
 	}
 }

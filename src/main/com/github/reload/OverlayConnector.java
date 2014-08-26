@@ -47,14 +47,14 @@ class OverlayConnector {
 
 		if (bootstrap.isOverlayInitiator()) {
 			ctx.set(Overlay.class, overlay);
-			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", ctx.get(Configuration.class).getOverlayName(), bootstrap.getLocalNodeId(), bootstrap.getLocalAddress()));
+			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", ctx.get(Configuration.class).get(Configuration.OVERLAY_NAME), bootstrap.getLocalNodeId(), bootstrap.getLocalAddress()));
 			overlayConnFut.set(overlay);
 			return overlayConnFut;
 		}
 
 		Configuration conf = ctx.get(Configuration.class);
 
-		ListenableFuture<Connection> bootConnFut = connectToBootstrap(conf.getBootstrapNodes(), conf.getOverlayLinkTypes());
+		ListenableFuture<Connection> bootConnFut = connectToBootstrap(conf.get(Configuration.BOOT_NODES), conf.get(Configuration.LINK_TYPES));
 
 		Futures.addCallback(bootConnFut, new FutureCallback<Connection>() {
 

@@ -73,7 +73,7 @@ public abstract class BootstrapFactory {
 			if (f.isCompatibleWith(conf))
 				return f;
 		}
-		throw new NoSuchFactoryException(conf.getOverlayName());
+		throw new NoSuchFactoryException(conf.get(Configuration.OVERLAY_NAME));
 	}
 
 	/**
