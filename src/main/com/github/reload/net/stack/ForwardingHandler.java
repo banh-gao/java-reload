@@ -115,7 +115,7 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 				return destList.size() == 1;
 
 			case NODEID :
-				if (nextHop.equals(localId))
+				if (nextHop.equals(localId) || nextHop.isWildcard())
 					return true;
 
 				return connMgr.isNeighbor((NodeID) nextHop);
