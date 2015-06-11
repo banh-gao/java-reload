@@ -17,7 +17,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 public class MultiNodeTest {
 
-	public static final int NUM_NODES = 4;
+	public static final int NUM_NODES = 2;
 
 	public static Overlay[] overlays;
 

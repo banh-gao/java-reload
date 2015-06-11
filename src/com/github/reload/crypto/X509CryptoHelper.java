@@ -85,7 +85,7 @@ public class X509CryptoHelper extends CryptoHelper {
 	@Override
 	public SSLEngine newSSLEngine(OverlayLinkType linkType) throws NoSuchAlgorithmException {
 		SSLEngine e = sslContext.createSSLEngine();
-		e.setEnabledCipherSuites(new String[]{"TLS_RSA_WITH_AES_256_CBC_SHA"});
+		e.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
 		return e;
 	}
 
