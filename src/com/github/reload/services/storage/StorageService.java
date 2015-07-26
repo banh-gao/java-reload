@@ -9,11 +9,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.Service;
 import com.github.reload.components.ComponentsContext.ServiceIdentifier;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -53,30 +53,29 @@ import com.google.common.util.concurrent.SettableFuture;
  * Helps a peer to send storage requests into the overlay
  * 
  */
-@Component(value = StorageService.class, priority = 10)
 public class StorageService {
 
 	public static final ServiceIdentifier<StorageService> SERVICE_ID = new ServiceIdentifier<StorageService>(StorageService.class);
 
 	private static final short REPLICA_NUMBER = 0;
 
-	@Component
-	private ComponentsContext ctx;
+	@Inject
+	ComponentsContext ctx;
 
-	@Component
-	private Configuration conf;
+	@Inject
+	Configuration conf;
 
-	@Component
-	private TopologyPlugin plugin;
+	@Inject
+	TopologyPlugin plugin;
 
-	@Component
-	private MessageRouter msgRouter;
+	@Inject
+	MessageRouter msgRouter;
 
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	@Component
-	private Keystore keystore;
+	@Inject
+	Keystore keystore;
 
 	@CompStart
 	private void loadController() {
@@ -178,8 +177,9 @@ public class StorageService {
 
 			@Override
 			public void onFailure(Throwable t) {
-				if (t instanceof UnknownKindException)
+				if (t instanceof UnknownKindException) {
 					sendKindConfigUpdate(resourceId, ((UnknownKindException) t).getUnknownKinds());
+				}
 				storeFut.setException(t);
 			}
 		});

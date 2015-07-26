@@ -5,9 +5,10 @@ import io.netty.channel.ChannelFutureListener;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
@@ -31,21 +32,24 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Send the outgoing messages to neighbor nodes by using the routing table
  */
-@Component(value = MessageRouter.class, priority = 0)
 public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
 
-	@Component
-	private ConnectionManager connManager;
+	@Inject
+	ConnectionManager connManager;
 
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	@Component
-	private ComponentsContext ctx;
+	@Inject
+	RoutingTable routingTable;
 
-	private RequestManager reqManager = new RequestManager();
+	@Inject
+	@Named("packetsLooper")
+	Executor exec;
+
+	private final RequestManager reqManager = new RequestManager();
 
 	/**
 	 * Send the given request message to the destination node into the overlay.
@@ -101,11 +105,11 @@ public class MessageRouter {
 		if (dest instanceof NodeID && isDirectlyConnected((NodeID) dest))
 			return Collections.singleton((NodeID) dest);
 		else
-			return ctx.get(RoutingTable.class).getNextHops(dest);
+			return routingTable.getNextHops(dest);
 	}
 
 	private boolean isDirectlyConnected(NodeID nextDest) {
-		return ctx.get(ConnectionManager.class).isNeighbor(nextDest);
+		return connManager.isNeighbor(nextDest);
 	}
 
 	private void transmit(final Message message, final NodeID neighborNode, final SettableFuture<NodeID> status) {
@@ -123,7 +127,7 @@ public class MessageRouter {
 			@Override
 			public void operationComplete(final ChannelFuture future) throws Exception {
 				l.debug(String.format("Transmitting message %#x (%s) to %s through %s at %s...", message.getHeader().getTransactionId(), message.getContent().getType(), message.getHeader().getDestinationId(), neighborNode, conn.get().getStack().getChannel().remoteAddress()));
-				ctx.execute(new Runnable() {
+				exec.execute(new Runnable() {
 
 					@Override
 					public void run() {
@@ -156,10 +160,11 @@ public class MessageRouter {
 
 					@Override
 					public void operationComplete(ChannelFuture future) throws Exception {
-						if (future.isSuccess())
+						if (future.isSuccess()) {
 							l.debug(String.format("Message %#x forwarded to %s", msg.getHeader().getTransactionId(), directConn.get().getNodeId()), future.cause());
-						else
+						} else {
 							l.debug(String.format("Message forwarding of %#x failed", msg.getHeader().getTransactionId()), future.cause());
+						}
 					}
 				});
 			}
@@ -175,10 +180,11 @@ public class MessageRouter {
 
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
-					if (future.isSuccess())
+					if (future.isSuccess()) {
 						l.debug(String.format("Message %#x forwarded to %s", msg.getHeader().getTransactionId(), c.get().getNodeId()), future.cause());
-					else
+					} else {
 						l.debug(String.format("Message forwarding of %#x failed", msg.getHeader().getTransactionId()), future.cause());
+					}
 				}
 			});
 		}
@@ -198,7 +204,7 @@ public class MessageRouter {
 
 	@MessageHandler(handleAnswers = true, value = ContentType.ERROR)
 	private void handleAnswer(Message message) {
-		reqManager.handleAnswer(message, ctx);
+		reqManager.handleAnswer(message, null);
 	}
 
 	public static class ForwardingException extends Exception {

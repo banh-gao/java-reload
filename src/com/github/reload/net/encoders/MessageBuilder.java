@@ -1,9 +1,9 @@
 package com.github.reload.net.encoders;
 
 import java.util.Collections;
+import javax.inject.Inject;
 import com.github.reload.Bootstrap;
 import com.github.reload.Overlay;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.encoders.Header.Builder;
@@ -11,17 +11,12 @@ import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 
-@Component(value = MessageBuilder.class, priority = 0)
 public class MessageBuilder {
 
-	@Component
-	private Configuration conf;
-	@Component
-	private Bootstrap connector;
-	@Component
-	private CryptoHelper cryptoHelper;
-
-	private NodeID wildcardId;
+	@Inject
+	Configuration conf;
+	@Inject
+	Bootstrap connector;
 
 	/**
 	 * Build a message for the given content and destination.
@@ -46,10 +41,7 @@ public class MessageBuilder {
 	}
 
 	public NodeID getWildcard() {
-		if (wildcardId == null) {
-			wildcardId = NodeID.getWildcardId(conf.get(Configuration.NODE_ID_LENGTH));
-		}
-		return wildcardId;
+		return NodeID.getWildcardId(conf.get(Configuration.NODE_ID_LENGTH));
 	}
 
 	private Message newMessage(Header header, Content content) {

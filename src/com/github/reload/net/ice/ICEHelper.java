@@ -10,11 +10,9 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
-@Component(value = ICEHelper.class, priority = 0)
 public class ICEHelper {
 
 	/**

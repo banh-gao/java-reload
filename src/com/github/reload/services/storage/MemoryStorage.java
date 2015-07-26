@@ -4,10 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.encoders.StoredData;
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
@@ -19,14 +16,7 @@ import com.google.common.collect.SetMultimap;
  * responsible for.
  * 
  */
-@Component(value = DataStorage.class, priority = 1)
 public class MemoryStorage implements DataStorage {
-
-	@Component
-	private ComponentsContext ctx;
-
-	@Component
-	private TopologyPlugin plugin;
 
 	private final Map<ResourceID, Map<Long, StoreKindData>> storedResources = Maps.newConcurrentMap();
 
@@ -39,16 +29,18 @@ public class MemoryStorage implements DataStorage {
 	}
 
 	private void updateKindToResource(Set<Long> kinds, ResourceID resId) {
-		for (Long k : kinds)
+		for (Long k : kinds) {
 			storedKinds.put(k, resId);
+		}
 	}
 
 	@Override
 	public Optional<Map<Long, StoreKindData>> get(ResourceID resId) {
 		Optional<Map<Long, StoreKindData>> res = Optional.fromNullable(storedResources.get(resId));
 
-		if (res.isPresent())
+		if (res.isPresent()) {
 			deleteExpired(res.get());
+		}
 
 		return res;
 	}
@@ -58,8 +50,9 @@ public class MemoryStorage implements DataStorage {
 			Iterator<StoredData> i = kd.getValues().iterator();
 			while (i.hasNext()) {
 				StoredData d = i.next();
-				if (d.isExpired())
+				if (d.isExpired()) {
 					i.remove();
+				}
 			}
 		}
 	}

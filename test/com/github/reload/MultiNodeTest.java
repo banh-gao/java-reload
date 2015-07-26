@@ -29,8 +29,9 @@ public class MultiNodeTest {
 
 		overlays[0] = startNode(TestConfiguration.BOOTSTRAP_ADDR, 0);
 
-		for (int i = 1; i < NUM_NODES; i++)
+		for (int i = 1; i < NUM_NODES; i++) {
 			overlays[i] = startNode(new InetSocketAddress(InetAddress.getLoopbackAddress(), 2000 + i), i);
+		}
 
 		ComponentsContext ctx = overlays[1].getService(TestService.SERVICE_ID).getCtx();
 
@@ -47,8 +48,9 @@ public class MultiNodeTest {
 
 		TestBootstrap b = (TestBootstrap) BootstrapFactory.createBootstrap(c);
 
-		if (addr.equals(TestConfiguration.BOOTSTRAP_ADDR))
+		if (addr.equals(TestConfiguration.BOOTSTRAP_ADDR)) {
 			b.setOverlayInitiator(true);
+		}
 
 		b.setLocalAddress(addr);
 		b.setLocalNodeId(cert.getNodeId());
@@ -61,7 +63,8 @@ public class MultiNodeTest {
 
 	@AfterClass
 	public static void deinit() throws InterruptedException {
-		for (Overlay o : overlays)
+		for (Overlay o : overlays) {
 			o.disconnect();
+		}
 	}
 }

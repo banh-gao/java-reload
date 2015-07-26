@@ -6,9 +6,9 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.services.storage.encoders.StoredData;
 import com.github.reload.services.storage.encoders.DataModel.DataValue;
 import com.github.reload.services.storage.encoders.DataModel.DataValueBuilder;
+import com.github.reload.services.storage.encoders.StoredData;
 
 /**
  * Helps to generate a signed data
@@ -20,14 +20,14 @@ public class PreparedData {
 
 	public static final long MAX_LIFETIME = 0xffffffffl;
 	public static final BigInteger MAX_GENERATION = new BigInteger(1, new byte[]{
-																					(byte) 0xff,
-																					(byte) 0xff,
-																					(byte) 0xff,
-																					(byte) 0xff,
-																					(byte) 0xff,
-																					(byte) 0xff,
-																					(byte) 0xff,
-																					(byte) 0xff});
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff,
+	                                                                             (byte) 0xff});
 
 	private final DataKind kind;
 	private final DataValueBuilder<?> valueBuilder;
@@ -38,7 +38,7 @@ public class PreparedData {
 
 	PreparedData(DataKind kind) {
 		this.kind = kind;
-		this.valueBuilder = kind.getDataModel().newValueBuilder();
+		valueBuilder = kind.getDataModel().newValueBuilder();
 	}
 
 	public DataKind getKind() {

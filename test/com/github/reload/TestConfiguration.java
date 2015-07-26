@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.services.storage.DataKind;
@@ -29,7 +28,6 @@ import com.github.reload.services.storage.policies.UserMatch;
 /**
  * Representation of a RELOAD configuration document
  */
-@Component(Configuration.class)
 public class TestConfiguration implements Configuration {
 
 	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);

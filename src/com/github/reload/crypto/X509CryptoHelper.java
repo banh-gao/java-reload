@@ -12,6 +12,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.inject.Inject;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -21,7 +22,6 @@ import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext.CompStart;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
@@ -29,17 +29,16 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * Crypto helper for X.509 certificates
  * 
  */
-@Component(value = CryptoHelper.class, priority = 1)
 public class X509CryptoHelper extends CryptoHelper {
 
-	@Component
-	private Bootstrap boot;
+	@Inject
+	Bootstrap boot;
 
-	@Component
-	private Configuration conf;
+	@Inject
+	Configuration conf;
 
-	@Component
-	private Keystore keystore;
+	@Inject
+	Keystore keystore;
 
 	private SSLContext sslContext;
 

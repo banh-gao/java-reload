@@ -29,8 +29,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class StorageTest extends APITest {
 
 	private static StorageService storServ;
-	private byte[] TEST_SINGLE = "SINGLE_VALUE".getBytes();
-	private byte[] TEST_KEY = "TEST_KEY".getBytes();
+	private final byte[] TEST_SINGLE = "SINGLE_VALUE".getBytes();
+	private final byte[] TEST_KEY = "TEST_KEY".getBytes();
 	private static int TEST_INDEX = 3;
 
 	@Before

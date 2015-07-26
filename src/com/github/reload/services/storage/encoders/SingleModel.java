@@ -69,8 +69,9 @@ public class SingleModel extends DataModel<SingleValue> {
 
 		@Override
 		public SingleValue build() {
-			if (value == null)
+			if (value == null) {
 				value = new byte[0];
+			}
 			return new SingleValue(value, exists);
 		}
 	}

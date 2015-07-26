@@ -1,16 +1,15 @@
 package com.github.reload;
 
+import javax.inject.Inject;
 import org.apache.log4j.PropertyConfigurator;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.ServiceIdentifier;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 
 /**
  * Represents the RELOAD overlay where the local node is connected to
  * 
  */
-@Component(Overlay.class)
 public class Overlay {
 
 	public static final String LIB_COMPANY = "zeroDenial";
@@ -22,13 +21,13 @@ public class Overlay {
 		PropertyConfigurator.configure("log4j.properties");
 	}
 
-	@Component
-	private Configuration conf;
+	@Inject
+	Configuration conf;
 
-	@Component
-	private Bootstrap bootstrap;
+	@Inject
+	Bootstrap bootstrap;
 
-	@Component
+	@Inject
 	ComponentsContext ctx;
 
 	Overlay() {

@@ -22,7 +22,7 @@ public class StoreRequest extends Content {
 
 	public StoreRequest(ResourceID id, short replNum, Collection<StoreKindData> data) {
 		resourceId = id;
-		this.replicaNumber = replNum;
+		replicaNumber = replNum;
 		kindData = data;
 	}
 

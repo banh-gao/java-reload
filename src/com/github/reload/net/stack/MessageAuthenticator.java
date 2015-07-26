@@ -9,8 +9,8 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -24,15 +24,14 @@ public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private final Configuration conf;
-	private final Keystore keystore;
-	private final CryptoHelper cryptoHelper;
+	@Inject
+	Configuration conf;
 
-	public MessageAuthenticator(ComponentsContext ctx) {
-		this.conf = ctx.get(Configuration.class);
-		this.keystore = ctx.get(Keystore.class);
-		this.cryptoHelper = ctx.get(CryptoHelper.class);
-	}
+	@Inject
+	Keystore keystore;
+
+	@Inject
+	CryptoHelper cryptoHelper;
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Message msg) {

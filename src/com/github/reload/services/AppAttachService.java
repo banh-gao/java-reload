@@ -5,10 +5,10 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext.Service;
 import com.github.reload.components.ComponentsContext.ServiceIdentifier;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
@@ -29,21 +29,20 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Provides attach functionalities for local peer and answers remote requests
  */
-@Component(AppAttachService.class)
 public class AppAttachService {
 
 	public static final ServiceIdentifier<AppAttachService> SERVICE_ID = new ServiceIdentifier<AppAttachService>(AppAttachService.class);
 
 	private static final Logger logger = Logger.getRootLogger();
 
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	@Component
-	private MessageRouter router;
+	@Inject
+	MessageRouter router;
 
-	@Component
-	private ICEHelper iceHelper;
+	@Inject
+	ICEHelper iceHelper;
 
 	private final Map<Integer, InetSocketAddress> registeredServers = Maps.newConcurrentMap();
 

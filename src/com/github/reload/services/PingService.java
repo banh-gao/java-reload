@@ -2,7 +2,7 @@ package com.github.reload.services;
 
 import java.math.BigInteger;
 import java.util.Random;
-import com.github.reload.components.ComponentsRepository.Component;
+import javax.inject.Inject;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
@@ -13,14 +13,13 @@ import com.github.reload.net.encoders.content.PingAnswer;
 /**
  * Answers remote peers ping requests
  */
-@Component(value = PingService.class, priority = 10)
 public class PingService {
 
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	@Component
-	private MessageRouter router;
+	@Inject
+	MessageRouter router;
 
 	private final Random rand = new Random();
 

@@ -2,11 +2,11 @@ package com.github.reload.net;
 
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
@@ -37,31 +37,30 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish direct connections to other peers using attach messages
  */
-@Component(value = AttachService.class, priority = 1)
 public class AttachService {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	@Component
-	private Bootstrap bootstrap;
+	@Inject
+	Bootstrap bootstrap;
 
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	@Component
-	private MessageRouter msgRouter;
+	@Inject
+	MessageRouter msgRouter;
 
-	@Component
+	@Inject
 	ConnectionManager connMgr;
 
-	@Component
-	private ICEHelper iceHelper;
+	@Inject
+	ICEHelper iceHelper;
 
-	@Component
-	private TopologyPlugin plugin;
+	@Inject
+	TopologyPlugin plugin;
 
-	@Component
-	private ComponentsContext ctx;
+	@Inject
+	ComponentsContext ctx;
 
 	private final Map<Long, SettableFuture<Connection>> pendingRequests = Maps.newConcurrentMap();
 	private final Set<NodeID> answeredRequests = Sets.newConcurrentHashSet();

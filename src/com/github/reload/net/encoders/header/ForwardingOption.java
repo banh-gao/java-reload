@@ -115,7 +115,7 @@ public abstract class ForwardingOption {
 				case UNKNOWN_OPTION :
 					option = unknownFwdCodec.decode(data);
 					break;
-			// May be extended
+					// May be extended
 			}
 
 			assert (option != null);

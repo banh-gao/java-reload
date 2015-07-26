@@ -3,9 +3,9 @@ package com.github.reload.net.stack;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.connections.ConnectionManager;
@@ -24,21 +24,23 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private final MessageRouter router;
-	private final Bootstrap boot;
-	private final TopologyPlugin plugin;
-	private final ConnectionManager connMgr;
-	private final Configuration conf;
-	private final PathCompressor compressor;
+	@Inject
+	MessageRouter router;
 
-	public ForwardingHandler(ComponentsContext ctx) {
-		router = ctx.get(MessageRouter.class);
-		boot = ctx.get(Bootstrap.class);
-		plugin = ctx.get(TopologyPlugin.class);
-		connMgr = ctx.get(ConnectionManager.class);
-		conf = ctx.get(Configuration.class);
-		compressor = ctx.get(PathCompressor.class);
-	}
+	@Inject
+	Bootstrap boot;
+
+	@Inject
+	TopologyPlugin plugin;
+
+	@Inject
+	ConnectionManager connMgr;
+
+	@Inject
+	Configuration conf;
+
+	@Inject
+	PathCompressor compressor;
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -69,10 +71,11 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 
 			short ttl = message.getHeader().getTimeToLive();
 			if (ttl == 0 || ttl > conf.get(Configuration.INITIAL_TTL)) {
-				if (ttl == 0)
+				if (ttl == 0) {
 					router.sendError(message.getHeader(), ErrorType.TLL_EXCEEDED, "Expired message TTL");
-				else if (ttl > conf.get(Configuration.INITIAL_TTL))
+				} else if (ttl > conf.get(Configuration.INITIAL_TTL)) {
 					router.sendError(message.getHeader(), ErrorType.TLL_EXCEEDED, "Message TTL greater than initial overlay TTL");
+				}
 
 				l.debug(String.format("Expired message %#x not forwarded", message.getHeader().getTransactionId()));
 				return;

@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import javax.inject.Inject;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -38,8 +39,7 @@ public class NodeMatch extends AccessPolicy {
 		validate(resourceId, signerIdentity, ctx);
 	}
 
-	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, ComponentsContext ctx) throws AccessPolicyException {
-		Keystore keystore = ctx.get(Keystore.class);
+	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, Keystore keystore) throws AccessPolicyException {
 		Optional<ReloadCertificate> storerReloadCert = keystore.getCertificate(storerIdentity);
 		if (!storerReloadCert.isPresent())
 			throw new AccessPolicyException("Unknown signer identity");
@@ -58,8 +58,7 @@ public class NodeMatch extends AccessPolicy {
 		throw new AccessPolicyException("Signer node-id not matching with resource-id");
 	}
 
-	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, ComponentsContext ctx) {
-		TopologyPlugin plugin = (TopologyPlugin) ctx.get(TopologyPlugin.class);
+	private static byte[] hashNodeId(HashAlgorithm hashAlg, NodeID storerId, TopologyPlugin plugin) {
 		int length = plugin.getResourceIdLength();
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
@@ -89,15 +88,11 @@ public class NodeMatch extends AccessPolicy {
 	 */
 	public static class NodeParamsGenerator implements AccessParamsGenerator {
 
-		private final ComponentsContext ctx;
-
-		public NodeParamsGenerator(ComponentsContext ctx) {
-			this.ctx = ctx;
-		}
+		@Inject
+		TopologyPlugin topology;
 
 		public ResourceID getResourceId(NodeID storerId) {
-			TopologyPlugin plugin = (TopologyPlugin) ctx.get(TopologyPlugin.class);
-			return plugin.getResourceId(hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerId, ctx));
+			return topology.getResourceId(hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerId, topology));
 		}
 	}
 }

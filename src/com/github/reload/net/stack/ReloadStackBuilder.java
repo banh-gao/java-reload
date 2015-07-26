@@ -15,6 +15,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
+import javax.inject.Inject;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
@@ -33,7 +34,12 @@ public class ReloadStackBuilder {
 	private final AbstractBootstrap<?, ?> bootstrap;
 	private InetSocketAddress localAddress;
 	private OverlayLinkType linkType;
-	private final ForwardingHandler fwdHandler;
+
+	@Inject
+	CryptoHelper cryptoHelper;
+
+	@Inject
+	ForwardingHandler fwdHandler;
 
 	public static ReloadStackBuilder newClientBuilder(ComponentsContext ctx, MessageDispatcher msgDispatcher) {
 		Bootstrap b = new Bootstrap();
@@ -57,7 +63,6 @@ public class ReloadStackBuilder {
 	protected <T extends AbstractBootstrap<T, ? extends Channel>> ReloadStackBuilder(ComponentsContext ctx, MessageDispatcher msgDispatcher, T bootstrap, boolean isServer) {
 		this.ctx = ctx;
 		this.isServer = isServer;
-		fwdHandler = new ForwardingHandler(ctx);
 		this.bootstrap = bootstrap;
 		this.msgDispatcher = msgDispatcher;
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -98,7 +103,7 @@ public class ReloadStackBuilder {
 				ChannelPipeline pipeline = ch.pipeline();
 
 				// Encrypted tunnel handler
-				SSLEngine eng = ctx.get(CryptoHelper.class).newSSLEngine(linkType);
+				SSLEngine eng = cryptoHelper.newSSLEngine(linkType);
 				if (isServer) {
 					eng.setNeedClientAuth(true);
 					eng.setUseClientMode(false);
@@ -124,7 +129,7 @@ public class ReloadStackBuilder {
 				// Decoder for message payload (content + security block)
 				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, new MessagePayloadDecoder(ctx));
 
-				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator(ctx));
+				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, new MessageAuthenticator());
 
 				// Encorder for message entire outgoing message, also
 				// responsible for message signature generation

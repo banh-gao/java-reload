@@ -9,16 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
-import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
@@ -52,23 +50,17 @@ import com.google.common.base.Optional;
  */
 class StorageController {
 
-	@Component
-	private Configuration conf;
+	@Inject
+	TopologyPlugin plugin;
 
-	@Component
-	private TopologyPlugin plugin;
+	@Inject
+	MessageRouter router;
 
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	ComponentsContext ctx;
 
-	@Component
-	private MessageRouter router;
-
-	@Component
-	private ComponentsContext ctx;
-
-	@Component
-	private DataStorage storage;
+	@Inject
+	DataStorage storage;
 
 	@MessageHandler(ContentType.STORE_REQ)
 	private void handleStoreRequest(Message requestMessage) {
@@ -121,8 +113,9 @@ class StorageController {
 
 			Optional<StoreKindData> oldStoredKind = Optional.absent();
 
-			if (oldStoredResource.isPresent())
+			if (oldStoredResource.isPresent()) {
 				oldStoredKind = Optional.fromNullable(oldStoredResource.get().get(kind.getKindId()));
+			}
 
 			if (receivedData.getValues().size() > kind.getAttribute(DataKind.MAX_COUNT, DataKind.MAX_COUNT_DEFAULT))
 				throw new ErrorMessageException(ErrorType.DATA_TOO_LARGE, "Stored data exceeds maximum number of values for this kind");
@@ -133,8 +126,9 @@ class StorageController {
 				if (d.getValue().getSize() > kind.getAttribute(DataKind.MAX_SIZE, DataKind.MAX_SIZE_DEFAULT))
 					throw new ErrorMessageException(ErrorType.DATA_TOO_LARGE, "Stored data exceeds maximum size for this kind");
 
-				if (oldStoredKind.isPresent())
+				if (oldStoredKind.isPresent()) {
 					checkValidReplace(oldStoredKind.get(), d);
+				}
 
 				SignerIdentity storerIdentity = d.getSignature().getIdentity();
 
@@ -147,8 +141,9 @@ class StorageController {
 				// If the store is not a replica (it is a normal store request
 				// from a peer), perform policy checks also for the node that
 				// sends the store message
-				if (!isReplica)
+				if (!isReplica) {
 					kind.getAccessPolicy().accept(resourceId, kind, d, senderIdentity, ctx);
+				}
 
 				Optional<ReloadCertificate> storerCert = ctx.get(Keystore.class).getCertificate(storerIdentity);
 
@@ -164,10 +159,11 @@ class StorageController {
 			}
 
 			// Increase stored data generation by one
-			if (oldStoredKind.isPresent())
+			if (oldStoredKind.isPresent()) {
 				receivedData.generation = oldStoredKind.get().getGeneration().add(BigInteger.ONE);
-			else
+			} else {
 				receivedData.generation = receivedData.generation.add(BigInteger.ONE);
+			}
 
 			tempStore.put(kind.getKindId(), receivedData);
 
@@ -349,10 +345,11 @@ class StorageController {
 
 			ResourceID resId;
 
-			if (resources.isEmpty())
+			if (resources.isEmpty()) {
 				resId = plugin.getResourceId(new byte[0]);
-			else
+			} else {
 				resId = plugin.getCloserId(reqResId, resources);
+			}
 
 			out.add(new FindKindData(k, resId));
 		}

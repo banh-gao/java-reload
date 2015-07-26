@@ -5,20 +5,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.encoders.Message;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.Maps;
@@ -81,19 +74,13 @@ public class ComponentsContext {
 		loadedComponents.put(compBaseClazz, comp);
 
 		setComponentStatus(compBaseClazz, STATUS_LOADED);
-
-		injectComponents(comp);
 	}
 
 	private void setComponentStatus(Class<?> compBaseClazz, int status) {
 
 		Class<? extends Annotation> annotation = toAnnotation(status);
 
-		Object c = get(compBaseClazz);
-
 		componentsStatus.put(compBaseClazz, status);
-
-		triggerStatusMethod(c.getClass(), c, annotation);
 	}
 
 	/**
@@ -105,8 +92,9 @@ public class ComponentsContext {
 
 		// Recursively call parent classes trigger methods before calling object
 		// runtime class methods
-		if (clazz.getSuperclass() != null)
+		if (clazz.getSuperclass() != null) {
 			triggerStatusMethod(clazz.getSuperclass(), obj, annotation);
+		}
 
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (m.isAnnotationPresent(annotation)) {
@@ -125,46 +113,6 @@ public class ComponentsContext {
 		return componentsStatus.get(compBaseClazz);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T get(Class<T> compBaseClazz) {
-		if (!loadedComponents.containsKey(compBaseClazz)) {
-			T comp = repo.newComponent(compBaseClazz);
-			set(compBaseClazz, comp);
-		}
-		return (T) loadedComponents.get(compBaseClazz);
-	}
-
-	public boolean startComponent(Class<?> compBaseClazz) {
-		Object cmp = get(compBaseClazz);
-
-		if (getComponentStatus(compBaseClazz) >= STATUS_STARTED)
-			return false;
-
-		setComponentStatus(compBaseClazz, STATUS_STARTED);
-		eventBus.register(cmp);
-		msgHandlerMgr.registerMessageHandler(cmp);
-		return true;
-	}
-
-	public void startComponents() {
-		List<Class<?>> startOrder = new ArrayList<Class<?>>(loadedComponents.keySet());
-		Collections.sort(startOrder, new Comparator<Class<?>>() {
-
-			@Override
-			public int compare(Class<?> o1, Class<?> o2) {
-				Component ann1 = o1.getAnnotation(Component.class);
-				Component ann2 = o2.getAnnotation(Component.class);
-				if (ann1 == null || ann2 == null)
-					return 0;
-				return Integer.compare(ann1.priority(), ann2.priority());
-			}
-		});
-
-		for (Class<?> compBaseClazz : startOrder) {
-			startComponent(compBaseClazz);
-		}
-	}
-
 	public void stopComponents() {
 		for (Class<?> compBaseClazz : loadedComponents.keySet()) {
 			stopComponent(compBaseClazz);
@@ -175,10 +123,6 @@ public class ComponentsContext {
 		if (getComponentStatus(compBaseClazz) >= STATUS_STOPPED)
 			return false;
 
-		Object cmp = get(compBaseClazz);
-		setComponentStatus(compBaseClazz, STATUS_STOPPED);
-		msgHandlerMgr.unregisterMessageHandler(cmp);
-		eventBus.unregister(cmp);
 		return true;
 	}
 
@@ -205,46 +149,6 @@ public class ComponentsContext {
 
 	public void postEvent(Object event) {
 		eventBus.post(event);
-	}
-
-	private void injectComponents(Object c) {
-		Class<?> superClazz = c.getClass();
-
-		// Inject fields either of the object class and of all its parents
-		while (superClazz != null) {
-			injectFields(c, superClazz);
-			superClazz = superClazz.getSuperclass();
-		}
-	}
-
-	private void injectFields(Object comp, Class<?> clazz) {
-		for (Field f : clazz.getDeclaredFields()) {
-			Component cmp = f.getAnnotation(Component.class);
-			if (cmp != null) {
-
-				f.setAccessible(true);
-
-				Class<?> compBaseClazz = f.getType();
-
-				Object obj = null;
-
-				try {
-					obj = (compBaseClazz.equals(ComponentsContext.class)) ? this : get(compBaseClazz);
-				} catch (NoSuchElementException e) {
-					// Checked later
-				}
-
-				if (obj != null) {
-					try {
-						f.set(comp, obj);
-					} catch (IllegalArgumentException | IllegalAccessException e) {
-						throw new IllegalStateException(e);
-					}
-				} else
-					throw new IllegalStateException(String.format("Missing component %s required by %s", compBaseClazz.getCanonicalName(), clazz.getCanonicalName()));
-
-			}
-		}
 	}
 
 	/**
@@ -312,10 +216,6 @@ public class ComponentsContext {
 
 		@SuppressWarnings("unchecked")
 		T getService(ComponentsContext ctx) {
-			Object cmp = ctx.get(compBaseClazz);
-
-			ctx.startComponent(compBaseClazz);
-
 			for (Method m : cmp.getClass().getDeclaredMethods()) {
 				if (!m.isAnnotationPresent(Service.class)) {
 					continue;

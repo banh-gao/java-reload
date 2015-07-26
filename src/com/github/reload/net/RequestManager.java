@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Message;
@@ -32,6 +33,12 @@ class RequestManager {
 	private final ScheduledExecutorService expiredRequestsRemover = Executors.newScheduledThreadPool(1);
 
 	private final Map<Long, PendingRequest> pendingRequests = Maps.newConcurrentMap();
+
+	@Inject
+	RoutingTable routingTable;
+
+	@Inject
+	TopologyPlugin topology;
 
 	public SettableFuture<Message> put(Message request) {
 
@@ -75,7 +82,7 @@ class RequestManager {
 		private final SettableFuture<Message> future;
 
 		public PendingRequest(Message req, SettableFuture<Message> future) {
-			this.reqDest = req.getHeader().getDestinationId();
+			reqDest = req.getHeader().getDestinationId();
 			this.future = future;
 		}
 
@@ -100,15 +107,12 @@ class RequestManager {
 					break;
 
 				case RESOURCEID :
-					RoutingTable r = ctx.get(RoutingTable.class);
-					TopologyPlugin plugin = ctx.get(TopologyPlugin.class);
-
-					Set<NodeID> neighbors = new HashSet<NodeID>(r.getNeighbors());
+					Set<NodeID> neighbors = new HashSet<NodeID>(routingTable.getNeighbors());
 					neighbors.add(sender);
 
 					// Sender node should be closer than any of the neighbor
 					// nodes to the destination resource
-					if (!plugin.getCloserId(reqDest, neighbors).equals(sender))
+					if (!topology.getCloserId(reqDest, neighbors).equals(sender))
 						throw new GeneralSecurityException("Answering node is not closer than neighbors to the request destination resource");
 
 					break;

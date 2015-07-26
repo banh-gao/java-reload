@@ -3,9 +3,9 @@ package com.github.reload;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.AttachService;
+import com.github.reload.net.NetModule;
 import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
@@ -26,12 +26,21 @@ class OverlayConnector {
 
 	private static final Logger l = Logger.getRootLogger();
 
-	private final ComponentsContext ctx;
-	private final Overlay overlay;
+	private Bootstrap bootstrap;
+	private Overlay overlay;
 
-	public OverlayConnector(ComponentsContext ctx) {
-		this.ctx = ctx;
-		overlay = new Overlay();
+	private Configuration conf;
+
+	public OverlayConnector(Configuration conf) {
+		Builder b = DaggerOverlayInitializer.builder();
+		b.coreModule(new CoreModule(conf));
+		b.netModule(new NetModule());
+
+		OverlayInitializer initializer = b.build();
+
+		bootstrap = initializer.getBootstrap();
+		this.conf = initializer.getConfiguration();
+		overlay = initializer.getOverlay();
 	}
 
 	/**
@@ -43,16 +52,11 @@ class OverlayConnector {
 
 		final SettableFuture<Overlay> overlayConnFut = SettableFuture.create();
 
-		Bootstrap bootstrap = ctx.get(Bootstrap.class);
-
 		if (bootstrap.isOverlayInitiator()) {
-			ctx.set(Overlay.class, overlay);
-			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", ctx.get(Configuration.class).get(Configuration.OVERLAY_NAME), bootstrap.getLocalNodeId(), bootstrap.getLocalAddress()));
+			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", conf.get(Configuration.OVERLAY_NAME), bootstrap.getLocalNodeId(), bootstrap.getLocalAddress()));
 			overlayConnFut.set(overlay);
 			return overlayConnFut;
 		}
-
-		Configuration conf = ctx.get(Configuration.class);
 
 		ListenableFuture<Connection> bootConnFut = connectToBootstrap(conf.get(Configuration.BOOT_NODES), conf.get(Configuration.LINK_TYPES));
 
@@ -93,10 +97,11 @@ class OverlayConnector {
 
 			@Override
 			public void onFailure(Throwable t) {
-				if (remainingServers == 0)
+				if (remainingServers == 0) {
 					bootConnFut.setException(new NetworkException("Cannot connect to any bootstrap server"));
-				else
+				} else {
 					remainingServers--;
+				}
 			}
 		};
 
@@ -111,9 +116,6 @@ class OverlayConnector {
 	}
 
 	private void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut, final boolean joinNeeded) {
-
-		Bootstrap bootstrap = ctx.get(Bootstrap.class);
-
 		final DestinationList dest = new DestinationList();
 
 		// Pass request through bootstrap server
@@ -137,7 +139,6 @@ class OverlayConnector {
 
 						@Override
 						public void onSuccess(NodeID result) {
-							ctx.set(Overlay.class, overlay);
 							overlayConnFut.set(overlay);
 						}
 
@@ -147,7 +148,6 @@ class OverlayConnector {
 						}
 					});
 				} else {
-					ctx.set(Overlay.class, overlay);
 					overlayConnFut.set(overlay);
 				}
 			}

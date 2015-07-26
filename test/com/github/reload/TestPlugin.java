@@ -11,11 +11,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
@@ -48,44 +48,44 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
-@Component(TopologyPlugin.class)
 public class TestPlugin implements TopologyPlugin {
 
 	private static final int RESID_LENGTH = 16;
 
 	private static final Logger l = Logger.getRootLogger();
 
-	@Component
-	private ComponentsContext ctx;
-	@Component
-	private Configuration conf;
-	@Component
-	private Bootstrap boot;
-	@Component
-	private ConnectionManager connMgr;
-	@Component
-	private MessageRouter router;
-	@Component
-	private MessageBuilder msgBuilder;
+	@Inject
+	ComponentsContext ctx;
+	@Inject
+	Configuration conf;
+	@Inject
+	Bootstrap boot;
+	@Inject
+	ConnectionManager connMgr;
+	@Inject
+	MessageRouter router;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	@Component
-	private DataStorage store;
+	@Inject
+	DataStorage store;
 
 	private boolean isJoined = false;
 
 	private final TestRouting r = new TestRouting();
 
-	private NodeID TEST_REPLICA_NODE = NodeID.valueOf(new byte[16]);
+	private final NodeID TEST_REPLICA_NODE = NodeID.valueOf(new byte[16]);
 
 	@CompStart
 	private void start() {
 		ctx.set(RoutingTable.class, r);
-		if (boot.isOverlayInitiator())
+		if (boot.isOverlayInitiator()) {
 			try {
 				addLoopback().get();
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
+		}
 	}
 
 	@Override
@@ -107,6 +107,7 @@ public class TestPlugin implements TopologyPlugin {
 
 		Futures.addCallback(joinAnsFut, new FutureCallback<Message>() {
 
+			@Override
 			public void onSuccess(Message joinAns) {
 				NodeID ap = joinAns.getHeader().getSenderId();
 				addLoopback();
@@ -152,8 +153,9 @@ public class TestPlugin implements TopologyPlugin {
 
 		NodeID joinNode = ((JoinRequest) req.getContent()).getJoiningNode();
 
-		if (connMgr.isNeighbor(joinNode))
+		if (connMgr.isNeighbor(joinNode)) {
 			r.neighbors.add(joinNode);
+		}
 	}
 
 	@MessageHandler(ContentType.LEAVE_REQ)
@@ -187,8 +189,9 @@ public class TestPlugin implements TopologyPlugin {
 			r.neighbors.add(e.connection.getNodeId());
 		}
 
-		if (e.type == Type.CLOSED)
+		if (e.type == Type.CLOSED) {
 			r.neighbors.remove(e.connection.getNodeId());
+		}
 	}
 
 	@Override
@@ -286,8 +289,9 @@ public class TestPlugin implements TopologyPlugin {
 
 			// Remove loopback connection from results if destination is not
 			// itself and there are other available neighbors
-			if (!destination.equals(boot.getLocalNodeId()) && candidates.size() > 1)
+			if (!destination.equals(boot.getLocalNodeId()) && candidates.size() > 1) {
 				candidates.remove(boot.getLocalNodeId());
+			}
 
 			NodeID singleNextHop = getCloserId(destination, candidates);
 

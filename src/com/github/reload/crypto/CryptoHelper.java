@@ -7,10 +7,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext.CompStart;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
@@ -22,7 +22,6 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  * node
  * 
  */
-@Component(CryptoHelper.class)
 public abstract class CryptoHelper {
 
 	/**
@@ -30,14 +29,14 @@ public abstract class CryptoHelper {
 	 */
 	public static final HashAlgorithm OVERLAY_HASHALG = HashAlgorithm.SHA1;
 
-	@Component
-	private Bootstrap boot;
+	@Inject
+	Bootstrap boot;
 
-	@Component
-	private Configuration conf;
+	@Inject
+	Keystore keystore;
 
-	@Component
-	private Keystore keystore;
+	@Inject
+	Configuration conf;
 
 	private HashAlgorithm signHashAlg;
 	private SignatureAlgorithm signAlg;
@@ -48,6 +47,7 @@ public abstract class CryptoHelper {
 		signHashAlg = boot.getSignHashAlg();
 		signAlg = boot.getSignAlg();
 		certHashAlg = boot.getHashAlg();
+		keystore.addCertificate(boot.getLocalCert());
 	}
 
 	public HashAlgorithm getSignHashAlg() {

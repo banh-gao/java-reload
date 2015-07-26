@@ -12,18 +12,16 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.Map;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
-import com.github.reload.components.ComponentsRepository.Component;
-import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
-import com.github.reload.net.encoders.MessageBuilder;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.net.stack.MessageDispatcher;
@@ -38,29 +36,22 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish and manage connections for all neighbor nodes
  */
-@Component(value = ConnectionManager.class, priority = 0)
 public class ConnectionManager {
 
 	private static final Logger l = Logger.getRootLogger();
 	private static final OverlayLinkType SERVER_PROTO = OverlayLinkType.TLS_TCP_FH_NO_ICE;
 
-	@Component
-	private CryptoHelper cryptoHelper;
+	@Inject
+	CryptoHelper cryptoHelper;
 
-	@Component
-	private Keystore keystore;
+	@Inject
+	Keystore keystore;
 
-	@Component
-	private Configuration conf;
+	@Inject
+	Bootstrap connector;
 
-	@Component
-	private Bootstrap connector;
-
-	@Component
-	private MessageBuilder msgBuilder;
-
-	@Component
-	private ComponentsContext ctx;
+	@Inject
+	ComponentsContext ctx;
 
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 

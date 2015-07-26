@@ -319,8 +319,9 @@ public class Header {
 			viaList.add(lastHop);
 		}
 
-		if (destinationList.size() > 1)
+		if (destinationList.size() > 1) {
 			destinationList.remove(0);
+		}
 	}
 
 }

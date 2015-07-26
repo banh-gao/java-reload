@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.MessageRouter;
@@ -18,12 +19,13 @@ import com.github.reload.net.encoders.secBlock.SecurityBlock;
  */
 public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessage> {
 
-	private final ComponentsContext compCtx;
 	private final Codec<Content> contentCodec;
 	private final Codec<SecurityBlock> secBlockCodec;
 
+	@Inject
+	MessageRouter router;
+
 	public MessagePayloadDecoder(ComponentsContext ctx) {
-		compCtx = ctx;
 		contentCodec = Codec.getCodec(Content.class, ctx);
 		secBlockCodec = Codec.getCodec(SecurityBlock.class, ctx);
 	}
@@ -52,7 +54,7 @@ public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessag
 				if (e instanceof ErrorMessageException) {
 					ErrorMessageException error = (ErrorMessageException) e;
 					Error content = new Error(error.getType(), error.getInfo());
-					compCtx.get(MessageRouter.class).sendAnswer(header, content);
+					router.sendAnswer(header, content);
 					Logger.getRootLogger().debug(String.format("Sent error message caused by decoding of %#x: %s", header.getTransactionId(), e.getMessage()));
 				} else {
 					Logger.getRootLogger().warn(String.format("Message payload %#x decoding failed: %s", header.getTransactionId(), e.getMessage()));

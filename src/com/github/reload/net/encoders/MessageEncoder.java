@@ -7,6 +7,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
@@ -34,10 +35,10 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	private final Codec<Content> contentCodec;
 	private final Codec<SecurityBlock> secBlockCodec;
 
-	private final ComponentsContext ctx;
+	@Inject
+	CryptoHelper cryptoHelper;
 
 	public MessageEncoder(ComponentsContext ctx) {
-		this.ctx = ctx;
 		hdrCodec = Codec.getCodec(Header.class, ctx);
 		contentCodec = Codec.getCodec(Content.class, ctx);
 		secBlockCodec = Codec.getCodec(SecurityBlock.class, ctx);
@@ -69,7 +70,6 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 	}
 
 	private SecurityBlock computeSecBlock(Header header, ByteBuf rawContent, ByteBufAllocator bufAlloc) throws Exception {
-		CryptoHelper cryptoHelper = ctx.get(CryptoHelper.class);
 		Signer signer = cryptoHelper.newSigner();
 
 		ByteBuf signedDataBuf = bufAlloc.buffer();

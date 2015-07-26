@@ -25,8 +25,9 @@ public class SecurityBlock {
 
 	public List<? extends Certificate> getCertificates() {
 		List<Certificate> out = new ArrayList<Certificate>();
-		for (GenericCertificate c : certificates)
+		for (GenericCertificate c : certificates) {
 			out.add(c.certificate);
+		}
 
 		return out;
 	}

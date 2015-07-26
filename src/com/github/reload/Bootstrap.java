@@ -2,12 +2,8 @@ package com.github.reload;
 
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsRepository;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
-import com.github.reload.crypto.Keystore;
-import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CryptoHelper;
 import com.github.reload.net.AttachService;
@@ -18,9 +14,7 @@ import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.ICEHelper;
-import com.github.reload.routing.DefaultPathCompressor;
 import com.github.reload.services.PingService;
-import com.github.reload.services.storage.MemoryStorage;
 import com.github.reload.services.storage.StorageService;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -29,7 +23,6 @@ import com.google.common.util.concurrent.ListenableFuture;
  * local peer to operate with a specific overlay instance
  * 
  */
-@Component(Bootstrap.class)
 public class Bootstrap {
 
 	public static HashAlgorithm DEFAULT_HASH = HashAlgorithm.SHA1;
@@ -166,40 +159,20 @@ public class Bootstrap {
 	 * Connects to the overlay
 	 */
 	public final ListenableFuture<Overlay> connect() {
-		// Register core components
-		for (Class<?> coreComp : CORE_COMPONENTS)
-			ComponentsRepository.register(coreComp);
-
 		registerCryptoHelper();
-
-		// Register default implementations
-		ComponentsRepository.register(MemoryKeystore.class);
-		ComponentsRepository.register(MemoryStorage.class);
-		ComponentsRepository.register(DefaultPathCompressor.class);
 
 		// Register overlay specific components
 		registerComponents();
 
-		ComponentsContext ctx = ComponentsContext.newInstance();
-		ctx.set(Configuration.class, conf);
-		ctx.set(Bootstrap.class, this);
-
-		// Start core components
-		for (Class<?> coreComp : CORE_COMPONENTS)
-			ctx.startComponent(coreComp);
-
-		ctx.startComponents();
-
-		ctx.get(Keystore.class).addCertificate(getLocalCert());
-
-		ListenableFuture<Overlay> overlayConnFut = new OverlayConnector(ctx).connectToOverlay(!isClientMode);
+		ListenableFuture<Overlay> overlayConnFut = new OverlayConnector(conf).connectToOverlay(!isClientMode);
 
 		return overlayConnFut;
 	}
 
 	private void registerCryptoHelper() {
-		if (getLocalCert().getOriginalCertificate().getType().equalsIgnoreCase("X.509"))
+		if (getLocalCert().getOriginalCertificate().getType().equalsIgnoreCase("X.509")) {
 			ComponentsRepository.register(X509CryptoHelper.class);
+		}
 	}
 
 	public boolean isClientMode() {

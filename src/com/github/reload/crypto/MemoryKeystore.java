@@ -3,7 +3,6 @@ package com.github.reload.crypto;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.net.encoders.header.NodeID;
 import com.google.common.base.Optional;
 
@@ -11,7 +10,6 @@ import com.google.common.base.Optional;
  * Keystore that stored initialization values and running crypto material into
  * memory
  */
-@Component(value = Keystore.class, priority = 1)
 public class MemoryKeystore extends Keystore {
 
 	private final Map<NodeID, ReloadCertificate> storedCerts = new HashMap<NodeID, ReloadCertificate>();

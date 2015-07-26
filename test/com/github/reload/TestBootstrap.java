@@ -16,13 +16,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import com.github.reload.components.ComponentsRepository;
-import com.github.reload.components.ComponentsRepository.Component;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CertificateParser;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 
-@Component(Bootstrap.class)
 public class TestBootstrap extends Bootstrap {
 
 	public TestBootstrap(Configuration conf) throws Exception {

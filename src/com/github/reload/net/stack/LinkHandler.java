@@ -81,8 +81,9 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 		l.trace("Passing DATA frame " + data.getSequence() + " to lower layer...");
 		ctx.write(data, promise);
 
-		if (getLinkTimeout() > 0)
+		if (getLinkTimeout() > 0) {
 			t.startTimeout(getLinkTimeout());
+		}
 	}
 
 	/**
