@@ -3,8 +3,7 @@ package com.github.reload.services.storage.policies;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import com.github.reload.Bootstrap;
-import com.github.reload.components.ComponentsContext;
+import javax.inject.Inject;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -13,6 +12,7 @@ import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.AccessPolicy;
+import com.github.reload.services.storage.AccessPolicy.AccessParamsGenerator;
 import com.github.reload.services.storage.AccessPolicy.PolicyName;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.StoredData;
@@ -22,13 +22,21 @@ import com.google.common.base.Optional;
  * Check if the username hash in the sender certificate matches the resource id
  * 
  */
-@PolicyName("user-match")
+@PolicyName(value = "user-match", paramGen = AccessParamsGenerator.class)
 public class UserMatch extends AccessPolicy {
 
-	@Override
-	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
+	TopologyPlugin topology;
+	Keystore keystore;
 
-		Optional<ReloadCertificate> storerReloadCert = ctx.get(Keystore.class).getCertificate(signerIdentity);
+	public UserMatch(TopologyPlugin topology, Keystore keystore) {
+		this.topology = topology;
+		this.keystore = keystore;
+	}
+
+	@Override
+	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
+
+		Optional<ReloadCertificate> storerReloadCert = keystore.getCertificate(signerIdentity);
 
 		if (!storerReloadCert.isPresent())
 			throw new AccessPolicyException("Unknown signer identity");
@@ -37,26 +45,20 @@ public class UserMatch extends AccessPolicy {
 
 		byte[] resourceIdHash = resourceId.getData();
 
-		byte[] nodeIdHash = hashUsername(CryptoHelper.OVERLAY_HASHALG, storerUsername, ctx);
+		byte[] nodeIdHash = hashUsername(CryptoHelper.OVERLAY_HASHALG, storerUsername, topology.getResourceIdLength());
 
 		if (!Arrays.equals(nodeIdHash, resourceIdHash))
 			throw new AccessPolicyException("Identity hash value mismatch");
 
 	}
 
-	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, ComponentsContext ctx) {
-		int length = ctx.get(TopologyPlugin.class).getResourceIdLength();
+	private static byte[] hashUsername(HashAlgorithm hashAlg, String username, int resIdLength) {
 		try {
 			MessageDigest d = MessageDigest.getInstance(hashAlg.toString());
-			return Arrays.copyOfRange(d.digest(username.getBytes()), 0, length);
+			return Arrays.copyOfRange(d.digest(username.getBytes()), 0, resIdLength);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public AccessParamsGenerator newParamsGenerator(ComponentsContext ctx) {
-		return new UserParamsGenerator(ctx);
 	}
 
 	/**
@@ -65,15 +67,15 @@ public class UserMatch extends AccessPolicy {
 	 */
 	public static class UserParamsGenerator implements AccessParamsGenerator {
 
-		private final ComponentsContext ctx;
+		@Inject
+		TopologyPlugin topology;
 
-		public UserParamsGenerator(ComponentsContext ctx) {
-			this.ctx = ctx;
-		}
+		@Inject
+		Keystore keystore;
 
 		public ResourceID getResourceId() {
-			String username = ctx.get(Bootstrap.class).getLocalCert().getUsername();
-			return ctx.get(TopologyPlugin.class).getResourceId(hashUsername(CryptoHelper.OVERLAY_HASHALG, username, ctx));
+			String username = keystore.getLocalCert().getUsername();
+			return topology.getResourceId(hashUsername(CryptoHelper.OVERLAY_HASHALG, username, topology.getResourceIdLength()));
 		}
 	}
 }

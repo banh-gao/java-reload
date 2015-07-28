@@ -12,9 +12,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.Map;
-import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
@@ -41,16 +39,9 @@ public class ConnectionManager {
 	private static final Logger l = Logger.getRootLogger();
 	private static final OverlayLinkType SERVER_PROTO = OverlayLinkType.TLS_TCP_FH_NO_ICE;
 
-	@Inject
-	CryptoHelper cryptoHelper;
+	private final CryptoHelper cryptoHelper;
+	private final Keystore keystore;
 
-	@Inject
-	Keystore keystore;
-
-	@Inject
-	Bootstrap connector;
-
-	@Inject
 	ComponentsContext ctx;
 
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
@@ -60,12 +51,17 @@ public class ConnectionManager {
 
 	private ReloadStack attachServer;
 
+	public ConnectionManager(CryptoHelper cryptoHelper, Keystore keystore) {
+		this.cryptoHelper = cryptoHelper;
+		this.keystore = keystore;
+	}
+
 	@CompStart
-	private void start() throws Exception {
+	private void start(InetSocketAddress localAddress) throws Exception {
 		msgDispatcher = new MessageDispatcher(ctx);
 		serverStatusHandler = new ServerStatusHandler(this);
 		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
-		b.setLocalAddress(connector.getLocalAddress());
+		b.setLocalAddress(localAddress);
 		b.setLinkType(SERVER_PROTO);
 
 		attachServer = b.buildStack();

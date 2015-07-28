@@ -7,8 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext.Service;
-import com.github.reload.components.ComponentsContext.ServiceIdentifier;
+import com.github.reload.Service;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
@@ -29,9 +28,8 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Provides attach functionalities for local peer and answers remote requests
  */
+@Service({AppAttachModule.class})
 public class AppAttachService {
-
-	public static final ServiceIdentifier<AppAttachService> SERVICE_ID = new ServiceIdentifier<AppAttachService>(AppAttachService.class);
 
 	private static final Logger logger = Logger.getRootLogger();
 
@@ -134,11 +132,6 @@ public class AppAttachService {
 	 */
 	public Map<Integer, InetSocketAddress> getRegisteredServers() {
 		return Collections.unmodifiableMap(registeredServers);
-	}
-
-	@Service
-	private AppAttachService exportService() {
-		return this;
 	}
 
 	@MessageHandler(ContentType.APPATTACH_REQ)

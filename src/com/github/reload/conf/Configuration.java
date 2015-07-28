@@ -20,6 +20,7 @@ public interface Configuration {
 	public static final AttributeKey<Set<String>> LINK_PROTOCOLS = AttributeKey.valueOf("linkProtocols");
 	public static final AttributeKey<Set<OverlayLinkType>> LINK_TYPES = AttributeKey.valueOf("linkTypes");
 	public static final AttributeKey<Boolean> NO_ICE = AttributeKey.valueOf("noIce");
+	public static final AttributeKey<String> TOPOLOGY = AttributeKey.valueOf("topology-plugin");
 
 	public <T> T get(AttributeKey<T> name);
 

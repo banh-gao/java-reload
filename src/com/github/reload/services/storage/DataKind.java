@@ -10,7 +10,6 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind.DataKindCodec;
 import com.github.reload.services.storage.encoders.DataModel;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
 
 /**
  * The description of the data kind that a peer can handle
@@ -28,8 +27,8 @@ public class DataKind {
 	public static final AttributeKey<Long> MAX_NODE_MULTIPLE = AttributeKey.valueOf("maxNodeMultiple");
 
 	private final long kindId;
-	private final DataModel<? extends DataValue> dataModel;
-	private final AccessPolicy accessPolicy;
+	private final Class<? extends DataModel<?>> dataModel;
+	private final Class<? extends AccessPolicy> accessPolicy;
 	private final Map<AttributeKey<?>, Object> attributes;
 
 	public static DataKind getInstance(long kindId) {
@@ -42,12 +41,8 @@ public class DataKind {
 
 	DataKind(Builder builder) {
 		kindId = builder.kindId;
-		try {
-			accessPolicy = builder.accessPolicy.newInstance();
-			dataModel = builder.dataModel.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		accessPolicy = builder.accessPolicy;
+		dataModel = builder.dataModel;
 		attributes = new HashMap<AttributeKey<?>, Object>(builder.attributes);
 	}
 
@@ -61,7 +56,7 @@ public class DataKind {
 	/**
 	 * @return Get the data model for the data type stored by this kind
 	 */
-	public DataModel<? extends DataValue> getDataModel() {
+	public Class<? extends DataModel<?>> getDataModel() {
 		return dataModel;
 	}
 
@@ -84,7 +79,7 @@ public class DataKind {
 	/**
 	 * @return The access control policy associated with this data kind
 	 */
-	AccessPolicy getAccessPolicy() {
+	Class<? extends AccessPolicy> getAccessPolicy() {
 		return accessPolicy;
 	}
 

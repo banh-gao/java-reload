@@ -3,11 +3,14 @@ package com.github.reload.net;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import com.github.reload.Bootstrap;
+import com.github.reload.Overlay;
+import com.github.reload.Service;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
+import com.github.reload.net.AttachService.ServiceModule;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
@@ -33,16 +36,19 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import dagger.Module;
+import dagger.Provides;
 
 /**
  * Establish direct connections to other peers using attach messages
  */
+@Service({ServiceModule.class})
 public class AttachService {
 
 	private static final Logger l = Logger.getRootLogger();
 
 	@Inject
-	Bootstrap bootstrap;
+	Overlay overlay;
 
 	@Inject
 	MessageBuilder msgBuilder;
@@ -59,7 +65,6 @@ public class AttachService {
 	@Inject
 	TopologyPlugin plugin;
 
-	@Inject
 	ComponentsContext ctx;
 
 	private final Map<Long, SettableFuture<Connection>> pendingRequests = Maps.newConcurrentMap();
@@ -184,7 +189,7 @@ public class AttachService {
 		}
 
 		// Pending request not answered
-		if (bootstrap.getLocalNodeId().compareTo(sender) > 0) {
+		if (overlay.getLocalNodeId().compareTo(sender) > 0) {
 			msgRouter.sendError(req.getHeader(), ErrorType.IN_PROGRESS, "Attach request already sent");
 			return;
 		}
@@ -215,6 +220,16 @@ public class AttachService {
 	public void sendUpdateAfterConnection(ConnectionStatusEvent e) {
 		if (e.type == Type.ACCEPTED && updateAfterConnection.remove(e.connection.getNodeId())) {
 			plugin.requestUpdate(e.connection.getNodeId());
+		}
+	}
+
+	@Module(injects = {AttachService.class}, complete = false)
+	public static class ServiceModule {
+
+		@Provides
+		@Singleton
+		public AttachService provideAttachService() {
+			return new AttachService();
 		}
 	}
 }

@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.apache.log4j.Logger;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.connections.Connection;
@@ -23,6 +21,7 @@ import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.routing.RoutingTable;
+import com.github.reload.routing.TopologyPlugin;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -36,20 +35,22 @@ public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
 
-	@Inject
-	ConnectionManager connManager;
+	private final ConnectionManager connManager;
 
-	@Inject
-	MessageBuilder msgBuilder;
+	private final MessageBuilder msgBuilder;
 
-	@Inject
-	RoutingTable routingTable;
+	private final RoutingTable routingTable;
 
-	@Inject
-	@Named("packetsLooper")
-	Executor exec;
+	private final Executor exec;
 
 	private final RequestManager reqManager = new RequestManager();
+
+	public MessageRouter(ConnectionManager connManager, MessageBuilder msgBuilder, TopologyPlugin topology, Executor exec) {
+		this.connManager = connManager;
+		this.msgBuilder = msgBuilder;
+		this.routingTable = topology.getRoutngTable();
+		this.exec = exec;
+	}
 
 	/**
 	 * Send the given request message to the destination node into the overlay.

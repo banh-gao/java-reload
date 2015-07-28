@@ -5,7 +5,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.AttachService;
-import com.github.reload.net.NetModule;
 import com.github.reload.net.NetworkException;
 import com.github.reload.net.connections.Connection;
 import com.github.reload.net.connections.ConnectionManager;
@@ -24,37 +23,33 @@ import com.google.common.util.concurrent.SettableFuture;
  */
 class OverlayConnector {
 
-	private static final Logger l = Logger.getRootLogger();
+	/**
+	 * 
+	 */
+	private final Overlay overlay;
+	private final TopologyPlugin topology;
+	private final ConnectionManager connMgr;
 
-	private Bootstrap bootstrap;
-	private Overlay overlay;
-
-	private Configuration conf;
-
-	public OverlayConnector(Configuration conf) {
-		Builder b = DaggerOverlayInitializer.builder();
-		b.coreModule(new CoreModule(conf));
-		b.netModule(new NetModule());
-
-		OverlayInitializer initializer = b.build();
-
-		bootstrap = initializer.getBootstrap();
-		this.conf = initializer.getConfiguration();
-		overlay = initializer.getOverlay();
+	public OverlayConnector(Overlay overlay, TopologyPlugin topology, ConnectionManager connMgr) {
+		this.overlay = overlay;
+		this.topology = topology;
+		this.connMgr = connMgr;
 	}
+
+	private final Logger l = Logger.getRootLogger();
 
 	/**
 	 * Connect to a bootstrap server and then to the admitting peer
 	 * 
 	 * @return the amount of local nodeids successful joined
 	 */
-	final SettableFuture<Overlay> connectToOverlay(final boolean joinNeeded) {
+	final SettableFuture<Overlay> connectToOverlay(Configuration conf) {
 
 		final SettableFuture<Overlay> overlayConnFut = SettableFuture.create();
 
-		if (bootstrap.isOverlayInitiator()) {
-			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", conf.get(Configuration.OVERLAY_NAME), bootstrap.getLocalNodeId(), bootstrap.getLocalAddress()));
-			overlayConnFut.set(overlay);
+		if (this.overlay.isOverlayInitiator()) {
+			l.info(String.format("RELOAD overlay %s initialized by %s at %s.", conf.get(Configuration.OVERLAY_NAME), overlay.getLocalNodeId(), overlay.getLocalAddress()));
+			overlayConnFut.set(this.overlay);
 			return overlayConnFut;
 		}
 
@@ -64,7 +59,7 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection neighbor) {
-				attachToAP(neighbor.getNodeId(), overlayConnFut, joinNeeded);
+				attachToAP(neighbor.getNodeId(), overlayConnFut);
 			}
 
 			@Override
@@ -78,11 +73,10 @@ class OverlayConnector {
 
 	private ListenableFuture<Connection> connectToBootstrap(final Set<InetSocketAddress> bootstrapNodes, Set<OverlayLinkType> linkTypes) {
 
-		ConnectionManager connMgr = ctx.get(ConnectionManager.class);
-
 		final SettableFuture<Connection> bootConnFut = SettableFuture.create();
 
-		// Called by the first successful connection to a bootstrap node, other
+		// Called by the first successful connection to a bootstrap node,
+		// other
 		// successfully connection will be closed
 		FutureCallback<Connection> connCB = new FutureCallback<Connection>() {
 
@@ -115,17 +109,18 @@ class OverlayConnector {
 		return bootConnFut;
 	}
 
-	private void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut, final boolean joinNeeded) {
+	private void attachToAP(NodeID bootstrapServer, final SettableFuture<Overlay> overlayConnFut) {
 		final DestinationList dest = new DestinationList();
 
 		// Pass request through bootstrap server
 		dest.add(bootstrapServer);
 
-		// ResourceId destination corresponding to local node-id to route the
+		// ResourceId destination corresponding to local node-id to route
+		// the
 		// attach request to the correct Admitting Peer
-		dest.add(ResourceID.valueOf(bootstrap.getLocalNodeId().getData()));
+		dest.add(ResourceID.valueOf(overlay.getLocalNodeId().getData()));
 
-		AttachService attachConnector = ctx.get(AttachService.class);
+		AttachService attachConnector = overlay.getService(AttachService.class);
 
 		ListenableFuture<Connection> apConnFut = attachConnector.attachTo(dest, true);
 
@@ -133,8 +128,8 @@ class OverlayConnector {
 
 			@Override
 			public void onSuccess(Connection apConn) {
-				if (joinNeeded) {
-					ListenableFuture<NodeID> joinCB = ctx.get(TopologyPlugin.class).requestJoin();
+				if (!overlay.isClientMode()) {
+					ListenableFuture<NodeID> joinCB = topology.requestJoin();
 					Futures.addCallback(joinCB, new FutureCallback<NodeID>() {
 
 						@Override

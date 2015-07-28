@@ -1,8 +1,6 @@
 package com.github.reload.net.encoders;
 
 import java.util.Collections;
-import javax.inject.Inject;
-import com.github.reload.Bootstrap;
 import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
@@ -13,10 +11,13 @@ import com.github.reload.net.encoders.header.NodeID;
 
 public class MessageBuilder {
 
-	@Inject
-	Configuration conf;
-	@Inject
-	Bootstrap connector;
+	private final Overlay overlay;
+	private final Configuration conf;
+
+	public MessageBuilder(Overlay overlay, Configuration conf) {
+		this.overlay = overlay;
+		this.conf = conf;
+	}
 
 	/**
 	 * Build a message for the given content and destination.
@@ -45,7 +46,7 @@ public class MessageBuilder {
 	}
 
 	private Message newMessage(Header header, Content content) {
-		NodeID sender = connector.getLocalNodeId();
+		NodeID sender = overlay.getLocalNodeId();
 		header.getViaList().add(sender);
 
 		return new Message(header, content, null);
@@ -71,7 +72,7 @@ public class MessageBuilder {
 
 		// Clear via list and add local node as first node
 		viaList.clear();
-		viaList.add(connector.getLocalNodeId());
+		viaList.add(overlay.getLocalNodeId());
 
 		// Reset TTL
 		requestHeader.ttl = conf.get(Configuration.INITIAL_TTL);

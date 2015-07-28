@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.net.ssl.SSLEngine;
-import com.github.reload.Bootstrap;
-import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
@@ -30,9 +28,6 @@ public abstract class CryptoHelper {
 	public static final HashAlgorithm OVERLAY_HASHALG = HashAlgorithm.SHA1;
 
 	@Inject
-	Bootstrap boot;
-
-	@Inject
 	Keystore keystore;
 
 	@Inject
@@ -42,12 +37,10 @@ public abstract class CryptoHelper {
 	private SignatureAlgorithm signAlg;
 	private HashAlgorithm certHashAlg;
 
-	@CompStart
-	public void init() {
-		signHashAlg = boot.getSignHashAlg();
-		signAlg = boot.getSignAlg();
-		certHashAlg = boot.getHashAlg();
-		keystore.addCertificate(boot.getLocalCert());
+	public CryptoHelper(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
+		this.signHashAlg = signHashAlg;
+		this.signAlg = signAlg;
+		this.certHashAlg = certHashAlg;
 	}
 
 	public HashAlgorithm getSignHashAlg() {
@@ -94,10 +87,10 @@ public abstract class CryptoHelper {
 	 *         signing algorithms.
 	 */
 	public Signer newSigner() {
-		SignerIdentity identity = SignerIdentity.singleIdIdentity(getCertHashAlg(), boot.getLocalCert().getOriginalCertificate());
+		SignerIdentity identity = SignerIdentity.singleIdIdentity(getCertHashAlg(), keystore.getLocalCert().getOriginalCertificate());
 		Signer signer;
 		try {
-			signer = new Signer(identity, boot.getLocalKey(), getSignHashAlg(), getSignAlg());
+			signer = new Signer(identity, keystore.getLocalKey(), getSignHashAlg(), getSignAlg());
 		} catch (NoSuchAlgorithmException | InvalidKeyException e) {
 			throw new RuntimeException(e);
 		}
@@ -146,7 +139,7 @@ public abstract class CryptoHelper {
 		List<? extends Certificate> relations = null;
 		for (Certificate issuer : issuers) {
 			try {
-				relations = getTrustRelationship(boot.getLocalCert().getOriginalCertificate(), issuer, issuers);
+				relations = getTrustRelationship(keystore.getLocalCert().getOriginalCertificate(), issuer, issuers);
 				if (relations != null) {
 					relations.remove(issuer);
 					return relations;

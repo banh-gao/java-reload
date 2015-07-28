@@ -6,7 +6,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.inject.Inject;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -22,24 +21,33 @@ import com.github.reload.services.storage.AccessPolicy;
 import com.github.reload.services.storage.AccessPolicy.PolicyName;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.encoders.StoredData;
+import com.github.reload.services.storage.policies.NodeMatch.NodeParamsGenerator;
 import com.google.common.base.Optional;
 
 /**
  * Check if the nodeid hash in the sender certificate matches the resource id
  * 
  */
-@PolicyName("node-match")
+@PolicyName(value = "node-match", paramGen = NodeParamsGenerator.class)
 public class NodeMatch extends AccessPolicy {
 
+	TopologyPlugin topology;
+	Keystore keystore;
+
+	public NodeMatch(TopologyPlugin topology, Keystore keystore) {
+		this.topology = topology;
+		this.keystore = keystore;
+	}
+
 	@Override
-	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException {
+	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
 		if (signerIdentity.getIdentityType() != IdentityType.CERT_HASH_NODE_ID)
 			throw new AccessPolicyException("Wrong signer identity type");
 
-		validate(resourceId, signerIdentity, ctx);
+		validate(resourceId, signerIdentity);
 	}
 
-	private static void validate(ResourceID resourceId, SignerIdentity storerIdentity, Keystore keystore) throws AccessPolicyException {
+	private void validate(ResourceID resourceId, SignerIdentity storerIdentity) throws AccessPolicyException {
 		Optional<ReloadCertificate> storerReloadCert = keystore.getCertificate(storerIdentity);
 		if (!storerReloadCert.isPresent())
 			throw new AccessPolicyException("Unknown signer identity");
@@ -49,7 +57,7 @@ public class NodeMatch extends AccessPolicy {
 		byte[] resourceIdHash = resourceId.getData();
 
 		X509Certificate storerCert = (X509Certificate) storerReloadCert.get().getOriginalCertificate();
-		byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId, ctx);
+		byte[] nodeIdHash = hashNodeId(CryptoHelper.OVERLAY_HASHALG, storerNodeId, topology);
 		if (Arrays.equals(nodeIdHash, resourceIdHash)) {
 			checkIdentityHash(storerCert, storerNodeId, storerIdentity);
 			return;
@@ -75,11 +83,6 @@ public class NodeMatch extends AccessPolicy {
 
 		if (!Arrays.equals(storerIdentityValue.getHashValue(), computedIdentityValue))
 			throw new AccessPolicyException("Identity hash value mismatch");
-	}
-
-	@Override
-	public AccessParamsGenerator newParamsGenerator(ComponentsContext ctx) {
-		return new NodeParamsGenerator(ctx);
 	}
 
 	/**

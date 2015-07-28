@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -43,6 +42,7 @@ import com.github.reload.services.storage.encoders.StoreRequest;
 import com.github.reload.services.storage.encoders.StoredData;
 import com.github.reload.services.storage.encoders.StoredMetadata;
 import com.google.common.base.Optional;
+import dagger.ObjectGraph;
 
 /**
  * Process incoming storage requests and accesses local storage
@@ -57,7 +57,7 @@ class StorageController {
 	MessageRouter router;
 
 	@Inject
-	ComponentsContext ctx;
+	ObjectGraph g;
 
 	@Inject
 	DataStorage storage;
@@ -136,16 +136,16 @@ class StorageController {
 					throw new ErrorMessageException(ErrorType.FORBITTEN, "NONE identity type not allowed");
 
 				// Perform policy checks for storer node
-				receivedData.getKind().getAccessPolicy().accept(resourceId, receivedData.getKind(), d, storerIdentity, ctx);
+				receivedData.getKind().getAccessPolicy().accept(resourceId, receivedData.getKind(), d, storerIdentity);
 
 				// If the store is not a replica (it is a normal store request
 				// from a peer), perform policy checks also for the node that
 				// sends the store message
 				if (!isReplica) {
-					kind.getAccessPolicy().accept(resourceId, kind, d, senderIdentity, ctx);
+					kind.getAccessPolicy().accept(resourceId, kind, d, senderIdentity);
 				}
 
-				Optional<ReloadCertificate> storerCert = ctx.get(Keystore.class).getCertificate(storerIdentity);
+				Optional<ReloadCertificate> storerCert = g.get(Keystore.class).getCertificate(storerIdentity);
 
 				if (!storerCert.isPresent())
 					throw new GeneralSecurityException("Storer certificate not available");

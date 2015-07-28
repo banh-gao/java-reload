@@ -2,48 +2,28 @@ package com.github.reload;
 
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
-import com.github.reload.components.ComponentsRepository;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.CryptoModule;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.crypto.X509CryptoHelper;
-import com.github.reload.net.AttachService;
-import com.github.reload.net.MessageRouter;
-import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.MessageBuilder;
+import com.github.reload.net.NetModule;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.net.ice.ICEHelper;
-import com.github.reload.services.PingService;
-import com.github.reload.services.storage.StorageService;
 import com.google.common.util.concurrent.ListenableFuture;
+import dagger.ObjectGraph;
 
 /**
  * Connector used for a specific overlay configuration, it configures the
  * local peer to operate with a specific overlay instance
  * 
  */
-public class Bootstrap {
+public abstract class Bootstrap {
 
 	public static HashAlgorithm DEFAULT_HASH = HashAlgorithm.SHA1;
 	public static SignatureAlgorithm DEFAULT_SIGN = SignatureAlgorithm.RSA;
 
-	/**
-	 * Core components and services
-	 */
-	private static final Class<?>[] CORE_COMPONENTS = new Class<?>[]{
-																		MessageBuilder.class,
-																		ConnectionManager.class,
-																		AttachService.class,
-																		ICEHelper.class,
-																		MessageRouter.class,
-																		AttachService.class,
-																		StorageService.class,
-																		PingService.class
-
-	};
-
 	private final Configuration conf;
+
 	private InetSocketAddress localAddr;
 	private boolean isOverlayInitiator;
 	private boolean isClientMode = false;
@@ -56,15 +36,15 @@ public class Bootstrap {
 		this.conf = conf;
 	}
 
+	public Configuration getConfiguration() {
+		return conf;
+	}
+
 	/**
 	 * @return the data to be send in the join request
 	 */
 	protected byte[] getJoinData() {
 		return new byte[0];
-	}
-
-	protected void registerComponents() {
-
 	}
 
 	public void setLocalCert(ReloadCertificate localCert) {
@@ -159,20 +139,15 @@ public class Bootstrap {
 	 * Connects to the overlay
 	 */
 	public final ListenableFuture<Overlay> connect() {
-		registerCryptoHelper();
+		BootModule bootModule = new BootModule(conf);
+		ObjectGraph g = ObjectGraph.create(bootModule, new NetModule(), new CryptoModule(this));
+		Overlay overlay = g.get(Overlay.class);
 
-		// Register overlay specific components
-		registerComponents();
+		overlay.init(this, g);
 
-		ListenableFuture<Overlay> overlayConnFut = new OverlayConnector(conf).connectToOverlay(!isClientMode);
+		ListenableFuture<Overlay> overlayConnFut = overlay.connect();
 
 		return overlayConnFut;
-	}
-
-	private void registerCryptoHelper() {
-		if (getLocalCert().getOriginalCertificate().getType().equalsIgnoreCase("X.509")) {
-			ComponentsRepository.register(X509CryptoHelper.class);
-		}
 	}
 
 	public boolean isClientMode() {

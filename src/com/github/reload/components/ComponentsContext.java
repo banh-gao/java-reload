@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
+import com.github.reload.ServiceIdentifier;
 import com.github.reload.net.encoders.Message;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.Maps;
@@ -203,67 +204,5 @@ public class ComponentsContext {
 
 	public <T> T getService(ServiceIdentifier<T> serviceId) {
 		return serviceId.getService(this);
-	}
-
-	public static class ServiceIdentifier<T> {
-
-		private final Class<?> compBaseClazz;
-
-		public ServiceIdentifier(Class<?> compBaseClazz) {
-			this.compBaseClazz = compBaseClazz;
-			ComponentsRepository.register(compBaseClazz);
-		}
-
-		@SuppressWarnings("unchecked")
-		T getService(ComponentsContext ctx) {
-			for (Method m : cmp.getClass().getDeclaredMethods()) {
-				if (!m.isAnnotationPresent(Service.class)) {
-					continue;
-				}
-
-				try {
-					m.setAccessible(true);
-					return (T) m.invoke(cmp);
-				} catch (IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			throw new UnsupportedOperationException(String.format("No exposed service for component %s", cmp.getClass().getCanonicalName()));
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((compBaseClazz == null) ? 0 : compBaseClazz.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ServiceIdentifier<?> other = (ServiceIdentifier<?>) obj;
-			if (compBaseClazz == null) {
-				if (other.compBaseClazz != null)
-					return false;
-			} else if (!compBaseClazz.equals(other.compBaseClazz))
-				return false;
-			return true;
-		}
-	}
-
-	/**
-	 * The annotated method will be used to expose a service provided by the
-	 * component to the library client
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface Service {
 	}
 }

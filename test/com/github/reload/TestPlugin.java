@@ -54,12 +54,15 @@ public class TestPlugin implements TopologyPlugin {
 
 	private static final Logger l = Logger.getRootLogger();
 
+	public static final String NAME = "TEST";
+
 	@Inject
 	ComponentsContext ctx;
+
+	@Inject
+	Overlay overlay;
 	@Inject
 	Configuration conf;
-	@Inject
-	Bootstrap boot;
 	@Inject
 	ConnectionManager connMgr;
 	@Inject
@@ -78,8 +81,7 @@ public class TestPlugin implements TopologyPlugin {
 
 	@CompStart
 	private void start() {
-		ctx.set(RoutingTable.class, r);
-		if (boot.isOverlayInitiator()) {
+		if (overlay.isOverlayInitiator()) {
 			try {
 				addLoopback().get();
 			} catch (InterruptedException | ExecutionException e) {
@@ -90,14 +92,11 @@ public class TestPlugin implements TopologyPlugin {
 
 	@Override
 	public ListenableFuture<NodeID> requestJoin() {
-		l.info(String.format("Joining to RELOAD overlay %s with %s in progress...", conf.get(Configuration.OVERLAY_NAME), boot.getLocalNodeId()));
-		Bootstrap connector = ctx.get(Bootstrap.class);
-		MessageBuilder msgBuilder = ctx.get(MessageBuilder.class);
-		MessageRouter router = ctx.get(MessageRouter.class);
+		l.info(String.format("Joining to RELOAD overlay %s with %s in progress...", conf.get(Configuration.OVERLAY_NAME), overlay.getLocalNodeId()));
 
-		JoinRequest req = new JoinRequest(connector.getLocalNodeId(), connector.getJoinData());
+		JoinRequest req = new JoinRequest(overlay.getLocalNodeId(), overlay.getJoinData());
 
-		DestinationList dest = new DestinationList(ResourceID.valueOf(connector.getLocalNodeId().getData()));
+		DestinationList dest = new DestinationList(ResourceID.valueOf(overlay.getLocalNodeId().getData()));
 
 		Message request = msgBuilder.newMessage(req, dest);
 
@@ -112,14 +111,14 @@ public class TestPlugin implements TopologyPlugin {
 				NodeID ap = joinAns.getHeader().getSenderId();
 				addLoopback();
 				r.neighbors.add(ap);
-				l.info(String.format("Joining to RELOAD overlay %s with %s completed.", conf.get(Configuration.OVERLAY_NAME), boot.getLocalNodeId()));
+				l.info(String.format("Joining to RELOAD overlay %s with %s completed.", conf.get(Configuration.OVERLAY_NAME), overlay.getLocalNodeId()));
 				isJoined = true;
 				joinFuture.set(joinAns.getHeader().getSenderId());
 			};
 
 			@Override
 			public void onFailure(Throwable t) {
-				l.info(String.format("Joining to RELOAD overlay %s with %s failed: %s", conf.get(Configuration.OVERLAY_NAME), boot.getLocalNodeId(), t.getMessage()));
+				l.info(String.format("Joining to RELOAD overlay %s with %s failed: %s", conf.get(Configuration.OVERLAY_NAME), overlay.getLocalNodeId(), t.getMessage()));
 				joinFuture.setException(t);
 			}
 		});
@@ -128,7 +127,7 @@ public class TestPlugin implements TopologyPlugin {
 	}
 
 	private ListenableFuture<Connection> addLoopback() {
-		ListenableFuture<Connection> fut = connMgr.connectTo(boot.getLocalAddress(), OverlayLinkType.TLS_TCP_FH_NO_ICE);
+		ListenableFuture<Connection> fut = connMgr.connectTo(overlay.getLocalAddress(), OverlayLinkType.TLS_TCP_FH_NO_ICE);
 		Futures.addCallback(fut, new FutureCallback<Connection>() {
 
 			@Override
@@ -231,8 +230,8 @@ public class TestPlugin implements TopologyPlugin {
 	public boolean isLocalPeerResponsible(RoutableID destination) {
 		int localDistance = Integer.MAX_VALUE;
 
-		if (isJoined || boot.isOverlayInitiator()) {
-			localDistance = getDistance(destination, boot.getLocalNodeId());
+		if (isJoined || overlay.isOverlayInitiator()) {
+			localDistance = getDistance(destination, overlay.getLocalNodeId());
 		}
 
 		for (NodeID neighborId : r.neighbors) {
@@ -261,7 +260,7 @@ public class TestPlugin implements TopologyPlugin {
 		dest.add(neighborNode);
 		dest.add(msgBuilder.getWildcard());
 
-		Message leaveMessage = msgBuilder.newMessage(new LeaveRequest(boot.getLocalNodeId(), new byte[0]), dest);
+		Message leaveMessage = msgBuilder.newMessage(new LeaveRequest(overlay.getLocalNodeId(), new byte[0]), dest);
 
 		router.sendMessage(leaveMessage);
 	}
@@ -289,8 +288,8 @@ public class TestPlugin implements TopologyPlugin {
 
 			// Remove loopback connection from results if destination is not
 			// itself and there are other available neighbors
-			if (!destination.equals(boot.getLocalNodeId()) && candidates.size() > 1) {
-				candidates.remove(boot.getLocalNodeId());
+			if (!destination.equals(overlay.getLocalNodeId()) && candidates.size() > 1) {
+				candidates.remove(overlay.getLocalNodeId());
 			}
 
 			NodeID singleNextHop = getCloserId(destination, candidates);
@@ -340,5 +339,10 @@ public class TestPlugin implements TopologyPlugin {
 
 	private void replicateData(Message replicaStore) {
 		router.sendRequestMessage(replicaStore);
+	}
+
+	@Override
+	public RoutingTable getRoutngTable() {
+		return r;
 	}
 }

@@ -1,11 +1,9 @@
 package com.github.reload;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.naming.ConfigurationException;
 import com.github.reload.conf.Configuration;
-import com.github.reload.util.ConfigurationFetcher;
 
 /**
  * Factory to create bootstraps compatible with overlay instance configurations
@@ -21,7 +19,7 @@ public abstract class BootstrapFactory {
 	 */
 	public abstract boolean isCompatibleWith(Configuration conf);
 
-	protected abstract Bootstrap implCreateBootstrap(Configuration conf);
+	protected abstract Bootstrap createBootstrap(Configuration conf);
 
 	/**
 	 * Register a connector factory, only one instance for each factory class
@@ -45,27 +43,14 @@ public abstract class BootstrapFactory {
 	}
 
 	/**
-	 * Create a new overlay bootstrap for the specified overlay. The
-	 * configuration is automatically fetched from the overlay server.
-	 * 
-	 * @throws NoSuchFactoryException
-	 * @throws IOException
-	 */
-	public static Bootstrap createBootstrap(String instanceName) throws NoSuchFactoryException, IOException {
-		Configuration conf = ConfigurationFetcher.fetchConfiguration(instanceName);
-		return createBootstrap(conf);
-	}
-
-	/**
 	 * Create a new overlay bootstrap initialized with the specified
 	 * configuration
 	 * 
 	 * @throws NoSuchFactoryException
 	 * @throws ConfigurationException
 	 */
-	public static Bootstrap createBootstrap(Configuration conf) throws NoSuchFactoryException {
-		BootstrapFactory f = getInstance(conf);
-		return f.implCreateBootstrap(conf);
+	public static Bootstrap newBootstrap(Configuration c) throws NoSuchFactoryException {
+		return getInstance(c).createBootstrap(c);
 	}
 
 	private static BootstrapFactory getInstance(Configuration conf) throws NoSuchFactoryException {

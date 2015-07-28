@@ -15,7 +15,6 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
-import com.github.reload.components.ComponentsRepository;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CertificateParser;
@@ -30,11 +29,6 @@ public class TestBootstrap extends Bootstrap {
 	@Override
 	protected byte[] getJoinData() {
 		return "JOIN REQ".getBytes();
-	}
-
-	@Override
-	protected void registerComponents() {
-		ComponentsRepository.register(TestPlugin.class);
 	}
 
 	public static ReloadCertificate loadCert(String certPath) throws CertificateException, FileNotFoundException {

@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.github.reload.APITest;
 import com.github.reload.TestConfiguration;
-import com.github.reload.TestService;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.services.storage.PreparedData;
 import com.github.reload.services.storage.StorageService;
@@ -35,7 +34,7 @@ public class StorageTest extends APITest {
 
 	@Before
 	public void start() throws Exception {
-		storServ = overlay.getService(StorageService.SERVICE_ID);
+		storServ = overlay.getService(StorageService.class);
 	}
 
 	@Test
@@ -126,10 +125,5 @@ public class StorageTest extends APITest {
 
 		// Check returned value is "non-existent" value
 		assertEquals(TestConfiguration.TEST_KIND_SINGLE.getDataModel().getNonExistentValue(), fetchFut.get().get(0).getValues().get(0).getValue());
-	}
-
-	@Test
-	public void testStat() throws Exception {
-		TestService s = overlay.getService(TestService.SERVICE_ID);
 	}
 }

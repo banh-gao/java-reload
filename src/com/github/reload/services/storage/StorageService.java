@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-import com.github.reload.components.ComponentsContext;
+import javax.inject.Named;
+import javax.inject.Provider;
+import com.github.reload.Service;
 import com.github.reload.components.ComponentsContext.CompStart;
-import com.github.reload.components.ComponentsContext.Service;
-import com.github.reload.components.ComponentsContext.ServiceIdentifier;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -41,6 +41,8 @@ import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
 import com.github.reload.services.storage.encoders.StoreKindResponse;
 import com.github.reload.services.storage.encoders.StoreRequest;
 import com.github.reload.services.storage.encoders.StoredData;
+import com.github.reload.services.storage.policies.NodeMatch;
+import com.github.reload.services.storage.policies.UserMatch;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -48,19 +50,19 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import dagger.ObjectGraph;
 
 /**
  * Helps a peer to send storage requests into the overlay
  * 
  */
+@Service({StorageModule.class})
 public class StorageService {
-
-	public static final ServiceIdentifier<StorageService> SERVICE_ID = new ServiceIdentifier<StorageService>(StorageService.class);
 
 	private static final short REPLICA_NUMBER = 0;
 
 	@Inject
-	ComponentsContext ctx;
+	ObjectGraph graph;
 
 	@Inject
 	Configuration conf;
@@ -77,15 +79,20 @@ public class StorageService {
 	@Inject
 	Keystore keystore;
 
+	@Inject
+	Provider<PreparedData> prepDataProvider;
+
+	@Inject
+	@Named("node-match")
+	Provider<NodeMatch> nodeMatchProvider;
+
+	@Inject
+	@Named("user-match")
+	Provider<UserMatch> userMatchProvider;
+
 	@CompStart
 	private void loadController() {
-		ctx.set(StorageController.class, new StorageController());
-		ctx.startComponent(StorageController.class);
-	}
-
-	@Service
-	private StorageService exportService() {
-		return this;
+		// FIXME: ctx.startComponent(StorageController.class);
 	}
 
 	/**
@@ -96,11 +103,22 @@ public class StorageService {
 	}
 
 	public PreparedData newPreparedData(DataKind kind) {
-		return new PreparedData(kind);
+		PreparedData d = prepDataProvider.get();
+		d.setKind(kind);
+		return d;
 	}
 
 	public AccessParamsGenerator newParamsGenerator(DataKind kind) {
-		return kind.getAccessPolicy().newParamsGenerator(ctx);
+		AccessPolicy policy;
+
+		if (kind.getAccessPolicy() == NodeMatch.class)
+			policy = nodeMatchProvider.get();
+		else if (kind.getAccessPolicy() == UserMatch.class)
+			policy = userMatchProvider.get();
+		else
+			throw new IllegalArgumentException("Unknown access policy " + kind.getAccessPolicy());
+
+		return graph.get(policy.getParamGenerator());
 	}
 
 	/**
@@ -151,7 +169,7 @@ public class StorageService {
 		Map<Long, StoreKindData> kindData = Maps.newHashMap();
 
 		for (PreparedData prepared : preparedData) {
-			StoredData data = prepared.build(ctx, resourceId);
+			StoredData data = prepared.build(resourceId);
 
 			StoreKindData kd = kindData.get(prepared.getKind().getKindId());
 

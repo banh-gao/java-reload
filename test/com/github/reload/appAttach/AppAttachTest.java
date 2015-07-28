@@ -14,7 +14,7 @@ public class AppAttachTest extends APITest {
 
 	@Test
 	public void testRegister() throws Exception {
-		AppAttachService srv = overlay.getService(AppAttachService.SERVICE_ID);
+		AppAttachService srv = overlay.getService(AppAttachService.class);
 
 		srv.registerApplicativeServer(TEST_PORT);
 

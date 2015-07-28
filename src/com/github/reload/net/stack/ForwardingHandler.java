@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import com.github.reload.Bootstrap;
+import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.connections.ConnectionManager;
@@ -25,10 +25,10 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 	private static final Logger l = Logger.getRootLogger();
 
 	@Inject
-	MessageRouter router;
+	Overlay overlay;
 
 	@Inject
-	Bootstrap boot;
+	MessageRouter router;
 
 	@Inject
 	TopologyPlugin plugin;
@@ -48,7 +48,7 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 
 		DestinationList destList = message.getHeader().getDestinationList();
 
-		NodeID localId = boot.getLocalNodeId();
+		NodeID localId = overlay.getLocalNodeId();
 
 		try {
 			processDestination(destList, localId);
@@ -139,7 +139,7 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 		if (dest.isWildcard())
 			return true;
 
-		if (dest.equals(boot.getLocalNodeId()))
+		if (dest.equals(overlay.getLocalNodeId()))
 			return true;
 
 		return plugin.isLocalPeerResponsible(dest);

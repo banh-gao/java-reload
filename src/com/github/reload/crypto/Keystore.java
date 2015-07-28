@@ -1,5 +1,6 @@
 package com.github.reload.crypto;
 
+import java.security.PrivateKey;
 import java.util.Map;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.CertHashSignerIdentityValue;
@@ -12,35 +13,39 @@ import com.google.common.base.Optional;
  * the protocol
  * 
  */
-public abstract class Keystore {
+public interface Keystore {
 
 	/**
 	 * @return the locally stored certificate that correspond to the specified
 	 *         node-id
 	 */
-	public abstract Optional<ReloadCertificate> getCertificate(NodeID node);
+	public Optional<ReloadCertificate> getCertificate(NodeID node);
 
 	/**
 	 * Store a new certificate locally, the certificate is validated before it
 	 * is stored
 	 */
-	public abstract void addCertificate(ReloadCertificate cert);
+	public void addCertificate(ReloadCertificate cert);
 
 	/**
 	 * Remove a locally stored certificate
 	 */
-	public abstract void removeCertificate(NodeID certOwner);
+	public void removeCertificate(NodeID certOwner);
 
 	/**
 	 * @return all the stored certificates
 	 */
-	public abstract Map<NodeID, ReloadCertificate> getStoredCertificates();
+	public Map<NodeID, ReloadCertificate> getStoredCertificates();
+
+	public ReloadCertificate getLocalCert();
+
+	public PrivateKey getLocalKey();
 
 	/**
 	 * @return the locally stored certificate that correspond to the specified
 	 *         node-id
 	 */
-	public Optional<ReloadCertificate> getCertificate(SignerIdentity identity) {
+	public default Optional<ReloadCertificate> getCertificate(SignerIdentity identity) {
 		for (ReloadCertificate cert : getStoredCertificates().values())
 			if (belongsTo(cert, identity))
 				return Optional.of(cert);
@@ -48,7 +53,7 @@ public abstract class Keystore {
 		return Optional.absent();
 	}
 
-	private boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity) {
+	public default boolean belongsTo(ReloadCertificate certificate, SignerIdentity identity) {
 		HashAlgorithm certHashAlg = identity.getSignerIdentityValue().getHashAlgorithm();
 		SignerIdentity computedIdentity = null;
 		if (identity.getSignerIdentityValue() instanceof CertHashSignerIdentityValue) {

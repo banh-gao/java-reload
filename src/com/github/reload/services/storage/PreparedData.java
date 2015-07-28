@@ -2,7 +2,7 @@ package com.github.reload.services.storage;
 
 import java.math.BigInteger;
 import java.util.Date;
-import com.github.reload.components.ComponentsContext;
+import javax.inject.Inject;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -20,23 +20,26 @@ public class PreparedData {
 
 	public static final long MAX_LIFETIME = 0xffffffffl;
 	public static final BigInteger MAX_GENERATION = new BigInteger(1, new byte[]{
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff,
-	                                                                             (byte) 0xff});
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff,
+																					(byte) 0xff});
 
-	private final DataKind kind;
-	private final DataValueBuilder<?> valueBuilder;
+	private DataKind kind;
+	private DataValueBuilder<?> valueBuilder;
+
+	@Inject
+	CryptoHelper cryptoHelper;
 
 	BigInteger generation = BigInteger.ONE;
 	BigInteger storageTime = BigInteger.valueOf(new Date().getTime());
 	long lifeTime = DEFAULT_LIFETIME;
 
-	PreparedData(DataKind kind) {
+	void setKind(DataKind kind) {
 		this.kind = kind;
 		valueBuilder = kind.getDataModel().newValueBuilder();
 	}
@@ -96,10 +99,10 @@ public class PreparedData {
 	 * @return The stored data for the specified overlay
 	 * @throws DataBuildingException
 	 */
-	public StoredData build(ComponentsContext ctx, ResourceID resId) {
+	public StoredData build(ResourceID resId) {
 		DataValue value = valueBuilder.build();
 
-		Signer dataSigner = ctx.get(CryptoHelper.class).newSigner();
+		Signer dataSigner = cryptoHelper.newSigner();
 
 		return new StoredData(storageTime, lifeTime, value, dataSigner, resId, kind);
 	}

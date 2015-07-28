@@ -10,7 +10,7 @@ public class TestFactory extends BootstrapFactory {
 	}
 
 	@Override
-	protected Bootstrap implCreateBootstrap(Configuration conf) {
+	protected Bootstrap createBootstrap(Configuration conf) {
 		try {
 			return new TestBootstrap(conf);
 		} catch (Exception e) {

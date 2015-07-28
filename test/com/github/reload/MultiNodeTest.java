@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import org.junit.AfterClass;
 import org.junit.Test;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.encoders.Message;
@@ -14,6 +13,7 @@ import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.google.common.util.concurrent.ListenableFuture;
+import dagger.ObjectGraph;
 
 public class MultiNodeTest {
 
@@ -33,11 +33,11 @@ public class MultiNodeTest {
 			overlays[i] = startNode(new InetSocketAddress(InetAddress.getLoopbackAddress(), 2000 + i), i);
 		}
 
-		ComponentsContext ctx = overlays[1].getService(TestService.SERVICE_ID).getCtx();
+		ObjectGraph ctx = overlays[1].objectGraph;
 
 		Message req = ctx.get(MessageBuilder.class).newMessage(new PingRequest(), new DestinationList(NodeID.valueOf("ceeadf392596529d0f6aaabe39fbb116")));
 
-		ListenableFuture<Message> ansFut = ctx.get(MessageRouter.class).sendRequestMessage(req);
+		ctx.get(MessageRouter.class).sendRequestMessage(req);
 	}
 
 	private Overlay startNode(InetSocketAddress addr, int i) throws Exception {
@@ -46,7 +46,7 @@ public class MultiNodeTest {
 		TestConfiguration c = new TestConfiguration();
 		// c.setBootstrap(addr);
 
-		TestBootstrap b = (TestBootstrap) BootstrapFactory.createBootstrap(c);
+		TestBootstrap b = (TestBootstrap) BootstrapFactory.newBootstrap(c);
 
 		if (addr.equals(TestConfiguration.BOOTSTRAP_ADDR)) {
 			b.setOverlayInitiator(true);

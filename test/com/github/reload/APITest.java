@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.routing.TopologyPluginFactory;
 
 public abstract class APITest {
 
@@ -14,8 +15,9 @@ public abstract class APITest {
 	@BeforeClass
 	public static void init() throws Exception {
 		BootstrapFactory.register(new TestFactory());
+		TopologyPluginFactory.register(TestPlugin.NAME, TestPlugin.class);
 
-		Bootstrap b = BootstrapFactory.createBootstrap(new TestConfiguration());
+		Bootstrap b = BootstrapFactory.newBootstrap(new TestConfiguration());
 
 		b.setLocalAddress(TestConfiguration.BOOTSTRAP_ADDR);
 		b.setLocalNodeId(TEST_NODEID);

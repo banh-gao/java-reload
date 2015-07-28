@@ -20,9 +20,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
-import com.github.reload.Bootstrap;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.conf.Configuration;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 /**
@@ -32,15 +33,16 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 public class X509CryptoHelper extends CryptoHelper {
 
 	@Inject
-	Bootstrap boot;
-
-	@Inject
 	Configuration conf;
 
 	@Inject
 	Keystore keystore;
 
 	private SSLContext sslContext;
+
+	public X509CryptoHelper(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
+		super(signHashAlg, signAlg, certHashAlg);
+	}
 
 	@CompStart
 	public void start() throws Exception {
@@ -129,7 +131,7 @@ public class X509CryptoHelper extends CryptoHelper {
 
 		@Override
 		public PrivateKey getPrivateKey(String alias) {
-			return boot.getLocalKey();
+			return keystore.getLocalKey();
 		}
 
 		@Override

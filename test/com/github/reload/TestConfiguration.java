@@ -31,9 +31,9 @@ import com.github.reload.services.storage.policies.UserMatch;
 public class TestConfiguration implements Configuration {
 
 	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
-	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).accessPolicy(UserMatch.class).dataModel(SingleModel.class).build();
-	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).accessPolicy(UserMatch.class).dataModel(ArrayModel.class).build();
-	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).accessPolicy(UserMatch.class).dataModel(DictionaryModel.class).build();
+	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).dataModel(SingleModel.class).accessPolicy(UserMatch.class).build();
+	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).dataModel(ArrayModel.class).accessPolicy(UserMatch.class).build();
+	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).dataModel(DictionaryModel.class).accessPolicy(UserMatch.class).build();
 
 	private final Map<AttributeKey<?>, Object> conf = new HashMap<AttributeKey<?>, Object>();
 
@@ -47,6 +47,7 @@ public class TestConfiguration implements Configuration {
 		set(BOOT_NODES, Collections.singleton(BOOTSTRAP_ADDR));
 		set(NO_ICE, true);
 		set(LINK_TYPES, getOverlayLinkTypes());
+		set(TOPOLOGY, "TEST");
 
 		Set<DataKind> requiredKinds = new HashSet<DataKind>();
 		requiredKinds.add(TEST_KIND_SINGLE);

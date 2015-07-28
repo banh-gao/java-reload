@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.ResourceID;
@@ -54,6 +53,10 @@ public abstract class AccessPolicy {
 		return clazz.getAnnotation(PolicyName.class).value().toLowerCase();
 	}
 
+	public Class<? extends AccessParamsGenerator> getParamGenerator() {
+		return this.getClass().getAnnotation(PolicyName.class).paramGen();
+	}
+
 	public static Map<String, AccessPolicy> getSupportedPolicies() {
 		return Collections.unmodifiableMap(policies);
 	}
@@ -68,13 +71,7 @@ public abstract class AccessPolicy {
 	 * @throws AccessPolicyException
 	 *             if the policy check fails
 	 */
-	public abstract void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity, ComponentsContext ctx) throws AccessPolicyException;
-
-	/**
-	 * Get a parameter generator for this access policy to be used with the
-	 * specified overlay
-	 */
-	public abstract AccessParamsGenerator newParamsGenerator(ComponentsContext ctx);
+	public abstract void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException;
 
 	/**
 	 * Throw an exception if the given datakind builder doesn't
@@ -116,5 +113,7 @@ public abstract class AccessPolicy {
 	public @interface PolicyName {
 
 		public String value();
+
+		public Class<? extends AccessParamsGenerator> paramGen();
 	}
 }
