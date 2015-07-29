@@ -46,8 +46,7 @@ public class Overlay {
 		connector = new OverlayConnector(this, topology, connMgr);
 	}
 
-	void init(Bootstrap bootstrap, ObjectGraph graph) {
-		this.graph = graph;
+	void init(Bootstrap bootstrap, CoreModule coreModule) {
 		conf = bootstrap.getConfiguration();
 		localAddress = bootstrap.getLocalAddress();
 		isOverlayInitiator = bootstrap.isOverlayInitiator();
@@ -55,7 +54,7 @@ public class Overlay {
 		localNodeId = bootstrap.getLocalNodeId();
 		joinData = bootstrap.getJoinData();
 
-		serviceLoader = new ServiceLoader(graph);
+		serviceLoader = new ServiceLoader(coreModule);
 	}
 
 	ListenableFuture<Overlay> connect() {

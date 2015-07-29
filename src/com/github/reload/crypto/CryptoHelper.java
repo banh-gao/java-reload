@@ -7,7 +7,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.inject.Inject;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
@@ -27,17 +26,16 @@ public abstract class CryptoHelper {
 	 */
 	public static final HashAlgorithm OVERLAY_HASHALG = HashAlgorithm.SHA1;
 
-	@Inject
-	Keystore keystore;
-
-	@Inject
-	Configuration conf;
+	private final Keystore keystore;
+	private final Configuration conf;
 
 	private HashAlgorithm signHashAlg;
 	private SignatureAlgorithm signAlg;
 	private HashAlgorithm certHashAlg;
 
-	public CryptoHelper(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
+	public CryptoHelper(Keystore keystore, Configuration conf, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
+		this.keystore = keystore;
+		this.conf = conf;
 		this.signHashAlg = signHashAlg;
 		this.signAlg = signAlg;
 		this.certHashAlg = certHashAlg;

@@ -12,7 +12,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.inject.Inject;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -32,16 +31,16 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  */
 public class X509CryptoHelper extends CryptoHelper {
 
-	@Inject
 	Configuration conf;
-
-	@Inject
 	Keystore keystore;
 
 	private SSLContext sslContext;
 
-	public X509CryptoHelper(HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
-		super(signHashAlg, signAlg, certHashAlg);
+	public X509CryptoHelper(Keystore keystore, Configuration conf, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
+		super(keystore, conf, signHashAlg, signAlg, certHashAlg);
+
+		this.keystore = keystore;
+		this.conf = conf;
 	}
 
 	@CompStart

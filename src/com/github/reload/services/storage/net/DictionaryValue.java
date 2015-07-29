@@ -2,6 +2,7 @@ package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
+import javax.inject.Inject;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -16,6 +17,7 @@ public class DictionaryValue implements DataValue {
 	private byte[] key;
 	private SingleValue value = new SingleValue(new byte[0], true);
 
+	@Inject
 	public DictionaryValue() {
 	}
 

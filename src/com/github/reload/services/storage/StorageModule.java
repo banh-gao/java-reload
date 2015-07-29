@@ -19,7 +19,9 @@ import dagger.Provides;
 					NodeRIDGenerator.class, NodeMatch.class, UserMatch.class,
 					NodeMatch.NodeRIDGenerator.class,
 					UserMatch.UserRIDGenerator.class, MemoryStorage.class,
-					SingleValue.class, ArrayValue.class, DictionaryValue.class}, complete = false)
+					SingleValue.class, ArrayValue.class, DictionaryValue.class,
+					NodeMatch.class, UserRIDGenerator.class,
+					NodeRIDGenerator.class}, complete = false)
 public class StorageModule {
 
 	@Provides

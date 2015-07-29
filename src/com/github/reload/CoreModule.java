@@ -11,12 +11,12 @@ import dagger.Provides;
 
 @Module(injects = {Configuration.class, Overlay.class, TopologyPlugin.class,
 					ObjectGraph.class}, complete = false)
-public class BootModule {
+public class CoreModule {
 
 	private final Configuration conf;
 	ObjectGraph graph;
 
-	public BootModule(Configuration conf) {
+	public CoreModule(Configuration conf) {
 		this.conf = conf;
 	}
 
@@ -27,7 +27,6 @@ public class BootModule {
 	}
 
 	@Provides
-	@Singleton
 	ObjectGraph provideGraph() {
 		return graph;
 	}

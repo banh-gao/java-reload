@@ -11,17 +11,17 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.local.StoredData;
-import com.github.reload.services.storage.policies.AccessPolicy.ResourceIDGenerator;
-import com.github.reload.services.storage.policies.AccessPolicy.PolicyName;
 import com.github.reload.services.storage.DataKind;
+import com.github.reload.services.storage.local.StoredData;
+import com.github.reload.services.storage.policies.AccessPolicy.PolicyName;
+import com.github.reload.services.storage.policies.UserMatch.UserRIDGenerator;
 import com.google.common.base.Optional;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id
  * 
  */
-@PolicyName(value = "user-match", paramGen = ResourceIDGenerator.class)
+@PolicyName(value = "user-match", paramGen = UserRIDGenerator.class)
 public class UserMatch extends AccessPolicy {
 
 	@Inject

@@ -4,7 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import dagger.ObjectGraph;
+import com.github.reload.services.storage.net.DictionaryValue;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -15,16 +15,16 @@ public @interface Service {
 
 class ServiceLoader {
 
-	ObjectGraph graph;
+	CoreModule coreModule;
 
-	public ServiceLoader(ObjectGraph graph) {
-		this.graph = graph;
+	public ServiceLoader(CoreModule coreModule) {
+		this.coreModule = coreModule;
 	}
 
 	public <T> T getService(Class<T> service) {
 		T instance;
 		try {
-			instance = graph.get(service);
+			instance = coreModule.graph.get(service);
 		} catch (IllegalArgumentException e) {
 			instance = loadService(service);
 		}
@@ -37,9 +37,11 @@ class ServiceLoader {
 
 		loadModules(service);
 
-		T instance = graph.get(service);
+		T instance = coreModule.graph.get(service);
 
-		graph.inject(instance);
+		System.out.println(coreModule.graph.get(DictionaryValue.class));
+
+		coreModule.graph.inject(instance);
 
 		return instance;
 	}
@@ -56,11 +58,18 @@ class ServiceLoader {
 		}
 	}
 
+	/**
+	 * Load new service modules in the object graph. The new modules are visible
+	 * only to objects that will be injected after this call. Objects that were
+	 * already injected cannot access the new service.
+	 * 
+	 * @param clazz
+	 */
 	private void loadModules(Class<?> clazz) {
 		Service ann = clazz.getAnnotation(Service.class);
 		for (Class<?> mod : ann.value()) {
 			try {
-				graph = graph.plus(mod.newInstance());
+				coreModule.graph = coreModule.graph.plus(mod.newInstance());
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalArgumentException(e);
 			}
