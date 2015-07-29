@@ -12,6 +12,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.components.ComponentsContext.CompStart;
@@ -44,9 +47,15 @@ public class ConnectionManager {
 
 	ComponentsContext ctx;
 
+	@Inject
+	MessageDispatcher msgDispatcher;
+
+	@Inject
+	@Named("packetLooper")
+	Executor packetLooper;
+
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
-	private MessageDispatcher msgDispatcher;
 	private ServerStatusHandler serverStatusHandler;
 
 	private ReloadStack attachServer;
@@ -58,7 +67,6 @@ public class ConnectionManager {
 
 	@CompStart
 	private void start(InetSocketAddress localAddress) throws Exception {
-		msgDispatcher = new MessageDispatcher(ctx);
 		serverStatusHandler = new ServerStatusHandler(this);
 		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
 		b.setLocalAddress(localAddress);
@@ -105,7 +113,7 @@ public class ConnectionManager {
 						@Override
 						public void operationComplete(Future<Channel> future) throws Exception {
 
-							ctx.execute(new Runnable() {
+							packetLooper.execute(new Runnable() {
 
 								@Override
 								public void run() {
@@ -142,7 +150,7 @@ public class ConnectionManager {
 
 			@Override
 			public void operationComplete(final Future<Channel> future) throws Exception {
-				ctx.execute(new Runnable() {
+				packetLooper.execute(new Runnable() {
 
 					@Override
 					public void run() {

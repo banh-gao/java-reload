@@ -3,8 +3,11 @@ package com.github.reload.net.stack;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import java.util.concurrent.Executor;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
+import com.github.reload.components.MessageHandlersManager;
 import com.github.reload.net.encoders.Message;
 
 /**
@@ -15,15 +18,22 @@ import com.github.reload.net.encoders.Message;
 @Sharable
 public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 
-	private final ComponentsContext ctx;
+	@Inject
+	@Named("packetLooper")
+	Executor packetLooper;
 
-	public MessageDispatcher(ComponentsContext ctx) {
-		this.ctx = ctx;
-	}
+	@Inject
+	MessageHandlersManager msgHandlers;
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		this.ctx.handleMessage((Message) msg);
+		packetLooper.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				msgHandlers.handle((Message) msg);
+			}
+		});
 	}
 
 	@Override

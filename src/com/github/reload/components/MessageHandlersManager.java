@@ -19,6 +19,7 @@ public class MessageHandlersManager {
 	private final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private MessageHandlerMethod answerHandler;
 
+	// FIXME: register message handlers
 	public void registerMessageHandler(Object obj) {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
 			MessageHandler ann = m.getAnnotation(MessageHandler.class);
