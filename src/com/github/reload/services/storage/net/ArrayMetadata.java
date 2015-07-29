@@ -1,28 +1,33 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.encoders.ArrayMetadata.ArrayMetadataCodec;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
-import com.github.reload.services.storage.encoders.DataModel.Metadata;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.Metadata;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.net.ArrayMetadata.ArrayMetadataCodec;
 
 /**
  * Metadata of a stored array entry
  * 
  */
 @ReloadCodec(ArrayMetadataCodec.class)
-public class ArrayMetadata implements Metadata<ArrayValue> {
+public class ArrayMetadata implements Metadata {
 
-	private final long index;
-	private final SingleMetadata singleMeta;
+	private long index;
+	private SingleMetadata singleMeta;
 
-	public ArrayMetadata(long index, SingleMetadata singleMeta) {
-		this.index = index;
-		this.singleMeta = singleMeta;
+	@Override
+	public void setMetadata(DataValue v, HashAlgorithm hashAlg) {
+		ArrayValue value = (ArrayValue) v;
+		index = value.getIndex();
+
+		singleMeta = new SingleMetadata();
+		singleMeta.setMetadata(v, hashAlg);
 	}
 
 	public long getIndex() {
@@ -81,7 +86,12 @@ public class ArrayMetadata implements Metadata<ArrayValue> {
 		public ArrayMetadata decode(ByteBuf buf, Object... params) throws CodecException {
 			long index = buf.readUnsignedInt();
 			SingleMetadata single = singleCodec.decode(buf);
-			return new ArrayMetadata(index, single);
+
+			ArrayMetadata m = new ArrayMetadata();
+			m.index = index;
+			m.singleMeta = single;
+
+			return new ArrayMetadata();
 		}
 
 	}
@@ -93,6 +103,6 @@ public class ArrayMetadata implements Metadata<ArrayValue> {
 
 	@Override
 	public ValueSpecifier getMatchingSpecifier() {
-		return new ArrayValueSpecifier().addRange(index, index);
+		throw new AssertionError("Metadata don't have specifiers");
 	}
 }

@@ -11,18 +11,15 @@ import com.github.reload.TestConfiguration;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.services.storage.PreparedData;
 import com.github.reload.services.storage.StorageService;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
-import com.github.reload.services.storage.encoders.ArrayValue;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueBuilder;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
-import com.github.reload.services.storage.encoders.DictionaryValue;
-import com.github.reload.services.storage.encoders.FetchKindResponse;
-import com.github.reload.services.storage.encoders.SingleModel.SingleValueBuilder;
-import com.github.reload.services.storage.encoders.SingleValue;
-import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
-import com.github.reload.services.storage.encoders.StoreKindResponse;
-import com.github.reload.services.storage.policies.UserMatch.UserParamsGenerator;
+import com.github.reload.services.storage.net.ArrayValue;
+import com.github.reload.services.storage.net.ArrayValueSpecifier;
+import com.github.reload.services.storage.net.DictionaryValue;
+import com.github.reload.services.storage.net.DictionaryValueSpecifier;
+import com.github.reload.services.storage.net.FetchKindResponse;
+import com.github.reload.services.storage.net.SingleValue;
+import com.github.reload.services.storage.net.StoreKindResponse;
+import com.github.reload.services.storage.net.StoreKindSpecifier;
+import com.github.reload.services.storage.policies.UserMatch.UserRIDGenerator;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class StorageTest extends APITest {
@@ -40,17 +37,17 @@ public class StorageTest extends APITest {
 	@Test
 	public void testStoreSingle() throws Exception {
 		PreparedData p = storServ.newPreparedData(TestConfiguration.TEST_KIND_SINGLE);
-		SingleValueBuilder b = (SingleValueBuilder) p.getValueBuilder();
-		b.value(TEST_SINGLE);
+		SingleValue v = (SingleValue) p.getValue();
+		v.setValue(TEST_SINGLE);
 
-		UserParamsGenerator pGen = (UserParamsGenerator) storServ.newParamsGenerator(TestConfiguration.TEST_KIND_SINGLE);
+		UserRIDGenerator pGen = (UserRIDGenerator) storServ.newIDGenerator(TestConfiguration.TEST_KIND_SINGLE);
 
-		ResourceID STORE_RESID = pGen.getResourceId();
+		ResourceID STORE_RESID = pGen.generateID();
 
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.store(STORE_RESID, p);
 		storeFut.get();
 
-		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
+		StoreKindSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetch(STORE_RESID, spec);
 
 		SingleValue ans = (SingleValue) fetchFut.get().get(0).getValues().get(0).getValue();
@@ -61,17 +58,17 @@ public class StorageTest extends APITest {
 	@Test
 	public void testStoreArray() throws Exception {
 		PreparedData p = storServ.newPreparedData(TestConfiguration.TEST_KIND_ARRAY);
-		ArrayValueBuilder b = (ArrayValueBuilder) p.getValueBuilder();
-		b.index(TEST_INDEX);
-		b.value(TEST_SINGLE, true);
+		ArrayValue v = (ArrayValue) p.getValue();
+		v.setIndex(TEST_INDEX);
+		v.setValue(TEST_SINGLE, true);
 
-		UserParamsGenerator pGen = (UserParamsGenerator) storServ.newParamsGenerator(TestConfiguration.TEST_KIND_SINGLE);
-		ResourceID STORE_RESID = pGen.getResourceId();
+		UserRIDGenerator pGen = (UserRIDGenerator) storServ.newIDGenerator(TestConfiguration.TEST_KIND_SINGLE);
+		ResourceID STORE_RESID = pGen.generateID();
 
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.store(STORE_RESID, p);
 		storeFut.get();
 
-		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_ARRAY);
+		StoreKindSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_ARRAY);
 		ArrayValueSpecifier mSpec = (ArrayValueSpecifier) spec.getValueSpecifier();
 		mSpec.addRange(3, 4);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetch(STORE_RESID, spec);
@@ -86,17 +83,17 @@ public class StorageTest extends APITest {
 	@Test
 	public void testStoreDict() throws Exception {
 		PreparedData p = storServ.newPreparedData(TestConfiguration.TEST_KIND_DICT);
-		DictionaryValueBuilder b = (DictionaryValueBuilder) p.getValueBuilder();
-		b.key(TEST_KEY);
-		b.value(TEST_SINGLE, true);
+		DictionaryValue v = (DictionaryValue) p.getValue();
+		v.setKey(TEST_KEY);
+		v.setValue(TEST_SINGLE, true);
 
-		UserParamsGenerator pGen = (UserParamsGenerator) storServ.newParamsGenerator(TestConfiguration.TEST_KIND_DICT);
-		ResourceID STORE_RESID = pGen.getResourceId();
+		UserRIDGenerator pGen = (UserRIDGenerator) storServ.newIDGenerator(TestConfiguration.TEST_KIND_DICT);
+		ResourceID STORE_RESID = pGen.generateID();
 
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.store(STORE_RESID, p);
 		storeFut.get();
 
-		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_DICT);
+		StoreKindSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_DICT);
 		DictionaryValueSpecifier mSpec = (DictionaryValueSpecifier) spec.getValueSpecifier();
 		mSpec.addKey(TEST_KEY);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetch(STORE_RESID, spec);
@@ -110,13 +107,13 @@ public class StorageTest extends APITest {
 
 	@Test
 	public void testRemove() throws Exception {
-		UserParamsGenerator pGen = (UserParamsGenerator) storServ.newParamsGenerator(TestConfiguration.TEST_KIND_SINGLE);
-		ResourceID STORE_RESID = pGen.getResourceId();
+		UserRIDGenerator pGen = (UserRIDGenerator) storServ.newIDGenerator(TestConfiguration.TEST_KIND_SINGLE);
+		ResourceID STORE_RESID = pGen.generateID();
 		PreparedData p = storServ.newPreparedData(TestConfiguration.TEST_KIND_SINGLE);
 		ListenableFuture<List<StoreKindResponse>> storeFut = storServ.store(STORE_RESID, p);
 		storeFut.get();
 
-		StoreKindDataSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
+		StoreKindSpecifier spec = storServ.newDataSpecifier(TestConfiguration.TEST_KIND_SINGLE);
 		ListenableFuture<List<FetchKindResponse>> fetchFut = storServ.fetch(STORE_RESID, spec);
 
 		storServ.removeData(STORE_RESID, spec).get();

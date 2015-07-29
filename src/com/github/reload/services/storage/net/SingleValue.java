@@ -1,24 +1,31 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.SingleModel.SingleValueSpecifier;
-import com.github.reload.services.storage.encoders.SingleValue.SingleEntryCodec;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.net.SingleValue.SingleEntryCodec;
 import com.google.common.base.Objects;
 
 @ReloadCodec(SingleEntryCodec.class)
 public class SingleValue implements DataValue {
 
-	private final boolean exists;
-	private final byte[] value;
+	private boolean exists;
+	private byte[] value;
 
 	public SingleValue(byte[] value, boolean exists) {
 		this.value = value;
+		this.exists = exists;
+	}
+
+	public void setValue(byte[] value) {
+		this.value = value;
+	}
+
+	public void setExists(boolean exists) {
 		this.exists = exists;
 	}
 
@@ -100,5 +107,4 @@ public class SingleValue implements DataValue {
 	public ValueSpecifier getMatchingSpecifier() {
 		return new SingleValueSpecifier();
 	}
-
 }

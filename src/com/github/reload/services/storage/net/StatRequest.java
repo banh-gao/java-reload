@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.List;
@@ -6,12 +6,12 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.services.storage.encoders.StatRequest.StatRequestCodec;
+import com.github.reload.services.storage.net.StatRequest.StatRequestCodec;
 
 @ReloadCodec(StatRequestCodec.class)
 public class StatRequest extends FetchRequest {
 
-	public StatRequest(ResourceID resId, List<StoreKindDataSpecifier> specifiers) {
+	public StatRequest(ResourceID resId, List<StoreKindSpecifier> specifiers) {
 		super(resId, specifiers);
 	}
 

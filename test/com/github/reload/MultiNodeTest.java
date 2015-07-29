@@ -33,7 +33,7 @@ public class MultiNodeTest {
 			overlays[i] = startNode(new InetSocketAddress(InetAddress.getLoopbackAddress(), 2000 + i), i);
 		}
 
-		ObjectGraph ctx = overlays[1].objectGraph;
+		ObjectGraph ctx = overlays[1].graph;
 
 		Message req = ctx.get(MessageBuilder.class).newMessage(new PingRequest(), new DestinationList(NodeID.valueOf("ceeadf392596529d0f6aaabe39fbb116")));
 

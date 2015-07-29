@@ -38,9 +38,9 @@ import com.github.reload.net.encoders.header.RoutableID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.DataStorage;
-import com.github.reload.services.storage.StoreKindData;
-import com.github.reload.services.storage.encoders.StoreRequest;
+import com.github.reload.services.storage.local.DataStorage;
+import com.github.reload.services.storage.local.StoredKindData;
+import com.github.reload.services.storage.net.StoreRequest;
 import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.FutureCallback;
@@ -323,12 +323,12 @@ public class TestPlugin implements TopologyPlugin {
 	public void requestReplication(ResourceID resourceId) {
 		List<NodeID> replicaNodes = getReplicaNodes(resourceId);
 
-		Optional<Map<Long, StoreKindData>> res = store.get(resourceId);
+		Optional<Map<Long, StoredKindData>> res = store.get(resourceId);
 
 		if (!res.isPresent())
 			return;
 
-		Collection<StoreKindData> data = res.get().values();
+		Collection<StoredKindData> data = res.get().values();
 
 		short replNum = 1;
 		for (NodeID repl : replicaNodes) {

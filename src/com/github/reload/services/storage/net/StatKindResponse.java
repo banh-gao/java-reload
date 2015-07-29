@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -9,8 +9,9 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.StatKindResponse.StatKindResponseCodec;
+import com.github.reload.services.storage.DataModel;
+import com.github.reload.services.storage.local.StoredMetadata;
+import com.github.reload.services.storage.net.StatKindResponse.StatKindResponseCodec;
 
 /**
  * A response contained in a stat answer, contains all the data for a specific
@@ -131,7 +132,7 @@ public class StatKindResponse {
 
 			List<StoredMetadata> out = new ArrayList<StoredMetadata>();
 
-			DataModel<? extends DataValue> dataModel = kind.getDataModel();
+			DataModel dataModel = kind.getDataModel();
 
 			while (respData.readableBytes() > 0) {
 				StoredMetadata data = storedDataCodec.decode(respData, dataModel);

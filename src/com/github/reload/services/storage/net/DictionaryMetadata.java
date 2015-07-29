@@ -1,28 +1,32 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.encoders.DataModel.Metadata;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.DictionaryMetadata.DictionaryMetadataCodec;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
+import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.Metadata;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.net.DictionaryMetadata.DictionaryMetadataCodec;
 
 /**
  * Metadata of a stored dictionary entry
  * 
  */
 @ReloadCodec(DictionaryMetadataCodec.class)
-public class DictionaryMetadata implements Metadata<DictionaryValue> {
+public class DictionaryMetadata implements Metadata {
 
-	private final byte[] key;
-	private final SingleMetadata singleMeta;
+	private byte[] key;
+	private SingleMetadata singleMeta;
 
-	public DictionaryMetadata(byte[] key, SingleMetadata singleMeta) {
-		this.key = key;
-		this.singleMeta = singleMeta;
+	@Override
+	public void setMetadata(DataValue v, HashAlgorithm hashAlg) {
+		DictionaryValue value = (DictionaryValue) v;
+		this.key = value.getKey();
+		this.singleMeta = new SingleMetadata();
+		this.singleMeta.setMetadata(value.getValue(), hashAlg);
 	}
 
 	public byte[] getKey() {
@@ -62,7 +66,12 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		public DictionaryMetadata decode(ByteBuf buf, Object... params) throws CodecException {
 			byte[] key = DictionaryValue.DictionaryValueCodec.decodeKey(buf);
 			SingleMetadata single = singleCodec.decode(buf);
-			return new DictionaryMetadata(key, single);
+
+			DictionaryMetadata m = new DictionaryMetadata();
+			m.key = key;
+			m.singleMeta = single;
+
+			return m;
 		}
 
 	}
@@ -70,11 +79,6 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 	@Override
 	public long getSize() {
 		return singleMeta.getSize();
-	}
-
-	@Override
-	public ValueSpecifier getMatchingSpecifier() {
-		return new DictionaryValueSpecifier().addKey(key);
 	}
 
 	@Override
@@ -94,6 +98,11 @@ public class DictionaryMetadata implements Metadata<DictionaryValue> {
 		} else if (!singleMeta.equals(other.singleMeta))
 			return false;
 		return true;
+	}
+
+	@Override
+	public ValueSpecifier getMatchingSpecifier() {
+		throw new AssertionError("Metadata don't have specifiers");
 	}
 
 }

@@ -1,11 +1,10 @@
-package com.github.reload.services.storage;
+package com.github.reload.services.storage.local;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.services.storage.encoders.StoredData;
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
@@ -18,12 +17,12 @@ import com.google.common.collect.SetMultimap;
  */
 public class MemoryStorage implements DataStorage {
 
-	private final Map<ResourceID, Map<Long, StoreKindData>> storedResources = Maps.newConcurrentMap();
+	private final Map<ResourceID, Map<Long, StoredKindData>> storedResources = Maps.newConcurrentMap();
 
 	private final SetMultimap<Long, ResourceID> storedKinds = LinkedHashMultimap.create();
 
 	@Override
-	public Optional<Map<Long, StoreKindData>> put(ResourceID resourceId, Map<Long, StoreKindData> values) {
+	public Optional<Map<Long, StoredKindData>> put(ResourceID resourceId, Map<Long, StoredKindData> values) {
 		updateKindToResource(values.keySet(), resourceId);
 		return Optional.fromNullable(storedResources.put(resourceId, values));
 	}
@@ -35,8 +34,8 @@ public class MemoryStorage implements DataStorage {
 	}
 
 	@Override
-	public Optional<Map<Long, StoreKindData>> get(ResourceID resId) {
-		Optional<Map<Long, StoreKindData>> res = Optional.fromNullable(storedResources.get(resId));
+	public Optional<Map<Long, StoredKindData>> get(ResourceID resId) {
+		Optional<Map<Long, StoredKindData>> res = Optional.fromNullable(storedResources.get(resId));
 
 		if (res.isPresent()) {
 			deleteExpired(res.get());
@@ -45,8 +44,8 @@ public class MemoryStorage implements DataStorage {
 		return res;
 	}
 
-	private void deleteExpired(Map<Long, StoreKindData> res) {
-		for (StoreKindData kd : res.values()) {
+	private void deleteExpired(Map<Long, StoredKindData> res) {
+		for (StoredKindData kd : res.values()) {
 			Iterator<StoredData> i = kd.getValues().iterator();
 			while (i.hasNext()) {
 				StoredData d = i.next();
@@ -58,7 +57,7 @@ public class MemoryStorage implements DataStorage {
 	}
 
 	@Override
-	public Optional<Map<Long, StoreKindData>> remove(ResourceID resourceId) {
+	public Optional<Map<Long, StoredKindData>> remove(ResourceID resourceId) {
 		return Optional.fromNullable(storedResources.remove(resourceId));
 	}
 

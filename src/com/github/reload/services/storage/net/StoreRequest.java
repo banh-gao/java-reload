@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -10,17 +10,17 @@ import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.services.storage.StoreKindData;
-import com.github.reload.services.storage.encoders.StoreRequest.StoreRequestCodec;
+import com.github.reload.services.storage.local.StoredKindData;
+import com.github.reload.services.storage.net.StoreRequest.StoreRequestCodec;
 
 @ReloadCodec(StoreRequestCodec.class)
 public class StoreRequest extends Content {
 
 	private final ResourceID resourceId;
 	private final short replicaNumber;
-	private final Collection<StoreKindData> kindData;
+	private final Collection<StoredKindData> kindData;
 
-	public StoreRequest(ResourceID id, short replNum, Collection<StoreKindData> data) {
+	public StoreRequest(ResourceID id, short replNum, Collection<StoredKindData> data) {
 		resourceId = id;
 		replicaNumber = replNum;
 		kindData = data;
@@ -35,7 +35,7 @@ public class StoreRequest extends Content {
 		return resourceId;
 	}
 
-	public Collection<StoreKindData> getKindData() {
+	public Collection<StoredKindData> getKindData() {
 		return kindData;
 	}
 
@@ -48,12 +48,12 @@ public class StoreRequest extends Content {
 		private static final int STOREDKINDDATA_LENGTH_FIELD = U_INT32;
 
 		private final Codec<ResourceID> resIdCodec;
-		private final Codec<StoreKindData> storeKindDataCodec;
+		private final Codec<StoredKindData> storeKindDataCodec;
 
 		public StoreRequestCodec(ComponentsContext ctx) {
 			super(ctx);
 			resIdCodec = getCodec(ResourceID.class);
-			storeKindDataCodec = getCodec(StoreKindData.class);
+			storeKindDataCodec = getCodec(StoredKindData.class);
 		}
 
 		@Override
@@ -64,7 +64,7 @@ public class StoreRequest extends Content {
 
 			Field lenFld = allocateField(buf, STOREDKINDDATA_LENGTH_FIELD);
 
-			for (StoreKindData d : obj.kindData) {
+			for (StoredKindData d : obj.kindData) {
 				storeKindDataCodec.encode(d, buf);
 			}
 
@@ -75,12 +75,12 @@ public class StoreRequest extends Content {
 		public StoreRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			ResourceID resId = resIdCodec.decode(buf);
 			short replicaNumber = buf.readUnsignedByte();
-			List<StoreKindData> kindData = decodeKindDataList(buf);
+			List<StoredKindData> kindData = decodeKindDataList(buf);
 			return new StoreRequest(resId, replicaNumber, kindData);
 		}
 
-		private List<StoreKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
-			List<StoreKindData> out = new ArrayList<StoreKindData>();
+		private List<StoredKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+			List<StoredKindData> out = new ArrayList<StoredKindData>();
 
 			ByteBuf kindData = readField(buf, STOREDKINDDATA_LENGTH_FIELD);
 

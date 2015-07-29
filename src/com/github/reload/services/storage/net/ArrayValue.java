@@ -1,24 +1,45 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
-import com.github.reload.services.storage.encoders.ArrayValue.ArrayEntryCodec;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.net.ArrayValue.ArrayEntryCodec;
 import com.google.common.base.Objects;
 
 @ReloadCodec(ArrayEntryCodec.class)
 public class ArrayValue implements DataValue {
 
-	private final long index;
-	private final SingleValue value;
+	private static final long LAST_INDEX = 0xffffffffl;
 
-	ArrayValue(long index, SingleValue value) {
+	private long index = 0;
+	private SingleValue value = new SingleValue(new byte[0], false);
+
+	public ArrayValue() {
+	}
+
+	public ArrayValue(long index, SingleValue value) {
 		this.index = index;
 		this.value = value;
+	}
+
+	public void setIndex(long index) {
+		this.index = index;
+	}
+
+	public void setAppend(boolean isAppend) {
+		if (isAppend)
+			index = LAST_INDEX;
+	}
+
+	public boolean isAppend() {
+		return index == LAST_INDEX;
+	}
+
+	public void setValue(byte[] value, boolean exists) {
+		this.value = new SingleValue(value, exists);
 	}
 
 	public long getIndex() {
@@ -89,6 +110,8 @@ public class ArrayValue implements DataValue {
 
 	@Override
 	public ValueSpecifier getMatchingSpecifier() {
-		return new ArrayValueSpecifier().addRange(index, index);
+		ArrayValueSpecifier s = new ArrayValueSpecifier();
+		s.addRange(index, index);
+		return s;
 	}
 }

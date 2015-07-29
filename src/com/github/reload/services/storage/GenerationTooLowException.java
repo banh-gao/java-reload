@@ -7,7 +7,7 @@ import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Header;
 import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.services.storage.encoders.StoreAnswer;
+import com.github.reload.services.storage.net.StoreAnswer;
 
 /**
  * Indicates that a store request has the generation value lower than the stored

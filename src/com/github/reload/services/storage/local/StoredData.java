@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.local;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
@@ -13,11 +13,11 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.StoredData.StoredDataCodec;
+import com.github.reload.services.storage.DataModel;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.local.StoredData.StoredDataCodec;
 
 @ReloadCodec(StoredDataCodec.class)
 public class StoredData {
@@ -48,12 +48,6 @@ public class StoredData {
 
 	public DataValue getValue() {
 		return value;
-	}
-
-	public StoredMetadata getMetadata(DataKind kind, HashAlgorithm hashAlg) {
-		@SuppressWarnings("unchecked")
-		DataModel<DataValue> m = (DataModel<DataValue>) kind.getDataModel();
-		return new StoredMetadata(storageTime, lifeTime, m.newMetadata(value, hashAlg));
 	}
 
 	public Signature getSignature() {
@@ -200,7 +194,7 @@ public class StoredData {
 			long lifeTime = dataFld.readUnsignedInt();
 
 			@SuppressWarnings("unchecked")
-			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel<?>) params[0]).getValueClass());
+			Codec<DataValue> valueCodec = (Codec<DataValue>) getCodec(((DataModel) params[0]).getValueClass());
 
 			DataValue value = valueCodec.decode(dataFld);
 

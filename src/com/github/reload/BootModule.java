@@ -6,12 +6,15 @@ import com.github.reload.net.connections.ConnectionManager;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.routing.TopologyPluginFactory;
 import dagger.Module;
+import dagger.ObjectGraph;
 import dagger.Provides;
 
-@Module(injects = {Configuration.class, Overlay.class, TopologyPlugin.class}, complete = false)
+@Module(injects = {Configuration.class, Overlay.class, TopologyPlugin.class,
+					ObjectGraph.class}, complete = false)
 public class BootModule {
 
 	private final Configuration conf;
+	ObjectGraph graph;
 
 	public BootModule(Configuration conf) {
 		this.conf = conf;
@@ -21,6 +24,12 @@ public class BootModule {
 	@Singleton
 	Overlay provideOverlay(ConnectionManager connMgr, TopologyPlugin topology) {
 		return new Overlay(connMgr, topology);
+	}
+
+	@Provides
+	@Singleton
+	ObjectGraph provideGraph() {
+		return graph;
 	}
 
 	@Provides

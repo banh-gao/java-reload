@@ -8,7 +8,7 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.CodecException;
 import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
+import com.github.reload.services.storage.net.StoreKindSpecifier;
 
 /**
  * A RELOAD Uniform Resource Identifier defined as:
@@ -25,9 +25,9 @@ public class ReloadUri {
 
 	private final DestinationList destinationList;
 	private final String overlayName;
-	private final StoreKindDataSpecifier specifier;
+	private final StoreKindSpecifier specifier;
 
-	private ReloadUri(DestinationList destList, String overlayName, StoreKindDataSpecifier specifier) {
+	private ReloadUri(DestinationList destList, String overlayName, StoreKindSpecifier specifier) {
 		destinationList = destList;
 		this.overlayName = overlayName;
 		this.specifier = specifier;
@@ -70,7 +70,7 @@ public class ReloadUri {
 	 *             if the destination list is empty or the overlay name is not
 	 *             valid
 	 */
-	public static ReloadUri create(DestinationList destList, String overlayName, StoreKindDataSpecifier dataSpecifier) {
+	public static ReloadUri create(DestinationList destList, String overlayName, StoreKindSpecifier dataSpecifier) {
 		if (destList == null || overlayName == null)
 			throw new NullPointerException();
 		if (destList.isEmpty())
@@ -112,7 +112,7 @@ public class ReloadUri {
 		if (destList.isEmpty())
 			throw new IllegalArgumentException("Empty destination list");
 
-		StoreKindDataSpecifier specifier = parseSpecifier(uri);
+		StoreKindSpecifier specifier = parseSpecifier(uri);
 
 		return new ReloadUri(destList, overlayName, specifier);
 	}
@@ -143,14 +143,14 @@ public class ReloadUri {
 		return buf;
 	}
 
-	private static StoreKindDataSpecifier parseSpecifier(URI uri) {
+	private static StoreKindSpecifier parseSpecifier(URI uri) {
 		String hexSpecifier = uri.getPath();
 		if (hexSpecifier.length() == 0)
 			return null;
 
 		ByteBuf encSpecifier = hexToByte(hexSpecifier);
 
-		Codec<StoreKindDataSpecifier> codec = Codec.getCodec(StoreKindDataSpecifier.class, null);
+		Codec<StoreKindSpecifier> codec = Codec.getCodec(StoreKindSpecifier.class, null);
 		try {
 			return codec.decode(encSpecifier);
 		} catch (CodecException e) {
@@ -188,7 +188,7 @@ public class ReloadUri {
 
 		ByteBuf buf = UnpooledByteBufAllocator.DEFAULT.buffer(DEST_BUF_SIZE);
 
-		Codec<StoreKindDataSpecifier> codec = Codec.getCodec(StoreKindDataSpecifier.class, null);
+		Codec<StoreKindSpecifier> codec = Codec.getCodec(StoreKindSpecifier.class, null);
 		try {
 			codec.encode(specifier, buf);
 		} catch (CodecException e) {
@@ -231,7 +231,7 @@ public class ReloadUri {
 	/**
 	 * @return the data specifier contained in the uri, or null if not present
 	 */
-	public StoreKindDataSpecifier getSpecifier() {
+	public StoreKindSpecifier getSpecifier() {
 		return specifier;
 	}
 

@@ -1,4 +1,4 @@
-package com.github.reload.services.storage;
+package com.github.reload.services.storage.local;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
@@ -25,22 +25,24 @@ import com.github.reload.net.encoders.secBlock.Signature;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.FetchAnswer;
-import com.github.reload.services.storage.encoders.FetchKindResponse;
-import com.github.reload.services.storage.encoders.FetchRequest;
-import com.github.reload.services.storage.encoders.FindAnswer;
-import com.github.reload.services.storage.encoders.FindKindData;
-import com.github.reload.services.storage.encoders.FindRequest;
-import com.github.reload.services.storage.encoders.StatAnswer;
-import com.github.reload.services.storage.encoders.StatKindResponse;
-import com.github.reload.services.storage.encoders.StatRequest;
-import com.github.reload.services.storage.encoders.StoreAnswer;
-import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
-import com.github.reload.services.storage.encoders.StoreKindResponse;
-import com.github.reload.services.storage.encoders.StoreRequest;
-import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.encoders.StoredMetadata;
+import com.github.reload.services.storage.DataKind;
+import com.github.reload.services.storage.DataModel.Metadata;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.GenerationTooLowException;
+import com.github.reload.services.storage.net.FetchAnswer;
+import com.github.reload.services.storage.net.FetchKindResponse;
+import com.github.reload.services.storage.net.FetchRequest;
+import com.github.reload.services.storage.net.FindAnswer;
+import com.github.reload.services.storage.net.FindKindData;
+import com.github.reload.services.storage.net.FindRequest;
+import com.github.reload.services.storage.net.StatAnswer;
+import com.github.reload.services.storage.net.StatKindResponse;
+import com.github.reload.services.storage.net.StatRequest;
+import com.github.reload.services.storage.net.StoreAnswer;
+import com.github.reload.services.storage.net.StoreKindResponse;
+import com.github.reload.services.storage.net.StoreKindSpecifier;
+import com.github.reload.services.storage.net.StoreRequest;
+import com.github.reload.services.storage.policies.AccessPolicy;
 import com.google.common.base.Optional;
 import dagger.ObjectGraph;
 
@@ -48,7 +50,7 @@ import dagger.ObjectGraph;
  * Process incoming storage requests and accesses local storage
  * 
  */
-class StorageController {
+public class StorageController {
 
 	@Inject
 	TopologyPlugin plugin;
@@ -95,23 +97,23 @@ class StorageController {
 		plugin.requestReplication(req.getResourceId());
 	}
 
-	private List<StoreKindResponse> store(ResourceID resourceId, Collection<StoreKindData> data, SignerIdentity senderIdentity, boolean isReplica, List<NodeID> replicaNodes) throws GeneralSecurityException, ErrorMessageException {
+	private List<StoreKindResponse> store(ResourceID resourceId, Collection<StoredKindData> data, SignerIdentity senderIdentity, boolean isReplica, List<NodeID> replicaNodes) throws GeneralSecurityException, ErrorMessageException {
 		List<StoreKindResponse> response = new ArrayList<StoreKindResponse>();
 		List<StoreKindResponse> generTooLowResponses = new ArrayList<StoreKindResponse>();
 
-		Optional<Map<Long, StoreKindData>> oldStoredResource = storage.get(resourceId);
+		Optional<Map<Long, StoredKindData>> oldStoredResource = storage.get(resourceId);
 
-		Map<Long, StoreKindData> tempStore = new HashMap<Long, StoreKindData>(data.size());
+		Map<Long, StoredKindData> tempStore = new HashMap<Long, StoredKindData>(data.size());
 
 		Set<Long> requestKinds = new HashSet<Long>();
 
-		for (StoreKindData receivedData : data) {
+		for (StoredKindData receivedData : data) {
 
 			DataKind kind = receivedData.getKind();
 
 			requestKinds.add(kind.getKindId());
 
-			Optional<StoreKindData> oldStoredKind = Optional.absent();
+			Optional<StoredKindData> oldStoredKind = Optional.absent();
 
 			if (oldStoredResource.isPresent()) {
 				oldStoredKind = Optional.fromNullable(oldStoredResource.get().get(kind.getKindId()));
@@ -136,13 +138,15 @@ class StorageController {
 					throw new ErrorMessageException(ErrorType.FORBITTEN, "NONE identity type not allowed");
 
 				// Perform policy checks for storer node
-				receivedData.getKind().getAccessPolicy().accept(resourceId, receivedData.getKind(), d, storerIdentity);
+
+				AccessPolicy p = g.get(receivedData.getKind().getPolicyClass());
+				p.accept(resourceId, receivedData.getKind(), d, storerIdentity);
 
 				// If the store is not a replica (it is a normal store request
 				// from a peer), perform policy checks also for the node that
 				// sends the store message
 				if (!isReplica) {
-					kind.getAccessPolicy().accept(resourceId, kind, d, senderIdentity);
+					p.accept(resourceId, kind, d, senderIdentity);
 				}
 
 				Optional<ReloadCertificate> storerCert = g.get(Keystore.class).getCertificate(storerIdentity);
@@ -179,7 +183,7 @@ class StorageController {
 		return response;
 	}
 
-	private void checkValidReplace(StoreKindData oldKindData, StoredData newData) throws ErrorMessageException {
+	private void checkValidReplace(StoredKindData oldKindData, StoredData newData) throws ErrorMessageException {
 		if (oldKindData == null)
 			return;
 
@@ -194,7 +198,7 @@ class StorageController {
 			throw new ErrorMessageException(ErrorType.DATA_TOO_OLD);
 	}
 
-	private boolean checkGeneration(StoreKindData receivedData, StoreKindData oldStoredKind, boolean isReplica) {
+	private boolean checkGeneration(StoredKindData receivedData, StoredKindData oldStoredKind, boolean isReplica) {
 		BigInteger rcvGen = receivedData.getGeneration();
 
 		// Generation for replica stores needs only to be not zero
@@ -224,17 +228,17 @@ class StorageController {
 		router.sendAnswer(requestMessage.getHeader(), answer);
 	}
 
-	private List<FetchKindResponse> fetch(ResourceID resourceId, List<StoreKindDataSpecifier> specifiers) throws ErrorMessageException {
+	private List<FetchKindResponse> fetch(ResourceID resourceId, List<StoreKindSpecifier> specifiers) throws ErrorMessageException {
 		List<FetchKindResponse> out = new ArrayList<FetchKindResponse>();
 
-		Optional<Map<Long, StoreKindData>> resource = storage.get(resourceId);
+		Optional<Map<Long, StoredKindData>> resource = storage.get(resourceId);
 
 		if (!resource.isPresent())
 			throw new ErrorMessageException(ErrorType.NOT_FOUND, String.format("Resource %s not found", resourceId));
 
-		for (StoreKindDataSpecifier spec : specifiers) {
+		for (StoreKindSpecifier spec : specifiers) {
 
-			StoreKindData kindData = resource.get().get(spec.getKind().getKindId());
+			StoredKindData kindData = resource.get().get(spec.getKind().getKindId());
 
 			if (kindData == null) {
 				continue;
@@ -266,7 +270,7 @@ class StorageController {
 	 * @param spec
 	 * @return
 	 */
-	private List<StoredData> getMatchingData(StoreKindData kindData, ValueSpecifier spec) {
+	private List<StoredData> getMatchingData(StoredKindData kindData, ValueSpecifier spec) {
 		List<StoredData> matchingData = new ArrayList<StoredData>();
 
 		for (StoredData d : kindData.getValues()) {
@@ -295,17 +299,17 @@ class StorageController {
 		router.sendAnswer(requestMessage.getHeader(), answer);
 	}
 
-	private List<StatKindResponse> stat(ResourceID resourceId, List<StoreKindDataSpecifier> specifiers) throws ErrorMessageException {
+	private List<StatKindResponse> stat(ResourceID resourceId, List<StoreKindSpecifier> specifiers) throws ErrorMessageException {
 		List<StatKindResponse> out = new ArrayList<StatKindResponse>();
 
-		Optional<Map<Long, StoreKindData>> resource = storage.get(resourceId);
+		Optional<Map<Long, StoredKindData>> resource = storage.get(resourceId);
 
 		if (!resource.isPresent())
 			throw new ErrorMessageException(ErrorType.NOT_FOUND, String.format("Resource %s not found", resourceId));
 
-		for (StoreKindDataSpecifier spec : specifiers) {
+		for (StoreKindSpecifier spec : specifiers) {
 
-			StoreKindData kindData = resource.get().get(spec.getKind().getKindId());
+			StoredKindData kindData = resource.get().get(spec.getKind().getKindId());
 
 			if (kindData == null) {
 				continue;
@@ -320,13 +324,23 @@ class StorageController {
 			List<StoredMetadata> matchingData = new ArrayList<StoredMetadata>();
 
 			for (StoredData d : getMatchingData(kindData, spec.getValueSpecifier())) {
-				matchingData.add(d.getMetadata(spec.getKind(), CryptoHelper.OVERLAY_HASHALG));
+
+				matchingData.add(buildMetadata(d, spec.getKind()));
 			}
 
 			out.add(new StatKindResponse(spec.getKind(), kindData.getGeneration(), matchingData));
 		}
 
 		return out;
+	}
+
+	private StoredMetadata buildMetadata(StoredData d, DataKind kind) {
+
+		Metadata m = g.get(kind.getDataModel().getMetadataClass());
+
+		m.setMetadata(d.getValue(), CryptoHelper.OVERLAY_HASHALG);
+
+		return new StoredMetadata(d.getStorageTime(), d.getLifeTime(), m);
 	}
 
 	@MessageHandler(ContentType.FIND_REQ)

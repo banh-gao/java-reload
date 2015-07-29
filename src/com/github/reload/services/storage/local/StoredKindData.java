@@ -1,4 +1,4 @@
-package com.github.reload.services.storage;
+package com.github.reload.services.storage.local;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -7,11 +7,11 @@ import java.util.List;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.StoreKindData.StoreKindDataCodec;
-import com.github.reload.services.storage.encoders.StoredData;
+import com.github.reload.services.storage.DataKind;
+import com.github.reload.services.storage.local.StoredKindData.StoreKindDataCodec;
 
 @ReloadCodec(StoreKindDataCodec.class)
-public class StoreKindData {
+public class StoredKindData {
 
 	protected final DataKind kind;
 
@@ -19,7 +19,7 @@ public class StoreKindData {
 
 	private final List<StoredData> data;
 
-	public StoreKindData(DataKind kind, BigInteger generation, List<StoredData> data) {
+	public StoredKindData(DataKind kind, BigInteger generation, List<StoredData> data) {
 		this.kind = kind;
 		this.generation = generation;
 		this.data = data;
@@ -37,7 +37,7 @@ public class StoreKindData {
 		return data;
 	}
 
-	static class StoreKindDataCodec extends Codec<StoreKindData> {
+	static class StoreKindDataCodec extends Codec<StoredKindData> {
 
 		protected static final int GENERATION_FIELD = U_INT64;
 		protected static final int VALUES_LENGTH_FIELD = U_INT32;
@@ -52,7 +52,7 @@ public class StoreKindData {
 		}
 
 		@Override
-		public void encode(StoreKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(StoredKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			kindCodec.encode(obj.kind, buf);
 
 			byte[] generationBytes = toUnsigned(obj.generation);
@@ -72,7 +72,7 @@ public class StoreKindData {
 		}
 
 		@Override
-		public StoreKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public StoredKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
 			byte[] generationData = new byte[GENERATION_FIELD];
@@ -80,7 +80,7 @@ public class StoreKindData {
 			BigInteger generation = new BigInteger(1, generationData);
 
 			List<StoredData> data = decodeStoredDataList(kind, buf);
-			return new StoreKindData(kind, generation, data);
+			return new StoredKindData(kind, generation, data);
 		}
 
 		private List<StoredData> decodeStoredDataList(DataKind kind, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {

@@ -17,27 +17,24 @@ import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.net.encoders.secBlock.SignerIdentityValue;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.AccessPolicy;
-import com.github.reload.services.storage.AccessPolicy.PolicyName;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.policies.NodeMatch.NodeParamsGenerator;
+import com.github.reload.services.storage.local.StoredData;
+import com.github.reload.services.storage.policies.AccessPolicy.PolicyName;
+import com.github.reload.services.storage.policies.NodeMatch.NodeRIDGenerator;
 import com.google.common.base.Optional;
 
 /**
  * Check if the nodeid hash in the sender certificate matches the resource id
  * 
  */
-@PolicyName(value = "node-match", paramGen = NodeParamsGenerator.class)
+@PolicyName(value = "node-match", paramGen = NodeRIDGenerator.class)
 public class NodeMatch extends AccessPolicy {
 
+	@Inject
 	TopologyPlugin topology;
-	Keystore keystore;
 
-	public NodeMatch(TopologyPlugin topology, Keystore keystore) {
-		this.topology = topology;
-		this.keystore = keystore;
-	}
+	@Inject
+	Keystore keystore;
 
 	@Override
 	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
@@ -89,7 +86,7 @@ public class NodeMatch extends AccessPolicy {
 	 * Parameters generator for NODE-MATCH policy
 	 * 
 	 */
-	public static class NodeParamsGenerator implements AccessParamsGenerator {
+	public static class NodeRIDGenerator implements ResourceIDGenerator {
 
 		@Inject
 		TopologyPlugin topology;

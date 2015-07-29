@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -8,8 +8,9 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.FetchKindResponse.FetchKindResponseCodec;
+import com.github.reload.services.storage.DataModel;
+import com.github.reload.services.storage.local.StoredData;
+import com.github.reload.services.storage.net.FetchKindResponse.FetchKindResponseCodec;
 
 /**
  * A response contained in a fetch answer, contains all the data for a specific
@@ -94,7 +95,7 @@ public class FetchKindResponse {
 
 			List<StoredData> out = new ArrayList<StoredData>();
 
-			DataModel<? extends DataValue> dataModel = kind.getDataModel();
+			DataModel dataModel = kind.getDataModel();
 
 			while (respData.readableBytes() > 0) {
 				StoredData data = storedDataCodec.decode(respData, dataModel);

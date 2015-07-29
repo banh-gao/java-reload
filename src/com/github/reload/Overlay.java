@@ -38,12 +38,16 @@ public class Overlay {
 	private OverlayConnector connector;
 	private ServiceLoader serviceLoader;
 
+	// Used only for testing
+	ObjectGraph graph;
+
 	@Inject
 	public Overlay(ConnectionManager connMgr, TopologyPlugin topology) {
 		connector = new OverlayConnector(this, topology, connMgr);
 	}
 
 	void init(Bootstrap bootstrap, ObjectGraph graph) {
+		this.graph = graph;
 		conf = bootstrap.getConfiguration();
 		localAddress = bootstrap.getLocalAddress();
 		isOverlayInitiator = bootstrap.isOverlayInitiator();

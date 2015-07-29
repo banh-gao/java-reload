@@ -20,9 +20,7 @@ import java.util.Set;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.ArrayModel;
-import com.github.reload.services.storage.encoders.DictionaryModel;
-import com.github.reload.services.storage.encoders.SingleModel;
+import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.policies.UserMatch;
 
 /**
@@ -31,9 +29,9 @@ import com.github.reload.services.storage.policies.UserMatch;
 public class TestConfiguration implements Configuration {
 
 	public static InetSocketAddress BOOTSTRAP_ADDR = new InetSocketAddress(InetAddress.getLoopbackAddress(), 6084);
-	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).dataModel(SingleModel.class).accessPolicy(UserMatch.class).build();
-	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).dataModel(ArrayModel.class).accessPolicy(UserMatch.class).build();
-	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).dataModel(DictionaryModel.class).accessPolicy(UserMatch.class).build();
+	public static DataKind TEST_KIND_SINGLE = new DataKind.Builder(2020).dataModel(DataModel.SINGLE).accessPolicy(UserMatch.class).build();
+	public static DataKind TEST_KIND_ARRAY = new DataKind.Builder(2050).dataModel(DataModel.ARRAY).accessPolicy(UserMatch.class).build();
+	public static DataKind TEST_KIND_DICT = new DataKind.Builder(2070).dataModel(DataModel.DICTIONARY).accessPolicy(UserMatch.class).build();
 
 	private final Map<AttributeKey<?>, Object> conf = new HashMap<AttributeKey<?>, Object>();
 

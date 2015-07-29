@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.content.Content;
 import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.services.storage.encoders.FetchAnswer.FetchAnswerCodec;
+import com.github.reload.services.storage.net.FetchAnswer.FetchAnswerCodec;
 
 @ReloadCodec(FetchAnswerCodec.class)
 public class FetchAnswer extends Content {

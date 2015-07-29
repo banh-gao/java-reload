@@ -17,9 +17,7 @@ import com.github.reload.routing.TopologyPlugin;
 import dagger.Module;
 import dagger.Provides;
 
-@Module(injects = {MessageBuilder.class, MessageRouter.class,
-					ConnectionManager.class, PathCompressor.class,
-					ICEHelper.class, Executor.class}, complete = false)
+@Module(library = true, complete = false)
 public class NetModule {
 
 	@Provides

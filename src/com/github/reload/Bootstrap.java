@@ -141,6 +141,10 @@ public abstract class Bootstrap {
 	public final ListenableFuture<Overlay> connect() {
 		BootModule bootModule = new BootModule(conf);
 		ObjectGraph g = ObjectGraph.create(bootModule, new NetModule(), new CryptoModule(this));
+
+		// Allow services to get a reference injection of the graph
+		bootModule.graph = g;
+
 		Overlay overlay = g.get(Overlay.class);
 
 		overlay.init(this, g);

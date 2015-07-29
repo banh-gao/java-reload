@@ -11,27 +11,24 @@ import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.AccessPolicy;
-import com.github.reload.services.storage.AccessPolicy.AccessParamsGenerator;
-import com.github.reload.services.storage.AccessPolicy.PolicyName;
+import com.github.reload.services.storage.local.StoredData;
+import com.github.reload.services.storage.policies.AccessPolicy.ResourceIDGenerator;
+import com.github.reload.services.storage.policies.AccessPolicy.PolicyName;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.StoredData;
 import com.google.common.base.Optional;
 
 /**
  * Check if the username hash in the sender certificate matches the resource id
  * 
  */
-@PolicyName(value = "user-match", paramGen = AccessParamsGenerator.class)
+@PolicyName(value = "user-match", paramGen = ResourceIDGenerator.class)
 public class UserMatch extends AccessPolicy {
 
+	@Inject
 	TopologyPlugin topology;
-	Keystore keystore;
 
-	public UserMatch(TopologyPlugin topology, Keystore keystore) {
-		this.topology = topology;
-		this.keystore = keystore;
-	}
+	@Inject
+	Keystore keystore;
 
 	@Override
 	public void accept(ResourceID resourceId, DataKind kind, StoredData data, SignerIdentity signerIdentity) throws AccessPolicyException {
@@ -65,7 +62,7 @@ public class UserMatch extends AccessPolicy {
 	 * Parameters generator for USER-MATCH policy
 	 * 
 	 */
-	public static class UserParamsGenerator implements AccessParamsGenerator {
+	public static class UserRIDGenerator implements ResourceIDGenerator {
 
 		@Inject
 		TopologyPlugin topology;
@@ -73,7 +70,7 @@ public class UserMatch extends AccessPolicy {
 		@Inject
 		Keystore keystore;
 
-		public ResourceID getResourceId() {
+		public ResourceID generateID() {
 			String username = keystore.getLocalCert().getUsername();
 			return topology.getResourceId(hashUsername(CryptoHelper.OVERLAY_HASHALG, username, topology.getResourceIdLength()));
 		}

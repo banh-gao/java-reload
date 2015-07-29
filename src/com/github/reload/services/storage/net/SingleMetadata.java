@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.security.MessageDigest;
@@ -9,37 +9,38 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.services.storage.encoders.DataModel.Metadata;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.SingleMetadata.SingleMetadataCodec;
-import com.github.reload.services.storage.encoders.SingleModel.SingleValueSpecifier;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.Metadata;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.net.SingleMetadata.SingleMetadataCodec;
 
 /**
  * Metadata used to describe a stored data
  * 
  */
 @ReloadCodec(SingleMetadataCodec.class)
-public class SingleMetadata implements Metadata<SingleValue> {
+public class SingleMetadata implements Metadata {
 
-	private final boolean exists;
-	private final long storedValueSize;
-	private final HashAlgorithm hashAlgorithm;
+	private boolean exists;
+	private long storedValueSize;
+	private HashAlgorithm hashAlgorithm;
+	private byte[] hashValue;
 
-	private final byte[] hashValue;
-
-	public SingleMetadata(boolean exists, long valueSize, HashAlgorithm hashAlg, byte[] hashValue) {
-		this.exists = exists;
-		storedValueSize = valueSize;
+	@Override
+	public void setMetadata(DataValue v, HashAlgorithm hashAlg) {
+		SingleValue value = (SingleValue) v;
+		this.exists = value.exists();
+		this.storedValueSize = value.getSize();
 		if (storedValueSize == 0) {
 			hashAlgorithm = HashAlgorithm.NONE;
 			this.hashValue = new byte[0];
 		} else {
 			hashAlgorithm = hashAlg;
-			this.hashValue = hashValue;
+			this.hashValue = computeHash(hashAlg, value.getValue());
 		}
 	}
 
-	public static byte[] computeHash(HashAlgorithm hashAlgorithm, byte[] value) {
+	static byte[] computeHash(HashAlgorithm hashAlgorithm, byte[] value) {
 		MessageDigest digestor;
 		try {
 			digestor = MessageDigest.getInstance(hashAlgorithm.toString());
@@ -128,7 +129,14 @@ public class SingleMetadata implements Metadata<SingleValue> {
 
 			hashFld.release();
 
-			return new SingleMetadata(exists, storedValueSize, hashAlgorithm, hashValue);
+			SingleMetadata m = new SingleMetadata();
+
+			m.exists = exists;
+			m.storedValueSize = storedValueSize;
+			m.hashAlgorithm = hashAlgorithm;
+			m.hashValue = hashValue;
+
+			return m;
 		}
 
 	}
@@ -140,6 +148,6 @@ public class SingleMetadata implements Metadata<SingleValue> {
 
 	@Override
 	public ValueSpecifier getMatchingSpecifier() {
-		return new SingleValueSpecifier();
+		throw new AssertionError("Metadata don't have specifiers");
 	}
 }

@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
@@ -7,7 +7,7 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.FindKindData.FindKindDataCodec;
+import com.github.reload.services.storage.net.FindKindData.FindKindDataCodec;
 
 /**
  * Find data contained in a find answer for a specific kind-id

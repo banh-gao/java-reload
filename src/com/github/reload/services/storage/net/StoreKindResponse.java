@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -9,7 +9,7 @@ import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.services.storage.DataKind;
-import com.github.reload.services.storage.encoders.StoreKindResponse.StoreKindResponseCodec;
+import com.github.reload.services.storage.net.StoreKindResponse.StoreKindResponseCodec;
 
 @ReloadCodec(StoreKindResponseCodec.class)
 public class StoreKindResponse {

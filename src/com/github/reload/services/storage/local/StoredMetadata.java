@@ -1,4 +1,4 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.local;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
@@ -6,14 +6,14 @@ import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
 import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.DataModel.Metadata;
-import com.github.reload.services.storage.encoders.StoredMetadata.StoredMetadataCodec;
+import com.github.reload.services.storage.DataModel;
+import com.github.reload.services.storage.DataModel.Metadata;
+import com.github.reload.services.storage.local.StoredMetadata.StoredMetadataCodec;
 
 @ReloadCodec(StoredMetadataCodec.class)
 public class StoredMetadata extends StoredData {
 
-	public StoredMetadata(BigInteger storageTime, long lifetime, Metadata<? extends DataValue> value) {
+	public StoredMetadata(BigInteger storageTime, long lifetime, Metadata value) {
 		super(storageTime, lifetime, value, Signature.EMPTY_SIGNATURE);
 	}
 
@@ -38,9 +38,9 @@ public class StoredMetadata extends StoredData {
 
 			buf.writeInt((int) obj.getLifeTime());
 
-			Codec<Metadata<? extends DataValue>> valueCodec = (Codec<Metadata<? extends DataValue>>) getCodec(obj.getValue().getClass());
+			Codec<Metadata> valueCodec = (Codec<Metadata>) getCodec(obj.getValue().getClass());
 
-			valueCodec.encode((Metadata<? extends DataValue>) obj.getValue(), buf);
+			valueCodec.encode((Metadata) obj.getValue(), buf);
 
 			lenFld.updateDataLength();
 		}
@@ -59,9 +59,9 @@ public class StoredMetadata extends StoredData {
 			long lifeTime = dataFld.readUnsignedInt();
 
 			@SuppressWarnings("unchecked")
-			Codec<Metadata<? extends DataValue>> valueCodec = (Codec<Metadata<? extends DataValue>>) getCodec(((DataModel<?>) params[0]).getMetadataClass());
+			Codec<Metadata> valueCodec = (Codec<Metadata>) getCodec(((DataModel) params[0]).getMetadataClass());
 
-			Metadata<? extends DataValue> value = valueCodec.decode(dataFld);
+			Metadata value = valueCodec.decode(dataFld);
 
 			return new StoredMetadata(storageTime, lifeTime, value);
 		}

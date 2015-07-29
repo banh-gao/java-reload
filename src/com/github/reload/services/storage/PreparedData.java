@@ -2,13 +2,10 @@ package com.github.reload.services.storage;
 
 import java.math.BigInteger;
 import java.util.Date;
-import javax.inject.Inject;
-import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Signer;
 import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.DataModel.DataValueBuilder;
-import com.github.reload.services.storage.encoders.StoredData;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.local.StoredData;
 
 /**
  * Helps to generate a signed data
@@ -29,19 +26,16 @@ public class PreparedData {
 																					(byte) 0xff,
 																					(byte) 0xff});
 
-	private DataKind kind;
-	private DataValueBuilder<?> valueBuilder;
-
-	@Inject
-	CryptoHelper cryptoHelper;
+	private final DataKind kind;
+	private final DataValue value;
 
 	BigInteger generation = BigInteger.ONE;
 	BigInteger storageTime = BigInteger.valueOf(new Date().getTime());
 	long lifeTime = DEFAULT_LIFETIME;
 
-	void setKind(DataKind kind) {
+	public PreparedData(DataKind kind, DataValue value) {
 		this.kind = kind;
-		valueBuilder = kind.getDataModel().newValueBuilder();
+		this.value = value;
 	}
 
 	public DataKind getKind() {
@@ -83,8 +77,8 @@ public class PreparedData {
 	 *         value type depends on the data model used by the associated data
 	 *         kind
 	 */
-	public DataValueBuilder<?> getValueBuilder() {
-		return valueBuilder;
+	public DataValue getValue() {
+		return value;
 	}
 
 	/**
@@ -99,11 +93,7 @@ public class PreparedData {
 	 * @return The stored data for the specified overlay
 	 * @throws DataBuildingException
 	 */
-	public StoredData build(ResourceID resId) {
-		DataValue value = valueBuilder.build();
-
-		Signer dataSigner = cryptoHelper.newSigner();
-
-		return new StoredData(storageTime, lifeTime, value, dataSigner, resId, kind);
+	public StoredData buildSigned(ResourceID resId, Signer signer) {
+		return new StoredData(storageTime, lifeTime, value, signer, resId, kind);
 	}
 }

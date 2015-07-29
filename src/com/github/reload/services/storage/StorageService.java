@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
 import com.github.reload.Service;
 import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.conf.Configuration;
+import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
@@ -25,24 +24,25 @@ import com.github.reload.net.encoders.header.DestinationList;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.AccessPolicy.AccessParamsGenerator;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueBuilder;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier;
-import com.github.reload.services.storage.encoders.ArrayModel.ArrayValueSpecifier.ArrayRange;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueBuilder;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
-import com.github.reload.services.storage.encoders.FetchAnswer;
-import com.github.reload.services.storage.encoders.FetchKindResponse;
-import com.github.reload.services.storage.encoders.FetchRequest;
-import com.github.reload.services.storage.encoders.SingleModel.SingleValueBuilder;
-import com.github.reload.services.storage.encoders.StoreAnswer;
-import com.github.reload.services.storage.encoders.StoreKindDataSpecifier;
-import com.github.reload.services.storage.encoders.StoreKindResponse;
-import com.github.reload.services.storage.encoders.StoreRequest;
-import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.policies.NodeMatch;
-import com.github.reload.services.storage.policies.UserMatch;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.local.StoredData;
+import com.github.reload.services.storage.local.StoredKindData;
+import com.github.reload.services.storage.net.ArrayValue;
+import com.github.reload.services.storage.net.ArrayValueSpecifier;
+import com.github.reload.services.storage.net.ArrayValueSpecifier.ArrayRange;
+import com.github.reload.services.storage.net.DictionaryValue;
+import com.github.reload.services.storage.net.DictionaryValueSpecifier;
+import com.github.reload.services.storage.net.FetchAnswer;
+import com.github.reload.services.storage.net.FetchKindResponse;
+import com.github.reload.services.storage.net.FetchRequest;
+import com.github.reload.services.storage.net.SingleValue;
+import com.github.reload.services.storage.net.StoreAnswer;
+import com.github.reload.services.storage.net.StoreKindResponse;
+import com.github.reload.services.storage.net.StoreKindSpecifier;
+import com.github.reload.services.storage.net.StoreRequest;
+import com.github.reload.services.storage.policies.AccessPolicy;
+import com.github.reload.services.storage.policies.AccessPolicy.ResourceIDGenerator;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
@@ -80,15 +80,7 @@ public class StorageService {
 	Keystore keystore;
 
 	@Inject
-	Provider<PreparedData> prepDataProvider;
-
-	@Inject
-	@Named("node-match")
-	Provider<NodeMatch> nodeMatchProvider;
-
-	@Inject
-	@Named("user-match")
-	Provider<UserMatch> userMatchProvider;
+	CryptoHelper cryptoHelper;
 
 	@CompStart
 	private void loadController() {
@@ -103,22 +95,27 @@ public class StorageService {
 	}
 
 	public PreparedData newPreparedData(DataKind kind) {
-		PreparedData d = prepDataProvider.get();
-		d.setKind(kind);
+		DataValue v = graph.get(kind.getDataModel().getValueClass());
+		PreparedData d = new PreparedData(kind, v);
 		return d;
 	}
 
-	public AccessParamsGenerator newParamsGenerator(DataKind kind) {
-		AccessPolicy policy;
-
-		if (kind.getAccessPolicy() == NodeMatch.class)
-			policy = nodeMatchProvider.get();
-		else if (kind.getAccessPolicy() == UserMatch.class)
-			policy = userMatchProvider.get();
-		else
-			throw new IllegalArgumentException("Unknown access policy " + kind.getAccessPolicy());
-
+	public ResourceIDGenerator newIDGenerator(DataKind kind) {
+		AccessPolicy policy = graph.get(kind.getPolicyClass());
 		return graph.get(policy.getParamGenerator());
+	}
+
+	public StoreKindSpecifier newDataSpecifier(DataKind kind) {
+		DataModel model = kind.getDataModel();
+
+		ValueSpecifier valSpec = graph.get(model.getSpecifierClass());
+
+		StoreKindSpecifier dataSpec = graph.get(StoreKindSpecifier.class);
+
+		dataSpec.setKind(kind);
+		dataSpec.setValueSpecifier(valSpec);
+
+		return dataSpec;
 	}
 
 	/**
@@ -166,22 +163,23 @@ public class StorageService {
 			return storeFut;
 		}
 
-		Map<Long, StoreKindData> kindData = Maps.newHashMap();
+		Map<Long, StoredKindData> kindData = Maps.newHashMap();
 
 		for (PreparedData prepared : preparedData) {
-			StoredData data = prepared.build(resourceId);
+			StoredData data = prepared.buildSigned(resourceId, cryptoHelper.newSigner());
 
-			StoreKindData kd = kindData.get(prepared.getKind().getKindId());
-
+			// Aggregate prepared data of the same kind in the same KindData
+			// object
+			StoredKindData kd = kindData.get(prepared.getKind().getKindId());
 			if (kd == null) {
-				kd = new StoreKindData(prepared.getKind(), prepared.generation, new ArrayList<StoredData>());
+				kd = new StoredKindData(prepared.getKind(), prepared.generation, new ArrayList<StoredData>());
 				kindData.put(prepared.getKind().getKindId(), kd);
 			}
 
 			kd.getValues().add(data);
 		}
 
-		Message request = msgBuilder.newMessage(new StoreRequest(resourceId, REPLICA_NUMBER, new ArrayList<StoreKindData>(kindData.values())), new DestinationList(resourceId));
+		Message request = msgBuilder.newMessage(new StoreRequest(resourceId, REPLICA_NUMBER, new ArrayList<StoredKindData>(kindData.values())), new DestinationList(resourceId));
 
 		ListenableFuture<Message> ansFut = msgRouter.sendRequestMessage(request);
 
@@ -209,10 +207,6 @@ public class StorageService {
 		// TODO send kind config update
 	}
 
-	public StoreKindDataSpecifier newDataSpecifier(DataKind kind) {
-		return new StoreKindDataSpecifier(kind);
-	}
-
 	/**
 	 * Retrieve the values corresponding to the specified resource-id that
 	 * matches the passed data specifiers. This is a blocking call, the method
@@ -238,7 +232,7 @@ public class StorageService {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public ListenableFuture<List<FetchKindResponse>> fetch(final ResourceID resourceId, StoreKindDataSpecifier... specifiers) {
+	public ListenableFuture<List<FetchKindResponse>> fetch(final ResourceID resourceId, StoreKindSpecifier... specifiers) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(specifiers);
 
@@ -312,7 +306,7 @@ public class StorageService {
 	 *             if the caller thread is interrupted while waiting for the
 	 *             response
 	 */
-	public ListenableFuture<List<StoreKindResponse>> removeData(ResourceID resourceId, StoreKindDataSpecifier dataSpecifier) {
+	public ListenableFuture<List<StoreKindResponse>> removeData(ResourceID resourceId, StoreKindSpecifier dataSpecifier) {
 		Preconditions.checkNotNull(resourceId);
 		Preconditions.checkNotNull(dataSpecifier);
 
@@ -330,12 +324,12 @@ public class StorageService {
 			for (ArrayRange r : ((ArrayValueSpecifier) modelSpec).getRanges()) {
 				for (long i = r.getStartIndex(); i < r.getEndIndex(); i++) {
 					PreparedData b = newPreparedData(kind);
-					ArrayValueBuilder preparedVal = (ArrayValueBuilder) b.getValueBuilder();
+					ArrayValue val = (ArrayValue) b.getValue();
 					if (settedIndexes.contains(i)) {
 						continue;
 					}
-					preparedVal.index(i);
-					preparedVal.value(new byte[0], false);
+					val.setIndex(i);
+					val.setValue(new byte[0], false);
 					settedIndexes.add(i);
 
 					preparedDatas.add(b);
@@ -344,16 +338,16 @@ public class StorageService {
 		} else if (modelSpec instanceof DictionaryValueSpecifier) {
 			for (byte[] k : ((DictionaryValueSpecifier) modelSpec).getKeys()) {
 				PreparedData b = newPreparedData(kind);
-				DictionaryValueBuilder preparedVal = (DictionaryValueBuilder) b.getValueBuilder();
-				preparedVal.key(k);
-				preparedVal.value(new byte[0], false);
+				DictionaryValue preparedVal = (DictionaryValue) b.getValue();
+				preparedVal.setKey(k);
+				preparedVal.setValue(new byte[0], false);
 
 				preparedDatas.add(b);
 			}
 		} else {
 			PreparedData b = newPreparedData(kind);
-			SingleValueBuilder preparedVal = (SingleValueBuilder) b.getValueBuilder();
-			preparedVal.exists(false);
+			SingleValue preparedVal = (SingleValue) b.getValue();
+			preparedVal.setExists(false);
 
 			preparedDatas.add(b);
 		}

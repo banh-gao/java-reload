@@ -1,21 +1,25 @@
 package com.github.reload.services.storage;
 
-import javax.inject.Named;
 import javax.inject.Singleton;
-import com.github.reload.crypto.Keystore;
-import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.storage.local.DataStorage;
+import com.github.reload.services.storage.local.MemoryStorage;
+import com.github.reload.services.storage.local.StorageController;
+import com.github.reload.services.storage.net.ArrayValue;
+import com.github.reload.services.storage.net.DictionaryValue;
+import com.github.reload.services.storage.net.SingleValue;
 import com.github.reload.services.storage.policies.NodeMatch;
-import com.github.reload.services.storage.policies.NodeMatch.NodeParamsGenerator;
+import com.github.reload.services.storage.policies.NodeMatch.NodeRIDGenerator;
 import com.github.reload.services.storage.policies.UserMatch;
-import com.github.reload.services.storage.policies.UserMatch.UserParamsGenerator;
+import com.github.reload.services.storage.policies.UserMatch.UserRIDGenerator;
 import dagger.Module;
 import dagger.Provides;
 
 @Module(injects = {StorageService.class, StorageController.class,
-					PreparedData.class, UserParamsGenerator.class,
-					NodeParamsGenerator.class, NodeMatch.class,
-					UserMatch.class, NodeMatch.NodeParamsGenerator.class,
-					UserMatch.UserParamsGenerator.class}, complete = false)
+					PreparedData.class, UserRIDGenerator.class,
+					NodeRIDGenerator.class, NodeMatch.class, UserMatch.class,
+					NodeMatch.NodeRIDGenerator.class,
+					UserMatch.UserRIDGenerator.class, MemoryStorage.class,
+					SingleValue.class, ArrayValue.class, DictionaryValue.class}, complete = false)
 public class StorageModule {
 
 	@Provides
@@ -26,19 +30,13 @@ public class StorageModule {
 
 	@Provides
 	@Singleton
+	DataStorage provideDataStorage() {
+		return new MemoryStorage();
+	}
+
+	@Provides
+	@Singleton
 	StorageController provideStorageController() {
 		return new StorageController();
-	}
-
-	@Provides
-	@Named("node-match")
-	AccessPolicy provideNodeMatch(TopologyPlugin topology, Keystore keystore) {
-		return new NodeMatch(topology, keystore);
-	}
-
-	@Provides
-	@Named("user-match")
-	AccessPolicy provideUserMatch(TopologyPlugin topology, Keystore keystore) {
-		return new UserMatch(topology, keystore);
 	}
 }

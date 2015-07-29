@@ -1,25 +1,35 @@
-package com.github.reload.services.storage.encoders;
+package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.encoders.DataModel.DataValue;
-import com.github.reload.services.storage.encoders.DataModel.ValueSpecifier;
-import com.github.reload.services.storage.encoders.DictionaryModel.DictionaryValueSpecifier;
-import com.github.reload.services.storage.encoders.DictionaryValue.DictionaryValueCodec;
+import com.github.reload.services.storage.DataModel.DataValue;
+import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.net.DictionaryValue.DictionaryValueCodec;
 import com.google.common.base.Objects;
 
 @ReloadCodec(DictionaryValueCodec.class)
 public class DictionaryValue implements DataValue {
 
-	private final byte[] key;
-	private final SingleValue value;
+	private byte[] key;
+	private SingleValue value = new SingleValue(new byte[0], true);
 
-	DictionaryValue(byte[] key, SingleValue value) {
+	public DictionaryValue() {
+	}
+
+	public DictionaryValue(byte[] key, SingleValue value) {
 		this.key = key;
 		this.value = value;
+	}
+
+	public void setKey(byte[] key) {
+		this.key = key;
+	}
+
+	public void setValue(byte[] value, boolean exists) {
+		this.value = new SingleValue(value, exists);
 	}
 
 	public byte[] getKey() {
@@ -109,7 +119,9 @@ public class DictionaryValue implements DataValue {
 
 	@Override
 	public ValueSpecifier getMatchingSpecifier() {
-		return new DictionaryValueSpecifier().addKey(key);
+		DictionaryValueSpecifier s = new DictionaryValueSpecifier();
+		s.addKey(key);
+		return s;
 	}
 
 }

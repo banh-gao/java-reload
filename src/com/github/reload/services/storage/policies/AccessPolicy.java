@@ -1,4 +1,4 @@
-package com.github.reload.services.storage;
+package com.github.reload.services.storage.policies;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,9 +11,8 @@ import com.github.reload.net.encoders.content.Error.ErrorMessageException;
 import com.github.reload.net.encoders.content.Error.ErrorType;
 import com.github.reload.net.encoders.header.ResourceID;
 import com.github.reload.net.encoders.secBlock.SignerIdentity;
-import com.github.reload.services.storage.encoders.StoredData;
-import com.github.reload.services.storage.policies.NodeMatch;
-import com.github.reload.services.storage.policies.UserMatch;
+import com.github.reload.services.storage.DataKind;
+import com.github.reload.services.storage.local.StoredData;
 
 /**
  * An access control policy used by data kinds that determines if a store
@@ -53,7 +52,7 @@ public abstract class AccessPolicy {
 		return clazz.getAnnotation(PolicyName.class).value().toLowerCase();
 	}
 
-	public Class<? extends AccessParamsGenerator> getParamGenerator() {
+	public Class<? extends ResourceIDGenerator> getParamGenerator() {
 		return this.getClass().getAnnotation(PolicyName.class).paramGen();
 	}
 
@@ -104,7 +103,7 @@ public abstract class AccessPolicy {
 	 * Generate the parameters in conformity to an access control policy
 	 * 
 	 */
-	public interface AccessParamsGenerator {
+	public interface ResourceIDGenerator {
 
 	}
 
@@ -114,6 +113,6 @@ public abstract class AccessPolicy {
 
 		public String value();
 
-		public Class<? extends AccessParamsGenerator> paramGen();
+		public Class<? extends ResourceIDGenerator> paramGen();
 	}
 }
