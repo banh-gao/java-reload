@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import com.github.reload.Service;
-import com.github.reload.components.ComponentsContext.CompStart;
+import com.github.reload.Service.OnLoaded;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -82,7 +82,7 @@ public class StorageService {
 	@Inject
 	CryptoHelper cryptoHelper;
 
-	@CompStart
+	@OnLoaded
 	private void loadController() {
 		// FIXME: ctx.startComponent(StorageController.class);
 	}

@@ -1,6 +1,7 @@
 package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
+import javax.inject.Inject;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -15,8 +16,9 @@ public class ArrayValue implements DataValue {
 	private static final long LAST_INDEX = 0xffffffffl;
 
 	private long index = 0;
-	private SingleValue value = new SingleValue(new byte[0], false);
+	private SingleValue value = new SingleValue();
 
+	@Inject
 	public ArrayValue() {
 	}
 

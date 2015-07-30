@@ -2,6 +2,7 @@ package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
+import javax.inject.Inject;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.encoders.Codec;
 import com.github.reload.net.encoders.Codec.ReloadCodec;
@@ -15,6 +16,12 @@ public class SingleValue implements DataValue {
 
 	private boolean exists;
 	private byte[] value;
+
+	@Inject
+	public SingleValue() {
+		exists = false;
+		value = new byte[0];
+	}
 
 	public SingleValue(byte[] value, boolean exists) {
 		this.value = value;

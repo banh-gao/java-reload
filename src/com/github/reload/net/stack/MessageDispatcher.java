@@ -19,15 +19,15 @@ import com.github.reload.net.encoders.Message;
 public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 
 	@Inject
-	@Named("packetLooper")
-	Executor packetLooper;
+	@Named("packetsLooper")
+	Executor packetsLooper;
 
 	@Inject
 	MessageHandlersManager msgHandlers;
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		packetLooper.execute(new Runnable() {
+		packetsLooper.execute(new Runnable() {
 
 			@Override
 			public void run() {

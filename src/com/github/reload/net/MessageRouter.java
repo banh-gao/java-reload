@@ -48,7 +48,7 @@ public class MessageRouter {
 	public MessageRouter(ConnectionManager connManager, MessageBuilder msgBuilder, TopologyPlugin topology, Executor exec) {
 		this.connManager = connManager;
 		this.msgBuilder = msgBuilder;
-		this.routingTable = topology.getRoutngTable();
+		this.routingTable = topology.getRoutingTable();
 		this.exec = exec;
 	}
 

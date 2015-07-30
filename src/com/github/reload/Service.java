@@ -4,13 +4,18 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import com.github.reload.services.storage.net.DictionaryValue;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import com.github.reload.Service.OnLoaded;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Service {
 
 	Class<?>[] value();
+
+	public @interface OnLoaded {
+	}
 }
 
 class ServiceLoader {
@@ -39,9 +44,9 @@ class ServiceLoader {
 
 		T instance = coreModule.graph.get(service);
 
-		System.out.println(coreModule.graph.get(DictionaryValue.class));
-
 		coreModule.graph.inject(instance);
+
+		startService(instance);
 
 		return instance;
 	}
@@ -67,11 +72,18 @@ class ServiceLoader {
 	 */
 	private void loadModules(Class<?> clazz) {
 		Service ann = clazz.getAnnotation(Service.class);
-		for (Class<?> mod : ann.value()) {
-			try {
-				coreModule.graph = coreModule.graph.plus(mod.newInstance());
-			} catch (InstantiationException | IllegalAccessException e) {
-				throw new IllegalArgumentException(e);
+		coreModule.loadModules(ann.value());
+	}
+
+	private void startService(Object service) {
+		for (Method m : service.getClass().getMethods()) {
+			if (m.isAnnotationPresent(OnLoaded.class)) {
+				try {
+					m.invoke(service);
+				} catch (IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

@@ -1,7 +1,6 @@
 package com.github.reload;
 
 import java.net.InetSocketAddress;
-import javax.inject.Inject;
 import org.apache.log4j.PropertyConfigurator;
 import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
@@ -38,12 +37,14 @@ public class Overlay {
 	private OverlayConnector connector;
 	private ServiceLoader serviceLoader;
 
+	private TopologyPlugin topology;
+
 	// Used only for testing
 	ObjectGraph graph;
 
-	@Inject
 	public Overlay(ConnectionManager connMgr, TopologyPlugin topology) {
 		connector = new OverlayConnector(this, topology, connMgr);
+		this.topology = topology;
 	}
 
 	void init(Bootstrap bootstrap, CoreModule coreModule) {
@@ -53,6 +54,8 @@ public class Overlay {
 		isClientMode = bootstrap.isClientMode();
 		localNodeId = bootstrap.getLocalNodeId();
 		joinData = bootstrap.getJoinData();
+
+		coreModule.graph.inject(topology);
 
 		serviceLoader = new ServiceLoader(coreModule);
 	}

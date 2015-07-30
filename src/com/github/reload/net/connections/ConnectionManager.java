@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.log4j.Logger;
 import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.components.ComponentsContext.CompStop;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -51,8 +50,8 @@ public class ConnectionManager {
 	MessageDispatcher msgDispatcher;
 
 	@Inject
-	@Named("packetLooper")
-	Executor packetLooper;
+	@Named("packetsLooper")
+	Executor packetsLooper;
 
 	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
@@ -65,8 +64,7 @@ public class ConnectionManager {
 		this.keystore = keystore;
 	}
 
-	@CompStart
-	private void start(InetSocketAddress localAddress) throws Exception {
+	public void startServer(InetSocketAddress localAddress) {
 		serverStatusHandler = new ServerStatusHandler(this);
 		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
 		b.setLocalAddress(localAddress);
@@ -113,7 +111,7 @@ public class ConnectionManager {
 						@Override
 						public void operationComplete(Future<Channel> future) throws Exception {
 
-							packetLooper.execute(new Runnable() {
+							packetsLooper.execute(new Runnable() {
 
 								@Override
 								public void run() {
@@ -150,7 +148,7 @@ public class ConnectionManager {
 
 			@Override
 			public void operationComplete(final Future<Channel> future) throws Exception {
-				packetLooper.execute(new Runnable() {
+				packetsLooper.execute(new Runnable() {
 
 					@Override
 					public void run() {

@@ -14,7 +14,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import java.net.InetSocketAddress;
-import java.security.NoSuchAlgorithmException;
 import javax.inject.Inject;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.components.ComponentsContext;
@@ -70,7 +69,7 @@ public class ReloadStackBuilder {
 		bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
 	}
 
-	public void setLinkType(OverlayLinkType linkType) throws NoSuchAlgorithmException {
+	public void setLinkType(OverlayLinkType linkType) {
 		this.linkType = linkType;
 	}
 
@@ -78,7 +77,7 @@ public class ReloadStackBuilder {
 		this.localAddress = localAddress;
 	}
 
-	public ReloadStack buildStack() throws InterruptedException {
+	public ReloadStack buildStack() {
 		if (linkType == null)
 			throw new IllegalStateException();
 
@@ -88,7 +87,11 @@ public class ReloadStackBuilder {
 			localAddress = new InetSocketAddress(0);
 		}
 
-		return new ReloadStack(bootstrap.bind(localAddress).sync().channel());
+		try {
+			return new ReloadStack(bootstrap.bind(localAddress).sync().channel());
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected void initPipeline() {

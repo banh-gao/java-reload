@@ -35,8 +35,12 @@ public class TestConfiguration implements Configuration {
 
 	private final Map<AttributeKey<?>, Object> conf = new HashMap<AttributeKey<?>, Object>();
 
-	public TestConfiguration() throws Exception {
-		set(ROOT_CERTS, Collections.singletonList((X509Certificate) loadLocalCert("CAcert.der")));
+	public TestConfiguration() {
+		try {
+			set(ROOT_CERTS, Collections.singletonList((X509Certificate) loadLocalCert("CAcert.der")));
+		} catch (FileNotFoundException | CertificateException e) {
+			e.printStackTrace();
+		}
 		set(OVERLAY_NAME, "testOverlay.com");
 		set(MAX_MESSAGE_SIZE, 5000);
 		set(NODE_ID_LENGTH, 16);

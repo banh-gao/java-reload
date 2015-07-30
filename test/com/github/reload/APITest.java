@@ -2,24 +2,29 @@ package com.github.reload;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import com.github.reload.TestFactory.TestBootstrap;
+import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.routing.TopologyPluginFactory;
 
 public abstract class APITest {
 
 	public static NodeID TEST_NODEID = NodeID.valueOf("f16a536ca4028b661fcb864a075f3871");
 
+	public static final Configuration CONF = new TestConfiguration();
+
 	public static Overlay overlay;
+
+	static {
+		BootstrapFactory.register(new TestFactory());
+	}
 
 	@BeforeClass
 	public static void init() throws Exception {
-		BootstrapFactory.register(new TestFactory());
-		TopologyPluginFactory.register(TestPlugin.NAME, TestPlugin.class);
-
-		Bootstrap b = BootstrapFactory.newBootstrap(new TestConfiguration());
+		Bootstrap b = BootstrapFactory.newBootstrap(CONF);
 
 		b.setLocalAddress(TestConfiguration.BOOTSTRAP_ADDR);
+
 		b.setLocalNodeId(TEST_NODEID);
 		b.setLocalCert(TestBootstrap.loadCert("certs/peer0_cert.der"));
 		b.setLocalKey(TestBootstrap.loadPrivateKey("privKeys/peer0_key.der", SignatureAlgorithm.RSA));

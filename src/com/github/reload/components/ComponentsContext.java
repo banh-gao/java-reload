@@ -30,16 +30,6 @@ public class ComponentsContext {
 	}
 
 	/**
-	 * The annotated method will be called when the component can start to
-	 * operate.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface CompStart {
-
-	}
-
-	/**
 	 * The annotated method will be called when the component have to stop its
 	 * internal operations.
 	 */

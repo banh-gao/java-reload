@@ -50,15 +50,16 @@ public abstract class BootstrapFactory {
 	 * @throws ConfigurationException
 	 */
 	public static Bootstrap newBootstrap(Configuration c) throws NoSuchFactoryException {
-		return getInstance(c).createBootstrap(c);
-	}
+		BootstrapFactory factory = null;
 
-	private static BootstrapFactory getInstance(Configuration conf) throws NoSuchFactoryException {
-		for (BootstrapFactory f : bootstrapFactories) {
-			if (f.isCompatibleWith(conf))
-				return f;
-		}
-		throw new NoSuchFactoryException(conf.get(Configuration.OVERLAY_NAME));
+		for (BootstrapFactory f : bootstrapFactories)
+			if (f.isCompatibleWith(c))
+				factory = f;
+
+		if (factory == null)
+			throw new NoSuchFactoryException(c.get(Configuration.OVERLAY_NAME));
+
+		return factory.createBootstrap(c);
 	}
 
 	/**

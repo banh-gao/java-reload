@@ -2,10 +2,11 @@ package com.github.reload;
 
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.github.reload.conf.Configuration;
-import com.github.reload.crypto.CryptoModule;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.NetModule;
 import com.github.reload.net.encoders.header.NodeID;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
@@ -38,6 +39,10 @@ public abstract class Bootstrap {
 
 	public Configuration getConfiguration() {
 		return conf;
+	}
+
+	protected List<Object> getProviderModules() {
+		return Collections.emptyList();
 	}
 
 	/**
@@ -139,8 +144,12 @@ public abstract class Bootstrap {
 	 * Connects to the overlay
 	 */
 	public final ListenableFuture<Overlay> connect() {
-		CoreModule coreModule = new CoreModule(conf);
-		ObjectGraph g = ObjectGraph.create(coreModule, new NetModule(), new CryptoModule(this));
+		List<Object> modules = new ArrayList<Object>();
+		CoreModule coreModule = new CoreModule();
+		modules.add(coreModule);
+		modules.addAll(getProviderModules());
+
+		ObjectGraph g = ObjectGraph.create(modules.toArray());
 
 		// Allow services to get a reference injection of the graph itself
 		coreModule.graph = g;

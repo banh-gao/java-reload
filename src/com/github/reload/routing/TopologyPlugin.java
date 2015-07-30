@@ -15,6 +15,8 @@ import com.google.common.util.concurrent.ListenableFuture;
  */
 public interface TopologyPlugin {
 
+	public void startAgent();
+
 	/**
 	 * Requests to join into the overlay through the given admitting peer
 	 * 
@@ -64,5 +66,5 @@ public interface TopologyPlugin {
 
 	public void requestReplication(ResourceID resourceId);
 
-	public RoutingTable getRoutngTable();
+	public RoutingTable getRoutingTable();
 }

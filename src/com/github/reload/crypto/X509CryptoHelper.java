@@ -2,6 +2,7 @@ package com.github.reload.crypto;
 
 import java.net.Socket;
 import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
@@ -19,7 +20,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
-import com.github.reload.components.ComponentsContext.CompStart;
 import com.github.reload.conf.Configuration;
 import com.github.reload.net.encoders.secBlock.HashAlgorithm;
 import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
@@ -31,22 +31,22 @@ import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
  */
 public class X509CryptoHelper extends CryptoHelper {
 
-	Configuration conf;
-	Keystore keystore;
-
-	private SSLContext sslContext;
+	private final Configuration conf;
+	private final Keystore keystore;
+	private final SSLContext sslContext;
 
 	public X509CryptoHelper(Keystore keystore, Configuration conf, HashAlgorithm signHashAlg, SignatureAlgorithm signAlg, HashAlgorithm certHashAlg) {
 		super(keystore, conf, signHashAlg, signAlg, certHashAlg);
 
 		this.keystore = keystore;
 		this.conf = conf;
-	}
 
-	@CompStart
-	public void start() throws Exception {
-		sslContext = SSLContext.getInstance("TLS");
-		sslContext.init(new KeyManager[]{new X509LocalKeyManager()}, new TrustManager[]{new X509LocalTrustManager()}, new SecureRandom());
+		try {
+			sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(new KeyManager[]{new X509LocalKeyManager()}, new TrustManager[]{new X509LocalTrustManager()}, new SecureRandom());
+		} catch (KeyManagementException | NoSuchAlgorithmException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	@Override
