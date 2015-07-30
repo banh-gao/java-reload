@@ -4,10 +4,10 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.header.NodeID;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.header.NodeID;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.net.StoreKindResponse.StoreKindResponseCodec;
 
@@ -49,7 +49,7 @@ public class StoreKindResponse {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<NodeID> nodeIdCodec;
 
-		public StoreKindResponseCodec(ComponentsContext ctx) {
+		public StoreKindResponseCodec(ObjectGraph ctx) {
 			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 			nodeIdCodec = getCodec(NodeID.class);
@@ -88,7 +88,7 @@ public class StoreKindResponse {
 			return new StoreKindResponse(kind, genCounter, replicas);
 		}
 
-		private List<NodeID> decodeReplicas(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+		private List<NodeID> decodeReplicas(ByteBuf buf) throws com.github.reload.net.codecs.Codec.CodecException {
 			ByteBuf replicasFld = readField(buf, REPLICAS_LENGTH_FIELD);
 
 			List<NodeID> replicas = new ArrayList<NodeID>();

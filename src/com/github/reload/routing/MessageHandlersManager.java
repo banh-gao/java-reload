@@ -1,4 +1,4 @@
-package com.github.reload.components;
+package com.github.reload.routing;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,17 +7,25 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.content.ContentType;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.content.ContentType;
 import com.google.common.collect.Maps;
 
+@Singleton
 public class MessageHandlersManager {
 
 	private static final Logger l = Logger.getRootLogger();
 
 	private final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private MessageHandlerMethod answerHandler;
+
+	@Inject
+	public MessageHandlersManager() {
+		// TODO Auto-generated constructor stub
+	}
 
 	// FIXME: register message handlers
 	public void registerMessageHandler(Object obj) {

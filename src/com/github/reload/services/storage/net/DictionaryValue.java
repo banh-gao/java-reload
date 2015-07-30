@@ -3,9 +3,9 @@ package com.github.reload.services.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import javax.inject.Inject;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.net.DictionaryValue.DictionaryValueCodec;
@@ -80,7 +80,7 @@ public class DictionaryValue implements DataValue {
 
 		private final Codec<SingleValue> valueCodec;
 
-		public DictionaryValueCodec(ComponentsContext ctx) {
+		public DictionaryValueCodec(ObjectGraph ctx) {
 			super(ctx);
 			valueCodec = getCodec(SingleValue.class);
 		}

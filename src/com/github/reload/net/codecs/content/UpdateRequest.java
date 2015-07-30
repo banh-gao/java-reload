@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.UpdateRequest.UpdateRequestCodec;
@@ -26,7 +26,7 @@ public class UpdateRequest extends Content {
 
 	static class UpdateRequestCodec extends Codec<UpdateRequest> {
 
-		public UpdateRequestCodec(ComponentsContext ctx) {
+		public UpdateRequestCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

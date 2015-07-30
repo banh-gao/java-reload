@@ -4,22 +4,24 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
 import com.github.reload.Overlay;
 import com.github.reload.conf.Configuration;
+import com.github.reload.net.ConnectionManager;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.ForwardMessage;
-import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.OpaqueID;
-import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.codecs.ForwardMessage;
+import com.github.reload.net.codecs.content.Error.ErrorType;
+import com.github.reload.net.codecs.header.DestinationList;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.header.OpaqueID;
+import com.github.reload.net.codecs.header.RoutableID;
 import com.github.reload.routing.PathCompressor;
 import com.github.reload.routing.PathCompressor.UnknownOpaqueIdException;
 import com.github.reload.routing.TopologyPlugin;
 
 @Sharable
+@Singleton
 public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 
 	private static final Logger l = Logger.getRootLogger();
@@ -41,6 +43,10 @@ public class ForwardingHandler extends ChannelInboundHandlerAdapter {
 
 	@Inject
 	PathCompressor compressor;
+
+	@Inject
+	public ForwardingHandler() {
+	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

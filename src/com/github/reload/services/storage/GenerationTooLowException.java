@@ -2,11 +2,11 @@ package com.github.reload.services.storage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.CodecException;
-import com.github.reload.net.encoders.Header;
-import com.github.reload.net.encoders.content.Error.ErrorMessageException;
-import com.github.reload.net.encoders.content.Error.ErrorType;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Header;
+import com.github.reload.net.codecs.Codec.CodecException;
+import com.github.reload.net.codecs.content.Error.ErrorMessageException;
+import com.github.reload.net.codecs.content.Error.ErrorType;
 import com.github.reload.services.storage.net.StoreAnswer;
 
 /**

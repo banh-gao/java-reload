@@ -2,10 +2,10 @@ package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.header.ResourceID;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.content.ContentType;
+import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.services.storage.net.StatRequest.StatRequestCodec;
 
 @ReloadCodec(StatRequestCodec.class)
@@ -22,12 +22,12 @@ public class StatRequest extends FetchRequest {
 
 	static class StatRequestCodec extends FetchRequestCodec {
 
-		public StatRequestCodec(ComponentsContext ctx) {
+		public StatRequestCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 
 		@Override
-		public FetchRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public FetchRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			FetchRequest req = super.decode(buf, params);
 			return new StatRequest(req.getResourceId(), req.getSpecifiers());
 		}

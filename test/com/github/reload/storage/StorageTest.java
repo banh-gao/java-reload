@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.github.reload.APITest;
 import com.github.reload.TestConfiguration;
-import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.services.storage.PreparedData;
 import com.github.reload.services.storage.StorageService;
 import com.github.reload.services.storage.net.ArrayValue;

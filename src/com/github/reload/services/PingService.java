@@ -3,12 +3,12 @@ package com.github.reload.services;
 import java.math.BigInteger;
 import java.util.Random;
 import javax.inject.Inject;
-import com.github.reload.components.MessageHandlersManager.MessageHandler;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder;
-import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.PingAnswer;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.MessageBuilder;
+import com.github.reload.net.codecs.content.ContentType;
+import com.github.reload.net.codecs.content.PingAnswer;
+import com.github.reload.routing.MessageHandlersManager.MessageHandler;
 
 /**
  * Answers remote peers ping requests

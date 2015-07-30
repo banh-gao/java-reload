@@ -6,22 +6,23 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import com.github.reload.components.MessageHandlersManager.MessageHandler;
-import com.github.reload.net.connections.Connection;
-import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.ForwardMessage;
-import com.github.reload.net.encoders.Header;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder;
-import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.Error;
-import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.RoutableID;
-import com.github.reload.routing.RoutingTable;
+import com.github.reload.net.ConnectionManager.Connection;
+import com.github.reload.net.codecs.ForwardMessage;
+import com.github.reload.net.codecs.Header;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.MessageBuilder;
+import com.github.reload.net.codecs.content.Content;
+import com.github.reload.net.codecs.content.ContentType;
+import com.github.reload.net.codecs.content.Error;
+import com.github.reload.net.codecs.content.Error.ErrorType;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.header.RoutableID;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.routing.MessageHandlersManager.MessageHandler;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -31,26 +32,25 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Send the outgoing messages to neighbor nodes by using the routing table
  */
+@Singleton
 public class MessageRouter {
 
 	private final Logger l = Logger.getRootLogger();
 
-	private final ConnectionManager connManager;
+	@Inject
+	ConnectionManager connManager;
 
-	private final MessageBuilder msgBuilder;
+	@Inject
+	MessageBuilder msgBuilder;
 
-	private final RoutingTable routingTable;
+	@Inject
+	TopologyPlugin topology;
 
-	private final Executor exec;
+	@Inject
+	@Named("packetsLooper")
+	Executor exec;
 
 	private final RequestManager reqManager = new RequestManager();
-
-	public MessageRouter(ConnectionManager connManager, MessageBuilder msgBuilder, TopologyPlugin topology, Executor exec) {
-		this.connManager = connManager;
-		this.msgBuilder = msgBuilder;
-		this.routingTable = topology.getRoutingTable();
-		this.exec = exec;
-	}
 
 	/**
 	 * Send the given request message to the destination node into the overlay.
@@ -106,7 +106,7 @@ public class MessageRouter {
 		if (dest instanceof NodeID && isDirectlyConnected((NodeID) dest))
 			return Collections.singleton((NodeID) dest);
 		else
-			return routingTable.getNextHops(dest);
+			return topology.getRoutingTable().getNextHops(dest);
 	}
 
 	private boolean isDirectlyConnected(NodeID nextDest) {

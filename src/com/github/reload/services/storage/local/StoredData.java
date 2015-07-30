@@ -7,13 +7,13 @@ import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.crypto.Signer;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.CodecException;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.secBlock.Signature;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.CodecException;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.header.ResourceID;
+import com.github.reload.net.codecs.secBlock.Signature;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.DataModel.DataValue;
@@ -152,13 +152,13 @@ public class StoredData {
 
 		private final Codec<Signature> signatureCodec;
 
-		public StoredDataCodec(ComponentsContext ctx) {
+		public StoredDataCodec(ObjectGraph ctx) {
 			super(ctx);
 			signatureCodec = getCodec(Signature.class);
 		}
 
 		@Override
-		public void encode(StoredData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(StoredData obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 
 			byte[] storageTimeBytes = Codec.toUnsigned(obj.storageTime);
@@ -181,7 +181,7 @@ public class StoredData {
 		}
 
 		@Override
-		public StoredData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public StoredData decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			if (params.length < 1 || !(params[0] instanceof DataModel))
 				throw new IllegalStateException("Data model needed to decode a stored data");
 

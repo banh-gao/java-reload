@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.header.NodeID;
@@ -54,7 +54,7 @@ public class CertHashNodeIdSignerIdentityValue extends SignerIdentityValue {
 
 		private final int CERT_HASH_NODEID_LENGTH_FIELD = U_INT8;
 
-		public CertHashNodeIdSignerIdentityValueCodec(ComponentsContext ctx) {
+		public CertHashNodeIdSignerIdentityValueCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.secBlock.SignerIdentity;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 /**

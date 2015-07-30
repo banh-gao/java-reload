@@ -4,12 +4,12 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.header.ResourceID;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.content.Content;
+import com.github.reload.net.codecs.content.ContentType;
+import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.services.storage.local.StoredKindData;
 import com.github.reload.services.storage.net.StoreRequest.StoreRequestCodec;
 
@@ -50,14 +50,14 @@ public class StoreRequest extends Content {
 		private final Codec<ResourceID> resIdCodec;
 		private final Codec<StoredKindData> storeKindDataCodec;
 
-		public StoreRequestCodec(ComponentsContext ctx) {
+		public StoreRequestCodec(ObjectGraph ctx) {
 			super(ctx);
 			resIdCodec = getCodec(ResourceID.class);
 			storeKindDataCodec = getCodec(StoredKindData.class);
 		}
 
 		@Override
-		public void encode(StoreRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(StoreRequest obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			resIdCodec.encode(obj.resourceId, buf);
 
 			buf.writeByte(obj.replicaNumber);
@@ -72,14 +72,14 @@ public class StoreRequest extends Content {
 		}
 
 		@Override
-		public StoreRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public StoreRequest decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			ResourceID resId = resIdCodec.decode(buf);
 			short replicaNumber = buf.readUnsignedByte();
 			List<StoredKindData> kindData = decodeKindDataList(buf);
 			return new StoreRequest(resId, replicaNumber, kindData);
 		}
 
-		private List<StoredKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+		private List<StoredKindData> decodeKindDataList(ByteBuf buf) throws com.github.reload.net.codecs.Codec.CodecException {
 			List<StoredKindData> out = new ArrayList<StoredKindData>();
 
 			ByteBuf kindData = readField(buf, STOREDKINDDATA_LENGTH_FIELD);

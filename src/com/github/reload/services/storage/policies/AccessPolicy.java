@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.net.encoders.content.Error.ErrorMessageException;
-import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.net.codecs.content.Error.ErrorMessageException;
+import com.github.reload.net.codecs.content.Error.ErrorType;
+import com.github.reload.net.codecs.header.ResourceID;
+import com.github.reload.net.codecs.secBlock.SignerIdentity;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.local.StoredData;
 

@@ -2,7 +2,7 @@ package com.github.reload.net.codecs.secBlock;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.secBlock.SignatureAlgorithm.SignatureAlgorithmCodec;
@@ -42,7 +42,7 @@ public enum SignatureAlgorithm {
 
 	static class SignatureAlgorithmCodec extends Codec<SignatureAlgorithm> {
 
-		public SignatureAlgorithmCodec(ComponentsContext ctx) {
+		public SignatureAlgorithmCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

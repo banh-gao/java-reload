@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.ObjectGraph;
 

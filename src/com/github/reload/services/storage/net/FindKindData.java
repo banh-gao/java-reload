@@ -2,10 +2,10 @@ package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.header.ResourceID;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.net.FindKindData.FindKindDataCodec;
 
@@ -69,7 +69,7 @@ public class FindKindData {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<ResourceID> resIdCodec;
 
-		public FindKindDataCodec(ComponentsContext ctx) {
+		public FindKindDataCodec(ObjectGraph ctx) {
 			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 			resIdCodec = getCodec(ResourceID.class);

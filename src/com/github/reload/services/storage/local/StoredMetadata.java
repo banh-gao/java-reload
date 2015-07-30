@@ -2,10 +2,10 @@ package com.github.reload.services.storage.local;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.secBlock.Signature;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.secBlock.Signature;
 import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.DataModel.Metadata;
 import com.github.reload.services.storage.local.StoredMetadata.StoredMetadataCodec;
@@ -22,13 +22,13 @@ public class StoredMetadata extends StoredData {
 		private static final int STORAGE_TIME_FIELD = U_INT64;
 		private static final int DATA_LENGTH_FIELD = U_INT32;
 
-		public StoredMetadataCodec(ComponentsContext ctx) {
+		public StoredMetadataCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(StoredMetadata obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			Field lenFld = allocateField(buf, DATA_LENGTH_FIELD);
 
 			byte[] storTimeBytes = toUnsigned(obj.getStorageTime());
@@ -46,7 +46,7 @@ public class StoredMetadata extends StoredData {
 		}
 
 		@Override
-		public StoredMetadata decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public StoredMetadata decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			if (params.length < 1 || !(params[0] instanceof DataModel))
 				throw new IllegalArgumentException("Data type needed to decode a stored data");
 

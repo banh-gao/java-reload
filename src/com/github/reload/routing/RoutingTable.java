@@ -1,8 +1,8 @@
 package com.github.reload.routing;
 
 import java.util.Set;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.header.RoutableID;
 
 /**
  * Routing table of the neighbor nodes managed by the topology plugin.

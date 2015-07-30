@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.ProbeRequest.ProbeRequestCodec;
@@ -68,7 +68,7 @@ public class ProbeRequest extends Content {
 
 		private static final int LIST_LENGTH_FIELD = U_INT8;
 
-		public ProbeRequestCodec(ComponentsContext ctx) {
+		public ProbeRequestCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

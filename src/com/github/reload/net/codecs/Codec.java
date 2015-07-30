@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.Map;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
 import com.google.common.collect.Maps;
+import dagger.ObjectGraph;
 
 /**
  * Encode and decode the object on the given buffer
@@ -65,7 +65,7 @@ public abstract class Codec<T> {
 	 */
 	public static final int U_INT128 = 16;
 
-	protected final ComponentsContext ctx;
+	protected final ObjectGraph ctx;
 
 	protected final Map<Class<?>, Codec<?>> codecs = Maps.newHashMap();
 
@@ -76,7 +76,7 @@ public abstract class Codec<T> {
 	 * 
 	 * @param ctx
 	 */
-	public Codec(ComponentsContext ctx) {
+	public Codec(ObjectGraph ctx) {
 		this.ctx = ctx;
 	}
 
@@ -117,7 +117,7 @@ public abstract class Codec<T> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Codec<T> getCodec(Class<T> clazz, ComponentsContext ctx) {
+	public static <T> Codec<T> getCodec(Class<T> clazz, ObjectGraph ctx) {
 		ReloadCodec codecAnn = clazz.getAnnotation(ReloadCodec.class);
 		if (codecAnn == null)
 			throw new IllegalStateException("No codec associated with " + clazz.toString());
@@ -125,7 +125,7 @@ public abstract class Codec<T> {
 		Class<? extends Codec<T>> codecClass = (Class<? extends Codec<T>>) codecAnn.value();
 
 		try {
-			Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(ComponentsContext.class);
+			Constructor<? extends Codec<?>> codecConstr = codecClass.getConstructor(ObjectGraph.class);
 			codecConstr.setAccessible(true);
 			return (Codec<T>) codecConstr.newInstance(ctx);
 		} catch (Exception e) {

@@ -1,8 +1,8 @@
 package com.github.reload.net.ice;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.ice.IPAddressPort.AddressType;
 
 class IPAddressPortCodec extends Codec<IPAddressPort> {
@@ -12,14 +12,14 @@ class IPAddressPortCodec extends Codec<IPAddressPort> {
 	private final Codec<IPv4AddressPort> ip4codec;
 	private final Codec<IPv6AddressPort> ip6codec;
 
-	public IPAddressPortCodec(ComponentsContext ctx) {
+	public IPAddressPortCodec(ObjectGraph ctx) {
 		super(ctx);
 		ip4codec = getCodec(IPv4AddressPort.class);
 		ip6codec = getCodec(IPv6AddressPort.class);
 	}
 
 	@Override
-	public void encode(IPAddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+	public void encode(IPAddressPort obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 		buf.writeByte(obj.getAddressType().code);
 		Field lenFld = allocateField(buf, ADDR_LENGTH_FIELD);
 

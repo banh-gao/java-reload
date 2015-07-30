@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.secBlock;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.secBlock.NoneSignerIndentityValue.NoneSignerIdentityValueCodec;
@@ -21,7 +21,7 @@ class NoneSignerIndentityValue extends SignerIdentityValue {
 
 	static class NoneSignerIdentityValueCodec extends Codec<NoneSignerIndentityValue> {
 
-		public NoneSignerIdentityValueCodec(ComponentsContext ctx) {
+		public NoneSignerIdentityValueCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

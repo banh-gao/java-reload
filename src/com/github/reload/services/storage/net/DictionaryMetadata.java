@@ -2,10 +2,10 @@ package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.Metadata;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
@@ -51,7 +51,7 @@ public class DictionaryMetadata implements Metadata {
 
 		private final Codec<SingleMetadata> singleCodec;
 
-		public DictionaryMetadataCodec(ComponentsContext ctx) {
+		public DictionaryMetadataCodec(ObjectGraph ctx) {
 			super(ctx);
 			singleCodec = getCodec(SingleMetadata.class);
 		}

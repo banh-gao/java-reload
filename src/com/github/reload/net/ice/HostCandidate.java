@@ -4,21 +4,24 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.stack.LinkHandler;
+import com.github.reload.net.stack.SRLinkHandler;
 
 @ReloadCodec(HostCandidateCodec.class)
 public class HostCandidate {
 
 	public enum OverlayLinkType {
-		DTLS_UDP_SR((byte) 1, "DTLS", true),
-		DTLS_UDP_SR_NO_ICE((byte) 3, "DTLS", false),
-		TLS_TCP_FH_NO_ICE((byte) 4, "TLS", false);
+		DTLS_UDP_SR((byte) 1, "DTLS", true, null),
+		DTLS_UDP_SR_NO_ICE((byte) 3, "DTLS", false, null),
+		TLS_TCP_FH_NO_ICE((byte) 4, "TLS", false, SRLinkHandler.class);
 
 		final byte code;
 		final String linkProtocol;
 		boolean useICE;
+		Class<? extends LinkHandler> handler;
 
-		OverlayLinkType(byte code, String linkProtocol, boolean useICE) {
+		OverlayLinkType(byte code, String linkProtocol, boolean useICE, Class<? extends LinkHandler> handler) {
 			this.code = code;
 			this.linkProtocol = linkProtocol;
 			this.useICE = useICE;
@@ -34,6 +37,10 @@ public class HostCandidate {
 
 		public boolean isUseICE() {
 			return useICE;
+		}
+
+		public Class<? extends LinkHandler> getHandler() {
+			return handler;
 		}
 
 		public static OverlayLinkType valueOf(byte code) {

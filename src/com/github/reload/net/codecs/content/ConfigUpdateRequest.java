@@ -2,7 +2,7 @@ package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.ConfigUpdateRequest.ConfUpdateReqCodec;
@@ -52,7 +52,7 @@ public class ConfigUpdateRequest extends Content {
 
 		private static final int CONF_LENGTH_FIELD = U_INT24;
 
-		public ConfUpdateReqCodec(ComponentsContext ctx) {
+		public ConfUpdateReqCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

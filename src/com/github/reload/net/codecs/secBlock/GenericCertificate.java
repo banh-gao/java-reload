@@ -13,7 +13,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.secBlock.GenericCertificate.GenericCertificateCodec;
@@ -98,7 +98,7 @@ public class GenericCertificate extends Certificate {
 
 		private static final int CERT_LENGTH_FIELD = U_INT16;
 
-		public GenericCertificateCodec(ComponentsContext ctx) {
+		public GenericCertificateCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

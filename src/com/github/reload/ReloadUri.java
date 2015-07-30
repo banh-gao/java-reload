@@ -5,9 +5,9 @@ import io.netty.buffer.UnpooledByteBufAllocator;
 import java.net.URI;
 import java.net.URISyntaxException;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.CodecException;
-import com.github.reload.net.encoders.header.DestinationList;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.CodecException;
+import com.github.reload.net.codecs.header.DestinationList;
 import com.github.reload.services.storage.net.StoreKindSpecifier;
 
 /**

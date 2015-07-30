@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.header;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.header.UnknownForwardingOption.UnknownForwardingOptionCodec;
@@ -18,7 +18,7 @@ public class UnknownForwardingOption extends ForwardingOption {
 
 	static class UnknownForwardingOptionCodec extends Codec<UnknownForwardingOption> {
 
-		public UnknownForwardingOptionCodec(ComponentsContext ctx) {
+		public UnknownForwardingOptionCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

@@ -3,7 +3,7 @@ package com.github.reload.services.storage;
 import java.math.BigInteger;
 import java.util.Date;
 import com.github.reload.crypto.Signer;
-import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.local.StoredData;
 

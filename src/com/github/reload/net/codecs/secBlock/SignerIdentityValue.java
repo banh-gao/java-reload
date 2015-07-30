@@ -3,7 +3,7 @@ package com.github.reload.net.codecs.secBlock;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.secBlock.SignerIdentity.IdentityType;
@@ -18,7 +18,7 @@ public abstract class SignerIdentityValue {
 
 	static class SignerIdentityValueCodec extends Codec<SignerIdentityValue> {
 
-		public SignerIdentityValueCodec(ComponentsContext ctx) {
+		public SignerIdentityValueCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

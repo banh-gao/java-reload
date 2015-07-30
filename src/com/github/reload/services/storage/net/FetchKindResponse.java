@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.local.StoredData;
@@ -50,14 +50,14 @@ public class FetchKindResponse {
 		private final Codec<DataKind> dataKindCodec;
 		private final Codec<StoredData> storedDataCodec;
 
-		public FetchKindResponseCodec(ComponentsContext ctx) {
+		public FetchKindResponseCodec(ObjectGraph ctx) {
 			super(ctx);
 			dataKindCodec = getCodec(DataKind.class);
 			storedDataCodec = getCodec(StoredData.class);
 		}
 
 		@Override
-		public void encode(FetchKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(FetchKindResponse obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			dataKindCodec.encode(obj.kind, buf);
 
 			byte[] genBytes = toUnsigned(obj.generation);
@@ -70,7 +70,7 @@ public class FetchKindResponse {
 			encodeData(obj, buf);
 		}
 
-		private void encodeData(FetchKindResponse obj, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+		private void encodeData(FetchKindResponse obj, ByteBuf buf) throws com.github.reload.net.codecs.Codec.CodecException {
 			Field dataFld = allocateField(buf, VALUES_LENGTH_FIELD);
 			for (StoredData d : obj.values) {
 				storedDataCodec.encode(d, buf);
@@ -79,7 +79,7 @@ public class FetchKindResponse {
 		}
 
 		@Override
-		public FetchKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public FetchKindResponse decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			DataKind kind = dataKindCodec.decode(buf);
 
 			byte[] genData = new byte[GENERATION_FIELD];

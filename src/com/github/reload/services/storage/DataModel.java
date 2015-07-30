@@ -1,6 +1,6 @@
 package com.github.reload.services.storage;
 
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
 import com.github.reload.services.storage.net.ArrayMetadata;
 import com.github.reload.services.storage.net.ArrayValue;
 import com.github.reload.services.storage.net.ArrayValueSpecifier;

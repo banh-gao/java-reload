@@ -3,7 +3,7 @@ package com.github.reload.net.codecs.header;
 import io.netty.buffer.ByteBuf;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.header.NodeID.NodeIdCodec;
@@ -82,7 +82,7 @@ public class NodeID extends RoutableID {
 
 		private static final int NODE_ID_LENGTH = 16;
 
-		public NodeIdCodec(ComponentsContext ctx) {
+		public NodeIdCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

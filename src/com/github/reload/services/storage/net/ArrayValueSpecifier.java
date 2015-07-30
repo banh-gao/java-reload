@@ -4,13 +4,12 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.services.storage.DataModel;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.net.ArrayValueSpecifier.ArrayValueSpecifierCodec;
+import dagger.ObjectGraph;
 
 /**
  * Specifier used to fetch array values
@@ -137,7 +136,7 @@ public class ArrayValueSpecifier implements ValueSpecifier {
 
 		private static final int RANGES_LENGTH_FIELD = U_INT16;
 
-		public ArrayValueSpecifierCodec(ComponentsContext ctx) {
+		public ArrayValueSpecifierCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

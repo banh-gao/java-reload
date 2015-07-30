@@ -19,7 +19,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import com.github.reload.Overlay;
 import com.github.reload.ReloadUri;
-import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.codecs.header.NodeID;
 
 public class X509CertificateParser {
 

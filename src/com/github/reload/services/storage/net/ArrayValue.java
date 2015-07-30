@@ -2,9 +2,9 @@ package com.github.reload.services.storage.net;
 
 import io.netty.buffer.ByteBuf;
 import javax.inject.Inject;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.net.ArrayValue.ArrayEntryCodec;
@@ -85,7 +85,7 @@ public class ArrayValue implements DataValue {
 
 		private final Codec<SingleValue> valueCodec;
 
-		public ArrayEntryCodec(ComponentsContext ctx) {
+		public ArrayEntryCodec(ObjectGraph ctx) {
 			super(ctx);
 			valueCodec = getCodec(SingleValue.class);
 		}

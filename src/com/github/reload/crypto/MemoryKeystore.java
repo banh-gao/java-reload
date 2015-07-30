@@ -4,7 +4,7 @@ import java.security.PrivateKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.codecs.header.NodeID;
 import com.google.common.base.Optional;
 
 /**

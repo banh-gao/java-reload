@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.JoinRequest.JoinRequestCodec;
@@ -37,7 +37,7 @@ public class JoinRequest extends Content {
 
 		private final Codec<NodeID> nodeCodec;
 
-		public JoinRequestCodec(ComponentsContext ctx) {
+		public JoinRequestCodec(ObjectGraph ctx) {
 			super(ctx);
 			nodeCodec = getCodec(NodeID.class);
 		}

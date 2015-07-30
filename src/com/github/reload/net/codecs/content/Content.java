@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.Content.ContentCodec;
@@ -44,7 +44,7 @@ public abstract class Content {
 		private static final int BODY_LENGTH_FIELD = U_INT32;
 		private static final int EXTENSIONS_LENGTH_FIELD = U_INT32;
 
-		public ContentCodec(ComponentsContext ctx) {
+		public ContentCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

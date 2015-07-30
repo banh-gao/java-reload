@@ -21,8 +21,8 @@ import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509ExtendedTrustManager;
 import javax.security.auth.x500.X500Principal;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 /**

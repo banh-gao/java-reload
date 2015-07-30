@@ -6,12 +6,12 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.CodecException;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.CodecException;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
+import com.github.reload.net.codecs.secBlock.Signature;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.secBlock.SignerIdentity;
 
 public class Signer {
 

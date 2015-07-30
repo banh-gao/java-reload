@@ -8,7 +8,7 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.CodecException;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
@@ -146,7 +146,7 @@ public class Signature {
 		private final Codec<HashAlgorithm> hashAlgCodec;
 		private final Codec<SignerIdentity> signIdentityCodec;
 
-		public SignatureCodec(ComponentsContext ctx) {
+		public SignatureCodec(ObjectGraph ctx) {
 			super(ctx);
 			signAlgCodec = getCodec(SignatureAlgorithm.class);
 			hashAlgCodec = getCodec(HashAlgorithm.class);

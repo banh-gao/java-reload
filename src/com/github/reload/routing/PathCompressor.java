@@ -1,7 +1,7 @@
 package com.github.reload.routing;
 
-import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.OpaqueID;
+import com.github.reload.net.codecs.header.DestinationList;
+import com.github.reload.net.codecs.header.OpaqueID;
 
 /**
  * Compress and decompress header destination lists by replacing it with opaque

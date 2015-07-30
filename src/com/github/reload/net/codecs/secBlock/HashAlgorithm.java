@@ -2,7 +2,7 @@ package com.github.reload.net.codecs.secBlock;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.secBlock.HashAlgorithm.HashAlgorithmCodec;
@@ -45,7 +45,7 @@ public enum HashAlgorithm {
 
 	static class HashAlgorithmCodec extends Codec<HashAlgorithm> {
 
-		public HashAlgorithmCodec(ComponentsContext ctx) {
+		public HashAlgorithmCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

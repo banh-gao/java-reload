@@ -2,7 +2,7 @@ package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.MessageExtension.MessageExtensionCodec;
@@ -43,7 +43,7 @@ public abstract class MessageExtension {
 
 		private static final int EXTENSION_CONTENT_LENGTH_FIELD = U_INT32;
 
-		public MessageExtensionCodec(ComponentsContext ctx) {
+		public MessageExtensionCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

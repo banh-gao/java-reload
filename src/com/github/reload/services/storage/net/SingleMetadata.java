@@ -5,10 +5,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.Metadata;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
@@ -98,7 +98,7 @@ public class SingleMetadata implements Metadata {
 
 		private final Codec<HashAlgorithm> hashAlgCodec;
 
-		public SingleMetadataCodec(ComponentsContext ctx) {
+		public SingleMetadataCodec(ObjectGraph ctx) {
 			super(ctx);
 			hashAlgCodec = getCodec(HashAlgorithm.class);
 		}

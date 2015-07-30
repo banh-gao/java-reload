@@ -1,12 +1,14 @@
 package com.github.reload.net.codecs;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.codecs.Codec.CodecException;
 import com.github.reload.net.codecs.content.Content;
@@ -17,17 +19,23 @@ import com.github.reload.net.codecs.secBlock.SecurityBlock;
 /**
  * Codec for message payload (content + security block)
  */
+@Sharable
+@Singleton
 public class MessagePayloadDecoder extends MessageToMessageDecoder<ForwardMessage> {
 
-	private final Codec<Content> contentCodec;
-	private final Codec<SecurityBlock> secBlockCodec;
+	@Inject
+	@Named("contentCodec")
+	Codec<Content> contentCodec;
+
+	@Inject
+	@Named("secBlockCodec")
+	Codec<SecurityBlock> secBlockCodec;
 
 	@Inject
 	MessageRouter router;
 
-	public MessagePayloadDecoder(ComponentsContext ctx) {
-		contentCodec = Codec.getCodec(Content.class, ctx);
-		secBlockCodec = Codec.getCodec(SecurityBlock.class, ctx);
+	@Inject
+	public MessagePayloadDecoder() {
 	}
 
 	@Override

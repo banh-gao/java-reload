@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
@@ -78,7 +78,7 @@ public class DictionaryValueSpecifier implements ValueSpecifier {
 		private static final int KEYS_LENGTH_FIELD = U_INT16;
 		private static final int KEY_ENTRY_FIELD = U_INT16;
 
-		public DictionaryValueSpecifierCodec(ComponentsContext ctx) {
+		public DictionaryValueSpecifierCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

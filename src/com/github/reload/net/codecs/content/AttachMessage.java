@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.AttachMessage.AttachMessageCodec;
@@ -117,7 +117,7 @@ public class AttachMessage extends Content {
 		private final static int ROLE_LENGTH_FIELD = U_INT8;
 		private final static int CANDIDATES_LENGTH_FIELD = U_INT16;
 
-		public AttachMessageCodec(ComponentsContext ctx) {
+		public AttachMessageCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

@@ -2,7 +2,7 @@ package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.PingAnswer.PingAnswerCodec;
@@ -46,7 +46,7 @@ public class PingAnswer extends Content {
 
 		private static final int RESPONSE_TIME_SIZE = U_INT64;
 
-		public PingAnswerCodec(ComponentsContext ctx) {
+		public PingAnswerCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

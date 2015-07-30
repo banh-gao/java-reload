@@ -5,7 +5,7 @@ import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.header.DestinationList.DestinationListCodec;
@@ -83,7 +83,7 @@ public class DestinationList extends AbstractList<RoutableID> {
 
 		private final Codec<RoutableID> rouIdCodec;
 
-		public DestinationListCodec(ComponentsContext ctx) {
+		public DestinationListCodec(ObjectGraph ctx) {
 			super(ctx);
 			rouIdCodec = getCodec(RoutableID.class);
 		}

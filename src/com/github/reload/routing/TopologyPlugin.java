@@ -2,9 +2,9 @@ package com.github.reload.routing;
 
 import java.util.Collection;
 import java.util.List;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.header.RoutableID;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.header.ResourceID;
+import com.github.reload.net.codecs.header.RoutableID;
 import com.google.common.util.concurrent.ListenableFuture;
 
 /**

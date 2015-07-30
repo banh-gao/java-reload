@@ -2,6 +2,7 @@ package com.github.reload.net.stack;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.security.GeneralSecurityException;
@@ -10,16 +11,19 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.encoders.Header;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.Signature;
+import com.github.reload.net.codecs.Header;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.secBlock.Signature;
 
+@Sharable
+@Singleton
 public class MessageAuthenticator extends SimpleChannelInboundHandler<Message> {
 
 	private static final Logger l = Logger.getRootLogger();

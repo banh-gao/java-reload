@@ -1,11 +1,12 @@
 package com.github.reload;
 
 import java.net.InetSocketAddress;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.apache.log4j.PropertyConfigurator;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.ConnectionManager;
+import com.github.reload.net.codecs.header.NodeID;
 import com.github.reload.routing.TopologyPlugin;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.ObjectGraph;
@@ -14,6 +15,7 @@ import dagger.ObjectGraph;
  * Represents the RELOAD overlay where the local node is connected to
  * 
  */
+@Singleton
 public class Overlay {
 
 	public static final String LIB_COMPANY = "zeroDenial";
@@ -24,8 +26,6 @@ public class Overlay {
 	static {
 		PropertyConfigurator.configure("log4j.properties");
 	}
-
-	private ComponentsContext ctx;
 
 	private Configuration conf;
 	private InetSocketAddress localAddress;
@@ -42,6 +42,7 @@ public class Overlay {
 	// Used only for testing
 	ObjectGraph graph;
 
+	@Inject
 	public Overlay(ConnectionManager connMgr, TopologyPlugin topology) {
 		connector = new OverlayConnector(this, topology, connMgr);
 		this.topology = topology;
@@ -94,7 +95,8 @@ public class Overlay {
 	 * instance will fail.
 	 */
 	public void disconnect() {
-		ctx.stopComponents();
+		// FIXME: send stop event
+		// ctx.stopComponents();
 	}
 
 	@Override

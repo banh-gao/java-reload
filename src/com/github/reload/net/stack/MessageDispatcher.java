@@ -6,9 +6,10 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import com.github.reload.components.MessageHandlersManager;
-import com.github.reload.net.encoders.Message;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.routing.MessageHandlersManager;
 
 /**
  * Dispatch incoming messages to a proper handler in a separate thread.
@@ -16,6 +17,7 @@ import com.github.reload.net.encoders.Message;
  * RELOAD message content type.
  */
 @Sharable
+@Singleton
 public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 
 	@Inject

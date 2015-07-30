@@ -4,8 +4,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import com.github.reload.TestFactory.TestBootstrap;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
 
 public abstract class APITest {
 

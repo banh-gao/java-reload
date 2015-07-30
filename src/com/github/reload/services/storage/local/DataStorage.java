@@ -2,7 +2,7 @@ package com.github.reload.services.storage.local;
 
 import java.util.Map;
 import java.util.Set;
-import com.github.reload.net.encoders.header.ResourceID;
+import com.github.reload.net.codecs.header.ResourceID;
 import com.google.common.base.Optional;
 
 public interface DataStorage {

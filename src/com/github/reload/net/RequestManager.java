@@ -9,15 +9,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.Error;
-import com.github.reload.net.encoders.content.Error.ErrorMessageException;
-import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.RoutableID;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.content.Content;
+import com.github.reload.net.codecs.content.ContentType;
+import com.github.reload.net.codecs.content.Error;
+import com.github.reload.net.codecs.content.Error.ErrorMessageException;
+import com.github.reload.net.codecs.content.Error.ErrorType;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.header.RoutableID;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
 import com.google.common.base.Optional;
@@ -55,7 +55,7 @@ class RequestManager {
 		return future;
 	}
 
-	public void handleAnswer(Message message, ComponentsContext ctx) {
+	public void handleAnswer(Message message, ObjectGraph ctx) {
 		Long transactionId = message.getHeader().getTransactionId();
 
 		Optional<PendingRequest> pending = Optional.fromNullable(pendingRequests.remove(transactionId));
@@ -86,7 +86,7 @@ class RequestManager {
 			this.future = future;
 		}
 
-		public void setAnswer(Message ans, ComponentsContext ctx) {
+		public void setAnswer(Message ans, ObjectGraph ctx) {
 			try {
 				validateAnswer(ans, ctx);
 				future.set(ans);
@@ -96,7 +96,7 @@ class RequestManager {
 
 		}
 
-		private void validateAnswer(Message ans, ComponentsContext ctx) throws GeneralSecurityException {
+		private void validateAnswer(Message ans, ObjectGraph ctx) throws GeneralSecurityException {
 
 			NodeID sender = ans.getHeader().getSenderId();
 

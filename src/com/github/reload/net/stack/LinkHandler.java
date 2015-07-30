@@ -7,15 +7,16 @@ import io.netty.channel.ChannelPromise;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
+import com.github.reload.net.ConnectionManager;
+import com.github.reload.net.ConnectionManager.Connection;
+import com.github.reload.net.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.NetworkException;
-import com.github.reload.net.connections.Connection;
-import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
-import com.github.reload.net.encoders.FramedMessage;
-import com.github.reload.net.encoders.FramedMessage.FramedAck;
-import com.github.reload.net.encoders.FramedMessage.FramedData;
+import com.github.reload.net.codecs.FramedMessage;
+import com.github.reload.net.codecs.FramedMessage.FramedAck;
+import com.github.reload.net.codecs.FramedMessage.FramedData;
+import com.google.common.eventbus.EventBus;
 
 /**
  * Subclasses will implement a specific link layer protocol to control the link
@@ -28,11 +29,8 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 
 	private final Map<Long, Transmission> transmissions = new LinkedHashMap<Long, Transmission>();
 
-	private final ComponentsContext compCtx;
-
-	public LinkHandler(ComponentsContext compCtx) {
-		this.compCtx = compCtx;
-	}
+	@Inject
+	EventBus eventBus;
 
 	@Override
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -46,7 +44,7 @@ public abstract class LinkHandler extends ChannelDuplexHandler {
 
 	@Override
 	public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {
-		compCtx.postEvent(new ConnectionManager.ConnectionStatusEvent(Type.CLOSED, ctx.attr(Connection.CONNECTION).get()));
+		eventBus.post(new ConnectionManager.ConnectionStatusEvent(Type.CLOSED, ctx.attr(Connection.CONNECTION).get()));
 	}
 
 	@Override

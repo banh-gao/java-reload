@@ -3,7 +3,7 @@ package com.github.reload.net.codecs;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.header.DestinationList;
 import com.github.reload.net.codecs.header.ForwardingOption;
 
@@ -29,7 +29,7 @@ class HeaderCodec extends Codec<Header> {
 	private final Codec<DestinationList> destListCodec;
 	private final Codec<ForwardingOption> fwdOptionCodec;
 
-	public HeaderCodec(ComponentsContext ctx) {
+	public HeaderCodec(ObjectGraph ctx) {
 		super(ctx);
 		destListCodec = getCodec(DestinationList.class);
 		fwdOptionCodec = getCodec(ForwardingOption.class);

@@ -10,10 +10,17 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 
 // TODO: Implement full ICE
+@Singleton
 public class ICEHelper {
+
+	@Inject
+	public ICEHelper() {
+	}
 
 	/**
 	 * @return the ICE candidates to be used to reach this peer

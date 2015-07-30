@@ -4,9 +4,9 @@ import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.local.StoredKindData.StoreKindDataCodec;
 
@@ -45,14 +45,14 @@ public class StoredKindData {
 		private final Codec<DataKind> kindCodec;
 		private final Codec<StoredData> dataCodec;
 
-		public StoreKindDataCodec(ComponentsContext ctx) {
+		public StoreKindDataCodec(ObjectGraph ctx) {
 			super(ctx);
 			kindCodec = getCodec(DataKind.class);
 			dataCodec = getCodec(StoredData.class);
 		}
 
 		@Override
-		public void encode(StoredKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(StoredKindData obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			kindCodec.encode(obj.kind, buf);
 
 			byte[] generationBytes = toUnsigned(obj.generation);
@@ -72,7 +72,7 @@ public class StoredKindData {
 		}
 
 		@Override
-		public StoredKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public StoredKindData decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			DataKind kind = kindCodec.decode(buf);
 
 			byte[] generationData = new byte[GENERATION_FIELD];
@@ -83,7 +83,7 @@ public class StoredKindData {
 			return new StoredKindData(kind, generation, data);
 		}
 
-		private List<StoredData> decodeStoredDataList(DataKind kind, ByteBuf buf) throws com.github.reload.net.encoders.Codec.CodecException {
+		private List<StoredData> decodeStoredDataList(DataKind kind, ByteBuf buf) throws com.github.reload.net.codecs.Codec.CodecException {
 			ByteBuf dataFld = readField(buf, VALUES_LENGTH_FIELD);
 
 			List<StoredData> data = new ArrayList<StoredData>();

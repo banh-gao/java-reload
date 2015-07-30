@@ -1,10 +1,14 @@
-package com.github.reload.net.connections;
+package com.github.reload.net;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import java.net.InetSocketAddress;
@@ -15,20 +19,28 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompStop;
+import dagger.ObjectGraph;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
-import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
-import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.ConnectionManager.ConnectionStatusEvent.Type;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.ForwardMessage;
+import com.github.reload.net.codecs.Header;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.MessageEncoder;
+import com.github.reload.net.codecs.header.NodeID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.net.stack.MessageDispatcher;
 import com.github.reload.net.stack.ReloadStack;
-import com.github.reload.net.stack.ReloadStackBuilder;
+import com.github.reload.net.stack.ReloadStackBuilder.ClientStackBuilder;
+import com.github.reload.net.stack.ReloadStackBuilder.ServerStackBuilder;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -36,15 +48,22 @@ import com.google.common.util.concurrent.SettableFuture;
 /**
  * Establish and manage connections for all neighbor nodes
  */
+@Singleton
 public class ConnectionManager {
 
 	private static final Logger l = Logger.getRootLogger();
 	private static final OverlayLinkType SERVER_PROTO = OverlayLinkType.TLS_TCP_FH_NO_ICE;
 
-	private final CryptoHelper cryptoHelper;
-	private final Keystore keystore;
+	@Inject
+	CryptoHelper cryptoHelper;
 
-	ComponentsContext ctx;
+	@Inject
+	Keystore keystore;
+
+	ObjectGraph ctx;
+
+	@Inject
+	EventBus eventBus;
 
 	@Inject
 	MessageDispatcher msgDispatcher;
@@ -53,20 +72,18 @@ public class ConnectionManager {
 	@Named("packetsLooper")
 	Executor packetsLooper;
 
-	private final Map<NodeID, Connection> connections = Maps.newHashMap();
+	@Inject
+	Provider<ClientStackBuilder> clientBuilderProv;
 
-	private ServerStatusHandler serverStatusHandler;
+	@Inject
+	Provider<ServerStackBuilder> serverBuilderProv;
+
+	private final Map<NodeID, Connection> connections = Maps.newHashMap();
 
 	private ReloadStack attachServer;
 
-	public ConnectionManager(CryptoHelper cryptoHelper, Keystore keystore) {
-		this.cryptoHelper = cryptoHelper;
-		this.keystore = keystore;
-	}
-
 	public void startServer(InetSocketAddress localAddress) {
-		serverStatusHandler = new ServerStatusHandler(this);
-		ReloadStackBuilder b = ReloadStackBuilder.newServerBuilder(ctx, msgDispatcher, serverStatusHandler);
+		ServerStackBuilder b = serverBuilderProv.get();
 		b.setLocalAddress(localAddress);
 		b.setLinkType(SERVER_PROTO);
 
@@ -74,8 +91,9 @@ public class ConnectionManager {
 		l.debug(String.format("Server started at %s", attachServer.getChannel().localAddress()));
 	}
 
-	@CompStop
 	private void shutdown() {
+
+		// FIXME: shotdown
 		attachServer.shutdown();
 	}
 
@@ -85,7 +103,7 @@ public class ConnectionManager {
 		final SettableFuture<Connection> outcome = SettableFuture.create();
 
 		try {
-			ReloadStackBuilder b = ReloadStackBuilder.newClientBuilder(ctx, msgDispatcher);
+			ClientStackBuilder b = clientBuilderProv.get();
 			b.setLinkType(linkType);
 			stack = b.buildStack();
 		} catch (Exception e) {
@@ -123,7 +141,7 @@ public class ConnectionManager {
 										outcome.setException(e);
 										return;
 									}
-									ctx.postEvent(new ConnectionStatusEvent(Type.ESTABLISHED, c));
+									eventBus.post(new ConnectionStatusEvent(Type.ESTABLISHED, c));
 									outcome.set(c);
 								}
 							});
@@ -140,7 +158,7 @@ public class ConnectionManager {
 		return outcome;
 	}
 
-	void remoteNodeAccepted(final Channel channel) {
+	public void remoteNodeAccepted(final Channel channel) {
 		SslHandler sslHandler = (SslHandler) channel.pipeline().get(ReloadStack.HANDLER_SSL);
 		Future<Channel> handshakeFuture = sslHandler.handshakeFuture();
 
@@ -157,7 +175,7 @@ public class ConnectionManager {
 						}
 						try {
 							Connection c = addConnection(new ReloadStack(channel));
-							ctx.postEvent(new ConnectionManager.ConnectionStatusEvent(Type.ACCEPTED, c));
+							eventBus.post(new ConnectionManager.ConnectionStatusEvent(Type.ACCEPTED, c));
 						} catch (CertificateException e) {
 							l.debug(String.format("Connection from %s rejected: Invalid RELOAD certificate", channel.remoteAddress()), e);
 							return;
@@ -237,5 +255,97 @@ public class ConnectionManager {
 
 	public Map<NodeID, Connection> getConnections() {
 		return Collections.unmodifiableMap(connections);
+	}
+
+	/**
+	 * A connection to a neighbor node
+	 */
+	public static class Connection {
+
+		public static final AttributeKey<Connection> CONNECTION = AttributeKey.valueOf("reloadConnection");
+
+		private final Codec<Header> hdrCodec;
+		private final NodeID nodeId;
+		private final ReloadStack stack;
+
+		public Connection(NodeID nodeId, ReloadStack stack) {
+			hdrCodec = Codec.getCodec(Header.class, null);
+			this.nodeId = nodeId;
+			this.stack = stack;
+			stack.getChannel().attr(CONNECTION).set(this);
+		}
+
+		/**
+		 * Send the given message to the neighbor
+		 * 
+		 * @param message
+		 * @return
+		 */
+		public ChannelFuture write(Message message) {
+			return stack.write(message);
+		}
+
+		/**
+		 * Forward the given message to the neighbor
+		 * 
+		 * @param headedMessage
+		 * @return
+		 */
+		public ChannelFuture forward(ForwardMessage headedMessage) {
+			Channel ch = stack.getChannel();
+
+			ByteBuf buf = ch.alloc().buffer();
+
+			int messageStart = buf.writerIndex();
+
+			try {
+				hdrCodec.encode(headedMessage.getHeader(), buf);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+
+			buf.writeBytes(headedMessage.getPayload());
+
+			setMessageLength(buf, messageStart);
+
+			// Get the context of the layer just before link handler, the write
+			// on
+			// this context passes the given buffer to the link handler
+			ChannelHandlerContext context = ch.pipeline().context(ReloadStack.DECODER_HEADER);
+
+			return context.writeAndFlush(buf);
+		}
+
+		private void setMessageLength(ByteBuf buf, int messageStart) {
+			int messageLength = buf.writerIndex() - messageStart;
+			buf.setInt(messageStart + MessageEncoder.HDR_LEADING_LEN, messageLength);
+		}
+
+		public ChannelFuture close() {
+			return stack.shutdown();
+		}
+
+		public NodeID getNodeId() {
+			return nodeId;
+		}
+
+		/**
+		 * @return The Maximum Transmission Unit this link can carry measured in
+		 *         bytes. If an outgoing message exceedes this limit, the
+		 *         message
+		 *         will be automatically divided into smaller RELOAD fragments.
+		 */
+		protected int getLinkMTU() {
+			return stack.getChannel().config().getOption(ChannelOption.SO_SNDBUF);
+		}
+
+		public ReloadStack getStack() {
+			return stack;
+		}
+
+		@Override
+		public String toString() {
+			return "Connection to " + nodeId;
+		}
 	}
 }

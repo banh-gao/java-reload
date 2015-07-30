@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.secBlock.SecurityBlock.SecurityBlockCodec;
@@ -43,7 +43,7 @@ public class SecurityBlock {
 		private final Codec<GenericCertificate> certCodec;
 		private final Codec<Signature> signCodec;
 
-		public SecurityBlockCodec(ComponentsContext ctx) {
+		public SecurityBlockCodec(ObjectGraph ctx) {
 			super(ctx);
 			certCodec = getCodec(GenericCertificate.class);
 			signCodec = getCodec(Signature.class);

@@ -33,15 +33,15 @@ import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import com.github.reload.ReloadUri;
-import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.secBlock.GenericCertificate;
-import com.github.reload.net.encoders.secBlock.GenericCertificate.CertificateType;
-import com.github.reload.net.encoders.secBlock.HashAlgorithm;
-import com.github.reload.net.encoders.secBlock.SecurityBlock;
-import com.github.reload.net.encoders.secBlock.Signature;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
-import com.github.reload.net.encoders.secBlock.SignerIdentity;
+import com.github.reload.net.codecs.header.DestinationList;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.secBlock.GenericCertificate;
+import com.github.reload.net.codecs.secBlock.HashAlgorithm;
+import com.github.reload.net.codecs.secBlock.SecurityBlock;
+import com.github.reload.net.codecs.secBlock.Signature;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.secBlock.SignerIdentity;
+import com.github.reload.net.codecs.secBlock.GenericCertificate.CertificateType;
 
 /**
  * Utility class for PKI infrastructure functionalities

@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.ProbeInformation.ProbeInformationCodec;
@@ -16,7 +16,7 @@ public abstract class ProbeInformation {
 
 		private static final int INFORMATION_LENGTH_FIELD = U_INT8;
 
-		public ProbeInformationCodec(ComponentsContext ctx) {
+		public ProbeInformationCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

@@ -3,7 +3,7 @@ package com.github.reload.net.codecs.content;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.ProbeAnswer.ProbeAnswerCodec;
@@ -37,7 +37,7 @@ public class ProbeAnswer extends Content {
 
 		private final Codec<ProbeInformation> infoCodec;
 
-		public ProbeAnswerCodec(ComponentsContext ctx) {
+		public ProbeAnswerCodec(ObjectGraph ctx) {
 			super(ctx);
 			infoCodec = getCodec(ProbeInformation.class);
 		}

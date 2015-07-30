@@ -3,7 +3,7 @@ package com.github.reload.net.codecs.content;
 import io.netty.buffer.ByteBuf;
 import java.nio.charset.Charset;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.CodecException;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
@@ -103,7 +103,7 @@ public class Error extends Content {
 
 		private static final int INFO_LENGTH_FIELD = U_INT16;
 
-		public ErrorCodec(ComponentsContext ctx) {
+		public ErrorCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

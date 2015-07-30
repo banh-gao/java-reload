@@ -5,9 +5,9 @@ import io.netty.util.AttributeKey;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind.DataKindCodec;
 import com.github.reload.services.storage.policies.AccessPolicy;
 
@@ -123,7 +123,7 @@ public class DataKind {
 
 	static class DataKindCodec extends Codec<DataKind> {
 
-		public DataKindCodec(ComponentsContext ctx) {
+		public DataKindCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

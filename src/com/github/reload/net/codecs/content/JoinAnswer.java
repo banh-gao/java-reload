@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.JoinAnswer.JoinAnswerCodec;
@@ -28,7 +28,7 @@ public class JoinAnswer extends Content {
 
 		private static final int DATA_LENGTH_FIELD = U_INT16;
 
-		public JoinAnswerCodec(ComponentsContext ctx) {
+		public JoinAnswerCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 

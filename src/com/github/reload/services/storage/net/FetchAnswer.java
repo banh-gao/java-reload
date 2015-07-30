@@ -3,11 +3,11 @@ package com.github.reload.services.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.Codec;
-import com.github.reload.net.encoders.Codec.ReloadCodec;
-import com.github.reload.net.encoders.content.Content;
-import com.github.reload.net.encoders.content.ContentType;
+import dagger.ObjectGraph;
+import com.github.reload.net.codecs.Codec;
+import com.github.reload.net.codecs.Codec.ReloadCodec;
+import com.github.reload.net.codecs.content.Content;
+import com.github.reload.net.codecs.content.ContentType;
 import com.github.reload.services.storage.net.FetchAnswer.FetchAnswerCodec;
 
 @ReloadCodec(FetchAnswerCodec.class)
@@ -34,13 +34,13 @@ public class FetchAnswer extends Content {
 
 		private final Codec<FetchKindResponse> respCodec;
 
-		public FetchAnswerCodec(ComponentsContext ctx) {
+		public FetchAnswerCodec(ObjectGraph ctx) {
 			super(ctx);
 			respCodec = getCodec(FetchKindResponse.class);
 		}
 
 		@Override
-		public void encode(FetchAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public void encode(FetchAnswer obj, ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			Field lenFld = allocateField(buf, RESPONSES_LENGTH_FIELD);
 
 			for (FetchKindResponse r : obj.responses) {
@@ -51,7 +51,7 @@ public class FetchAnswer extends Content {
 		}
 
 		@Override
-		public FetchAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.encoders.Codec.CodecException {
+		public FetchAnswer decode(ByteBuf buf, Object... params) throws com.github.reload.net.codecs.Codec.CodecException {
 			ByteBuf resposeData = readField(buf, RESPONSES_LENGTH_FIELD);
 			List<FetchKindResponse> responses = new ArrayList<FetchKindResponse>();
 

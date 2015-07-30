@@ -4,7 +4,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import com.github.reload.net.encoders.header.NodeID;
+import com.github.reload.net.codecs.header.NodeID;
 
 /**
  * A wrapper class that provides access to RELOAD values in certificates

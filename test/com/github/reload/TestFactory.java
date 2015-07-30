@@ -29,9 +29,7 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.components.ComponentsContext.CompStop;
-import com.github.reload.components.MessageHandlersManager.MessageHandler;
+import dagger.ObjectGraph;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -39,25 +37,26 @@ import com.github.reload.crypto.MemoryKeystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.crypto.X509CertificateParser;
 import com.github.reload.crypto.X509CryptoHelper;
+import com.github.reload.net.ConnectionManager;
+import com.github.reload.net.ConnectionManager.Connection;
+import com.github.reload.net.ConnectionManager.ConnectionStatusEvent;
+import com.github.reload.net.ConnectionManager.ConnectionStatusEvent.Type;
 import com.github.reload.net.MessageRouter;
-import com.github.reload.net.connections.Connection;
-import com.github.reload.net.connections.ConnectionManager;
-import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent;
-import com.github.reload.net.connections.ConnectionManager.ConnectionStatusEvent.Type;
-import com.github.reload.net.encoders.Header;
-import com.github.reload.net.encoders.Message;
-import com.github.reload.net.encoders.MessageBuilder;
-import com.github.reload.net.encoders.content.ContentType;
-import com.github.reload.net.encoders.content.Error.ErrorType;
-import com.github.reload.net.encoders.content.JoinAnswer;
-import com.github.reload.net.encoders.content.JoinRequest;
-import com.github.reload.net.encoders.content.LeaveRequest;
-import com.github.reload.net.encoders.header.DestinationList;
-import com.github.reload.net.encoders.header.NodeID;
-import com.github.reload.net.encoders.header.ResourceID;
-import com.github.reload.net.encoders.header.RoutableID;
-import com.github.reload.net.encoders.secBlock.SignatureAlgorithm;
+import com.github.reload.net.codecs.Header;
+import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.MessageBuilder;
+import com.github.reload.net.codecs.content.ContentType;
+import com.github.reload.net.codecs.content.Error.ErrorType;
+import com.github.reload.net.codecs.content.JoinAnswer;
+import com.github.reload.net.codecs.content.JoinRequest;
+import com.github.reload.net.codecs.content.LeaveRequest;
+import com.github.reload.net.codecs.header.DestinationList;
+import com.github.reload.net.codecs.header.NodeID;
+import com.github.reload.net.codecs.header.ResourceID;
+import com.github.reload.net.codecs.header.RoutableID;
+import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
+import com.github.reload.routing.MessageHandlersManager.MessageHandler;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.local.StoredKindData;
@@ -179,7 +178,7 @@ public class TestFactory extends BootstrapFactory {
 
 		private static final Logger l = Logger.getRootLogger();
 
-		ComponentsContext ctx;
+		ObjectGraph ctx;
 
 		@Inject
 		Overlay overlay;
@@ -388,8 +387,8 @@ public class TestFactory extends BootstrapFactory {
 			router.sendMessage(leaveMessage);
 		}
 
-		@CompStop
 		private void stop() {
+			// FIXME: shutdown
 			sendLeaveAndClose();
 		}
 

@@ -5,8 +5,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.CodecException;
 import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.log4j.Logger;
-import com.github.reload.components.ComponentsContext;
 import com.github.reload.net.ConnectionManager.Connection;
 import com.github.reload.net.codecs.header.NodeID;
 
@@ -15,12 +16,14 @@ import com.github.reload.net.codecs.header.NodeID;
  */
 public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
-	private final Codec<Header> hdrCodec;
+	@Inject
+	@Named("headerCodec")
+	Codec<Header> hdrCodec;
 
 	private NodeID neighborId;
 
-	public MessageHeaderDecoder(ComponentsContext ctx) {
-		hdrCodec = Codec.getCodec(Header.class, ctx);
+	@Inject
+	public MessageHeaderDecoder() {
 	}
 
 	@Override

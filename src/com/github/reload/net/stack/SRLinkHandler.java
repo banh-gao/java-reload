@@ -4,10 +4,9 @@ import io.netty.buffer.ByteBuf;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-import com.github.reload.components.ComponentsContext;
-import com.github.reload.net.encoders.FramedMessage;
-import com.github.reload.net.encoders.FramedMessage.FramedAck;
-import com.github.reload.net.encoders.FramedMessage.FramedData;
+import com.github.reload.net.codecs.FramedMessage;
+import com.github.reload.net.codecs.FramedMessage.FramedAck;
+import com.github.reload.net.codecs.FramedMessage.FramedData;
 
 /**
  * Simple Reliability implementation with acked messages but no retransmission,
@@ -41,8 +40,7 @@ public class SRLinkHandler extends LinkHandler {
 	// Receiver side vars
 	private final Queue<Long> lastReceivedSeqNums;
 
-	public SRLinkHandler(ComponentsContext ctx) {
-		super(ctx);
+	public SRLinkHandler() {
 		lastReceivedSeqNums = new LinkedBlockingQueue<Long>(LAST_RCV_PACKETS_BUF_SIZE) {
 
 			@Override

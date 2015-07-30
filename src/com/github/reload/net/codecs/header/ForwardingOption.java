@@ -2,7 +2,7 @@ package com.github.reload.net.codecs.header;
 
 import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.header.ForwardingOption.ForwardingOptionCodec;
@@ -59,7 +59,7 @@ public abstract class ForwardingOption {
 
 		private final Codec<UnknownForwardingOption> unknownFwdCodec;
 
-		public ForwardingOptionCodec(ComponentsContext ctx) {
+		public ForwardingOptionCodec(ObjectGraph ctx) {
 			super(ctx);
 			unknownFwdCodec = getCodec(UnknownForwardingOption.class);
 		}

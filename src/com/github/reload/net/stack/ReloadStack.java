@@ -3,7 +3,7 @@ package com.github.reload.net.stack;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import java.net.SocketAddress;
-import com.github.reload.net.encoders.Message;
+import com.github.reload.net.codecs.Message;
 
 public class ReloadStack {
 

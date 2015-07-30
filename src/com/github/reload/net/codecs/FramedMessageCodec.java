@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import io.netty.handler.codec.DecoderException;
 import java.util.List;
+import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import com.github.reload.net.codecs.Codec.CodecException;
 import com.github.reload.net.codecs.Codec.Field;
@@ -20,6 +21,10 @@ public class FramedMessageCodec extends ByteToMessageCodec<FramedMessage> {
 	private static final int DATA_MAX_LENGTH = Codec.U_INT24;
 
 	private static final int ACK_FRAME_LENGTH = 8;
+
+	@Inject
+	public FramedMessageCodec() {
+	}
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, FramedMessage msg, ByteBuf out) throws Exception {

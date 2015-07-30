@@ -1,7 +1,7 @@
 package com.github.reload.net.codecs.content;
 
 import io.netty.buffer.ByteBuf;
-import com.github.reload.components.ComponentsContext;
+import dagger.ObjectGraph;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.net.codecs.content.ProbeRequest.ProbeInformationType;
@@ -37,7 +37,7 @@ public class ResponsibleSetProbeInformation extends ProbeInformation {
 
 	static class RespSetCodec extends Codec<ResponsibleSetProbeInformation> {
 
-		public RespSetCodec(ComponentsContext ctx) {
+		public RespSetCodec(ObjectGraph ctx) {
 			super(ctx);
 		}
 
