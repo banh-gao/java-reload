@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import dagger.ObjectGraph;
+import javax.inject.Inject;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
-import com.github.reload.services.storage.DataModel;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.net.DictionaryValueSpecifier.DictionaryValueSpecifierCodec;
+import dagger.ObjectGraph;
 
 /**
  * Specifier used to fetch dictionary values
@@ -21,6 +21,10 @@ import com.github.reload.services.storage.net.DictionaryValueSpecifier.Dictionar
 public class DictionaryValueSpecifier implements ValueSpecifier {
 
 	List<byte[]> keys = new ArrayList<byte[]>();
+
+	@Inject
+	public DictionaryValueSpecifier() {
+	}
 
 	public DictionaryValueSpecifier addKey(byte[] key) {
 		if (key == null)

@@ -10,21 +10,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
 import com.github.reload.net.MessageRouter;
 import com.github.reload.net.codecs.Message;
+import com.github.reload.net.codecs.MessageBuilder;
 import com.github.reload.net.codecs.content.ContentType;
 import com.github.reload.net.codecs.content.Error.ErrorMessageException;
 import com.github.reload.net.codecs.content.Error.ErrorType;
+import com.github.reload.net.codecs.header.DestinationList;
 import com.github.reload.net.codecs.header.NodeID;
 import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.net.codecs.secBlock.Signature;
 import com.github.reload.net.codecs.secBlock.SignerIdentity;
 import com.github.reload.net.codecs.secBlock.SignerIdentity.IdentityType;
+import com.github.reload.routing.MessageHandlers;
+import com.github.reload.routing.MessageHandlers.MessageHandler;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.routing.MessageHandlersManager.MessageHandler;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.DataModel.Metadata;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
@@ -50,13 +54,17 @@ import dagger.ObjectGraph;
  * Process incoming storage requests and accesses local storage
  * 
  */
+@Singleton
 public class StorageController {
 
 	@Inject
-	TopologyPlugin plugin;
+	TopologyPlugin topology;
 
 	@Inject
 	MessageRouter router;
+
+	@Inject
+	MessageBuilder msgBuilder;
 
 	@Inject
 	ObjectGraph g;
@@ -64,20 +72,28 @@ public class StorageController {
 	@Inject
 	DataStorage storage;
 
+	@Inject
+	Keystore keystore;
+
+	@Inject
+	public StorageController(MessageHandlers msgHandlers) {
+		msgHandlers.register(this);
+	}
+
 	@MessageHandler(ContentType.STORE_REQ)
 	private void handleStoreRequest(Message requestMessage) {
 		StoreRequest req = (StoreRequest) requestMessage.getContent();
 
 		boolean isReplica = req.getReplicaNumber() != 0;
 
-		if (plugin.isLocalPeerValidStorage(req.getResourceId(), isReplica) == false) {
+		if (topology.isLocalPeerValidStorage(req.getResourceId(), isReplica) == false) {
 			router.sendError(requestMessage.getHeader(), ErrorType.FORBITTEN, "Node not responsible to store requested resource");
 			return;
 		}
 
 		SignerIdentity senderIdentity = requestMessage.getSecBlock().getSignature().getIdentity();
 
-		List<NodeID> replicaNodes = plugin.getReplicaNodes(req.getResourceId());
+		List<NodeID> replicaNodes = topology.getReplicaNodes(req.getResourceId());
 
 		List<StoreKindResponse> response;
 		try {
@@ -94,7 +110,7 @@ public class StorageController {
 
 		router.sendAnswer(requestMessage.getHeader(), answer);
 
-		plugin.requestReplication(req.getResourceId());
+		replicateData(req.getResourceId());
 	}
 
 	private List<StoreKindResponse> store(ResourceID resourceId, Collection<StoredKindData> data, SignerIdentity senderIdentity, boolean isReplica, List<NodeID> replicaNodes) throws GeneralSecurityException, ErrorMessageException {
@@ -149,7 +165,7 @@ public class StorageController {
 					p.accept(resourceId, kind, d, senderIdentity);
 				}
 
-				Optional<ReloadCertificate> storerCert = g.get(Keystore.class).getCertificate(storerIdentity);
+				Optional<ReloadCertificate> storerCert = keystore.getCertificate(storerIdentity);
 
 				if (!storerCert.isPresent())
 					throw new GeneralSecurityException("Storer certificate not available");
@@ -360,14 +376,31 @@ public class StorageController {
 			ResourceID resId;
 
 			if (resources.isEmpty()) {
-				resId = plugin.getResourceId(new byte[0]);
+				resId = topology.getResourceId(new byte[0]);
 			} else {
-				resId = plugin.getCloserId(reqResId, resources);
+				resId = topology.getCloserId(reqResId, resources);
 			}
 
 			out.add(new FindKindData(k, resId));
 		}
 
 		return out;
+	}
+
+	private void replicateData(ResourceID resourceId) {
+		List<NodeID> replicaNodes = topology.getReplicaNodes(resourceId);
+
+		Optional<Map<Long, StoredKindData>> res = storage.get(resourceId);
+
+		if (!res.isPresent())
+			return;
+
+		Collection<StoredKindData> data = res.get().values();
+
+		short replNum = 1;
+		for (NodeID repl : replicaNodes) {
+			router.sendRequestMessage(msgBuilder.newMessage(new StoreRequest(resourceId, replNum, data), new DestinationList(repl)));
+			replNum++;
+		}
 	}
 }

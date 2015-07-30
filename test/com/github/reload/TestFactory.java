@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -29,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import dagger.ObjectGraph;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -56,18 +54,17 @@ import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.net.codecs.header.RoutableID;
 import com.github.reload.net.codecs.secBlock.SignatureAlgorithm;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
-import com.github.reload.routing.MessageHandlersManager.MessageHandler;
+import com.github.reload.routing.MessageHandlers;
+import com.github.reload.routing.MessageHandlers.MessageHandler;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.services.storage.local.StoredKindData;
-import com.github.reload.services.storage.net.StoreRequest;
-import com.google.common.base.Optional;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import dagger.Module;
+import dagger.ObjectGraph;
 import dagger.Provides;
 
 public class TestFactory extends BootstrapFactory {
@@ -195,11 +192,18 @@ public class TestFactory extends BootstrapFactory {
 		@Inject
 		MessageBuilder msgBuilder;
 
+		@Inject
+		MessageHandlers msgHandlers;
+
 		private boolean isJoined = false;
 
 		private final TestRouting r = new TestRouting();
 
 		private final NodeID TEST_REPLICA_NODE = NodeID.valueOf(new byte[16]);
+
+		@Inject
+		public TestPlugin() {
+		}
 
 		@Override
 		public void startAgent() {
@@ -210,6 +214,7 @@ public class TestFactory extends BootstrapFactory {
 					e.printStackTrace();
 				}
 			}
+			msgHandlers.register(this);
 		}
 
 		@Override
@@ -402,7 +407,6 @@ public class TestFactory extends BootstrapFactory {
 
 			@Override
 			public Set<NodeID> getNextHops(RoutableID destination) {
-
 				Set<NodeID> candidates = new HashSet<NodeID>(neighbors);
 
 				if (candidates.isEmpty())
@@ -439,28 +443,6 @@ public class TestFactory extends BootstrapFactory {
 		@Override
 		public List<NodeID> getReplicaNodes(ResourceID resourceId) {
 			return Collections.singletonList(TEST_REPLICA_NODE);
-		}
-
-		@Override
-		public void requestReplication(ResourceID resourceId) {
-			List<NodeID> replicaNodes = getReplicaNodes(resourceId);
-
-			Optional<Map<Long, StoredKindData>> res = store.get(resourceId);
-
-			if (!res.isPresent())
-				return;
-
-			Collection<StoredKindData> data = res.get().values();
-
-			short replNum = 1;
-			for (NodeID repl : replicaNodes) {
-				replicateData(msgBuilder.newMessage(new StoreRequest(resourceId, replNum, data), new DestinationList(repl)));
-				replNum++;
-			}
-		}
-
-		private void replicateData(Message replicaStore) {
-			router.sendRequestMessage(replicaStore);
 		}
 
 		@Override

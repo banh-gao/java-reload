@@ -4,7 +4,6 @@ import io.netty.bootstrap.AbstractBootstrap;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -106,7 +105,10 @@ public abstract class ReloadStackBuilder {
 		if (linkType == null)
 			throw new IllegalStateException();
 
-		bootstrap.handler(newInitializer());
+		if (isServer)
+			((ServerBootstrap) this.bootstrap).childHandler(newInitializer());
+		else
+			bootstrap.handler(newInitializer());
 
 		if (localAddress == null) {
 			localAddress = new InetSocketAddress(0);
@@ -119,7 +121,7 @@ public abstract class ReloadStackBuilder {
 		}
 	}
 
-	protected ChannelInitializer<Channel> newInitializer(final ChannelHandler... extraHandlers) {
+	protected ChannelInitializer<Channel> newInitializer() {
 		return new ChannelInitializer<Channel>() {
 
 			@Override

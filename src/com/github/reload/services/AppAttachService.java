@@ -18,7 +18,8 @@ import com.github.reload.net.codecs.header.DestinationList;
 import com.github.reload.net.ice.HostCandidate;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.NoSuitableCandidateException;
-import com.github.reload.routing.MessageHandlersManager.MessageHandler;
+import com.github.reload.routing.MessageHandlers;
+import com.github.reload.routing.MessageHandlers.MessageHandler;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -43,6 +44,11 @@ public class AppAttachService {
 	ICEHelper iceHelper;
 
 	private final Map<Integer, InetSocketAddress> registeredServers = Maps.newConcurrentMap();
+
+	@Inject
+	public AppAttachService(MessageHandlers msgHandlers) {
+		msgHandlers.register(this);
+	}
 
 	/**
 	 * Register an application server that is already listening to the specified

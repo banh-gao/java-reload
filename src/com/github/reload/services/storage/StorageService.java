@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.github.reload.Service;
-import com.github.reload.Service.OnLoaded;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -26,6 +26,7 @@ import com.github.reload.net.codecs.secBlock.SignerIdentity.IdentityType;
 import com.github.reload.routing.TopologyPlugin;
 import com.github.reload.services.storage.DataModel.DataValue;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
+import com.github.reload.services.storage.local.StorageController;
 import com.github.reload.services.storage.local.StoredData;
 import com.github.reload.services.storage.local.StoredKindData;
 import com.github.reload.services.storage.net.ArrayValue;
@@ -57,6 +58,7 @@ import dagger.ObjectGraph;
  * 
  */
 @Service({StorageModule.class})
+@Singleton
 public class StorageService {
 
 	private static final short REPLICA_NUMBER = 0;
@@ -82,10 +84,8 @@ public class StorageService {
 	@Inject
 	CryptoHelper cryptoHelper;
 
-	@OnLoaded
-	private void loadController() {
-		// FIXME: ctx.startComponent(StorageController.class);
-	}
+	@Inject
+	StorageController controller;
 
 	/**
 	 * @return the available data kinds

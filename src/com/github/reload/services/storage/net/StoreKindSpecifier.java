@@ -3,12 +3,13 @@ package com.github.reload.services.storage.net;
 import io.netty.buffer.ByteBuf;
 import java.math.BigInteger;
 import java.util.Objects;
-import dagger.ObjectGraph;
+import javax.inject.Inject;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataKind;
 import com.github.reload.services.storage.DataModel.ValueSpecifier;
 import com.github.reload.services.storage.net.StoreKindSpecifier.StoreKindSpecifierCodec;
+import dagger.ObjectGraph;
 
 @ReloadCodec(StoreKindSpecifierCodec.class)
 public class StoreKindSpecifier {
@@ -17,6 +18,10 @@ public class StoreKindSpecifier {
 	private ValueSpecifier valueSpecifier;
 
 	private BigInteger generation = BigInteger.ZERO;
+
+	@Inject
+	public StoreKindSpecifier() {
+	}
 
 	public void setKind(DataKind kind) {
 		this.kind = kind;

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Singleton;
 import com.github.reload.net.codecs.header.ResourceID;
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
@@ -15,6 +16,7 @@ import com.google.common.collect.SetMultimap;
  * responsible for.
  * 
  */
+@Singleton
 public class MemoryStorage implements DataStorage {
 
 	private final Map<ResourceID, Map<Long, StoredKindData>> storedResources = Maps.newConcurrentMap();

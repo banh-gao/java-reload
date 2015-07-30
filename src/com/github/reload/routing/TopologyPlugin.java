@@ -64,7 +64,5 @@ public interface TopologyPlugin {
 
 	public List<NodeID> getReplicaNodes(ResourceID resourceId);
 
-	public void requestReplication(ResourceID resourceId);
-
 	public RoutingTable getRoutingTable();
 }

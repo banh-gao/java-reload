@@ -9,7 +9,8 @@ import com.github.reload.net.NetModule;
 import com.github.reload.net.codecs.MessageBuilder;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.routing.DefaultPathCompressor;
-import com.github.reload.routing.MessageHandlersManager;
+import com.github.reload.routing.MessageHandlers;
+import com.github.reload.routing.PathCompressor;
 import com.google.common.eventbus.EventBus;
 import dagger.Module;
 import dagger.ObjectGraph;
@@ -17,7 +18,7 @@ import dagger.Provides;
 
 @Module(injects = {Overlay.class, ObjectGraph.class, MessageBuilder.class,
 					MessageRouter.class, DefaultPathCompressor.class,
-					ICEHelper.class, MessageHandlersManager.class,
+					ICEHelper.class, MessageHandlers.class,
 					EventBus.class}, includes = {NetModule.class}, complete = false)
 public class CoreModule {
 
@@ -49,5 +50,11 @@ public class CoreModule {
 	@Named("packetsLooper")
 	Executor provideLoopExecutor() {
 		return Executors.newSingleThreadExecutor();
+	}
+
+	@Provides
+	@Singleton
+	PathCompressor providePathCompressor() {
+		return new DefaultPathCompressor();
 	}
 }

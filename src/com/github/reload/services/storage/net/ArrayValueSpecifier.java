@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.inject.Inject;
 import com.github.reload.net.codecs.Codec;
 import com.github.reload.net.codecs.Codec.ReloadCodec;
 import com.github.reload.services.storage.DataModel.DataValue;
@@ -19,6 +20,10 @@ import dagger.ObjectGraph;
 public class ArrayValueSpecifier implements ValueSpecifier {
 
 	final List<ArrayRange> ranges = new ArrayList<ArrayRange>();
+
+	@Inject
+	public ArrayValueSpecifier() {
+	}
 
 	/**
 	 * Add a range where the returned values must be included, the values

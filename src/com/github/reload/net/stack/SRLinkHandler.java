@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.BitSet;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import javax.inject.Inject;
 import com.github.reload.net.codecs.FramedMessage;
 import com.github.reload.net.codecs.FramedMessage.FramedAck;
 import com.github.reload.net.codecs.FramedMessage.FramedData;
@@ -40,6 +41,7 @@ public class SRLinkHandler extends LinkHandler {
 	// Receiver side vars
 	private final Queue<Long> lastReceivedSeqNums;
 
+	@Inject
 	public SRLinkHandler() {
 		lastReceivedSeqNums = new LinkedBlockingQueue<Long>(LAST_RCV_PACKETS_BUF_SIZE) {
 

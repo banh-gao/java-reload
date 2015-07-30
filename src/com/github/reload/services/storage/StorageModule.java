@@ -5,8 +5,12 @@ import com.github.reload.services.storage.local.DataStorage;
 import com.github.reload.services.storage.local.MemoryStorage;
 import com.github.reload.services.storage.local.StorageController;
 import com.github.reload.services.storage.net.ArrayValue;
+import com.github.reload.services.storage.net.ArrayValueSpecifier;
 import com.github.reload.services.storage.net.DictionaryValue;
+import com.github.reload.services.storage.net.DictionaryValueSpecifier;
 import com.github.reload.services.storage.net.SingleValue;
+import com.github.reload.services.storage.net.SingleValueSpecifier;
+import com.github.reload.services.storage.net.StoreKindSpecifier;
 import com.github.reload.services.storage.policies.NodeMatch;
 import com.github.reload.services.storage.policies.NodeMatch.NodeRIDGenerator;
 import com.github.reload.services.storage.policies.UserMatch;
@@ -21,24 +25,14 @@ import dagger.Provides;
 					UserMatch.UserRIDGenerator.class, MemoryStorage.class,
 					SingleValue.class, ArrayValue.class, DictionaryValue.class,
 					NodeMatch.class, UserRIDGenerator.class,
-					NodeRIDGenerator.class}, complete = false)
+					NodeRIDGenerator.class, SingleValueSpecifier.class,
+					ArrayValueSpecifier.class, DictionaryValueSpecifier.class,
+					StoreKindSpecifier.class}, complete = false)
 public class StorageModule {
-
-	@Provides
-	@Singleton
-	StorageService provideStorageService() {
-		return new StorageService();
-	}
 
 	@Provides
 	@Singleton
 	DataStorage provideDataStorage() {
 		return new MemoryStorage();
-	}
-
-	@Provides
-	@Singleton
-	StorageController provideStorageController() {
-		return new StorageController();
 	}
 }

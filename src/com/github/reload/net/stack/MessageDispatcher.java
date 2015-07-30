@@ -9,7 +9,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.apache.log4j.Logger;
 import com.github.reload.net.codecs.Message;
-import com.github.reload.routing.MessageHandlersManager;
+import com.github.reload.routing.MessageHandlers;
 
 /**
  * Dispatch incoming messages to a proper handler in a separate thread.
@@ -25,7 +25,7 @@ public class MessageDispatcher extends ChannelInboundHandlerAdapter {
 	Executor packetsLooper;
 
 	@Inject
-	MessageHandlersManager msgHandlers;
+	MessageHandlers msgHandlers;
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

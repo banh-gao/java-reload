@@ -13,22 +13,27 @@ import org.apache.log4j.Logger;
 import com.github.reload.net.codecs.Message;
 import com.github.reload.net.codecs.content.ContentType;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.DeadEvent;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 @Singleton
-public class MessageHandlersManager {
+public class MessageHandlers {
 
 	private static final Logger l = Logger.getRootLogger();
 
 	private final Map<ContentType, MessageHandlerMethod> messageHandlers = Maps.newHashMapWithExpectedSize(ContentType.values().length);
 	private MessageHandlerMethod answerHandler;
 
+	EventBus eventBus;
+
 	@Inject
-	public MessageHandlersManager() {
-		// TODO Auto-generated constructor stub
+	public MessageHandlers(EventBus eventBus) {
+		this.eventBus = eventBus;
+		eventBus.register(this);
 	}
 
-	// FIXME: register message handlers
-	public void registerMessageHandler(Object obj) {
+	public void register(Object obj) {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
 			MessageHandler ann = m.getAnnotation(MessageHandler.class);
 
@@ -47,7 +52,7 @@ public class MessageHandlersManager {
 		}
 	}
 
-	public void unregisterMessageHandler(Object obj) {
+	public void unregister(Object obj) {
 		for (Method m : obj.getClass().getDeclaredMethods()) {
 			MessageHandler ann = m.getAnnotation(MessageHandler.class);
 
@@ -127,5 +132,10 @@ public class MessageHandlersManager {
 				| InvocationTargetException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Subscribe
+	public void handleDeadEvents(DeadEvent ev) {
+		Logger.getRootLogger().trace("Ignored event " + ev.getEvent());
 	}
 }

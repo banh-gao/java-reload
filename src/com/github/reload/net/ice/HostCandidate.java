@@ -19,12 +19,13 @@ public class HostCandidate {
 		final byte code;
 		final String linkProtocol;
 		boolean useICE;
-		Class<? extends LinkHandler> handler;
+		final Class<? extends LinkHandler> handler;
 
 		OverlayLinkType(byte code, String linkProtocol, boolean useICE, Class<? extends LinkHandler> handler) {
 			this.code = code;
 			this.linkProtocol = linkProtocol;
 			this.useICE = useICE;
+			this.handler = handler;
 		}
 
 		public byte getCode() {

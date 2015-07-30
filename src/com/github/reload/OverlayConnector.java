@@ -45,9 +45,9 @@ class OverlayConnector {
 	 */
 	final SettableFuture<Overlay> connectToOverlay(Configuration conf) {
 
-		topology.startAgent();
-
 		connMgr.startServer(overlay.getLocalAddress());
+
+		topology.startAgent();
 
 		final SettableFuture<Overlay> overlayConnFut = SettableFuture.create();
 

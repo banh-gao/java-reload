@@ -8,7 +8,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Overlay;
 import com.github.reload.Service;
-import dagger.ObjectGraph;
 import com.github.reload.net.AttachService.ServiceModule;
 import com.github.reload.net.ConnectionManager.Connection;
 import com.github.reload.net.ConnectionManager.ConnectionStatusEvent;
@@ -25,8 +24,9 @@ import com.github.reload.net.codecs.header.RoutableID;
 import com.github.reload.net.ice.HostCandidate;
 import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.NoSuitableCandidateException;
+import com.github.reload.routing.MessageHandlers;
+import com.github.reload.routing.MessageHandlers.MessageHandler;
 import com.github.reload.routing.TopologyPlugin;
-import com.github.reload.routing.MessageHandlersManager.MessageHandler;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -36,12 +36,12 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import dagger.Module;
-import dagger.Provides;
 
 /**
  * Establish direct connections to other peers using attach messages
  */
 @Service({ServiceModule.class})
+@Singleton
 public class AttachService {
 
 	private static final Logger l = Logger.getRootLogger();
@@ -64,12 +64,15 @@ public class AttachService {
 	@Inject
 	TopologyPlugin plugin;
 
-	ObjectGraph ctx;
-
 	private final Map<Long, SettableFuture<Connection>> pendingRequests = Maps.newConcurrentMap();
 	private final Set<NodeID> answeredRequests = Sets.newConcurrentHashSet();
 
 	private final Set<NodeID> updateAfterConnection = Sets.newConcurrentHashSet();
+
+	@Inject
+	public AttachService(MessageHandlers msgHandlers) {
+		msgHandlers.register(this);
+	}
 
 	public ListenableFuture<Connection> attachTo(DestinationList destList, boolean requestUpdate) {
 		final SettableFuture<Connection> fut = SettableFuture.create();
@@ -225,10 +228,5 @@ public class AttachService {
 	@Module(injects = {AttachService.class}, complete = false)
 	public static class ServiceModule {
 
-		@Provides
-		@Singleton
-		public AttachService provideAttachService() {
-			return new AttachService();
-		}
 	}
 }

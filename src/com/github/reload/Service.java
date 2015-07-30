@@ -38,7 +38,8 @@ class ServiceLoader {
 	}
 
 	private <T> T loadService(Class<T> service) {
-		checkClass(service);
+		if (!service.isAnnotationPresent(Service.class))
+			throw new IllegalArgumentException("Missing @Service annotation");
 
 		loadModules(service);
 
@@ -49,18 +50,6 @@ class ServiceLoader {
 		startService(instance);
 
 		return instance;
-	}
-
-	private void checkClass(Class<?> clazz) {
-		if (!clazz.isAnnotationPresent(Service.class))
-			throw new IllegalArgumentException("Missing @Service annotation");
-		try {
-			clazz.getConstructor();
-		} catch (NoSuchMethodException e) {
-			throw new IllegalArgumentException("The service class must have a no-parameter constructor");
-		} catch (SecurityException e) {
-			throw new IllegalArgumentException(e);
-		}
 	}
 
 	/**
