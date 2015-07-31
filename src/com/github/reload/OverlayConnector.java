@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import com.github.reload.conf.Configuration;
-import com.github.reload.net.AttachService;
 import com.github.reload.net.ConnectionManager;
 import com.github.reload.net.ConnectionManager.Connection;
 import com.github.reload.net.NetworkException;
@@ -13,6 +12,9 @@ import com.github.reload.net.codecs.header.NodeID;
 import com.github.reload.net.codecs.header.ResourceID;
 import com.github.reload.net.ice.HostCandidate.OverlayLinkType;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.AppAttachService;
+import com.github.reload.services.AttachService;
+import com.github.reload.services.PingService;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -44,10 +46,7 @@ class OverlayConnector {
 	 * @return the amount of local nodeids successful joined
 	 */
 	final SettableFuture<Overlay> connectToOverlay(Configuration conf) {
-
-		connMgr.startServer(overlay.getLocalAddress());
-
-		topology.startAgent();
+		startServices();
 
 		final SettableFuture<Overlay> overlayConnFut = SettableFuture.create();
 
@@ -73,6 +72,14 @@ class OverlayConnector {
 		});
 
 		return overlayConnFut;
+	}
+
+	private void startServices() {
+		connMgr.startServer(overlay.getLocalAddress());
+		topology.startAgent();
+		overlay.getService(AttachService.class);
+		overlay.getService(PingService.class);
+		overlay.getService(AppAttachService.class);
 	}
 
 	private ListenableFuture<Connection> connectToBootstrap(final Set<InetSocketAddress> bootstrapNodes, Set<OverlayLinkType> linkTypes) {

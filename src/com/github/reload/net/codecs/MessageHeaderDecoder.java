@@ -20,8 +20,6 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 	@Named("headerCodec")
 	Codec<Header> hdrCodec;
 
-	private NodeID neighborId;
-
 	@Inject
 	public MessageHeaderDecoder() {
 	}
@@ -33,10 +31,7 @@ public class MessageHeaderDecoder extends ByteToMessageDecoder {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-		if (neighborId == null) {
-			neighborId = ctx.channel().attr(Connection.CONNECTION).get().getNodeId();
-		}
-
+		NodeID neighborId = ctx.channel().attr(Connection.CONNECTION).get().getNodeId();
 		try {
 
 			ForwardMessage message = new ForwardMessage();

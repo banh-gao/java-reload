@@ -16,6 +16,7 @@ import com.github.reload.net.stack.MessageAuthenticator;
 import com.github.reload.net.stack.MessageDispatcher;
 import com.github.reload.net.stack.ReloadStackBuilder.ClientStackBuilder;
 import com.github.reload.net.stack.ReloadStackBuilder.ServerStackBuilder;
+import com.github.reload.net.stack.ReloadStackBuilder.StackInitializer;
 import com.github.reload.net.stack.SRLinkHandler;
 import dagger.Module;
 import dagger.ObjectGraph;
@@ -27,7 +28,8 @@ import dagger.Provides;
 					MessageHeaderDecoder.class, ForwardingHandler.class,
 					MessagePayloadDecoder.class, MessageAuthenticator.class,
 					MessageEncoder.class, FramedMessageCodec.class,
-					MessageDispatcher.class, Codec.class, SRLinkHandler.class}, library = true, complete = false)
+					MessageDispatcher.class, Codec.class, SRLinkHandler.class,
+					StackInitializer.class}, library = true, complete = false)
 public class NetModule {
 
 	@Provides
@@ -50,4 +52,5 @@ public class NetModule {
 	Codec<SecurityBlock> provideSecBlockCodec(ObjectGraph graph) {
 		return Codec.getCodec(SecurityBlock.class, graph);
 	}
+
 }

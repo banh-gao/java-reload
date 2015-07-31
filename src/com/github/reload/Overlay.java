@@ -49,6 +49,7 @@ public class Overlay {
 	}
 
 	void init(Bootstrap bootstrap, CoreModule coreModule) {
+		graph = coreModule.graph;
 		conf = bootstrap.getConfiguration();
 		localAddress = bootstrap.getLocalAddress();
 		isOverlayInitiator = bootstrap.isOverlayInitiator();

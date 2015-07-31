@@ -22,7 +22,6 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.apache.log4j.Logger;
-import dagger.ObjectGraph;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -44,6 +43,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import dagger.ObjectGraph;
 
 /**
  * Establish and manage connections for all neighbor nodes
@@ -89,8 +89,10 @@ public class ConnectionManager {
 
 		attachServer = b.buildStack();
 		l.debug(String.format("Server started at %s", attachServer.getChannel().localAddress()));
+		eventBus.register(this);
 	}
 
+	@Subscribe
 	private void shutdown() {
 
 		// FIXME: shotdown

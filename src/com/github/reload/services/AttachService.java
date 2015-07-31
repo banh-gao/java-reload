@@ -1,4 +1,4 @@
-package com.github.reload.net;
+package com.github.reload.services;
 
 import java.util.Map;
 import java.util.Set;
@@ -8,7 +8,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import com.github.reload.Overlay;
 import com.github.reload.Service;
-import com.github.reload.net.AttachService.ServiceModule;
+import com.github.reload.net.ConnectionManager;
+import com.github.reload.net.MessageRouter;
 import com.github.reload.net.ConnectionManager.Connection;
 import com.github.reload.net.ConnectionManager.ConnectionStatusEvent;
 import com.github.reload.net.ConnectionManager.ConnectionStatusEvent.Type;
@@ -27,6 +28,7 @@ import com.github.reload.net.ice.NoSuitableCandidateException;
 import com.github.reload.routing.MessageHandlers;
 import com.github.reload.routing.MessageHandlers.MessageHandler;
 import com.github.reload.routing.TopologyPlugin;
+import com.github.reload.services.AttachService.ServiceModule;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

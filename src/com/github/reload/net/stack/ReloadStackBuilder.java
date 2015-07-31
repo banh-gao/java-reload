@@ -15,8 +15,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.AttributeKey;
 import java.net.InetSocketAddress;
 import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.net.ssl.SSLEngine;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.net.ConnectionManager;
@@ -30,33 +33,15 @@ import dagger.ObjectGraph;
 public abstract class ReloadStackBuilder {
 
 	@Inject
-	ObjectGraph g;
+	StackInitializer stackInitializer;
 
-	@Inject
-	CryptoHelper cryptoHelper;
-
-	@Inject
-	ConnectionManager connMgr;
-
-	@Inject
-	FramedMessageCodec frameCodec;
-	@Inject
-	MessageHeaderDecoder msgHdrDec;
-	@Inject
-	ForwardingHandler fwdHandler;
-	@Inject
-	MessagePayloadDecoder msgPayDec;
-	@Inject
-	MessageAuthenticator msgAuth;
-	@Inject
-	MessageEncoder msgEncoder;
-	@Inject
-	MessageDispatcher msgDispatcher;
-
-	private final boolean isServer;
 	private final AbstractBootstrap<?, ?> bootstrap;
-
 	private InetSocketAddress localAddress;
+
+	static final AttributeKey<Boolean> ATTR_SERVER = AttributeKey.valueOf("SERVER");
+	private final boolean isServer;
+
+	static final AttributeKey<OverlayLinkType> ATTR_LINKTYPE = AttributeKey.valueOf("LINKTYPE");
 	private OverlayLinkType linkType;
 
 	public static class ServerStackBuilder extends ReloadStackBuilder {
@@ -76,7 +61,7 @@ public abstract class ReloadStackBuilder {
 
 	}
 
-	protected ReloadStackBuilder(boolean isServer) {
+	private ReloadStackBuilder(boolean isServer) {
 		this.isServer = isServer;
 
 		if (isServer) {
@@ -102,13 +87,20 @@ public abstract class ReloadStackBuilder {
 	}
 
 	public ReloadStack buildStack() {
+
 		if (linkType == null)
 			throw new IllegalStateException();
 
-		if (isServer)
-			((ServerBootstrap) this.bootstrap).childHandler(newInitializer());
-		else
-			bootstrap.handler(newInitializer());
+		if (isServer) {
+			ServerBootstrap sBoot = (ServerBootstrap) bootstrap;
+			sBoot.childAttr(ATTR_SERVER, isServer);
+			sBoot.childAttr(ATTR_LINKTYPE, linkType);
+			sBoot.childHandler(stackInitializer);
+		} else {
+			bootstrap.attr(ATTR_SERVER, isServer);
+			bootstrap.attr(ATTR_LINKTYPE, linkType);
+			bootstrap.handler(stackInitializer);
+		}
 
 		if (localAddress == null) {
 			localAddress = new InetSocketAddress(0);
@@ -121,63 +113,90 @@ public abstract class ReloadStackBuilder {
 		}
 	}
 
-	protected ChannelInitializer<Channel> newInitializer() {
-		return new ChannelInitializer<Channel>() {
-
-			@Override
-			protected void initChannel(Channel ch) throws Exception {
-				ChannelPipeline pipeline = ch.pipeline();
-
-				// Encrypted tunnel handler
-				SSLEngine eng = cryptoHelper.newSSLEngine(linkType);
-				if (isServer) {
-					eng.setNeedClientAuth(true);
-					eng.setUseClientMode(false);
-				} else {
-					eng.setUseClientMode(true);
-				}
-
-				pipeline.addLast(ReloadStack.HANDLER_SSL, new SslHandler(eng));
-
-				// Codec for RELOAD framing message
-				pipeline.addLast(ReloadStack.CODEC_FRAME, frameCodec);
-
-				// Link handler to manage link reliability
-				pipeline.addLast(ReloadStack.HANDLER_LINK, g.get(linkType.getHandler()));
-
-				// Codec for RELOAD forwarding header
-				pipeline.addLast(ReloadStack.DECODER_HEADER, msgHdrDec);
-
-				// Decides whether an incoming message has to be processed
-				// locally or forwarded to a neighbor node
-				pipeline.addLast(ReloadStack.HANDLER_FORWARD, fwdHandler);
-
-				// Decoder for message payload (content + security block)
-				pipeline.addLast(ReloadStack.DECODER_PAYLOAD, msgPayDec);
-
-				pipeline.addLast(ReloadStack.HANDLER_MESSAGE, msgAuth);
-
-				// Encorder for message entire outgoing message, also
-				// responsible for message signature generation
-				pipeline.addLast(ReloadStack.ENCODER_MESSAGE, msgEncoder);
-
-				// Dispatch incoming messages on the application message bus
-				pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, msgDispatcher);
-
-				if (isServer)
-					pipeline.addLast(new ServerStatusHandler());
-			}
-		};
-	}
-
+	@Singleton
 	@Sharable
-	private class ServerStatusHandler extends ChannelInboundHandlerAdapter {
+	public static class StackInitializer extends ChannelInitializer<Channel> {
+
+		@Inject
+		ObjectGraph g;
+
+		@Inject
+		CryptoHelper cryptoHelper;
+
+		@Inject
+		ConnectionManager connMgr;
+
+		@Inject
+		Provider<FramedMessageCodec> frameCodec;
+		@Inject
+		Provider<MessageHeaderDecoder> msgHdrDec;
+		@Inject
+		Provider<ForwardingHandler> fwdHandler;
+		@Inject
+		Provider<MessagePayloadDecoder> msgPayDec;
+		@Inject
+		Provider<MessageAuthenticator> msgAuth;
+		@Inject
+		Provider<MessageEncoder> msgEncoder;
+		@Inject
+		Provider<MessageDispatcher> msgDispatcher;
 
 		@Override
-		public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-			// FIXME: use event
-			connMgr.remoteNodeAccepted(ctx.channel());
-			super.channelRegistered(ctx);
+		protected void initChannel(Channel ch) throws Exception {
+			boolean isServer = ch.attr(ReloadStackBuilder.ATTR_SERVER).get();
+			OverlayLinkType linkType = ch.attr(ReloadStackBuilder.ATTR_LINKTYPE).get();
+
+			ChannelPipeline pipeline = ch.pipeline();
+
+			// Encrypted tunnel handler
+			SSLEngine eng = cryptoHelper.newSSLEngine(linkType);
+			if (isServer) {
+				eng.setNeedClientAuth(true);
+				eng.setUseClientMode(false);
+			} else {
+				eng.setUseClientMode(true);
+			}
+
+			pipeline.addLast(ReloadStack.HANDLER_SSL, new SslHandler(eng));
+
+			// Codec for RELOAD framing message
+			pipeline.addLast(ReloadStack.CODEC_FRAME, frameCodec.get());
+
+			// Link handler to manage link reliability
+			pipeline.addLast(ReloadStack.HANDLER_LINK, g.get(linkType.getHandler()));
+
+			// Codec for RELOAD forwarding header
+			pipeline.addLast(ReloadStack.DECODER_HEADER, msgHdrDec.get());
+
+			// Decides whether an incoming message has to be processed
+			// locally or forwarded to a neighbor node
+			pipeline.addLast(ReloadStack.HANDLER_FORWARD, fwdHandler.get());
+
+			// Decoder for message payload (content + security block)
+			pipeline.addLast(ReloadStack.DECODER_PAYLOAD, msgPayDec.get());
+
+			pipeline.addLast(ReloadStack.HANDLER_MESSAGE, msgAuth.get());
+
+			// Encorder for message entire outgoing message, also
+			// responsible for message signature generation
+			pipeline.addLast(ReloadStack.ENCODER_MESSAGE, msgEncoder.get());
+
+			// Dispatch incoming messages on the application message bus
+			pipeline.addLast(ReloadStack.HANDLER_DISPATCHER, msgDispatcher.get());
+
+			if (isServer)
+				pipeline.addLast(new ServerStatusHandler());
+		}
+
+		@Sharable
+		private class ServerStatusHandler extends ChannelInboundHandlerAdapter {
+
+			@Override
+			public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+				// FIXME: use event
+				connMgr.remoteNodeAccepted(ctx.channel());
+				super.channelRegistered(ctx);
+			}
 		}
 	}
 }

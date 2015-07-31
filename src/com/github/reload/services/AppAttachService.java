@@ -20,11 +20,13 @@ import com.github.reload.net.ice.ICEHelper;
 import com.github.reload.net.ice.NoSuitableCandidateException;
 import com.github.reload.routing.MessageHandlers;
 import com.github.reload.routing.MessageHandlers.MessageHandler;
+import com.github.reload.services.AppAttachService.AppAttachModule;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import dagger.Module;
 
 /**
  * Provides attach functionalities for local peer and answers remote requests
@@ -154,6 +156,11 @@ public class AppAttachService {
 		List<? extends HostCandidate> candidates = iceHelper.getCandidates(addr);
 
 		router.sendAnswer(requestMessage.getHeader(), new AppAttachMessage.Builder(request.getApplicationID()).candidates(candidates).buildAnswer());
+
+	}
+
+	@Module(injects = {AppAttachService.class}, complete = false)
+	public static class AppAttachModule {
 
 	}
 }

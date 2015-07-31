@@ -58,6 +58,7 @@ import com.github.reload.routing.MessageHandlers;
 import com.github.reload.routing.MessageHandlers.MessageHandler;
 import com.github.reload.routing.RoutingTable;
 import com.github.reload.routing.TopologyPlugin;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -195,6 +196,9 @@ public class TestFactory extends BootstrapFactory {
 		@Inject
 		MessageHandlers msgHandlers;
 
+		@Inject
+		EventBus eventBus;
+
 		private boolean isJoined = false;
 
 		private final TestRouting r = new TestRouting();
@@ -215,6 +219,7 @@ public class TestFactory extends BootstrapFactory {
 				}
 			}
 			msgHandlers.register(this);
+			eventBus.register(this);
 		}
 
 		@Override
@@ -392,6 +397,7 @@ public class TestFactory extends BootstrapFactory {
 			router.sendMessage(leaveMessage);
 		}
 
+		@Subscribe
 		private void stop() {
 			// FIXME: shutdown
 			sendLeaveAndClose();
