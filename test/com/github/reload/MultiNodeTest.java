@@ -67,5 +67,6 @@ public class MultiNodeTest {
 		for (Overlay o : overlays) {
 			o.disconnect();
 		}
+
 	}
 }

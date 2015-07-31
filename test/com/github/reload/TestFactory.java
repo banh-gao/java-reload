@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutionException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.log4j.Logger;
+import com.github.reload.Overlay.GlobalEvent;
+import com.github.reload.Overlay.GlobalEvent.TYPE;
 import com.github.reload.conf.Configuration;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
@@ -398,9 +400,9 @@ public class TestFactory extends BootstrapFactory {
 		}
 
 		@Subscribe
-		private void stop() {
-			// FIXME: shutdown
-			sendLeaveAndClose();
+		private void stop(GlobalEvent ev) {
+			if (ev.type == TYPE.SHUTDOWN)
+				sendLeaveAndClose();
 		}
 
 		private void sendLeaveAndClose() {

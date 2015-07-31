@@ -193,7 +193,6 @@ public abstract class ReloadStackBuilder {
 
 			@Override
 			public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-				// FIXME: use event
 				connMgr.remoteNodeAccepted(ctx.channel());
 				super.channelRegistered(ctx);
 			}

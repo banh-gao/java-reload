@@ -22,6 +22,8 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.apache.log4j.Logger;
+import com.github.reload.Overlay.GlobalEvent;
+import com.github.reload.Overlay.GlobalEvent.TYPE;
 import com.github.reload.crypto.CryptoHelper;
 import com.github.reload.crypto.Keystore;
 import com.github.reload.crypto.ReloadCertificate;
@@ -93,10 +95,9 @@ public class ConnectionManager {
 	}
 
 	@Subscribe
-	private void shutdown() {
-
-		// FIXME: shotdown
-		attachServer.shutdown();
+	private void shutdown(GlobalEvent ev) {
+		if (ev.type == TYPE.SHUTDOWN)
+			attachServer.shutdown();
 	}
 
 	public ListenableFuture<Connection> connectTo(final InetSocketAddress remoteAddr, OverlayLinkType linkType) {

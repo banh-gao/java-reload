@@ -8,6 +8,7 @@ import com.github.reload.conf.Configuration;
 import com.github.reload.net.ConnectionManager;
 import com.github.reload.net.codecs.header.NodeID;
 import com.github.reload.routing.TopologyPlugin;
+import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.ObjectGraph;
 
@@ -39,7 +40,6 @@ public class Overlay {
 
 	private TopologyPlugin topology;
 
-	// Used only for testing
 	ObjectGraph graph;
 
 	@Inject
@@ -96,8 +96,8 @@ public class Overlay {
 	 * instance will fail.
 	 */
 	public void disconnect() {
-		// FIXME: send stop event
-		// ctx.stopComponents();
+		EventBus eventBus = graph.get(EventBus.class);
+		eventBus.post(GlobalEvent.SHUTDOWN);
 	}
 
 	@Override
@@ -107,5 +107,20 @@ public class Overlay {
 
 	public byte[] getJoinData() {
 		return joinData;
+	}
+
+	public static class GlobalEvent {
+
+		public static final GlobalEvent SHUTDOWN = new GlobalEvent(TYPE.SHUTDOWN);
+
+		public static enum TYPE {
+			SHUTDOWN
+		};
+
+		public final TYPE type;
+
+		private GlobalEvent(TYPE type) {
+			this.type = type;
+		}
 	}
 }
